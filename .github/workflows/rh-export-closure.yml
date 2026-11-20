@@ -1,0 +1,86 @@
+name: RH exact kernel dependency census from pinned proof export
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - tools/export_closure.py
+      - .github/workflows/rh-export-closure.yml
+
+jobs:
+  parser-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools
+          sparse-checkout-cone-mode: true
+          persist-credentials: false
+      - name: Verify parser against official lean4export NDJSON example
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3             https://raw.githubusercontent.com/leanprover/lean4export/v4.33.0/examples/Nat.add_succ.ndjson |
+            LC_ALL=C grep -E '"in":|"meta":|"thm":|"def":|"axiom":|"opaque":|"quot":|"inductive":' |
+            python3 tools/export_closure.py --allow-partial --output-dir analysis/smoke
+          python3 - <<'PY'
+          import gzip, json
+          from pathlib import Path
+          p = Path("analysis/smoke")
+          data = json.loads((p / "rh-export-dependency-counts.json").read_text())
+          assert data["exported_declarations"] > 0, data
+          with gzip.open(p / "rh-export-reachable-names.tsv.gz", "rt") as f:
+              lines = f.readlines()
+          assert len(lines) == data["exported_declarations"] + 1
+          print("Pinned export parser smoke: pass", data["exported_declarations"])
+          PY
+
+  published-proof-census:
+    needs: parser-smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 95
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools
+          sparse-checkout-cone-mode: true
+          persist-credentials: false
+      - name: Check resources and install streaming decompressor
+        run: |
+          set -euo pipefail
+          df -h .
+          command -v zstd || (sudo apt-get update -qq && sudo apt-get install -y -qq zstd)
+      - name: Download and hash exact independently checked original export
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --connect-timeout 30 --max-time 3300             https://math.mit.edu/~drew/grh/solution.ndjson.zst \
+            -o "$RUNNER_TEMP/solution.ndjson.zst"
+          printf '%s  %s\n' \
+            '61a8938ad5f5e57397c1c0e3b954916af546d9004ade01c3555744a681b05381' \
+            "$RUNNER_TEMP/solution.ndjson.zst" | sha256sum --check -
+          ls -lh "$RUNNER_TEMP/solution.ndjson.zst"
+      - name: Count exact transitive kernel declarations without storing 61GB NDJSON
+        shell: bash
+        run: |
+          set -euo pipefail
+          zstd -d --long=30 --stdout "$RUNNER_TEMP/solution.ndjson.zst" |
+            LC_ALL=C grep -E '"in":|"meta":|"thm":|"def":|"axiom":|"opaque":|"quot":|"inductive":' |
+            python3 tools/export_closure.py \
+              --output-dir analysis/export \
+              --compressed-sha256 '61a8938ad5f5e57397c1c0e3b954916af546d9004ade01c3555744a681b05381'
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d = json.loads(Path("analysis/export/rh-export-dependency-counts.json").read_text())
+          assert len(d["five_roots_found"]) == 5, d
+          assert d["exported_declarations"] > 5, d
+          print("VALID: five target theorem declarations present in pinned kernel export")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rh-pinned-export-declaration-closure
+          path: analysis/export
+          retention-days: 30
+          if-no-files-found: error
