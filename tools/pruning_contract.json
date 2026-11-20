@@ -1,0 +1,39 @@
+{
+  "baseline_commit": "7cbf7a0c32fca1badf05931879a37c3f8a2b03b4",
+  "baseline_files": 175187,
+  "baseline_lines": 17374215,
+  "baseline_source_bytes": 1030531854,
+  "modules": [
+    {
+      "path": "src/Supplements/Kernels/MainTheoremsAll.lean",
+      "blob_sha": "dfba1103254494332179b9c893fabe94ac6a45a1",
+      "lines": 2
+    },
+    {
+      "path": "src/Supplements/Kernels/MainTheoremsCritical.lean",
+      "blob_sha": "34d133d368c93518bf52927bada45b00ec5fe982",
+      "lines": 4
+    },
+    {
+      "path": "src/Development/AutomorphicArithmetic/AutomorphicVarieties/SmallClassNumbers/CorGKOf.lean",
+      "blob_sha": "e5b4584a4e65b1f3ade5c3cd5d3a8a8056dd1e4d",
+      "lines": 29
+    },
+    {
+      "path": "src/Development/AutomorphicArithmetic/AutomorphicVarieties/SmallClassNumbers/ClassNumberThree.lean",
+      "blob_sha": "41f30455fbae05b658425510ba46195c840f6d02",
+      "lines": 115
+    },
+    {
+      "path": "src/Development/AutomorphicArithmetic/AutomorphicVarieties/SmallClassNumbers/LenEqZeroIff.lean",
+      "blob_sha": "162ebbd6b1c6c265f8daaa0284876dfb5cda0148",
+      "lines": 95
+    },
+    {
+      "path": "src/Development/AutomorphicArithmetic/AutomorphicVarieties/SmallClassNumbers/OnePoint.lean",
+      "blob_sha": "fdff74fe7680cdb5cdd56c521eb47922f5327467",
+      "lines": 41
+    }
+  ],
+  "scope": "Import-only unused after the direct MainTheorems import; NOT kernel-verified source pruning."
+}
