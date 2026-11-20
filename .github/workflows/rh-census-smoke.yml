@@ -5,6 +5,7 @@ on:
     paths:
       - tools/RHDeclarationCensus.lean
       - tools/source_inventory.py
+      - tools/import_closure.py
       - .github/workflows/rh-census-smoke.yml
   workflow_dispatch:
 
@@ -75,8 +76,13 @@ jobs:
           persist-credentials: false
       - name: Count complete RH source and verify five theorem source lines
         run: python3 tools/source_inventory.py --src src --out analysis/rh-source-inventory.json
+      - name: Compare original and direct-import module closures
+        run: python3 tools/import_closure.py --src src --out analysis
       - uses: actions/upload-artifact@v4
         with:
           name: rh-full-source-inventory
-          path: analysis/rh-source-inventory.json
+          path: |
+            analysis/rh-source-inventory.json
+            analysis/rh-import-closure.json
+            analysis/rh-import-pruning-candidates.tsv
           if-no-files-found: error
