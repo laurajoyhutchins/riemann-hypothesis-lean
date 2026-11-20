@@ -43,9 +43,10 @@ jobs:
           theorem LFunction_eq_zero_re : True := census_used
           theorem LFunction_eq_zero_re_of_isPrimitive : True := census_used
           LEAN
-          LEAN_PATH="$tmp" lean -o "$tmp/Main.olean" "$tmp/Main.lean"
+          cp "$GITHUB_WORKSPACE/tools/RHDeclarationCensus.lean" "$tmp/RHDeclarationCensus.lean"
           cd "$tmp"
-          LEAN_PATH="$tmp" lean "$GITHUB_WORKSPACE/tools/RHDeclarationCensus.lean"
+          LEAN_PATH="$tmp" lean -o Main.olean Main.lean
+          LEAN_PATH="$tmp" lean RHDeclarationCensus.lean
           python3 - <<'PY'
           import csv
           from pathlib import Path
