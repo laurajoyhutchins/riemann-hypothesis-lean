@@ -39,6 +39,10 @@ Produced artifacts:
   of elaborated types, universe parameter lists, and transitive axiom names.
 - `analysis/rh-declaration-modules.tsv`: declaration counts grouped by
   defining module, both expression-only and mutual-block-conservative closure.
+- `analysis/rh-declaration-edges.tsv`: exact syntactic kernel-expression edges
+  between checked constants, labeled `type`, `value`, `structural`, or
+  `mutual-block`. This can identify direct users of a proposed wrapper alias;
+  it does not capture tactic or syntax-level uses.
 - `analysis/rh-module-lines.tsv`: each source module's physical line count
   and closure counts.
 - `analysis/rh-line-census.json`: size and conservative deletion upper bounds.
