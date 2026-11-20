@@ -3,22 +3,44 @@
 Branch base: `7cbf7a0c32fca1badf05931879a37c3f8a2b03b4`.
 Toolchain: `leanprover/lean4:v4.33.1`.
 Mathlib: `0df444a360eaa60ab8c11dca51a86af692955474`.
-The original 175,187-file, 17,374,215-line source baseline is reported by
-[Deicyde's independent audit](https://github.com/Deicyde/riemann-hypothesis/blob/main/verification/NOTES.md);
-it has **not** been re-counted on this branch.
+The original 175,187-file, 17,374,215-line source baseline was independently
+re-counted from this fork by GitHub Actions
+([full-tree inventory receipt](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/actions/runs/44828761286)).
+It agrees with [Deicyde's independent audit](https://github.com/Deicyde/riemann-hypothesis/blob/main/verification/NOTES.md).
 
-## Status
+## Status: first source-level deletion, not yet proof-certified
 
-This is an **unverified import-boundary experiment** and a **not-yet-executed
-Lean declaration census**. The five theorem declarations and proof bodies in
-`src/Main.lean` have *not* changed. Only its import of
-`Supplements.Kernels.MainTheoremsAll` was replaced with a direct import of
-`Supplements.Kernels.MainTheorems`, where `allChi`, `rhOfAll`,
-`critAll`, and `claimAll` are defined. This may permit later source deletion;
-it saves **zero physical source lines by itself**.
+The experiment replaced `Main.lean`'s import of
+`Supplements.Kernels.MainTheoremsAll` with a direct import of
+`Supplements.Kernels.MainTheorems`. Its five theorem declarations and proof
+bodies remain **textually identical** to the original commit.
 
-No successful build of this branch, axiom comparison, independent kernel
-replay, or source size reduction is claimed.
+A complete local-source import graph was then calculated on GitHub Actions.
+Under the original import, all **175,187** Lean modules are reachable. Under
+the direct import, **175,181** are reachable. The six excluded modules
+together contain **286 lines**. Their exact paths, original blob identities
+and individual line counts are recorded in `tools/pruning_contract.json`.
+
+Those six files have been **actually deleted from this draft branch** in
+[commit 3f28f55](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/commit/3f28f55b07b63980c27a5f693b68936f4c1dade9).
+The predicted post-deletion inventory is **175,181 files and 17,373,929
+physical Lean lines**, pending an exact-head automated recount. This is a
+small structural reduction, **not a verified proof-preserving reduction**.
+
+The pinned Lean 4.33.1 census successfully compiled and ran against a
+seven-declaration *mock Main* containing one unused declaration:
+six reachable and one unreachable, with zero missing dependencies
+([smoke test](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/actions/runs/44828948816)).
+The actual 175k-module environment still needs compilation and a real
+declaration census. **No successful full RH build, new axiom audit, or
+independent kernel replay is claimed for the modified code.**
+
+**Downstream compatibility:** the removed `MainTheoremsAll`,
+`MainTheoremsCritical` and four `SmallClassNumbers` modules are no
+longer available by their old import paths. Any external project importing
+those files must use the surviving underlying theorem modules or remain on
+the original fork. This intentional internal API removal is experimental
+and must be reconsidered before merging.
 
 ## Run the experiment on a machine with adequate RAM/disk
 
@@ -27,6 +49,10 @@ replay, or source size reduction is claimed.
 3. Execute `lake env lean tools/RHDeclarationCensus.lean`.
 4. Execute `python3 tools/enrich_census.py --src src --declarations analysis/rh-declaration-modules.tsv --out analysis`.
 5. Execute `python3 -m unittest discover -s tools -p 'test_*.py' -v`.
+6. Execute `python3 tools/source_inventory.py --src src` and
+   `python3 tools/pruning_contract.py --src src` to verify the exact
+   source reduction, the six original module identities, and that every
+   remaining project module still lies in `Main`'s import closure.
 
 Run those same commands with the *original* commit on a separate worktree and
 keep the two sets of outputs. The census loads `Main`, so its process alone
