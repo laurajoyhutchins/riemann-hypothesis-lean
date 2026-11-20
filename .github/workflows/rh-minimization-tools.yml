@@ -1,0 +1,17 @@
+name: RH minimization tooling tests (not proof verification)
+
+on:
+  pull_request:
+    paths:
+      - tools/**
+      - .github/workflows/rh-minimization-tools.yml
+  workflow_dispatch:
+
+jobs:
+  source-audit-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test line accounting and malformed-input rejection
+        run: python3 -m unittest discover -s tools -p 'test_enrich_census.py' -v
