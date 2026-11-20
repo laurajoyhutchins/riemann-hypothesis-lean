@@ -78,7 +78,10 @@ jobs:
       - name: Count complete RH source and verify five theorem source lines
         run: python3 tools/source_inventory.py --src src --out analysis/rh-source-inventory.json
       - name: Compare original and direct-import module closures
-        run: python3 tools/import_closure.py --src src --out analysis
+        run: |
+          python3 tools/import_closure.py --src src --out analysis --require-original-all
+          echo "Precisely identified import-only deletion candidates:"
+          cat analysis/rh-import-pruning-candidates.tsv
       - uses: actions/upload-artifact@v4
         with:
           name: rh-full-source-inventory
