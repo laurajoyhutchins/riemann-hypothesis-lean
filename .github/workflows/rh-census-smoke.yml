@@ -1,0 +1,82 @@
+name: RH proof minimization census smoke and source inventory
+
+on:
+  pull_request:
+    paths:
+      - tools/RHDeclarationCensus.lean
+      - tools/source_inventory.py
+      - .github/workflows/rh-census-smoke.yml
+  workflow_dispatch:
+
+jobs:
+  lean-api-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout: |
+            lean-toolchain
+            tools
+          sparse-checkout-cone-mode: false
+      - name: Install pinned Lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh |
+            sh -s -- -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile and execute actual dependency census on a controlled environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          cat > "$tmp/Main.lean" <<'LEAN'
+          import Lean
+          theorem census_used : True := True.intro
+          theorem census_unused : True := True.intro
+          theorem riemannHypothesis : True := census_used
+          theorem riemannZeta_eq_zero_re : True := census_used
+          theorem LFunction_ne_zero_of_half_lt_re : True := census_used
+          theorem LFunction_eq_zero_re : True := census_used
+          theorem LFunction_eq_zero_re_of_isPrimitive : True := census_used
+          LEAN
+          LEAN_PATH="$tmp" lean -o "$tmp/Main.olean" "$tmp/Main.lean"
+          cd "$tmp"
+          LEAN_PATH="$tmp" lean "$GITHUB_WORKSPACE/tools/RHDeclarationCensus.lean"
+          python3 - <<'PY'
+          import csv
+          from pathlib import Path
+          with Path("analysis/rh-declaration-modules.tsv").open() as f:
+              rows = {r["module"]: r for r in csv.DictReader(f, delimiter="\t")}
+          row = rows["Main"]
+          assert int(row["total"]) == 7, row
+          assert int(row["expression_reachable"]) == 6, row
+          assert int(row["block_reachable"]) == 6, row
+          assert int(row["block_unreachable"]) == 1, row
+          expected = {"riemannHypothesis", "riemannZeta_eq_zero_re",
+                      "LFunction_ne_zero_of_half_lt_re", "LFunction_eq_zero_re",
+                      "LFunction_eq_zero_re_of_isPrimitive"}
+          with Path("analysis/rh-targets.tsv").open() as f:
+              got = {r["name"] for r in csv.DictReader(f, delimiter="\t")}
+          assert got == expected, (got, expected)
+          edges = Path("analysis/rh-declaration-edges.tsv").read_text()
+          assert "riemannHypothesis\tcensus_used\tvalue" in edges, edges[:1000]
+          print("PASS: pinned Lean census compiled and found 6 reachable / 1 unreachable among seven mock Main declarations")
+          PY
+
+  complete-source-inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Count complete RH source and verify five theorem source lines
+        run: python3 tools/source_inventory.py --src src --out analysis/rh-source-inventory.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rh-full-source-inventory
+          path: analysis/rh-source-inventory.json
+          if-no-files-found: error
