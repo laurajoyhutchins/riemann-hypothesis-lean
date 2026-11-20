@@ -54,10 +54,16 @@ private def closure (env : Environment) (keepBlocks : Bool) : NameSet × Array N
     match env.find? name with
     | none => missing := missing.push name
     | some ci =>
-      for dep in dependencies ci keepBlocks do
-        unless seen.contains dep do
-          seen := seen.insert dep
-          queue := queue.push dep
+      -- An upstream dependency built before this project cannot refer back
+      -- to project declarations; stop the traversal at that boundary.
+      let isProject := match env.getModuleIdxFor? name with
+        | some idx => isProjectModule env.allImportedModuleNames[idx.toNat]!
+        | none => false
+      if isProject then
+        for dep in dependencies ci keepBlocks do
+          unless seen.contains dep do
+            seen := seen.insert dep
+            queue := queue.push dep
   return (seen, missing)
 
 private structure ModuleStats where
