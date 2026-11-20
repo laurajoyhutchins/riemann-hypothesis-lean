@@ -14,9 +14,9 @@ import Lean.Util.CollectAxioms
 open Lean Elab Command
 
 private def targets : Array Name :=
-  #[\`\`riemannHypothesis, \`\`riemannZeta_eq_zero_re,
-    \`\`LFunction_ne_zero_of_half_lt_re, \`\`LFunction_eq_zero_re,
-    \`\`LFunction_eq_zero_re_of_isPrimitive]
+  #[``riemannHypothesis, ``riemannZeta_eq_zero_re,
+    ``LFunction_ne_zero_of_half_lt_re, ``LFunction_eq_zero_re,
+    ``LFunction_eq_zero_re_of_isPrimitive]
 
 private def projectPrefixes : Array String :=
   #["BuildAid", "CompanionTheory", "Development", "Formalism", "GroundTheory",
