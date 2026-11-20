@@ -39,6 +39,11 @@ private def dependencies (ci : ConstantInfo) (keepBlocks : Bool) : NameSet := Id
     | _ => pure ()
   return refs
 
+private def projectConstant (env : Environment) (name : Name) : Bool :=
+  match env.getModuleIdxFor? name with
+  | some idx => isProjectModule env.allImportedModuleNames[idx.toNat]!
+  | none => false
+
 private def closure (env : Environment) (keepBlocks : Bool) : NameSet × Array Name := Id.run do
   let mut seen : NameSet := {}
   let mut queue : Array Name := #[]
@@ -56,10 +61,7 @@ private def closure (env : Environment) (keepBlocks : Bool) : NameSet × Array N
     | some ci =>
       -- An upstream dependency built before this project cannot refer back
       -- to project declarations; stop the traversal at that boundary.
-      let isProject := match env.getModuleIdxFor? name with
-        | some idx => isProjectModule env.allImportedModuleNames[idx.toNat]!
-        | none => false
-      if isProject then
+      if projectConstant env name then
         for dep in dependencies ci keepBlocks do
           unless seen.contains dep do
             seen := seen.insert dep
@@ -113,6 +115,27 @@ elab "#rh_decl_census" : command => do
     (String.intercalate "\n" rows.toList ++ "\n")
   liftIO <| IO.FS.writeFile "analysis/rh-targets.tsv"
     (String.intercalate "\n" targetRows.toList ++ "\n")
+  -- Stream a full *project* declaration graph without retaining millions of
+  -- edge strings in memory. Type and proof-body edges are distinguished.
+  liftIO <| IO.FS.withFile "analysis/rh-declaration-edges.tsv" .write fun h => do
+    h.putStrLn "source\tdependency\tkind"
+    for (name, ci) in env.constants.toList do
+      if projectConstant env name then
+        let typeDeps := ci.type.getUsedConstantsAsSet
+        for dep in typeDeps do
+          h.putStrLn s!"{name}\t{dep}\ttype"
+        let mut valueDeps : NameSet := {}
+        if let some value := ci.value? (allowOpaque := true) then
+          valueDeps := value.getUsedConstantsAsSet
+        for dep in valueDeps do
+          h.putStrLn s!"{name}\t{dep}\tvalue"
+        let baseDeps := ci.getUsedConstantsAsSet
+        for dep in baseDeps do
+          unless typeDeps.contains dep || valueDeps.contains dep do
+            h.putStrLn s!"{name}\t{dep}\tstructural"
+        for dep in dependencies ci true do
+          unless baseDeps.contains dep do
+            h.putStrLn s!"{name}\t{dep}\tmutual-block"
   logInfo m!"Project declarations: {total}; expression-reachable: {er}; block-reachable: {br}; block-unreachable: {total - br}"
   logInfo m!"Missing dependencies: expression {exprMissing.size}, block {blockMissing.size}"
   unless exprMissing.isEmpty && blockMissing.isEmpty do
