@@ -18,7 +18,11 @@ def read_declarations(tsv: Path) -> dict[str, dict[str, int]]:
     result = {}
     columns = ("total", "expression_reachable", "block_reachable", "block_unreachable")
     with tsv.open(encoding="utf-8", newline="") as f:
-        for row in csv.DictReader(f, delimiter="\t"):
+        reader = csv.DictReader(f, delimiter="\t")
+        required = {"module", *columns}
+        if not required.issubset(reader.fieldnames or []):
+            raise ValueError(f"missing declaration census columns: {required - set(reader.fieldnames or [])}")
+        for row in reader:
             mod = row["module"]
             if mod in result:
                 raise ValueError(f"duplicate module {mod}")
