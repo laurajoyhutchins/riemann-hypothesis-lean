@@ -86,16 +86,23 @@ def consume(stream, *, require_roots: bool = True):
 
         if "inductive" in obj:
             ind = obj["inductive"]
-            for group, kind in (("types", "inductive_type"),
-                                ("ctors", "constructor"),
-                                ("recs", "recursor")):
-                for entry in ind.get(group, []):
+            for aliases, kind in ((("types", "inductiveVals"), "inductive_type"),
+                                  (("ctors", "constructorVals"), "constructor"),
+                                  (("recs", "recursorVals"), "recursor")):
+                entries = next((ind[k] for k in aliases if k in ind), [])
+                for entry in entries:
                     emit(entry["name"], kind)
             counts["inductive_blocks"] += 1
             continue
         for kind in KINDS[:-1]:
             if kind in obj:
-                emit(obj[kind]["name"], kind)
+                entries = obj[kind]
+                if isinstance(entries, dict):
+                    entries = [entries]
+                if not isinstance(entries, list):
+                    raise ValueError(f"unexpected {kind} declaration layout")
+                for entry in entries:
+                    emit(entry["name"], kind)
                 break
     if not declaration_rows:
         raise ValueError("export contains no declarations")
