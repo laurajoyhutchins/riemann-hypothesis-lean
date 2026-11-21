@@ -172,6 +172,62 @@ SIGTERM/resumption, cross-input refusal, locked workspaces and metadata
 tampering with a fake Lake command. The fixtures test the controller, not
 Lean's actual trace/hash validation nor mathematical theorems.
 
+## Stock-Lake completion recovery experiment (not proof verification)
+
+`tools/RHRecoverCompleted.lean` and `tools/rh_ci_recover.py` implement a narrow
+version of the community's [stock no-build completed-artifact recovery](https://github.com/leanprover-community/riemann-hypothesis/blob/8ec38f92ac54b5c91bc07f4f6f88ea61691b7975/scripts/cache-bootstrap/RecoverCompleted.lean).
+
+**Mechanism.** Given explicit local Lean module names, the pinned Lean 4.33.1
+helper loads the Lake workspace with `noBuild=true` and
+`trustHash=false`, requests each module's actual `leanArts`, reads its
+saved Lake build trace, compares saved and observed output descriptors, deletes
+any incomplete existing `.ltar`, and asks stock Lake to repack and save the
+completed raw outputs. A candidate with stale inputs, missing generated
+outputs, an invalid trace, or mismatched artifact descriptors is rejected.
+The helper reports an explicit decision for every requested module.
+
+The trusted Python wrapper records the **current clean Git source/configuration
+identity** and verifier-source SHA-256, validates candidate names, requires
+all per-module decisions, rechecks the original current Lake `depHash` trace,
+hashes the resulting local `.ltar`, and writes a local receipt with
+`proof_verified: false` and `artifact_published: false`. It never uses a
+recovered archive as evidence that its mathematical theorem is correct.
+A partial helper failure, unreported candidate, forged path or changed
+source fingerprint causes refusal. Existing archival artifacts are not
+trusted merely because they hash.
+
+Example on an already provisioned, persistent and *externally isolated*
+trusted runner, after an interrupted or failed warm Lake build:
+
+```bash
+python3 tools/rh_ci_recover.py \
+  --workspace /persistent/rh/checkout \
+  --state-root /persistent/rh/checkpoints \
+  --module Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorObjectPullback \
+  --acknowledge-isolated-runner
+```
+
+Alternatively, `--scan-traces` explicitly examines existing root-project
+Lean module traces and submits the candidates to the helper. That can be
+expensive for 175,000 modules; use bounded candidate sets when possible.
+`--workers` controls only the concurrent Lake job checks, not full
+source elaboration. The wrapper does not install a sandbox or cgroup, and
+must not be used as a privileged `pull_request_target` job.
+
+The [tiny real-Lean smoke workflow](../.github/workflows/rh-stock-recovery-smoke.yml)
+is separate from the inexpensive Python fixture suite. It builds three
+small Lean modules on Lean v4.33.1, replaces one saved `.ltar` with truncated
+bytes, corrupts a finished C artifact, and changes a third module's committed
+source without rebuilding it. Only the completed, unmodified module
+may be repacked. This is *not* an RH-corpus proof check.
+
+**Still not implemented:** automatic harvesting from a killed 175k-module
+Lake build, upstream-compatible immutable module-map publication,
+external secure runner infrastructure, migration/locking across runner
+hosts, recovery of fatal controller crashes, or independent full five-root
+Comparator/kernel verification. This experiment has no permission to
+replace those requirements with a green fixture.
+
 ## Required future verification tier (NOT implemented by this CI change)
 
 For any proof-source refactor before a claim of preservation or a trusted merge:
