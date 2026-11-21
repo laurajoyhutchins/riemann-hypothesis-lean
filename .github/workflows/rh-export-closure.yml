@@ -49,7 +49,7 @@ jobs:
   published-proof-census:
     needs: parser-smoke
     runs-on: ubuntu-24.04
-    timeout-minutes: 95
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
         with:
@@ -65,7 +65,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -fL --retry 3 --connect-timeout 30 --max-time 3300             https://math.mit.edu/~drew/grh/solution.ndjson.zst \
+          curl -fL --retry 3 --connect-timeout 30 --max-time 7200             https://math.mit.edu/~drew/grh/solution.ndjson.zst \
             -o "$RUNNER_TEMP/solution.ndjson.zst"
           printf '%s  %s\n' \
             '61a8938ad5f5e57397c1c0e3b954916af546d9004ade01c3555744a681b05381' \

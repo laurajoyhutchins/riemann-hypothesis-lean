@@ -57,6 +57,7 @@ class ExactGraphTests(unittest.TestCase):
         report, _ = analyze(rows, roots=("first", "second"))
         self.assertEqual(report["unresolved_constant_id_count"], 1)
         self.assertEqual(report["unresolved_constant_ids"], [8])
+        self.assertEqual(report["unresolved_constant_names"], ["ghost"])
 
 
 if __name__ == "__main__":

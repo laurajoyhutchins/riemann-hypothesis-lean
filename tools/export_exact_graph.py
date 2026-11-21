@@ -212,6 +212,7 @@ def analyze(stream, roots=ROOTS, *, compressed_sha256=None):
             "union_by_kind": dict(sorted(kinds.items())),
             "membership_bitmask_counts": dict(sorted(histogram.items())),
             "unresolved_constant_ids": sorted(missing)[:100],
+            "unresolved_constant_names": sorted(names[n] for n in missing),
             "unresolved_constant_id_count": len(missing),
             "caveat": (
                 "Exact expression-constant closure of five exported theorem types and values, "
