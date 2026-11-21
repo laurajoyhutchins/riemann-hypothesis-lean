@@ -1,37 +1,53 @@
-# RH proof visualization: use upstream Lean Graph
+# RH declaration dependency visualization (upstream Lean Graph)
 
-**Viewer and dependency extractor:** [patrik-cihal/lean-graph](https://github.com/patrik-cihal/lean-graph) ([open viewer](https://patrik-cihal.github.io/lean-graph/)). We do not maintain an alternative graph renderer or expression-index service in this PR. The small `rh_lean_graph.py` wrapper only pins and retrieves upstream `DependencyExtractor.lean`, verifies its Git blob, prepends `import Main`, and issues one upstream extraction command per selected theorem.
+Use [patrik-cihal/lean-graph](https://github.com/patrik-cihal/lean-graph) and its [browser viewer](https://patrik-cihal.github.io/lean-graph/). No fork of its extractor, converter, database, renderer, or expression viewer is maintained here. The integration pins the exact upstream [`DependencyExtractor.lean`](https://github.com/patrik-cihal/lean-graph/blob/12fe82c12a41a827265bac725351cade3511d28a/static/DependencyExtractor.lean) Git blob `2cb37f37f01427086d2bf53a6fc8bdf4a8daaa69`.
 
-## Use
+## Source roots
 
-On a checkout of the RH source with its pinned Lean toolchain and Mathlib dependencies:
+The five top-level declarations are in `src/Main.lean`, which imports `Statements` and `Supplements.Kernels.MainTheorems`:
+
+| Root | Proof expression in `src/Main.lean` |
+|---|---|
+| `riemannHypothesis` | `rhOfAll` |
+| `riemannZeta_eq_zero_re` | `rhOfAll` |
+| `LFunction_ne_zero_of_half_lt_re` | `allChi` |
+| `LFunction_eq_zero_re` | `claimAll.2.1` |
+| `LFunction_eq_zero_re_of_isPrimitive` | `critAll` |
+
+These are **source-inspected names**, not a fresh `Main.olean` resolution receipt.
+
+## Real RH extraction from an already built environment
+
+Run in the RH repository root. For the project's pinned toolchain and dependency manifest, use the existing community build/cache infrastructure to prepare a trusted build. Do **not** treat an old cache as independent proof verification.
 
 ```bash
+# Required once, or satisfied by a provenanced reusable Main.olean build:
 lake exe cache get
 lake build Main
+
+# Choose an explicit BFS depth. Depth 2 is a neighborhood, not the full closure.
 python3 tools/rh_lean_graph.py --depth 2
-lake env lean analysis/RHLeanGraph.lean
+/usr/bin/time -v -o analysis/lean-graph-time.txt \
+  lake env lean analysis/RHLeanGraph.lean
+python3 tools/validate_rh_lean_graph.py --depth 2 \
+  --source-revision "$(git rev-parse HEAD)" \
+  --output-dir analysis/lean-graph-json
 ```
 
-Five `<theorem>.json` files are created in the current working directory. Open any one at https://patrik-cihal.github.io/lean-graph/ via **Open extracted data**. The default roots are the five declarations in `src/Main.lean`. To focus on the common proof root instead:
+This produces six canonical JSON files (five single-root graphs and `RH-combined.json`) plus `manifest.json`. The manifest records source revision, upstream commit/blob, hashes, sizes, node and edge counts, and external references. The real upstream functions generate every graph; Python only checks the emitted viewer schema and sorts the JSON for reproducible inspection.
 
-```bash
-python3 tools/rh_lean_graph.py --root UpperTheory.FinalTheorems.everyCharacter --depth 3
-lake env lean analysis/RHLeanGraph.lean
-```
+To demand that **all references emitted by the upstream extractor** have included nodes, increase `--depth` and rerun the entire command, then add `--require-closed` to the validator. A failure is evidence that the requested depth leaves a boundary. A success establishes only *closedness under emitted references*. Upstream's regular extractor follows proof-value references, excludes instances by default, and does not traverse type-only references. It suppresses some BFS errors, which the combined driver rechecks at each expanded node before publishing. Neither the emitted-edge closure nor that recheck establishes complete Lean semantic dependency coverage or all source/build dependencies.
 
-The wrapper pins upstream commit `12fe82c12a41a827265bac725351cade3511d28a`, extractor Git blob `2cb37f37f01427086d2bf53a6fc8bdf4a8daaa69`. If retrieving it is not possible, download this exact version elsewhere and pass `--extractor path/to/DependencyExtractor.lean` (the same blob check applies). No upstream source is committed to this repository.
+For focused exploration, pass repeatable `--root` arguments to **both** scripts. The `--module` option on the generator enables genuine-compiler compatibility tests against small standalone Lean modules. `--no-combined` is for narrow debugging; omit it for auditable five-root runs. The source driver explicitly checks root names. The validator refuses duplicate nodes, wrong schemas, absent/non-theorem roots, mismatches between the union and individual files, and dangling references when `--require-closed` is used.
 
-## What the diagram does and does not show
+Open one of the validated `.json` files with **Open extracted data** in the [upstream viewer](https://patrik-cihal.github.io/lean-graph/). The viewer source expects exactly `name`, `references`, `constCategory`, and `constType`. Loading huge graphs interactively is not demonstrated; its current Rust/egui renderer builds and simulates an in-memory graph, without lazy graph loading. JSON validation verifies the loader's schema, **not** a successful browser interaction or frame-rate measurement.
 
-Lean Graph's regular extractor traverses **theorem proof-body constant references** to a specified breadth-first depth. It excludes instances by default and intentionally limits graph depth. Its default extraction is not a complete elaborated expression AST, a five-root transitive closure census, or a proof certification. Increasing depth may be very expensive on RH's enormous environment, and the upstream viewer currently loads a bounded JSON graph rather than lazily querying all exported expressions.
+## CI tiers and evidence boundaries
 
-The independent `tools/export_exact_graph.py` in RH [research PR #1](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/pull/1) remains available for exact checked-expression dependency analysis. That is not a replacement viewer and should remain separate. The full RH source has not been rebuilt, the complete checked graph has not been generated, and no changed theorem has been independently kernel-verified by this visualization integration.
+The `rh-lazy-graph.yml` PR job runs Python tests and then builds `MiniMain` with pinned Lean 4.33.1, invokes the **actual** pinned upstream extractor, validates its JSON, and uploads a small graph and `/usr/bin/time -v` receipt. It does not fetch Mathlib or build the RH project. This genuine tiny Lean check is a compatibility gate, not an RH graph.
 
-## Smoke tests
+The full RH workflow is deliberately **not** a pull-request smoke job. Reuse the community's self-hosted resumable build infrastructure and its verified source identity receipts, then run the extraction commands above in that already built environment. Preserve `Main.olean` provenance, the input Git tree and toolchain/Mathlib revision; archive the resulting JSON and `lean-graph-time.txt`. Run an independent clean proof verification separately. Without a built `Main.olean`, there is no honest full-RH graph artifact.
 
-```bash
-python3 -m unittest discover -s tools -p 'test_rh_lean_graph.py' -v
-```
+## What remains unverified
 
-These tests check source generation and tamper refusal, not a full Lean build. The real Lean invocation is intentionally explicit because it imports the complete RH environment.
+A complete extracted five-root RH graph, a live large-graph viewer load, wall-time/peak-RSS on RH, full declaration type-plus-value closure, and full proof syntax/Expr AST extraction. Upstream normal JSON cannot certify unused Lean source files, mathematical proof equivalence, or preservation of the five final theorem types. The separate `export_exact_graph.py` research stream addresses a different, checked-expression traversal problem; do not delete it or reintroduce the previously removed viewer and adapter.

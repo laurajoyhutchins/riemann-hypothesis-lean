@@ -1,10 +1,12 @@
-name: RH upstream Lean Graph adapter
+name: RH upstream Lean Graph extraction checks
 
 on:
   pull_request:
     paths:
       - tools/rh_lean_graph.py
+      - tools/validate_rh_lean_graph.py
       - tools/test_rh_lean_graph.py
+      - tools/test_validate_rh_lean_graph.py
       - tools/RH_GRAPH_EXPLORER.md
       - .github/workflows/rh-lazy-graph.yml
   workflow_dispatch:
@@ -15,22 +17,69 @@ permissions:
 jobs:
   upstream-adapter-smoke:
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          sparse-checkout: tools
-          sparse-checkout-cone-mode: true
+          sparse-checkout: |
+            tools
+            lean-toolchain
+          sparse-checkout-cone-mode: false
           persist-credentials: false
-      - name: Test RH source wrapper (no Lean build)
-        run: python3 -m unittest discover -s tools -p test_rh_lean_graph.py -v
-      - name: Generate driver from the pinned upstream Lean Graph extractor
+      - name: Run fast source and JSON-schema regressions
         run: |
-          python3 tools/rh_lean_graph.py --depth 2 --output analysis/RHLeanGraph.lean
+          python3 -m unittest discover -s tools -p test_rh_lean_graph.py -v
+          python3 -m unittest discover -s tools -p test_validate_rh_lean_graph.py -v
+      - name: Install pinned Lean only (do NOT build RH)
+        uses: leanprover/lean-action@fe408643ea7367d8c0404a8be3975bb145f5fb64 # v1.7.0
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Extract a real Lean declaration graph with upstream source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p smoke
+          cp lean-toolchain smoke/lean-toolchain
+          cat > smoke/lakefile.toml <<'EOF'
+          name = "lean-graph-smoke"
+          [[lean_lib]]
+          name = "MiniMain"
+          EOF
+          cat > smoke/MiniMain.lean <<'EOF'
+          import Lean
+          namespace MiniMain
+          theorem leaf : True := True.intro
+          theorem entry : True := leaf
+          end MiniMain
+          EOF
+          pushd smoke
+          lake build MiniMain
+          python3 ../tools/rh_lean_graph.py --module MiniMain --root MiniMain.entry \
+            --depth 4 --output SmokeGraph.lean
+          /usr/bin/time -v -o extraction-time.txt lake env lean SmokeGraph.lean
+          python3 ../tools/validate_rh_lean_graph.py --root MiniMain.entry \
+            --depth 4 --input-dir . --output-dir validated --require-closed \
+            --source-revision "${GITHUB_SHA}"
           python3 - <<'PY'
-          from pathlib import Path
-          s=Path('analysis/RHLeanGraph.lean').read_text()
-          assert s.count('#eval serializeAndWriteToFile') == 5
-          assert 'import Main' in s
-          print('Pin checked and five-root Lean driver generated')
+          import json
+          m = json.load(open('validated/manifest.json'))
+          assert m['graphs']['RH-combined.json']['nodes'] >= 2
+          assert m['graphs']['RH-combined.json']['external_reference_count'] == 0
+          assert m['independent_kernel_verification'] is False
           PY
+          popd
+      - name: Publish genuine Lean smoke graph and resource receipt
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: upstream-lean-graph-genuine-smoke
+          path: |
+            smoke/validated/*.json
+            smoke/extraction-time.txt
+          retention-days: 7
+          if-no-files-found: warn
