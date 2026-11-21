@@ -112,6 +112,66 @@ an independent proof-reproducibility comparison should instead compare
 checked target types and source-derived proof exports under a pinned kernel.
 This is not a license to ignore actual compiler errors or failed kernel checks.
 
+## Experimental persistent warm Lake recovery (NOT a verification gate)
+
+`tools/rh_ci_durable_build.py` is a **small, source-bound recovery
+adapter**, derived from the community's architectural distinction between
+retaining completed build work and independently validating it. See their
+[`ci-build.py`](https://github.com/leanprover-community/riemann-hypothesis/blob/8ec38f92ac54b5c91bc07f4f6f88ea61691b7975/scripts/ci-build.py)
+and [`RecoverCompleted.lean`](https://github.com/leanprover-community/riemann-hypothesis/blob/8ec38f92ac54b5c91bc07f4f6f88ea61691b7975/scripts/cache-bootstrap/RecoverCompleted.lean).
+It intentionally **does not** copy upstream's repository-specific publisher,
+the source runtime sandbox, its verified artifact map, or its stock
+no-build/raw-output recovery implementation. Do not describe this as a
+replacement for that larger system.
+
+On a dedicated persistent and externally sandboxed Linux runner, prepare
+the pinned Mathlib dependency cache separately, then execute (example;
+the sandbox must already be configured by the operator):
+
+```bash
+python3 tools/rh_ci_durable_build.py \
+  --workspace /persistent/rh/checkout \
+  --state-root /persistent/rh/checkpoints \
+  --module Main \
+  --acknowledge-isolated-runner
+```
+
+The checkout and state directory **must survive between runs**; both must
+be owned by the runner user. The controller requires committed clean proof
+source and pinned input files, locks the workspace against concurrent
+controller runs, records a canonical `input_fingerprint`, runs `lake build
+Main` with `LAKE_ARTIFACT_CACHE=false`, and writes an fsync-backed
+checkpoint and append-only log. Failed and gracefully interrupted commands
+retain any raw Lake work **at the same workspace path**. Retry the exact
+same command to have stock Lake decide which outputs need rebuilding.
+There is no custom `.olean` acceptance path and no artifact publication.
+
+This is a **warm build** only: `build_succeeded` means the invoked Lake
+process exited 0, not independent kernel validation, axiom closure or proof
+preservation. The emitted checkpoint always records `proof_verified: false`.
+Never run candidate-controlled code on a host holding publishing secrets.
+The `--acknowledge-isolated-runner` argument is a mandatory human/operator
+assertion; it **does not establish sandboxing**. Do not use the experimental
+wrapper in `pull_request_target` or on an unisolated self-hosted runner.
+
+The default is fail closed across changed source/configuration inputs in the
+same persistent workspace. `--allow-cross-input-reuse` explicitly delegates
+invalidation to stock Lake for *untrusted warm iteration only*, never proof
+certification. Interrupted `SIGTERM` is journaled as `interrupted`, but
+`SIGKILL` or host crash may leave an `building` journal and active child
+processes. Such an orphan is **not automatically adopted**; the operator
+must independently establish quiescence and move aside the old workspace
+before starting a clean candidate. The controller does not provide the
+community's quiescence proof, bounded resource cgroups, portable LTAR
+packaging, uploader, distributed cache, or source-recovery completeness.
+Those are still required before enabling production self-hosted jobs.
+
+No new expensive CI runner is configured by this experiment. The
+`test_rh_ci_durable_build.py` fixtures exercise partial-work survival,
+SIGTERM/resumption, cross-input refusal, locked workspaces and metadata
+tampering with a fake Lake command. The fixtures test the controller, not
+Lean's actual trace/hash validation nor mathematical theorems.
+
 ## Required future verification tier (NOT implemented by this CI change)
 
 For any proof-source refactor before a claim of preservation or a trusted merge:
