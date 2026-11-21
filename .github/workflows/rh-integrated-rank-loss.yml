@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLoss.lean'
+      - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossCoupling.lean'
       - '.github/workflows/rh-integrated-rank-loss.yml'
   workflow_dispatch:
 
@@ -28,6 +29,9 @@ jobs:
             lake-manifest.json
             .github/workflows/rh-integrated-rank-loss.yml
             src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLoss.lean
+            src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossCoupling.lean
+            src/Formalism/CorankShare/StatementFR.lean
+            src/Formalism/CorankShare/CorankShareProofs/LayerCakeFormula.lean
           sparse-checkout-cone-mode: false
 
       - name: Install pinned Lean and restore official Mathlib cache
@@ -45,5 +49,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lake env lean -DautoImplicit=false \
-            src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLoss.lean
+          lake build Formalism.HarderNarasimhan.HarderNarasimhanProofs.IntegratedRankLossCoupling
