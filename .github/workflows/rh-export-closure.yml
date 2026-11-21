@@ -8,6 +8,10 @@ on:
       - tools/test_export_closure.py
       - .github/workflows/rh-export-closure.yml
 
+concurrency:
+  group: rh-export-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   parser-smoke:
     runs-on: ubuntu-24.04
@@ -38,7 +42,7 @@ jobs:
           assert len(lines) == data["exported_declarations"] + 1
           assert "exact_type_index" in data
           with gzip.open(p / "rh-export-identical-theorem-types.tsv.gz", "rt") as f:
-              assert f.readline() == "type_expr\\tlevel_params\\tfamily_size\\tname\\n"
+              assert f.readline() == "type_expr\tlevel_params\tfamily_size\tname\n"
           print("Pinned export parser smoke: pass", data["exported_declarations"])
           PY
 
