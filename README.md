@@ -21,9 +21,11 @@ This fork adds **documentation only** to help readers trace the proposed formali
 - [Proof navigation: five entry points and reading method](docs/proof-navigation.md)
 - [The `everyCharacter` dependency spine](docs/every-character-spine.md)
 - [Research plan: dependency graphs, verification and semantic compression](docs/proof-research-plan.md)
-- [Minimal Main experiment: runnable import-closure comparison and audit](docs/minimal-main-experiment.md)
+- [Minimal-import experiment: source evidence and PR #1 tools](docs/minimal-main-experiment.md)
+- [Proof atlas: nonvanishing to RH/GRH](docs/proof-atlas/analytic-reduction.md)
+- [Proof atlas: literature/theta-integral bridge](docs/proof-atlas/literature-bridge.md)
 
-These notes distinguish source inspection from independently verified kernel evidence. A separate, nondefault `MainMinimal` target and import-graph fixture tests are included as **unverified research infrastructure**; they do not certify the announced proof.
+These notes distinguish source inspection from independently verified kernel evidence. The import-graph tools and experimental Lean source reductions are in the separate [draft research PR #1](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/pull/1); this PR adds navigation documentation, not another implementation.
 
 ## What is proved
 
