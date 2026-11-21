@@ -101,6 +101,17 @@ do not verify the source produced by this branch. They should only be run to
 answer a new research question, not as a default response to each tooling edit.
 Their auto PR smoke jobs remain active.
 
+## Reproducibility: byte identity is not proof identity
+
+The community's [verification notes at pinned revision](https://github.com/leanprover-community/riemann-hypothesis/blob/8ec38f92ac54b5c91bc07f4f6f88ea61691b7975/verification/NOTES.md)
+explain that Lean 4.33.1 records absolute source filenames in some serialized
+`.olean` linter diagnostics. So two fresh builds from equivalent proof sources
+in *different directories* may have different `.olean` SHA-256 values.
+A cache receipt must bind and validate the actual artifact bytes it stores;
+an independent proof-reproducibility comparison should instead compare
+checked target types and source-derived proof exports under a pinned kernel.
+This is not a license to ignore actual compiler errors or failed kernel checks.
+
 ## Required future verification tier (NOT implemented by this CI change)
 
 For any proof-source refactor before a claim of preservation or a trusted merge:
