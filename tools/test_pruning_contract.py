@@ -14,10 +14,10 @@ class ProofRefactorContractTests(unittest.TestCase):
             source = root / "src"
             source.mkdir()
             target = source / "Shared.lean"
-            raw = b"theorem t : True := True.intro\\n"
+            raw = b"theorem t : True := True.intro\n"
             target.write_bytes(raw)
             current_sha = hashlib.sha1(
-                b"blob " + str(len(raw)).encode() + b"\\0" + raw
+                b"blob " + str(len(raw)).encode() + b"\0" + raw
             ).hexdigest()
             row = dict(
                 path="src/Shared.lean",
@@ -28,7 +28,7 @@ class ProofRefactorContractTests(unittest.TestCase):
                 declaration="t",
             )
             self.assertEqual(verify_proof_refactors(source, [row]), 9)
-            target.write_bytes(raw + b"\\n")
+            target.write_bytes(raw + b"\n")
             with self.assertRaisesRegex(ValueError, "blob drift"):
                 verify_proof_refactors(source, [row])
 

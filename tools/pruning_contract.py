@@ -29,10 +29,10 @@ def verify_proof_refactors(source: Path, entries: list[dict]) -> int:
         if not current.is_file():
             raise ValueError(f"proof refactor source missing: {relative}")
         raw = current.read_bytes()
-        blob_sha = hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\\0" + raw).hexdigest()
+        blob_sha = hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest()
         if blob_sha != row["current_blob_sha"]:
             raise ValueError(f"proof refactor blob drift: {relative}")
-        current_lines = raw.count(b"\\n") + int(bool(raw) and not raw.endswith(b"\\n"))
+        current_lines = raw.count(b"\n") + int(bool(raw) and not raw.endswith(b"\n"))
         if current_lines != row["current_lines"]:
             raise ValueError(f"proof refactor line drift: {relative}")
         original_lines = row["original_lines"]
