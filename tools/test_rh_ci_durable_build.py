@@ -55,7 +55,9 @@ class DurableWarmBuildTests(unittest.TestCase):
         ).strip()
 
     def commit(self):
-        self.git("add", "-A")
+        # A test commit must never accidentally version the simulated build cache.
+        self.git("add", "-A", "--", "src", "lakefile.toml",
+                 "lake-manifest.json", "lean-toolchain", "README.md")
         self.git("commit", "-qm", "fixture")
 
     def run_id(self):
@@ -97,8 +99,8 @@ class DurableWarmBuildTests(unittest.TestCase):
             run_build(self.workspace, self.state, ["Proof"], lake=str(self.fake_lake),
                       cross_input=True), 0,
         )
-        self.assertNotEqual(self.record()["plan"]["input_fingerprint"],
-                            make_plan(self.workspace, ["Proof"])["input_fingerprint"])
+        self.assertNotEqual(before["plan"]["input_fingerprint"],
+                            self.record()["plan"]["input_fingerprint"])
 
     def test_dirty_source_refused_even_when_warm_reuse_requested(self):
         (self.workspace / "src/Proof.lean").write_text("changed\n")
