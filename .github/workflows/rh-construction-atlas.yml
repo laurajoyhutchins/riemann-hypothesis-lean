@@ -8,6 +8,8 @@ on:
       - tools/test_construction_atlas.py
       - tools/compare_construction_pair.py
       - tools/test_compare_construction_pair.py
+      - tools/core5_projection_atlas.py
+      - tools/test_core5_projection_atlas.py
       - .github/workflows/rh-construction-atlas.yml
       - src/Development/AbelianVarietyTheory/Proofs/**
 
@@ -42,6 +44,15 @@ jobs:
             --left-theorem existsUnique_hom_extension_of_dvr \
             --right-theorem existsUnique_hom_extension_of_dvr \
             --out analysis/rh-semiabelian-extension-pair.json
+      - name: Verify Core5 record-projection family detector
+        run: python3 -m unittest discover -s tools -p 'test_core5_projection_atlas.py' -v
+      - name: Find source theorem families connected by Core5 projections
+        run: |
+          python3 tools/core5_projection_atlas.py \
+            --src src \
+            --root Development/AbelianVarietyTheory/Proofs \
+            --max-families 150 \
+            --out analysis/rh-core5-projection-atlas.json
       - name: Archive inspectable candidate family evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -50,5 +61,6 @@ jobs:
           path: |
             analysis/rh-construction-family-atlas.json
             analysis/rh-semiabelian-extension-pair.json
+            analysis/rh-core5-projection-atlas.json
           if-no-files-found: warn
           retention-days: 30
