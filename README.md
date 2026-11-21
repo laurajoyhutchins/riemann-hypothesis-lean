@@ -14,6 +14,21 @@
 
 ---
 
+## Navigate and investigate the proof
+
+This fork adds **documentation only** to help readers trace the proposed formalization; the original Lean source files have not been modified by this documentation PR.
+
+- [Proof navigation: five entry points and reading method](docs/proof-navigation.md)
+- [The `everyCharacter` dependency spine](docs/every-character-spine.md)
+- [Research plan: dependency graphs, verification and semantic compression](docs/proof-research-plan.md)
+- [Minimal-import experiment: source evidence and PR #1 tools](docs/minimal-main-experiment.md)
+- [Proof atlas: nonvanishing to RH/GRH](docs/proof-atlas/analytic-reduction.md)
+- [Proof atlas: literature/theta-integral bridge](docs/proof-atlas/literature-bridge.md)
+- [Proof atlas: character boxes, zero-free windows and imprimitive characters](docs/proof-atlas/character-box.md)
+- [Proof atlas: guard-parametric covolume assembly and realization refinement](docs/proof-atlas/covolume-assembly.md)
+
+These notes distinguish source inspection from independently verified kernel evidence. The import-graph tools and experimental Lean source reductions are in the separate [draft research PR #1](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/pull/1); this PR adds navigation documentation, not another implementation.
+
 ## What is proved
 
 The target statements are short. Read these two files first.
@@ -98,7 +113,7 @@ shasum -a 256 lean.tar.gz   # same hash as above
 tar -xzf lean.tar.gz && cd lean
 ```
 
-The `src/` tree in this repository is byte-for-byte the content of that archive; this README, `.gitignore` and nothing else were added.
+The `src/` tree in this repository originated from that archive. This fork also contains navigation/research documentation outside `src/`; do not infer byte-for-byte identity of future edits without checking file hashes.
 
 ## Building
 
