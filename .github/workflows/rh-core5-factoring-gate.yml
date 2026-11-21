@@ -1,0 +1,130 @@
+name: RH Core5 theorem reuse source and Lean gate
+
+on:
+  pull_request:
+    paths:
+      - src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/ExistsCcIsEquivAtSerOfOneMapRowOfCore.lean
+      - tools/RHCore5FactoringCheck.lean
+      - .github/workflows/rh-core5-factoring-gate.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  LEAN_ABORT_ON_PANIC: '1'
+  LAKE_ARTIFACT_CACHE: 'false'
+  MATHLIB_CACHE_GET_URL: https://cache.mathlib.org/mathlib4
+
+concurrency:
+  group: rh-core5-factoring-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  source-contract-and-import-cycle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify import graph and preserved four theorem statements
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || 'bc44ff907265af977f6593b3730257389cf11b3b' }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import subprocess
+          import sys
+          sys.path.insert(0, "tools")
+          from import_closure import load_source, transitive_modules
+
+          src = Path("src")
+          deps, _, warnings = load_source(src)
+          if warnings:
+              raise AssertionError("unparsed import syntax: " + str(warnings[:8]))
+          prefix = "Development.AbelianVarietyTheory.Proofs.DivisorProofs."
+          donor = prefix + "ExistsCcIsEquivAtSerOfOneMapRowOfFive"
+          consumer = prefix + "ExistsCcIsEquivAtSerOfOneMapRowOfCore"
+          assert donor in deps and consumer in deps
+          assert donor in deps[consumer], "expected new direct donor import"
+          assert consumer not in transitive_modules(deps, donor), "donor transitively imports recipient"
+          name = "src/" + consumer.replace(".", "/") + ".lean"
+          new = Path(name).read_text()
+          old = subprocess.check_output(["git", "show", os.environ["BASE_SHA"] + ":" + name], text=True)
+          targets = (
+              "isPair_record_ofCore", "models_at_record_ofCore",
+              "class_scalar_value_ofCore", "thetaVector_eq_sum_heisenberg_of_core",
+          )
+          def header(s, name):
+              begin = s.index("theorem " + name + " ")
+              end = s.index(":= by", begin)
+              return s[begin:end].strip()
+          for theorem in targets:
+              assert header(new, theorem) == header(old, theorem), theorem
+              part = new[new.index("theorem " + theorem + " "):]
+              proof = part[part.index(":= by"):].split("\ntheorem ", 1)[0]
+              assert "GlobalTheory.Core5.of_core" in proof, theorem
+          print("Four public theorem statements preserved; donor imports are acyclic.")
+          PY
+
+  source-elaboration-and-axioms:
+    needs: source-contract-and-import-cycle
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install checksum-pinned elan / Lean 4.33.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 3 \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            --output "$RUNNER_TEMP/elan.tar.gz"
+          printf '%s  %s\n' \
+            '42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63' \
+            "$RUNNER_TEMP/elan.tar.gz" | sha256sum --check -
+          tar -xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP"
+          "$RUNNER_TEMP/elan-init" -y --default-toolchain none --no-modify-path
+          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Bind source and lockfile identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p analysis
+          python3 tools/rh_ci_identity.py --root . \
+            --output analysis/rh-core5-factoring-input-identity.json
+      - name: Download only Mathlib compiled dependency cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake exe mathlib/cache get
+          git diff --quiet HEAD -- lakefile.toml lake-manifest.json lean-toolchain src
+      - name: Compile source proofs under original and new theorem imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCcIsEquivAtSerOfOneMapRowOfCore \
+            2>&1 | tee analysis/rh-core5-factoring-build.log
+      - name: Check public theorem declarations and axiom dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean tools/RHCore5FactoringCheck.lean \
+            2>&1 | tee analysis/rh-core5-factoring-axioms.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rh-core5-factoring-gate
+          path: |
+            analysis/rh-core5-factoring-*.log
+            analysis/rh-core5-factoring-input-identity.json
+          retention-days: 30
+          if-no-files-found: warn
