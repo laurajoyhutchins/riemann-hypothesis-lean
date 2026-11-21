@@ -5,6 +5,7 @@ on:
   pull_request:
     paths:
       - tools/export_closure.py
+      - tools/test_export_closure.py
       - .github/workflows/rh-export-closure.yml
 
 jobs:
@@ -17,6 +18,8 @@ jobs:
           sparse-checkout: tools
           sparse-checkout-cone-mode: true
           persist-credentials: false
+      - name: Unit test exact exported type and universe equivalence
+        run: python3 -m unittest discover -s tools -p 'test_export_closure.py' -v
       - name: Verify parser against official lean4export NDJSON example
         shell: bash
         run: |
@@ -33,6 +36,9 @@ jobs:
           with gzip.open(p / "rh-export-reachable-names.tsv.gz", "rt") as f:
               lines = f.readlines()
           assert len(lines) == data["exported_declarations"] + 1
+          assert "exact_type_index" in data
+          with gzip.open(p / "rh-export-identical-theorem-types.tsv.gz", "rt") as f:
+              assert f.readline() == "type_expr\\tlevel_params\\tfamily_size\\tname\\n"
           print("Pinned export parser smoke: pass", data["exported_declarations"])
           PY
 
