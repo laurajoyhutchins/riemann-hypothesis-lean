@@ -124,3 +124,12 @@ The thesis to test is whether an admissibility-parameterized theorem family can 
 6. Sample the 60 matched filenames and expand only when genuine reusable proofs, rather than equivalent labels, are demonstrated.
 
 **Current verdict:** the numerical covolume assembly is a strong **candidate for guard-parametric sharing**, with a mathematical proof argument grounded in the two existing source scripts. No general Lean theorem or realization conversion has been kernel-checked in this investigation.
+
+
+## Negative result: `deep_slim_use` is already the shared arithmetic adapter
+
+Source inspection identifies `PositivityTheory.HtPt.Ah.deep_slim_use` in `Development/WeilBound/CoreStatements/AutomorphicKernels/MoriwakiBigness/HilbertSamuelApplications/AhSlimU.lean`. It consumes resolution, principalization, Poincaré–Lelong, Hilbert–Samuel usage, Moriwaki bigness, Fargues exactness, Zarhin, and nef Riemann–Roch; it *does not prove the entire covolume result anew*. It calls `GlobalTheory.CompanionTheory.Ar.Plug.deepStR_of_use` from `.../HilbertSamuelApplications/DeepStROfUse.lean`.
+
+The latter builds a `lineOfLargeDegree_of_use` input, a `given_of_use` input, and a `good_tower_volume_theorem_bis` input, extracts the Hilbert–Samuel and birational-pullback ingredients, and invokes `deepStR_of_volume`. It is a substantive shared composition already present in the source.
+
+**Consequence:** deduplicating calls to `deep_slim_use` would not itself save those underlying proofs. The meaningful new sharing target is the *later* eight-bound covolume assembly, whose full proof bodies are separately repeated under different admissibility conditions.
