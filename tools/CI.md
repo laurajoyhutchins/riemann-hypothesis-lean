@@ -26,45 +26,60 @@ claim that these source-import candidates are a safe set of modules to build:
 Lean macros, elaborators, dynamic inputs and imported environment changes may
 create additional dependencies.
 
-## Community build-infrastructure adoption boundary
+## Direct community CI integration
 
-The reference implementation is
-[leanprover-community/riemann-hypothesis](https://github.com/leanprover-community/riemann-hypothesis/tree/8ec38f92ac54b5c91bc07f4f6f88ea61691b7975)
-at pinned commit `8ec38f92ac54b5c91bc07f4f6f88ea61691b7975`.
-See [community cache documentation](https://github.com/leanprover-community/riemann-hypothesis/blob/8ec38f92ac54b5c91bc07f4f6f88ea61691b7975/verification/CACHE.md),
-[PR build workflow](https://github.com/leanprover-community/riemann-hypothesis/blob/8ec38f92ac54b5c91bc07f4f6f88ea61691b7975/.github/workflows/build-pr.yml),
-and [clean Comparator instructions](https://github.com/leanprover-community/riemann-hypothesis/blob/8ec38f92ac54b5c91bc07f4f6f88ea61691b7975/README.md).
+The community CI is **not reimplemented in this fork**. The original repository
+[leanprover-community/riemann-hypothesis](https://github.com/leanprover-community/riemann-hypothesis)
+is pinned as Git submodule `upstream/riemann-hypothesis-community` at
+[`79c751e0b0a5ea3bbfc20198c852fa85f28661e6`](https://github.com/leanprover-community/riemann-hypothesis/commit/79c751e0b0a5ea3bbfc20198c852fa85f28661e6).
+The [integration workflow](../.github/workflows/rh-community-upstream.yml)
+checks out this exact upstream commit and invokes **its actual**
+`scripts/ci-prepare.py` and `scripts/ci-build.py` without modifying their
+source. It also runs the upstream preparation, publication-trust, and runner
+unit tests as inexpensive automatic PR checks.
 
-The immediate port uses the community's **five-field cache-input identity
-schema**, not its cache artifacts, publisher, or source build controller.
-`tools/rh_ci_identity.py` writes a clean-Git receipt containing the committed
-`src` tree identity, `lakefile.toml` SHA-256, dependency manifest SHA-256,
-Lean toolchain and build-roots field, plus the same canonical SHA-256 fingerprint.
-A documentation-only commit retains the fingerprint; changing the proof source,
-toolchain or configuration invalidates it. Dirty or untracked proof sources
-and ignored files under `src` are rejected. The receipt says
-`proof_verified: false` and is never an authorization to restore or trust an
-artifact. A matching digest authenticates input identity, **not proof validity**.
+**Input compatibility verified at integration:** our fork's
+`lake-manifest.json` and `lean-toolchain` bytes agree exactly with the
+upstream community version. The fork's `lakefile.toml` contains the original
+root libraries/configuration; the upstream copy additionally contains
+its own cache executable and publication service. The upstream controller
+snapshots the fork's actual `src`, lakefile, manifest and toolchain. It
+validates those inputs, restores the upstream original module baseline
+under its own input-hash checks, then executes *stock Lake* in its
+Bubblewrap sandbox with its **own** durable interrupted-work and
+finished-module recovery logic. Incompatible original artifacts are
+invalidated by Lake; exact restored archives alone do not prove the edited
+source correct.
 
-The five-field convention is compatible with the community's identity
-calculation, but its published receipts are repository-scoped and its cache
-service expects an exact source/configuration match. Our fork has changed
-proof modules and a different lakefile. **No full community root cache is
-declared compatible with our modified fork** merely because the toolchain
-matches. Do not copy a cache map, patch repository fields, or re-label existing
-`.olean` outputs to make it appear compatible.
+A manual `workflow_dispatch` full-build job requires a registered isolated
+self-hosted Linux runner labeled `rh-build` (and `systemd-run` user-manager,
+Bubblewrap, pinned Lean tooling, and a large persistent disk). Without a
+matching runner that job cannot execute. It is not an automatic PR proof gate
+or something that runs on a lightweight hosted runner. The community
+[runner guidance](https://github.com/leanprover-community/riemann-hypothesis/blob/79c751e0b0a5ea3bbfc20198c852fa85f28661e6/verification/CI-RUNNERS.md)
+recommends roughly 128 GiB RAM and at least 250 GiB free disk.
+The exact full-build job has **not** been observed to complete on the fork.
 
-The community's full pipeline also uses dedicated large Linux runners,
-untrusted-PR sandboxing, durable interrupted-build recovery, immutable packed
-artifacts, and an isolated publisher. Those capabilities require further
-adaptation and verification before being enabled here. The community
-documentation's recommended runner is about 128 GiB RAM with at least 250 GiB
-free SSD; the normal hosted runners are not interchangeable. No storage
-credentials or external publisher are configured by this change.
+No community publishing credentials or the upstream `publish-ci-cache.py`
+publication workflow are invoked: those bind explicitly to
+`leanprover-community/riemann-hypothesis` and must not be relabeled.
+The fork uploads small local evidence only; incomplete results stay on the
+persistent runner and may be recovered by the actual upstream controller.
+Build output remains an accelerator, not independent proof verification.
 
-Code and proof redistribution permissions must be checked before bulk
-vendoring the upstream scripts or proof artifacts. This change uses a small
-independently implemented interface and links to the upstream implementation.
+The older fork-side recovery experiments have been retired. The exact files
+deleted are `rh_ci_durable_build.py`, `rh_ci_recover.py`,
+`RHRecoverCompleted.lean`, their tests, the stock-recovery smoke harness
+and workflow. Their [experimental test evidence](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/pull/8)
+is historical, but the community now owns the authoritative implementation
+and future improvements. `rh_ci_identity.py` stays as a small,
+fork-specific read-only source/configuration identity adapter already used
+by the source impact gate; it does **not** implement build or recovery logic.
+
+Upstream changes must be adopted by reviewing a new pinned submodule commit,
+not by copying or independently editing upstream scripts. The submitted
+proof source has no declared redistribution license; the submodule preserves
+upstream ownership and history rather than vendoring a second copy.
 
 ## Focused Lean proof gate on review-ready candidates
 
@@ -112,121 +127,12 @@ an independent proof-reproducibility comparison should instead compare
 checked target types and source-derived proof exports under a pinned kernel.
 This is not a license to ignore actual compiler errors or failed kernel checks.
 
-## Experimental persistent warm Lake recovery (NOT a verification gate)
+## Retired recovery prototypes
 
-`tools/rh_ci_durable_build.py` is a **small, source-bound recovery
-adapter**, derived from the community's architectural distinction between
-retaining completed build work and independently validating it. See their
-[`ci-build.py`](https://github.com/leanprover-community/riemann-hypothesis/blob/8ec38f92ac54b5c91bc07f4f6f88ea61691b7975/scripts/ci-build.py)
-and [`RecoverCompleted.lean`](https://github.com/leanprover-community/riemann-hypothesis/blob/8ec38f92ac54b5c91bc07f4f6f88ea61691b7975/scripts/cache-bootstrap/RecoverCompleted.lean).
-It intentionally **does not** copy upstream's repository-specific publisher,
-the source runtime sandbox, its verified artifact map, or its stock
-no-build/raw-output recovery implementation. Do not describe this as a
-replacement for that larger system.
-
-On a dedicated persistent and externally sandboxed Linux runner, prepare
-the pinned Mathlib dependency cache separately, then execute (example;
-the sandbox must already be configured by the operator):
-
-```bash
-python3 tools/rh_ci_durable_build.py \
-  --workspace /persistent/rh/checkout \
-  --state-root /persistent/rh/checkpoints \
-  --module Main \
-  --acknowledge-isolated-runner
-```
-
-The checkout and state directory **must survive between runs**; both must
-be owned by the runner user. The controller requires committed clean proof
-source and pinned input files, locks the workspace against concurrent
-controller runs, records a canonical `input_fingerprint`, runs `lake build
-Main` with `LAKE_ARTIFACT_CACHE=false`, and writes an fsync-backed
-checkpoint and append-only log. Failed and gracefully interrupted commands
-retain any raw Lake work **at the same workspace path**. Retry the exact
-same command to have stock Lake decide which outputs need rebuilding.
-There is no custom `.olean` acceptance path and no artifact publication.
-
-This is a **warm build** only: `build_succeeded` means the invoked Lake
-process exited 0, not independent kernel validation, axiom closure or proof
-preservation. The emitted checkpoint always records `proof_verified: false`.
-Never run candidate-controlled code on a host holding publishing secrets.
-The `--acknowledge-isolated-runner` argument is a mandatory human/operator
-assertion; it **does not establish sandboxing**. Do not use the experimental
-wrapper in `pull_request_target` or on an unisolated self-hosted runner.
-
-The default is fail closed across changed source/configuration inputs in the
-same persistent workspace. `--allow-cross-input-reuse` explicitly delegates
-invalidation to stock Lake for *untrusted warm iteration only*, never proof
-certification. Interrupted `SIGTERM` is journaled as `interrupted`, but
-`SIGKILL` or host crash may leave an `building` journal and active child
-processes. Such an orphan is **not automatically adopted**; the operator
-must independently establish quiescence and move aside the old workspace
-before starting a clean candidate. The controller does not provide the
-community's quiescence proof, bounded resource cgroups, portable LTAR
-packaging, uploader, distributed cache, or source-recovery completeness.
-Those are still required before enabling production self-hosted jobs.
-
-No new expensive CI runner is configured by this experiment. The
-`test_rh_ci_durable_build.py` fixtures exercise partial-work survival,
-SIGTERM/resumption, cross-input refusal, locked workspaces and metadata
-tampering with a fake Lake command. The fixtures test the controller, not
-Lean's actual trace/hash validation nor mathematical theorems.
-
-## Stock-Lake completion recovery experiment (not proof verification)
-
-`tools/RHRecoverCompleted.lean` and `tools/rh_ci_recover.py` implement a narrow
-version of the community's [stock no-build completed-artifact recovery](https://github.com/leanprover-community/riemann-hypothesis/blob/8ec38f92ac54b5c91bc07f4f6f88ea61691b7975/scripts/cache-bootstrap/RecoverCompleted.lean).
-
-**Mechanism.** Given explicit local Lean module names, the pinned Lean 4.33.1
-helper loads the Lake workspace with `noBuild=true` and
-`trustHash=false`, requests each module's actual `leanArts`, reads its
-saved Lake build trace, compares saved and observed output descriptors, deletes
-any incomplete existing `.ltar`, and asks stock Lake to repack and save the
-completed raw outputs. A candidate with stale inputs, missing generated
-outputs, an invalid trace, or mismatched artifact descriptors is rejected.
-The helper reports an explicit decision for every requested module.
-
-The trusted Python wrapper records the **current clean Git source/configuration
-identity** and verifier-source SHA-256, validates candidate names, requires
-all per-module decisions, rechecks the original current Lake `depHash` trace,
-hashes the resulting local `.ltar`, and writes a local receipt with
-`proof_verified: false` and `artifact_published: false`. It never uses a
-recovered archive as evidence that its mathematical theorem is correct.
-A partial helper failure, unreported candidate, forged path or changed
-source fingerprint causes refusal. Existing archival artifacts are not
-trusted merely because they hash.
-
-Example on an already provisioned, persistent and *externally isolated*
-trusted runner, after an interrupted or failed warm Lake build:
-
-```bash
-python3 tools/rh_ci_recover.py \
-  --workspace /persistent/rh/checkout \
-  --state-root /persistent/rh/checkpoints \
-  --module Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorObjectPullback \
-  --acknowledge-isolated-runner
-```
-
-Alternatively, `--scan-traces` explicitly examines existing root-project
-Lean module traces and submits the candidates to the helper. That can be
-expensive for 175,000 modules; use bounded candidate sets when possible.
-`--workers` controls only the concurrent Lake job checks, not full
-source elaboration. The wrapper does not install a sandbox or cgroup, and
-must not be used as a privileged `pull_request_target` job.
-
-The [tiny real-Lean smoke workflow](../.github/workflows/rh-stock-recovery-smoke.yml)
-is separate from the inexpensive Python fixture suite. It builds three
-small Lean modules on Lean v4.33.1, replaces one saved `.ltar` with truncated
-bytes, corrupts a finished C artifact, and changes a third module's committed
-source without rebuilding it. Only the completed, unmodified module
-may be repacked. This is *not* an RH-corpus proof check.
-
-**Still not implemented:** automatic harvesting from a killed 175k-module
-Lake build, upstream-compatible immutable module-map publication,
-external secure runner infrastructure, migration/locking across runner
-hosts, recovery of fatal controller crashes, or independent full five-root
-Comparator/kernel verification. This experiment has no permission to
-replace those requirements with a green fixture.
+Our two earlier attempts to independently implement the community's
+persistent warm-build checkpoints and stock Lake recovery have been removed
+from active code and workflows. Reuse the pinned upstream controller above
+instead; do not reintroduce a parallel cache publisher or recovery runner.
 
 ## Required future verification tier (NOT implemented by this CI change)
 
