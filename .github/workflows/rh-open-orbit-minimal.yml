@@ -72,7 +72,7 @@ jobs:
           )
           assert "OpenOrbitInputs" in generic_head
           assert "P.toOpenOrbitInputs" in new_body
-          assert "sorry" not in small and "sorry" not in new and "admit" not in small and "admit" not in new
+          assert not re.search(r"\b(?:sorry|admit)\b", small + "\n" + new), "unproved source placeholder"
 
           record_fields = dict(re.findall(r"^  ([A-Za-z_][A-Za-z_0-9']*) : ([^\n]+)", record, re.M))
           mini = small.split("structure OpenOrbitInputs : Prop where\n", 1)[1].split("\n\n", 1)[0]
