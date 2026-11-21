@@ -1,0 +1,52 @@
+name: RH lazy proof expression viewer
+
+on:
+  pull_request:
+    paths:
+      - tools/rh_graph_explorer.py
+      - tools/rh_graph_viewer.html
+      - tools/test_rh_graph_explorer.py
+      - tools/RH_GRAPH_EXPLORER.md
+      - .github/workflows/rh-lazy-graph.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  viewer-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools
+          sparse-checkout-cone-mode: true
+          persist-credentials: false
+      - name: Run hermetic expression-index and HTTP regressions
+        run: python3 -m unittest discover -s tools -p test_rh_graph_explorer.py -v
+      - name: Index official lean4export example and inspect its theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 3 --fail --location --silent --show-error \
+            https://raw.githubusercontent.com/leanprover/lean4export/v4.33.0/examples/Nat.add_succ.ndjson | \
+            python3 tools/rh_graph_explorer.py build --root Nat.add_succ --output-dir analysis/viewer-sample
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          import sys
+          sys.path.insert(0,'tools')
+          from rh_graph_explorer import GraphStore
+          m=json.loads(Path('analysis/viewer-sample/manifest.json').read_text())
+          assert m['complete_index'] and m['unresolved_constant_count']==0
+          assert m['expression_count']>400
+          db=GraphStore('analysis/viewer-sample')
+          try:
+              decl=db.declaration('Nat.add_succ')
+              assert decl is not None and decl['kind']=='thm'
+              assert db.expression(decl['expression_roots'][-1])['id']==decl['expression_roots'][-1]
+          finally:
+              db.close()
+          print('Official sample: full Expr payload available by ID')
+          PY
