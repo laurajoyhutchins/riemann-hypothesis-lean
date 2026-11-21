@@ -127,9 +127,9 @@ def analyze_sources(sources: dict[str, str], *, expect_fields: int | None = 60):
         src = theorem_slice(sources[file], theorem)
         proj = direct_field_projection(src)
         unknown = sorted(set(proj) - known)
-        if unknown:
-            raise ValueError(f"{theorem}: projections not fields of P: {unknown}")
-        all_direct.update(proj)
+        direct = {field: count for field, count in proj.items()
+                  if field in known}
+        all_direct.update(direct)
         opaque = whole_record_contexts(src)
         rows.append({
             "theorem": theorem,
@@ -137,11 +137,12 @@ def analyze_sources(sources: dict[str, str], *, expect_fields: int | None = 60):
             "source_sha256": hashlib.sha256(
                 sources[file].encode("utf-8")
             ).hexdigest(),
-            "directly_referenced_fields": sorted(proj),
-            "direct_field_reference_counts": dict(sorted(proj.items())),
+            "directly_referenced_fields": sorted(direct),
+            "direct_field_reference_counts": dict(sorted(direct.items())),
+            "other_dot_accessors_not_in_constructor": unknown,
             "whole_record_occurrence_count": len(opaque),
             "whole_record_contexts": opaque,
-            "directly_referenced_field_count": len(proj),
+            "directly_referenced_field_count": len(direct),
         })
     return {
         "record_constructor_theorem": RECORD_CONSTRUCTOR,
@@ -156,12 +157,17 @@ def analyze_sources(sources: dict[str, str], *, expect_fields: int | None = 60):
         "other_fields_without_direct_projection_in_slices": sorted(
             known - all_direct
         ),
+        "nonconstructor_dot_accessors_across_slices": sorted({
+            name for site in rows for name in
+            site["other_dot_accessors_not_in_constructor"]
+        }),
         "whole_record_occurrences_across_slices": sum(
             row["whole_record_occurrence_count"] for row in rows
         ),
         "proof_sites": rows,
         "interpretation": (
-            "ONLY lexical direct field occurrences; whole-record calls "
+            "ONLY lexical direct constructor-field occurrences; derived " 
+            "accessors and whole-record calls "
             "require recursive theorem type/proof analysis. This is NOT a "
             "minimal record theorem, a proof of irrelevance, or a source "
             "compression certificate."
