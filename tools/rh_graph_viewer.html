@@ -78,11 +78,11 @@ const history = [];
 function showError(el, err) { el.append(node('p',err.message || String(err),'error')); }
 async function chooseDeclaration(name, remember=true) {
   try {
-    if (remember && $('heading').dataset.name) history.push($('heading').dataset.name);
+    if (remember && $('heading').dataset.id) history.push(Number($('heading').dataset.id));
     $('back').hidden = !history.length;
-    const info = await request('/api/declaration?name=' + encodeURIComponent(name));
+    const info = await request(typeof name === 'number' ? '/api/declaration?id=' + name : '/api/declaration?name=' + encodeURIComponent(name));
     $('heading').textContent = info.name;
-    $('heading').dataset.name = info.name;
+    $('heading').dataset.id = info.id;
     $('subtitle').textContent = `${info.kind} · exported declaration #${info.id} · click any Expr to expand only that node`;
     const tree = $('tree'); tree.replaceChildren();
     const count = info.expression_roots.length;
@@ -116,7 +116,7 @@ function exprButton(id, role='root') {
       head.append(node('span',info.kind,'kind'));
       if (info.reference) {
         const ref=info.reference;
-        if (ref.defined) head.append(button(`↗ ${ref.name}`,()=>chooseDeclaration(ref.name)));
+        if (ref.defined) head.append(button(`↗ ${ref.name}`,()=>chooseDeclaration(ref.name_id)));
         else head.append(node('span',`unresolved ${ref.name || ref.name_id}`,'error'));
       }
       for (const edge of info.children) body.append(exprButton(edge.id,edge.role));
@@ -140,7 +140,7 @@ $('search').addEventListener('input',async e=>{
   try {
     const {matches}=await request('/api/find?q='+encodeURIComponent(q));
     if(seq!==querySerial)return;
-    for (const name of matches) target.append(button(name,()=>chooseDeclaration(name)));
+    for (const item of matches) target.append(button(item.name+' (#'+item.id+')',()=>chooseDeclaration(item.id)));
     if (!matches.length) target.append(node('small','No prefix matches'));
   } catch(err) { if(seq===querySerial) showError(target,err); }
 });

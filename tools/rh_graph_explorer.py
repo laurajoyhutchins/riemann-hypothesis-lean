@@ -111,7 +111,7 @@ def _entries(obj):
 
 def _schema(db):
     db.executescript('''
-        CREATE TABLE names (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE);
+        CREATE TABLE names (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
         CREATE TABLE declarations (
           name_id INTEGER PRIMARY KEY, kind TEXT NOT NULL,
           roots TEXT NOT NULL, grouped TEXT NOT NULL, raw TEXT NOT NULL
@@ -215,6 +215,9 @@ def build_index(stream, output_dir, roots=ROOTS, compressed_sha256=None):
             found = db.execute('SELECT n.name, d.kind FROM names n JOIN declarations d ON n.id=d.name_id WHERE n.name IN (' +
                                ','.join('?' for _ in roots) + ')', roots).fetchall()
             found = dict(found)
+            ambiguity = db.execute('SELECT name FROM names WHERE name IN (' + ','.join('?' for _ in roots) + ') GROUP BY name HAVING COUNT(*) > 1', roots).fetchall()
+            if ambiguity:
+                raise ValueError(f'ambiguous printed root Names: {ambiguity}')
             if any(found.get(root) != 'thm' for root in roots):
                 raise ValueError(f'missing or non-theorem roots: {[root for root in roots if found.get(root) != "thm"]}')
             writer.close()
@@ -268,18 +271,22 @@ class GraphStore:
             raise ValueError('prefix length must be 1..250; limit 1..100')
         # Range query uses the indexed full Name and avoids a full-table LIKE scan.
         # U+10FFFF gives a strict upper bound on all names extending this prefix.
-        rows = self.con.execute('SELECT name FROM names WHERE name>=? AND name<? ORDER BY name LIMIT ?',
+        rows = self.con.execute('SELECT id, name FROM names WHERE name>=? AND name<? ORDER BY name,id LIMIT ?',
                                 (prefix, prefix + chr(0x10FFFF), limit)).fetchall()
-        return [r[0] for r in rows]
+        return [{'id': row[0], 'name': row[1]} for row in rows]
 
-    def declaration(self, name):
-        row = self.con.execute('''SELECT n.id,d.kind,d.roots,d.grouped,d.raw
-            FROM declarations d JOIN names n ON n.id=d.name_id WHERE n.name=?''', (name,)).fetchone()
+    def declaration(self, name=None, *, name_id=None):
+        if name_id is not None:
+            row = self.con.execute('''SELECT n.id,n.name,d.kind,d.roots,d.grouped,d.raw
+                FROM declarations d JOIN names n ON n.id=d.name_id WHERE n.id=?''', (name_id,)).fetchone()
+        else:
+            row = self.con.execute('''SELECT n.id,n.name,d.kind,d.roots,d.grouped,d.raw
+                FROM declarations d JOIN names n ON n.id=d.name_id WHERE n.name=? ORDER BY n.id LIMIT 1''', (name,)).fetchone()
         if row is None:
             return None
-        return {'name': name, 'id': row[0], 'kind': row[1],
-                'expression_roots': json.loads(row[2]), 'mutual_or_group': json.loads(row[3]),
-                'raw': json.loads(row[4])}
+        return {'name': row[1], 'id': row[0], 'kind': row[2],
+                'expression_roots': json.loads(row[3]), 'mutual_or_group': json.loads(row[4]),
+                'raw': json.loads(row[5])}
 
     def _name(self, ident):
         row = self.con.execute('SELECT name FROM names WHERE id=?', (ident,)).fetchone()
@@ -359,9 +366,15 @@ def handler_factory(index_dir, viewer_path):
                     return
                 if u.path == '/api/declaration':
                     name = query.get('name', [''])[0]
-                    if not name or len(name) > 2048:
-                        raise ValueError('declaration name missing or too long')
-                    result = self.server.store.declaration(name)
+                    ident = query.get('id', [''])[0]
+                    if ident:
+                        if not ident.isdecimal():
+                            raise ValueError('invalid declaration ID')
+                        result = self.server.store.declaration(name_id=int(ident))
+                    else:
+                        if not name or len(name) > 2048:
+                            raise ValueError('declaration name missing or too long')
+                        result = self.server.store.declaration(name)
                     self._json(200, result) if result is not None else self._json(404, {'error': 'unknown declaration'})
                     return
                 if u.path == '/api/expression':

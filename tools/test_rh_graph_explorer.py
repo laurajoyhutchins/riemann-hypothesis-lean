@@ -28,8 +28,9 @@ class ExplorerTests(unittest.TestCase):
         self.assertEqual(manifest['unresolved_constant_count'], 0)
         store = GraphStore(self.index)
         self.addCleanup(store.close)
-        self.assertEqual(store.find('s'), ['second'])
+        self.assertEqual(store.find('s'), [{'id':6,'name':'second'}])
         self.assertEqual(store.declaration('first')['expression_roots'], [0, 3])
+        self.assertEqual(store.declaration(name_id=5)['expression_roots'], [0,3])
         self.assertIsNone(store.declaration('unknown'))
         app = store.expression(5)
         self.assertEqual(app['kind'], 'app')
@@ -50,6 +51,19 @@ class ExplorerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'unresolved'):
             self.build(rows)
         self.assertFalse(self.index.exists())
+
+    def test_distinct_numeric_and_string_name_segments_preserve_ids(self):
+        rows = make_stream()
+        i = next(i for i,r in enumerate(rows) if b'"ie":0' in r)
+        rows[i:i] = [
+            b'{"in":8,"str":{"pre":0,"str":"1"}}\n',
+            b'{"in":9,"num":{"pre":0,"i":1}}\n',
+        ]
+        self.build(rows)
+        store = GraphStore(self.index)
+        self.addCleanup(store.close)
+        self.assertEqual(store.find('1'), [{'id':8,'name':'1'},{'id':9,'name':'1'}])
+        self.assertIsNone(store.declaration(name_id=8))
 
     def test_missing_roots_rejected(self):
         with self.assertRaisesRegex(ValueError,'missing or non-theorem'):
@@ -88,7 +102,7 @@ class ExplorerTests(unittest.TestCase):
         with urlopen(root+'/api/declaration?name=first') as r:
             self.assertEqual(json.load(r)['name'],'first')
         with urlopen(root+'/api/find?q=fi') as r:
-            self.assertEqual(json.load(r)['matches'],['first'])
+            self.assertEqual(json.load(r)['matches'],[{'id':5,'name':'first'}])
         with urlopen(root+'/') as r:
             self.assertIn(b'RH proof explorer',r.read())
         with self.assertRaises(HTTPError) as ctx:
