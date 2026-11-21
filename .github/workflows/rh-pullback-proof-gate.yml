@@ -1,0 +1,64 @@
+name: RH Harris-Taylor focused Lean proof gate
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/HarrisTaylorExistsGluedFirstOrderDeformation.lean
+      - src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/ExistsHarrisTaylorObjectPullback.lean
+      - src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/ExistsHarrisTaylorObjectPullbackBis.lean
+      - src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/ExistsHarrisTaylorObjectPullbackAlong.lean
+      - tools/RHPullbackCheck.lean
+      - .github/workflows/rh-pullback-proof-gate.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rh-harris-pullback-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  focused-source-elaboration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lean 4.33.1 pinned by repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh |
+            sh -s -- -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Download pinned dependency sources and Mathlib compiled cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake update --keep-toolchain
+          lake exe cache get
+      - name: Elaborate the four refactored proof modules with real imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p analysis
+          lake build -j 2 \
+            Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorExistsGluedFirstOrderDeformation \
+            Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorObjectPullback \
+            Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorObjectPullbackBis \
+            Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorObjectPullbackAlong \
+            2>&1 | tee analysis/rh-harris-pullback-build.log
+      - name: Inspect checked declarations and axiom dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean tools/RHPullbackCheck.lean 2>&1 | tee analysis/rh-harris-pullback-axioms.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rh-focused-harris-pullback-lean-evidence
+          path: analysis/rh-harris-pullback-*.log
+          retention-days: 30
+          if-no-files-found: warn
