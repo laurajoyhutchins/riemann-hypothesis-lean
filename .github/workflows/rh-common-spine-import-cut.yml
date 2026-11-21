@@ -12,7 +12,9 @@ permissions:
   contents: read
 
 concurrency:
-  group: rh-common-spine-import-${{ github.event.pull_request.number || github.ref }}
+  # Pin each census to its exact PR head so later research commits do not
+  # cancel a useful in-flight source-DAG measurement.
+  group: rh-common-spine-import-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
 
 jobs:
