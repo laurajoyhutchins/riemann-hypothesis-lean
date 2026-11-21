@@ -119,7 +119,7 @@ def read_report(path: Path, requested: list[str]) -> tuple[list[dict], list[str]
                     or HASH16.fullmatch(row["archive"]) is None):
                 raise ValueError("accepted row lacks a valid Lake artifact identity")
             accepted.append(row)
-    return accepted, sorted(expected - statuses)
+    return accepted, sorted(expected - statuses.keys())
 
 
 def hash_file(path: Path) -> str:
@@ -186,12 +186,15 @@ def recovery_once(
         current = source_identity(workspace)
         if current["input_fingerprint"] != identity["input_fingerprint"]:
             raise ValueError("source/config inputs changed during recovery")
-        decisions, missing = read_report(report, selected)
         if proc.returncode != 0:
+            # Failed Lean API invocation or partial recovery must never be
+            # mistaken for valid module decisions. Retain diagnostic log.
+            tail = log.read_text(errors="replace")[-6000:]
             raise ValueError(
                 f"stock Lake recovery exited {proc.returncode}; "
-                f"{len(decisions)} partial decisions are NOT accepted as a complete run"
+                f"report is NOT accepted. Diagnostic tail:\\n{tail}"
             )
+        decisions, missing = read_report(report, selected)
         if missing:
             raise ValueError(f"stock Lake did not report {len(missing)} candidates")
         receipts = []
