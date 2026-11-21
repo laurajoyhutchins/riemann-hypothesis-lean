@@ -1,0 +1,131 @@
+name: RH EveryCharacter bridge source-dependency cut
+
+on:
+  pull_request:
+    paths:
+      - src/Development/AutomorphicArithmetic/ThetaCorrespondence/ThetaPairLifts/ThirdPlaceSeries/EveryCharacterOfLiteratureOfVWin.lean
+      - tools/RHEveryCharacterBridgeCheck.lean
+      - .github/workflows/rh-everycharacter-bridge-cut.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  LEAN_ABORT_ON_PANIC: '1'
+  LAKE_ARTIFACT_CACHE: 'false'
+  MATHLIB_CACHE_GET_URL: https://cache.mathlib.org/mathlib4
+
+concurrency:
+  group: rh-everycharacter-bridge-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  source-import-cut:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify exactly one import removed and measure its source DAG cut
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || '4ee985bc90444f45fb805d5221fb2d52b55eff75' }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import subprocess
+          import sys
+          sys.path.insert(0, "tools")
+          from import_closure import load_source, transitive_modules
+          module = ("Development.AutomorphicArithmetic.ThetaCorrespondence."
+                    "ThetaPairLifts.ThirdPlaceSeries.EveryCharacterOfLiteratureOfVWin")
+          dep = ("Development.AutomorphicArithmetic.CharacterBoxes."
+                 "RiemannHypothesisOfEveryCharacter")
+          file = Path("src") / (module.replace(".", "/") + ".lean")
+          old = subprocess.check_output(
+              ["git", "show", os.environ["BASE_SHA"] + ":src/" +
+               module.replace(".", "/") + ".lean"], text=True
+          )
+          new = file.read_text(encoding="utf-8")
+          line = "import " + dep + "\n"
+          assert old.count(line) == 1 and new == old.replace(line, "", 1), (
+              "Change is not the single expected downstream import deletion"
+          )
+          graph, sizes, warnings = load_source(Path("src"))
+          assert not warnings, warnings[:12]
+          assert module in graph and dep in graph
+          now = transitive_modules(graph, module)
+          before = transitive_modules(graph, module,
+                                      {module: graph[module] + [dep]})
+          lost = before - now
+          count = len(lost)
+          lines = sum(sizes[k] for k in lost)
+          # Assertions bind this one-edit experiment to an exact immutable
+          # import-closure effect; source removal remains exactly one line.
+          assert count == 14631, count
+          assert lines == 1218455, lines
+          print(f"PASS: exactly one source import deleted; source DAG cut "
+                f"{count:,} modules / {lines:,} physical lines")
+          print("NOTE: This is not a kernel dependency count or removable source.")
+          PY
+
+  source-lean-proof:
+    needs: source-import-cut
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install checksum-pinned elan / Lean 4.33.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 3 \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            --output "$RUNNER_TEMP/elan.tar.gz"
+          printf '%s  %s\n' \
+            '42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63' \
+            "$RUNNER_TEMP/elan.tar.gz" | sha256sum --check -
+          tar -xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP"
+          "$RUNNER_TEMP/elan-init" -y --default-toolchain none --no-modify-path
+          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Capture exact source identity and lockfile
+        run: |
+          set -euo pipefail
+          mkdir -p analysis
+          python3 tools/rh_ci_identity.py --root . \
+            --output analysis/rh-everycharacter-bridge-source-identity.json
+      - name: Fetch only published pinned Mathlib cache
+        run: |
+          set -euo pipefail
+          lake exe mathlib/cache get
+          git diff --quiet HEAD -- lakefile.toml lake-manifest.json lean-toolchain src
+      - name: Rebuild full actual literature bridge import closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build \
+            Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.EveryCharacterOfLiteratureOfVWin \
+            2>&1 | tee analysis/rh-everycharacter-bridge-build.log
+      - name: Check final theorem and axiom provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean tools/RHEveryCharacterBridgeCheck.lean \
+            2>&1 | tee analysis/rh-everycharacter-bridge-axioms.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rh-everycharacter-bridge-source-gate
+          path: |
+            analysis/rh-everycharacter-bridge-*.log
+            analysis/rh-everycharacter-bridge-source-identity.json
+          retention-days: 30
+          if-no-files-found: warn

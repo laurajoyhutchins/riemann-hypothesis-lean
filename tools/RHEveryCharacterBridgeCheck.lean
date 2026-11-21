@@ -1,0 +1,9 @@
+import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.EveryCharacterOfLiteratureOfVWin
+
+-- The bridge should build without importing the downstream RH theorem module.
+#check UpperTheory.LiteratureTheorems.OpenLiteratureStatements
+#check UpperTheory.LiteratureTheorems.published_results_eigen
+#check UpperTheory.LiteratureTheorems.published_results_first
+#check UpperTheory.LiteratureTheorems.every_character_of_literature_of_vWin
+
+#print axioms UpperTheory.LiteratureTheorems.every_character_of_literature_of_vWin
