@@ -1,0 +1,44 @@
+name: RH implication-premise anti-unification census (hypotheses unproved)
+
+on:
+  pull_request:
+    paths:
+      - tools/premise_antiunification.py
+      - tools/test_premise_antiunification.py
+      - .github/workflows/rh-premise-antiunification.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rh-premise-census-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  premise-candidates:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Test premise template matcher including rejection cases
+        run: python3 -m unittest discover -s tools -p 'test_premise_antiunification.py' -v
+      - name: Scan Abelian proof statements for same conclusion, distinct premise
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/premise_antiunification.py \
+            --src src \
+            --root Development/AbelianVarietyTheory/Proofs \
+            --min-proof-lines 40 \
+            --max-families 250 \
+            --out analysis/rh-premise-antiunification.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rh-premise-antiunification-candidates
+          path: analysis/rh-premise-antiunification.json
+          retention-days: 30
+          if-no-files-found: warn

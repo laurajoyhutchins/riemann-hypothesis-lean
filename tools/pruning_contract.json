@@ -1,0 +1,84 @@
+{
+  "baseline_commit": "7cbf7a0c32fca1badf05931879a37c3f8a2b03b4",
+  "baseline_files": 175187,
+  "baseline_lines": 17374215,
+  "baseline_source_bytes": 1030531854,
+  "modules": [
+    {
+      "path": "src/Supplements/Kernels/MainTheoremsAll.lean",
+      "blob_sha": "dfba1103254494332179b9c893fabe94ac6a45a1",
+      "lines": 2
+    },
+    {
+      "path": "src/Supplements/Kernels/MainTheoremsCritical.lean",
+      "blob_sha": "34d133d368c93518bf52927bada45b00ec5fe982",
+      "lines": 4
+    },
+    {
+      "path": "src/Development/AutomorphicArithmetic/AutomorphicVarieties/SmallClassNumbers/CorGKOf.lean",
+      "blob_sha": "e5b4584a4e65b1f3ade5c3cd5d3a8a8056dd1e4d",
+      "lines": 29
+    },
+    {
+      "path": "src/Development/AutomorphicArithmetic/AutomorphicVarieties/SmallClassNumbers/ClassNumberThree.lean",
+      "blob_sha": "41f30455fbae05b658425510ba46195c840f6d02",
+      "lines": 115
+    },
+    {
+      "path": "src/Development/AutomorphicArithmetic/AutomorphicVarieties/SmallClassNumbers/LenEqZeroIff.lean",
+      "blob_sha": "162ebbd6b1c6c265f8daaa0284876dfb5cda0148",
+      "lines": 95
+    },
+    {
+      "path": "src/Development/AutomorphicArithmetic/AutomorphicVarieties/SmallClassNumbers/OnePoint.lean",
+      "blob_sha": "fdff74fe7680cdb5cdd56c521eb47922f5327467",
+      "lines": 41
+    }
+  ],
+  "scope": "Six import-only modules removed; four source-level proof-sharing refactors. None kernel verified on modified source.",
+  "proof_refactors": [
+    {
+      "path": "src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/HarrisTaylorExistsGluedFirstOrderDeformation.lean",
+      "original_blob_sha": "d5d9af2f39f0b825a9a5fa2155fd4943b617dc54",
+      "current_blob_sha": "04bd9a610c73fa66156c3e02899e69bfdce22c0b",
+      "original_lines": 143,
+      "current_lines": 116,
+      "declaration": "GlobalTheory.HTGlue.exists_obj_of_summand",
+      "verification": "source-audited only; Lean compilation and independent kernel check not performed",
+      "shared_module": "Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorExistsSquareZeroLiftOfFiltration"
+    },
+    {
+      "path": "src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/ExistsHarrisTaylorObjectPullback.lean",
+      "original_blob_sha": "942eea9a43e95b962353a12680004562d2e52d83",
+      "current_blob_sha": "c81f7aac717ba2b6b5abf7004af5db51c79afe42",
+      "original_lines": 243,
+      "current_lines": 163,
+      "declaration": "GlobalTheory.UPel.HT.BaseChange.exists_objMap",
+      "shared_theorem": "GlobalTheory.HTPullEvery.exists_objMap",
+      "verification": "source audit only; actual Lean elaboration/kernel replay outstanding",
+      "shared_module": "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorModuliObjectPullback"
+    },
+    {
+      "path": "src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/ExistsHarrisTaylorObjectPullbackBis.lean",
+      "original_blob_sha": "f7676ebf891d37dede745f6e2bdb1d0f288d7390",
+      "current_blob_sha": "1a3bf39a8ffc3c93bbaca0a3a81dad88d9aadb08",
+      "original_lines": 199,
+      "current_lines": 109,
+      "declaration": "GlobalTheory.HTPull.exists_objMap_pull",
+      "shared_theorem": "GlobalTheory.HTPullEvery.exists_objMap",
+      "verification": "source audit only; actual Lean elaboration/kernel replay outstanding",
+      "shared_module": "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorModuliObjectPullback"
+    },
+    {
+      "path": "src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/ExistsHarrisTaylorObjectPullbackAlong.lean",
+      "original_blob_sha": "dbd1b2bb7fcb6e195d632b538fe27d456436f9b2",
+      "current_blob_sha": "2616d322de5bbf2de57f94f00c6a810dc6e99294",
+      "original_lines": 196,
+      "current_lines": 89,
+      "declaration": "GlobalTheory.UPel.HT.Pull.exists_objMap",
+      "shared_theorem": "GlobalTheory.HTPullEvery.exists_objMap",
+      "verification": "source audit only; actual Lean elaboration/kernel replay outstanding",
+      "shared_module": "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorModuliObjectPullback"
+    }
+  ]
+}

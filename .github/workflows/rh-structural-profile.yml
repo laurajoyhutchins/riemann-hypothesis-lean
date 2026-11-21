@@ -1,0 +1,25 @@
+name: RH structural minimization survey (not proof verification)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - tools/structural_profile.py
+      - .github/workflows/rh-structural-profile.yml
+
+jobs:
+  full-source-structure:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Classify all Lean source modules and theorem wrappers
+        run: python3 tools/structural_profile.py --src src --out analysis/rh-structural-profile.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rh-structural-profile
+          path: analysis/rh-structural-profile.json
+          if-no-files-found: error

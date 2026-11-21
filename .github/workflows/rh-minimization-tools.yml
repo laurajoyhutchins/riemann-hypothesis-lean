@@ -1,0 +1,22 @@
+name: RH minimization tooling tests (not proof verification)
+
+on:
+  pull_request:
+    paths:
+      - tools/**
+      - .github/workflows/rh-minimization-tools.yml
+  workflow_dispatch:
+
+jobs:
+  source-audit-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools
+          sparse-checkout-cone-mode: true
+          filter: blob:none
+          persist-credentials: false
+      - name: Run all deterministic RH minimization tool unit tests
+        run: python3 -m unittest discover -s tools -p 'test_*.py' -v

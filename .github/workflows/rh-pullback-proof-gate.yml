@@ -1,0 +1,93 @@
+name: RH Harris-Taylor focused Lean proof gate
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/HarrisTaylorExistsGluedFirstOrderDeformation.lean
+      - src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/ExistsHarrisTaylorObjectPullback.lean
+      - src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/ExistsHarrisTaylorObjectPullbackBis.lean
+      - src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/ExistsHarrisTaylorObjectPullbackAlong.lean
+      - tools/RHPullbackCheck.lean
+      - .github/workflows/rh-pullback-proof-gate.yml
+
+permissions:
+  contents: read
+
+# Community verification mode: Mathlib cache allowed, local RH proof cache forbidden.
+env:
+  LEAN_ABORT_ON_PANIC: '1'
+  LAKE_ARTIFACT_CACHE: 'false'
+  MATHLIB_CACHE_GET_URL: https://cache.mathlib.org/mathlib4
+
+concurrency:
+  group: rh-harris-pullback-${{ github.event.pull_request.number || github.ref }}
+  # Draft synchronize events create skipped jobs, which must not cancel a
+  # manually rerun source build on the same PR. Allow the expensive gate to
+  # finish and bind its evidence to the exact checked commit.
+  cancel-in-progress: false
+
+jobs:
+  focused-source-elaboration:
+    # Draft PRs can iterate rapidly; opt in at ready-for-review or explicit dispatch.
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install checksum-pinned elan and the exact Lean toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 3 \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            --output "$RUNNER_TEMP/elan.tar.gz"
+          printf '%s  %s\n' \
+            '42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63' \
+            "$RUNNER_TEMP/elan.tar.gz" | sha256sum --check -
+          tar -xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP"
+          "$RUNNER_TEMP/elan-init" -y --default-toolchain none --no-modify-path
+          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Record actual clean source and dependency identity
+        run: |
+          set -euo pipefail
+          python3 tools/rh_ci_identity.py --root . \
+            --output analysis/rh-harris-pullback-input-identity.json
+      - name: Download only Mathlib's compiled cache, never RH proof artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake exe mathlib/cache get
+          # A dependency update would silently change the proof build's inputs.
+          git diff --quiet HEAD -- lakefile.toml lake-manifest.json lean-toolchain src
+          python3 tools/rh_ci_identity.py --root . \
+            --output analysis/rh-harris-pullback-input-identity.json
+      - name: Elaborate the four refactored proof modules with real imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p analysis
+          lake build \
+            Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorExistsGluedFirstOrderDeformation \
+            Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorObjectPullback \
+            Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorObjectPullbackBis \
+            Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorObjectPullbackAlong \
+            2>&1 | tee analysis/rh-harris-pullback-build.log
+      - name: Inspect checked declarations and axiom dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean tools/RHPullbackCheck.lean 2>&1 | tee analysis/rh-harris-pullback-axioms.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rh-focused-harris-pullback-lean-evidence
+          path: |
+            analysis/rh-harris-pullback-*.log
+            analysis/rh-harris-pullback-input-identity.json
+          retention-days: 30
+          if-no-files-found: warn

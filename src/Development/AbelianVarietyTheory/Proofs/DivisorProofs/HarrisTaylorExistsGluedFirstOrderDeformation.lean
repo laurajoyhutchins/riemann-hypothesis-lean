@@ -17,6 +17,7 @@ import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MemHodgeFiltrationI
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CrystalGluedHodgeGraphOrderStableOfDirectionsStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CrystalGluedHodgeGraphIsotropicOfDirectionsStatement
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CrystalGluedHodgeGraphLieConditionOfDirectionsStatement
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorExistsSquareZeroLiftOfFiltration
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsSqZeroLiftRealisingKs
 import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorExistsDeRhamPairing
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj NumberField
@@ -46,38 +47,10 @@ theorem GlobalTheory.HTGlue.exists_obj_of_summand (p : ℕ) [Fact p.Prime] (D : 
     (s : Sp C ⟶ Sp R) (hs : s = spMap tR) :
     ∃ (o : GlobalTheory.UPel.HT.Obj b N s) (m : GlobalTheory.UPel.HT.ObjMap o₀ o (spMap π)), liftFil (divided₂ hsq) m.cart = E := by
   subst hs
-  obtain ⟨A, _, i, h, act, hA, hE, hact⟩ := GlobalTheory.T.harrisTaylor_exists_lift_orderAction_hodge_summand p D R b N C C₀ π hπ hsq tR o₀ E hEc hEf hEs
-  haveI : IsCommMonObj A := hA.comm
-  subst hE
-  obtain ⟨P, φ₂, hP, r1, r2, hsym, hamp, hker, hros, hsq2, hpol⟩ :=
-    GlobalTheory.T.harrisTaylor_exists_polarisation_bundle_lift p D R b N C C₀ π hπ hsq tR o₀ A i h hA act hact hEi
-  obtain ⟨eta, e1, e2, e3, e4, e5⟩ :=
-    GlobalTheory.T.harrisTaylor_primeToP_level_lift_squareZero p D R b N C C₀ π hπ hsq tR o₀ A i h hA act hact hNp P φ₂ hP hsq2 hpol
-  exact ⟨{ A := A
-           ab := hA
-           act := act
-           P := P
-           isLB := hP
-           rig₁ := r1
-           rig₂ := r2
-           symm := hsym
-           ample := hamp
-           kerP := hker
-           rosati := hros
-           lie := fun R' _ β x hx v hv => GlobalTheory.T.harrisTaylor_lift_lie_of_hodge_summand_lie p D R b N C C₀ π hπ hsq tR o₀ A i h hA act hact hEl R' β x hx v hv
-           lieRank := fun k _ _ x β hx j => GlobalTheory.T.harrisTaylor_lieMultiplicity_squareZeroLift p D R b N C C₀ π hπ hsq tR o₀ A i h act hact k x β hx j
-           eta := eta
-           eta_add := e1
-           eta_lin := e2
-           eta_ker := e3
-           geom := e4 },
-    { φ := i
-      φ₂ := φ₂
-      cart := h
-      sq := hsq2
-      act := hact
-      pol := hpol
-      eta := e5 }, rfl⟩
+  exact GlobalTheory.UPel.HT.exists_sqZero_lift_of_fil
+    p D R b N hNp C C₀ π hπ hsq tR
+    (spMap tR) (spMap π ≫ spMap tR) rfl rfl
+    o₀ E hEc hEf hEs hEi hEl
 
 theorem GlobalTheory.HTGlue.isFilLiftV_of_eq {k : Type} [Field k] {d : ℕ} {A₀ : Over (Sp k)} [GrpObj A₀] (hA : IsAbelianScheme A₀)
     {A : Over (Sp (TrivSqZeroExt k (Fin d → k)))} [GrpObj A] {i : A₀.left ⟶ A.left}
