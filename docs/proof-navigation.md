@@ -96,7 +96,7 @@ Do not call a reduction proof-preserving until the final theorem types and kerne
 
 ## First executable investigation
 
-The [minimal Main experiment](minimal-main-experiment.md) has already been performed at the *source/import* level in separate [draft PR #1](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/pull/1), which also has more advanced dependency tooling. Those source results do not constitute a kernel dependency certificate. For the mathematics behind the final theorem witnesses, read the [analytic reduction](proof-atlas/analytic-reduction.md) and [literature/theta bridge](proof-atlas/literature-bridge.md).
+The [minimal Main experiment](minimal-main-experiment.md) has already been performed at the *source/import* level in separate [draft PR #1](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/pull/1), which also has more advanced dependency tooling. Those source results do not constitute a kernel dependency certificate. For the mathematics behind the final theorem witnesses, read the [analytic reduction](proof-atlas/analytic-reduction.md), [character-box interface](proof-atlas/character-box.md), and [literature/theta bridge](proof-atlas/literature-bridge.md).
 
 ## Next maps to build
 
