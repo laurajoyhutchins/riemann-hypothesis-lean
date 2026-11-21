@@ -20,6 +20,7 @@ from rh_lean_graph import RH_ROOTS, generate_driver, verify_extractor
 from validate_rh_lean_graph import publish_graphs
 
 TRUSTED_COMMUNITY_COMMIT = "79c751e0b0a5ea3bbfc20198c852fa85f28661e6"
+TIME_FORMAT = "wall_seconds=%e\npeak_rss_kib=%M\nexit_status=%x"
 DEP_HASH = re.compile(r"[0-9a-f]{16}\Z")
 RESULT_NAMES = tuple(root + ".json" for root in RH_ROOTS) + ("RH-combined.json",)
 FIELDS = ("source_tree", "lakefile_sha256", "manifest_sha256", "toolchain")
@@ -184,7 +185,7 @@ def extract(evidence: dict, *, candidate: Path, community: Path, extractor: Path
     # RUSAGE_CHILDREN.ru_maxrss accumulates a high-water mark from unrelated
     # children. GNU time records this exact sandbox invocation instead.
     time_cmd = ["/usr/bin/time", "--format",
-                "wall_seconds=%e\\npeak_rss_kib=%M\\nexit_status=%x",
+                TIME_FORMAT,
                 "--output", str(timing), *cmd]
     with (result / "rh-graph-lean.log").open("w") as log:
         completed = subprocess.run(time_cmd, stdout=log, stderr=subprocess.STDOUT,
