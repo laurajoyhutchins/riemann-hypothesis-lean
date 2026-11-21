@@ -123,3 +123,5 @@ Its proof constructs `GlobalTheory.CovTop.HypothesesX` from the toroidal-fan inp
 This is an **explicit compositional proof interface**, not evidence that the 15 hypotheses are independent, minimal, or redundant. A useful next refactoring experiment is to compare the source and elaborated types of `topCovolG_alt_alt`, `deep_slim_use`, and the associated hypothesis structures; test whether a general theorem over an abstract package can subsume multiple concrete wrappers. Record actual consumers before deleting any module.
 
 The original open question remains: the defining file/type of `UpperTheory.Lit.every_character_of_theta_integrals_local_matching` has **not yet been located**. GitHub code search returned no indexed matches for the fully qualified identifier, so the direct proof-term reference above is the current evidence.
+
+The next level of the arithmetic branch is now documented in [covolume assembly and realization refinement](covolume-assembly.md). It explains the shared local estimate, two distinct row admissibility predicates, and why a guard-parametric assembly theorem may share proofs without first proving a realization equivalence.
