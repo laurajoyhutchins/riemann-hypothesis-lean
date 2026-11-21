@@ -21,6 +21,7 @@ from rh_ci_identity import source_identity
 from rh_lean_graph import RH_ROOTS, generate_driver, verify_extractor
 from validate_rh_lean_graph import publish_graphs
 
+TRUSTED_COMMUNITY_COMMIT = "79c751e0b0a5ea3bbfc20198c852fa85f28661e6"
 DEP_HASH = re.compile(r"[0-9a-f]{16}\Z")
 RESULT_NAMES = tuple(root + ".json" for root in RH_ROOTS) + ("RH-combined.json",)
 FIELDS = ("source_tree", "lakefile_sha256", "manifest_sha256", "toolchain")
@@ -88,6 +89,15 @@ def inspect_retained_build(candidate: Path, checkpoint_path: Path, state: Path) 
 
 
 def load_trusted_controller(path: Path):
+    if path.is_symlink() or path.name != "ci-build.py" or path.parent.name != "scripts":
+        raise ValueError("untrusted community CI controller path")
+    checkout = path.parent.parent
+    actual = subprocess.check_output(
+        ["git", "-C", str(checkout), "rev-parse", "HEAD"], text=True).strip()
+    if actual != TRUSTED_COMMUNITY_COMMIT or subprocess.run(
+        ["git", "-C", str(checkout), "diff", "--quiet", "HEAD", "--", "scripts/ci-build.py"],
+        check=False).returncode:
+        raise ValueError("community CI controller does not match pinned clean revision")
     spec = importlib.util.spec_from_file_location("trusted_rh_ci_build", path)
     if spec is None or spec.loader is None:
         raise ValueError("missing upstream community ci-build.py")
@@ -112,10 +122,11 @@ def extract(evidence: dict, *, community: Path, extractor: Path,
     source = generate_driver(verify_extractor(extractor.read_bytes()), RH_ROOTS, depth)
     driver.write_text(source)
     community_build = load_trusted_controller(community / "scripts/ci-build.py")
+    elan_env = {key: os.environ[key] for key in ("PATH", "HOME", "ELAN_HOME")
+                if key in os.environ}
+    elan_env["ELAN_TOOLCHAIN"] = evidence["toolchain"]
     toolchain = Path(subprocess.check_output(
-        ["elan", "which", "lean"], text=True,
-        env={"PATH": os.environ.get("PATH", "/usr/bin:/bin"),
-             "ELAN_TOOLCHAIN": evidence["toolchain"]}).strip()).parent.parent
+        ["elan", "which", "lean"], text=True, env=elan_env).strip()).parent.parent
     if not subprocess.check_output([str(toolchain / "bin/lean"), "--version"],
                                    text=True).startswith("Lean (version 4.33.1,"):
         raise ValueError("wrong Lean executable version")
