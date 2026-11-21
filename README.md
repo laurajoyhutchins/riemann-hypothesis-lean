@@ -25,6 +25,7 @@ This fork adds **documentation only** to help readers trace the proposed formali
 - [Proof atlas: nonvanishing to RH/GRH](docs/proof-atlas/analytic-reduction.md)
 - [Proof atlas: literature/theta-integral bridge](docs/proof-atlas/literature-bridge.md)
 - [Proof atlas: character boxes, zero-free windows and imprimitive characters](docs/proof-atlas/character-box.md)
+- [Proof atlas: guard-parametric covolume assembly and realization refinement](docs/proof-atlas/covolume-assembly.md)
 
 These notes distinguish source inspection from independently verified kernel evidence. The import-graph tools and experimental Lean source reductions are in the separate [draft research PR #1](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/pull/1); this PR adds navigation documentation, not another implementation.
 
