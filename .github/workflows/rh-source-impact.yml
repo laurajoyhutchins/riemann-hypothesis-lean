@@ -7,6 +7,9 @@ on:
       - 'lakefile.toml'
       - 'lake-manifest.json'
       - 'lean-toolchain'
+      - 'tools/ci_import_impact.py'
+      - 'tools/test_ci_import_impact.py'
+      - '.github/workflows/rh-source-impact.yml'
 
 permissions:
   contents: read
