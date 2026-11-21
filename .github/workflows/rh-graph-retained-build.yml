@@ -12,6 +12,11 @@ on:
         required: true
         default: '2'
         type: string
+      require_closed:
+        description: 'Fail if upstream graph has omitted emitted-reference targets'
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -23,6 +28,7 @@ jobs:
     env:
       GRAPH_CHECKPOINT: ${{ inputs.checkpoint }}
       GRAPH_DEPTH: ${{ inputs.depth }}
+      GRAPH_REQUIRE_CLOSED: ${{ inputs.require_closed }}
     steps:
       - name: Checkout source and graph integration, no RH rebuild
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -70,13 +76,20 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          extra=()
+          if [[ "$GRAPH_REQUIRE_CLOSED" == "true" ]]; then
+            extra=(--require-closed)
+          elif [[ "$GRAPH_REQUIRE_CLOSED" != "false" ]]; then
+            echo "Invalid require_closed input" >&2
+            exit 2
+          fi
           python3 tools/rh_graph_postbuild.py \
             --candidate . --community community-harness \
             --checkpoint "$GRAPH_CHECKPOINT" \
             --state "${RH_CI_STATE_DIR:-$HOME/.local/share/riemann-build-state}" \
             --extractor analysis/DependencyExtractor.upstream.lean \
             --output analysis/lean-graph-json \
-            --depth "$GRAPH_DEPTH"
+            --depth "$GRAPH_DEPTH" "${extra[@]}"
       - name: Upload complete graph artifacts and receipts, not a proof certificate
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
