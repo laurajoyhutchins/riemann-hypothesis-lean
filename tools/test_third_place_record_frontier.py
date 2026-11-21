@@ -73,12 +73,14 @@ class FieldFrontierTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "exactly one"):
             theorem_slice("theorem unrelated : True := by trivial", "missing")
 
-    def test_unknown_projected_field_rejected(self):
+    def test_derived_accessor_not_mistaken_for_record_field(self):
         src = self.sample()
         key = "SiegelEisensteinSecondTermHypotheses.lean"
         src[key] = src[key].replace("P.green", "P.ghost")
-        with self.assertRaisesRegex(ValueError, "not fields"):
-            analyze_sources(src, expect_fields=3)
+        report = analyze_sources(src, expect_fields=3)
+        self.assertIn("ghost", report["nonconstructor_dot_accessors_across_slices"])
+        self.assertNotIn("ghost", report["direct_fields_seen_across_slices"])
+        self.assertEqual(report["record_field_count"], 3)
 
     def test_comments_not_conflated_with_proof_calls(self):
         proof = "theorem q : True := by\n  intro P\n  have a := P.green -- P.other\n  exact use P"
