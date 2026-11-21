@@ -9,6 +9,7 @@ on:
 
 jobs:
   full-source-structure:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 18
     steps:
