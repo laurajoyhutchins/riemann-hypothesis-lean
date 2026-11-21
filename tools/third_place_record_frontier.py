@@ -81,7 +81,7 @@ def strip_line_comments(s: str) -> str:
 def direct_field_projection(theorem: str, binder: str = "P") -> Counter:
     proof = strip_line_comments(theorem)
     return Counter(re.findall(r"\b" + re.escape(binder) +
-                              r"\.(" + IDENT + r")\b", proof))
+                              r"\.(" + IDENT + r")(?![A-Za-z_0-9\u0027])", proof))
 
 
 def whole_record_contexts(theorem: str, binder: str = "P") -> list[str]:
