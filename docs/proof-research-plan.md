@@ -91,7 +91,9 @@ Start with repeated constructions in the Abelian variety region, not superficial
 
 An abstraction that merely moves code or changes formatting is not a counted compression result. Report **gross eliminated source lines, new shared lines, net lines, number of proof obligations discharged, and end-to-end build impact**. To meet the target, the current ~17.37M-line baseline requires more than ~7.37M net lines removed. Small successful edits are tools for finding scalable families, not the objective.
 
-## Phase 5: CI designed around the dependency DAG
+## Parallel workstream: CI designed around the dependency DAG
+
+**Start the CI bootstrap immediately after Phase 0, in parallel with Phases 1–4.** Do not wait until semantic compression is already under way to establish correctness gates.
 
 There is no inspected `.github/` CI setup on the repository's default branch. Build verification incrementally, without confusing a fast PR check with proof validation:
 
