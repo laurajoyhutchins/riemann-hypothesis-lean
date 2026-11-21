@@ -28,6 +28,9 @@ START = re.compile(
 HYPOTHESES = (
     ("core", "GlobalTheory.Hk3.Core R F"),
     ("core5", "GlobalTheory.Core5 R F"),
+    # Independent Prop-valued record with five matching fields. The constructor
+    # maps are a mathematical candidate in PR #14, NOT a checked equivalence yet.
+    ("core_no_chain", "GlobalTheory.Hk3.CoreNoChain R F"),
     ("char", "R.Char F"),
 )
 WS = re.compile(r"\s+")
@@ -102,6 +105,12 @@ def rank(records: list[dict], max_families: int = 100) -> dict:
         gross = sum(r["proof_source_lines"] for r in members) - donor["proof_source_lines"]
         families.append({
             "canonical_statement_hash": key,
+            "needs_unverified_bridge": "core_no_chain" in tiers,
+            "bridge_obligation": (
+                "Prove CoreNoChain to Core5 using exact record fields and compile imports"
+                if "core_no_chain" in tiers else
+                "Existing Core5.of_core / Core5.of_char still requires source elaboration"
+            ),
             "members": len(members),
             "tiers": sorted(tiers),
             "modules": len({r["path"] for r in members}),
@@ -124,8 +133,10 @@ def rank(records: list[dict], max_families: int = 100) -> dict:
         "integrity": (
             "Exact source statement equality after one approved record "
             "hypothesis replacement, not definitional equality or a proof "
-            "certificate. Gross candidate lines are not valid claimed "
-            "reductions; import cycles, bridges and wrappers cost source."
+            "certificate. CoreNoChain-to-Core5 is a separate UNCHECKED bridge "
+            "obligation (PR #14); do not describe it as already proved. "
+            "Gross candidate lines are not valid claimed reductions; import "
+            "cycles, bridges and wrappers cost source."
         ),
     }
 
