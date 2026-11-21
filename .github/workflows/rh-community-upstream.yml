@@ -1,0 +1,174 @@
+name: RH community upstream build infrastructure
+
+# Reuse the community controller unchanged. Never invoke its publisher from
+# this fork: the publisher is scoped to the community repository and secrets.
+on:
+  pull_request:
+    paths:
+      - '.gitmodules'
+      - '.github/workflows/rh-community-upstream.yml'
+      - 'tools/CI.md'
+      - 'tools/rh_ci_identity.py'
+      - 'lake-manifest.json'
+      - 'lean-toolchain'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rh-upstream-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  community-upstream-contract:
+    name: Pinned community identity and upstream's actual no-network tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Checkout fork metadata, not proof source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          sparse-checkout: |
+            .gitmodules
+            lake-manifest.json
+            lean-toolchain
+            tools
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+          submodules: false
+      - name: Verify pinned Git submodule object
+        env:
+          COMMUNITY_SHA: 79c751e0b0a5ea3bbfc20198c852fa85f28661e6
+        run: |
+          set -euo pipefail
+          gitlink="$(git ls-tree HEAD upstream/riemann-hypothesis-community | awk '{print $3}')"
+          test "$gitlink" = "$COMMUNITY_SHA"
+          actual_url="$(git config -f .gitmodules --get 'submodule.upstream/riemann-hypothesis-community.url')"
+          test "$actual_url" = 'https://github.com/leanprover-community/riemann-hypothesis.git'
+      - name: Checkout the exact upstream community scripts, no source mirror
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: leanprover-community/riemann-hypothesis
+          ref: 79c751e0b0a5ea3bbfc20198c852fa85f28661e6
+          path: community-harness
+          sparse-checkout: |
+            scripts
+            lake-manifest.json
+            lean-toolchain
+          sparse-checkout-cone-mode: true
+          persist-credentials: false
+          submodules: false
+      - name: Verify toolchain and dependency manifest remain identical
+        run: |
+          set -euo pipefail
+          test "$(git -C community-harness rev-parse HEAD)" = '79c751e0b0a5ea3bbfc20198c852fa85f28661e6'
+          cmp lean-toolchain community-harness/lean-toolchain
+          cmp lake-manifest.json community-harness/lake-manifest.json
+      - name: Run community's own CI preparation and publication-trust tests
+        run: |
+          set -euo pipefail
+          python3 community-harness/scripts/cache-bootstrap/test_ci_prepare.py
+          python3 community-harness/scripts/cache-bootstrap/test_ci_github.py
+          python3 community-harness/scripts/test_ci_runner.py
+
+  community-full-build:
+    name: Manually build RH fork via unchanged community CI controller
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: [self-hosted, linux, x64, rh-build]
+    timeout-minutes: 1440
+    steps:
+      - name: Checkout exact selected fork commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: candidate
+          persist-credentials: false
+          submodules: false
+          fetch-depth: 1
+      - name: Checkout trusted upstream build controller and pinned preparation inputs
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: leanprover-community/riemann-hypothesis
+          ref: 79c751e0b0a5ea3bbfc20198c852fa85f28661e6
+          path: community-harness
+          sparse-checkout: |
+            scripts
+            lakefile.toml
+            lake-manifest.json
+            lean-toolchain
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+          submodules: false
+      - name: Verify upstream revision and build inputs before any expensive fetch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C community-harness rev-parse HEAD)" = '79c751e0b0a5ea3bbfc20198c852fa85f28661e6'
+          test "$(git -C candidate ls-tree HEAD upstream/riemann-hypothesis-community | awk '{print $3}')" = '79c751e0b0a5ea3bbfc20198c852fa85f28661e6'
+          cmp candidate/lake-manifest.json community-harness/lake-manifest.json
+          cmp candidate/lean-toolchain community-harness/lean-toolchain
+          command -v bwrap
+          command -v elan
+          command -v systemd-run
+          command -v systemctl
+      - name: Capture fork's source identity as upstream-preparer request
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p identity staging
+          python3 candidate/tools/rh_ci_identity.py --root candidate --output identity/source.json
+          python3 - <<'PY'
+          import json, os, pathlib
+          identity = json.loads(pathlib.Path('identity/source.json').read_text())
+          expected = {k: identity[k] for k in
+              ('schema','candidate_head','candidate_tree','source_tree','build_roots',
+               'lakefile_sha256','manifest_sha256','toolchain','input_fingerprint')}
+          request = {'repository': 'laurajoyhutchins/riemann-hypothesis-lean',
+                     'run_id': int(os.environ['GITHUB_RUN_ID']),
+                     'pr_number': 0, 'pr_head': expected['candidate_head'],
+                     'expected': expected}
+          pathlib.Path('identity/request.json').write_text(json.dumps(request, indent=2) + '\n')
+          PY
+      - name: Prepare pinned original baseline cache using upstream code
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          export RH_CI_STATE_DIR="${RH_CI_STATE_DIR:-$HOME/.local/share/riemann-build-state}"
+          python3 community-harness/scripts/ci-prepare.py prepare \
+            --trusted community-harness --candidate candidate \
+            --state "$RH_CI_STATE_DIR" --request identity/request.json \
+            --output identity/paths.json
+      - name: Run unchanged upstream source-sandboxed CI build and checkpoint logic
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          export RH_CI_STATE_DIR="${RH_CI_STATE_DIR:-$HOME/.local/share/riemann-build-state}"
+          python3 - <<'PY'
+          import json, os, subprocess
+          paths = json.loads(open('identity/paths.json').read())
+          command = ['python3', 'community-harness/scripts/ci-build.py',
+            '--candidate', 'candidate', '--packages', paths['packages'],
+            '--output', 'staging', '--jobs', os.environ.get('RH_CI_JOBS', '8'),
+            '--memory-gib', os.environ.get('RH_CI_MEMORY_GIB', '96'),
+            '--reserve-disk-gib', '12',
+            '--baseline-cache', paths['baseline_cache'],
+            '--baseline-manifest', paths['baseline_manifest'],
+            '--baseline-map', paths['baseline_map']]
+          if paths['latest_map']:
+              command += ['--cache-map', paths['latest_map']]
+          raise SystemExit(subprocess.run(command).returncode)
+          PY
+      - name: Upload only small provenance / build logs (never untrusted LTARs)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: rh-community-build-evidence
+          path: |
+            identity/*.json
+            staging/receipt.json
+            staging/build.log
+            staging/raw-recovery-summary.json
+          retention-days: 7
+          if-no-files-found: warn
