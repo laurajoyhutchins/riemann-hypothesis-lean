@@ -7,6 +7,9 @@ on:
       - tools/validate_rh_lean_graph.py
       - tools/test_rh_lean_graph.py
       - tools/test_validate_rh_lean_graph.py
+      - tools/rh_graph_postbuild.py
+      - tools/test_rh_graph_postbuild.py
+      - .github/workflows/rh-graph-retained-build.yml
       - tools/RH_GRAPH_EXPLORER.md
       - .github/workflows/rh-lazy-graph.yml
   workflow_dispatch:
@@ -32,6 +35,7 @@ jobs:
         run: |
           python3 -m unittest discover -s tools -p test_rh_lean_graph.py -v
           python3 -m unittest discover -s tools -p test_validate_rh_lean_graph.py -v
+          python3 -m unittest discover -s tools -p test_rh_graph_postbuild.py -v
       - name: Install pinned Lean only (do NOT build RH)
         uses: leanprover/lean-action@fe408643ea7367d8c0404a8be3975bb145f5fb64 # v1.7.0
         with:
