@@ -13,9 +13,7 @@ import json
 import os
 from pathlib import Path
 import re
-import resource
 import subprocess
-import time
 
 from rh_ci_identity import source_identity
 from rh_lean_graph import RH_ROOTS, generate_driver, verify_extractor
@@ -94,10 +92,16 @@ def load_trusted_controller(path: Path):
     checkout = path.parent.parent
     actual = subprocess.check_output(
         ["git", "-C", str(checkout), "rev-parse", "HEAD"], text=True).strip()
-    if actual != TRUSTED_COMMUNITY_COMMIT or subprocess.run(
-        ["git", "-C", str(checkout), "diff", "--quiet", "HEAD", "--", "scripts/ci-build.py"],
-        check=False).returncode:
-        raise ValueError("community CI controller does not match pinned clean revision")
+    if actual != TRUSTED_COMMUNITY_COMMIT:
+        raise ValueError("community CI controller is not at the pinned revision")
+    # Compare the actual bytes we are about to import, including staged edits.
+    expected_blob = subprocess.check_output(
+        ["git", "-C", str(checkout), "rev-parse", "HEAD:scripts/ci-build.py"],
+        text=True).strip()
+    actual_blob = subprocess.check_output(
+        ["git", "hash-object", str(path)], text=True).strip()
+    if expected_blob != actual_blob:
+        raise ValueError("community CI controller bytes differ from pinned Git blob")
     spec = importlib.util.spec_from_file_location("trusted_rh_ci_build", path)
     if spec is None or spec.loader is None:
         raise ValueError("missing upstream community ci-build.py")
@@ -106,7 +110,42 @@ def load_trusted_controller(path: Path):
     return module
 
 
-def extract(evidence: dict, *, community: Path, extractor: Path,
+def verify_retained_source(candidate: Path, project: Path, controller) -> str:
+    """Reuse upstream's exact Git-blob snapshot audit for *all* proof inputs."""
+    head = subprocess.check_output(
+        ["git", "-C", str(candidate), "rev-parse", "--verify", "HEAD"],
+        text=True).strip()
+    if not re.fullmatch(r"[0-9a-f]{40}", head):
+        raise ValueError("candidate Git HEAD is invalid")
+    # The checkpoint may name an earlier tooling commit with identical src
+    # and build inputs. Verify against the current committed bytes instead.
+    controller.verify_snapshot(candidate, head, project)
+    return head
+
+
+def parse_time_receipt(path: Path) -> dict:
+    """Parse exact per-invocation GNU time measurements, refusing gaps."""
+    rows = {}
+    for line in path.read_text().splitlines():
+        key, sep, value = line.partition("=")
+        if not sep or key in rows:
+            raise ValueError("invalid GNU time receipt")
+        rows[key] = value
+    if set(rows) != {"wall_seconds", "peak_rss_kib", "exit_status"}:
+        raise ValueError("incomplete GNU time receipt")
+    wall = float(rows["wall_seconds"])
+    rss = int(rows["peak_rss_kib"])
+    status = int(rows["exit_status"])
+    if not 0 <= wall < float("inf") or rss < 1 or status != 0:
+        raise ValueError("invalid or failed extraction resource measurement")
+    return {
+        "wall_seconds": wall,
+        "peak_rss_kib": rss,
+        "measurement_scope": "GNU time enclosing sandbox, Lake, and Lean; not only extractor",
+    }
+
+
+def extract(evidence: dict, *, candidate: Path, community: Path, extractor: Path,
             state: Path, depth: int, output: Path, jobs: int) -> dict:
     if depth < 1 or jobs < 1:
         raise ValueError("depth and jobs must be positive")
@@ -117,11 +156,13 @@ def extract(evidence: dict, *, community: Path, extractor: Path,
     if not (control / "packages.json").is_file():
         raise ValueError("community sandbox package overrides missing")
     driver = result / "RHLeanGraph.lean"
-    if driver.exists():
-        raise ValueError("graph driver already exists")
+    timing = result / "rh-graph-time.txt"
+    if driver.exists() or timing.exists():
+        raise ValueError("previous graph extraction driver or receipt exists")
+    community_build = load_trusted_controller(community / "scripts/ci-build.py")
+    verified_head = verify_retained_source(candidate, project, community_build)
     source = generate_driver(verify_extractor(extractor.read_bytes()), RH_ROOTS, depth)
     driver.write_text(source)
-    community_build = load_trusted_controller(community / "scripts/ci-build.py")
     elan_env = {key: os.environ[key] for key in ("PATH", "HOME", "ELAN_HOME")
                 if key in os.environ}
     elan_env["ELAN_TOOLCHAIN"] = evidence["toolchain"]
@@ -140,28 +181,29 @@ def extract(evidence: dict, *, community: Path, extractor: Path,
     # writable result directory so upstream's JSON files are not discarded.
     cmd += ["/opt/lean/bin/lake", "--packages", "/control/packages.json", "env",
             "/bin/sh", "-c", "cd /work/result && exec /opt/lean/bin/lean RHLeanGraph.lean"]
-    before = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
-    started = time.monotonic()
+    # RUSAGE_CHILDREN.ru_maxrss accumulates a high-water mark from unrelated
+    # children. GNU time records this exact sandbox invocation instead.
+    time_cmd = ["/usr/bin/time", "--format",
+                "wall_seconds=%e\\npeak_rss_kib=%M\\nexit_status=%x",
+                "--output", str(timing), *cmd]
     with (result / "rh-graph-lean.log").open("w") as log:
-        completed = subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT, check=False)
-    wall = round(time.monotonic() - started, 3)
-    peak = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
+        completed = subprocess.run(time_cmd, stdout=log, stderr=subprocess.STDOUT,
+                                   check=False)
     if completed.returncode:
         raise RuntimeError(f"upstream Lean extraction failed, exit {completed.returncode}; "
                            f"see {result / 'rh-graph-lean.log'}")
     if any(not (result / n).is_file() for n in RESULT_NAMES):
         raise ValueError("upstream Lean did not produce all five root and combined graphs")
+    measured = parse_time_receipt(timing)
     receipt = publish_graphs(result, output, RH_ROOTS, depth,
-                             source_revision=evidence["build_commit"])
+                             source_revision=verified_head)
     receipt["retained_build"] = {
         k: str(v) if isinstance(v, Path) else v
         for k, v in evidence.items() if k != "work"
     }
-    receipt["extraction_resources"] = {
-        "wall_seconds": wall, "child_peak_rss_kib": peak,
-        "prior_child_peak_rss_kib": before,
-        "measurement_scope": "host child rusage maximum; may include previous child processes",
-    }
+    receipt["extraction_resources"] = measured
+    receipt["retained_build"]["graph_checkout_commit"] = verified_head
+    (output / "extraction-time.txt").write_bytes(timing.read_bytes())
     (output / "manifest.json").write_text(json.dumps(receipt, sort_keys=True, indent=2) + "\n")
     (output / "extraction.log").write_bytes((result / "rh-graph-lean.log").read_bytes())
     return receipt
@@ -183,7 +225,8 @@ def main() -> None:
     if args.preflight_only:
         print(json.dumps({k: str(v) for k, v in evidence.items()}, sort_keys=True))
     else:
-        receipt = extract(evidence, community=args.community, extractor=args.extractor,
+        receipt = extract(evidence, candidate=args.candidate,
+                          community=args.community, extractor=args.extractor,
                           state=args.state, depth=args.depth, output=args.output,
                           jobs=args.jobs)
         print(json.dumps({"files": len(receipt["graphs"]),
