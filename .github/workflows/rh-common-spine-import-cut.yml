@@ -1,0 +1,43 @@
+name: RH common-spine import footprint census (source only)
+
+on:
+  pull_request:
+    paths:
+      - tools/shared_spine_import_cut.py
+      - tools/test_shared_spine_import_cut.py
+      - .github/workflows/rh-common-spine-import-cut.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # Pin each census to its exact PR head so later research commits do not
+  # cancel a useful in-flight source-DAG measurement.
+  group: rh-common-spine-import-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  map-source-imports:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Test DAG overlap and refusal cases
+        run: python3 -m unittest discover -s tools -p 'test_shared_spine_import_cut.py' -v
+      - name: Map shared and exclusive imported source across the RH bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/shared_spine_import_cut.py \
+            --root Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.EveryCharacterOfLiteratureOfVWin \
+            --out analysis/rh-common-spine-direct-import-footprints.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rh-common-spine-source-import-footprints
+          path: analysis/rh-common-spine-direct-import-footprints.json
+          retention-days: 30
+          if-no-files-found: warn
