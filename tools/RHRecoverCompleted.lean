@@ -29,9 +29,9 @@ private def verifiedPack
   let validated ← Job.async do
     let arts ← existing.await
     let trace ← IO.FS.readFile leanModule.traceFile
-    let .ok meta := BuildMetadata.parse trace
+    let .ok traceMeta := BuildMetadata.parse trace
       | error "missing or invalid Lake build trace"
-    let some outputHashes := meta.outputs?
+    let some outputHashes := traceMeta.outputs?
       | error "Lake build trace has no output descriptors"
     let .ok (saved : ModuleOutputDescrs) := fromJson? outputHashes
       | error "invalid Lake output descriptors"
@@ -52,7 +52,7 @@ private def verifiedPack
     return Json.mkObj [
       ("module", toJson modName),
       ("accepted", toJson true),
-      ("input_hash", toJson meta.depHash.toString),
+      ("input_hash", toJson traceMeta.depHash.toString),
       ("archive", toJson stored.descr.relPath.toString)]
   return validated
 
