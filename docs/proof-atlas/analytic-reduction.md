@@ -48,6 +48,10 @@ A second source-level proof of the same implication appears as `UpperTheory.riem
 
 These are inspectable source claims, not assertions of independent verification.
 
+## Two names for the same half-plane condition
+
+[`CharacterBoxes/HalfPlane.lean`](../../src/Development/AutomorphicArithmetic/CharacterBoxes/HalfPlane.lean) defines `Claim.HalfPlane` with the same displayed quantifiers and inequalities as `UpperTheory.EveryCharacter`. That explains the source-level use of `allChi` to inhabit the first component of `claimAll`. See the [character-box guide](character-box.md) for the separate `ZeroFreeAll → EveryCharacter` construction.
+
 ## The final dependency picture
 
 ```text
