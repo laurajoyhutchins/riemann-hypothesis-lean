@@ -77,7 +77,11 @@ jobs:
   lean-proof:
     needs: source-contract
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    # A prior 90-minute run compiled 10,721/11,245 source tasks before
+    # being cancelled, without reaching any changed declaration. Reserve
+    # sufficient time for one exact-head proof verdict instead of
+    # restarting the full import DAG repeatedly.
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
         with:
