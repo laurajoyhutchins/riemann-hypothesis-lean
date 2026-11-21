@@ -57,3 +57,24 @@ The full RH workflow is deliberately **not** a pull-request smoke job. Reuse the
 ## What remains unverified
 
 A complete extracted five-root RH graph, a live large-graph viewer load, wall-time/peak-RSS on RH, full declaration type-plus-value closure, and full proof syntax/Expr AST extraction. Upstream normal JSON cannot certify unused Lean source files, mathematical proof equivalence, or preservation of the five final theorem types. The separate `export_exact_graph.py` research stream addresses a different, checked-expression traversal problem; do not delete it or reintroduce the previously removed viewer and adapter.
+
+
+## Reuse a *completed* community build without rebuilding
+
+The optional [retained-build graph workflow](../.github/workflows/rh-graph-retained-build.yml) is manual and runs only on a self-hosted runner with the `rh-build` label. Select a source-matching successful checkpoint at `$RH_CI_STATE_DIR/failed-work/run-*/checkpoint.json`, not an original or stale build. Supply that checkpoint path and an explicit BFS depth via the workflow's `workflow_dispatch` inputs.
+
+The small `tools/rh_graph_postbuild.py` preflight compares the retained checkpoint's source Git tree, pinned Lean toolchain, manifest and lakefile hashes to the checkout; requires a *staged successful* community build; and checks `Main.olean`, its Lake trace, mapped archive and artifact hashes. Different *tooling-only* commits can reuse the same source-matching build. Unfinished, mismatched, or missing compiled evidence fails closed.
+
+For extraction the script loads the pinned community `scripts/ci-build.py` **as the sandbox provider**. It runs the pinned upstream Lean Graph driver within that existing Bubblewrap environment and uses `lake env` to establish imports, switching into the writable retained result directory for JSON. There is no new Lean compiler, graph traversal, cache controller, or local viewer. The standard validator emits the five root files, combined JSON, SHA-256 manifest, and resource receipt. An explicit smoke test checks the source-admission logic, but **the retained-build end-to-end command has not yet run against the full RH environment**.
+
+Run the preflight without touching Lean:
+```bash
+python3 tools/rh_graph_postbuild.py \
+  --candidate . --community community-harness \
+  --checkpoint "$RH_CHECKPOINT" \
+  --state "${RH_CI_STATE_DIR:-$HOME/.local/share/riemann-build-state}" \
+  --extractor /dev/null --output analysis/lean-graph-json \
+  --preflight-only
+```
+
+The `community-harness` checkout must be pinned to `79c751e0b0a5ea3bbfc20198c852fa85f28661e6`; the manual workflow verifies this and the upstream Lean Graph blob before actual execution. Do not run an arbitrary `ci-build.py` on the self-hosted runner. A verified graph or closed emitted-edge neighborhood is **not** a fresh Lean proof check, not a theorem-type comparison, and not evidence that source-only modules can be pruned. The manual workflow requires both a suitable registered runner and an already completed matching source build. No completed RH extraction is implied by the existence of this entry point.
