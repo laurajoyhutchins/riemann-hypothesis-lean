@@ -159,11 +159,20 @@ def rank(records: list[dict], *, max_groups: int, min_members: int) -> dict:
         -g["hypothetical_reusable_body_upper_bound"],
         -g["modules"], g["class"], g["key"]
     ))
+    # Reserve slots for each evidence class: otherwise the weak shared-anchor
+    # groups crowd all exact-text and shared-shape families out of the report.
+    classes_order = ("identical_proof_text", "matching_tactic_shape",
+                     "shared_qualified_dependency")
+    quota, remainder = divmod(max_groups, len(classes_order))
+    chosen = []
+    for index, klass in enumerate(classes_order):
+        allowance = quota + (index < remainder)
+        chosen.extend([g for g in groups if g["class"] == klass][:allowance])
     return {
         "groups_before_output_limit": len(groups),
         "group_counts_by_class": dict(classes),
         "output_limit": max_groups,
-        "groups": groups[:max_groups],
+        "groups": chosen,
         "integrity": (
             "This is a candidate index from source heuristics. Groups overlap. "
             "Upper bounds cannot be added, are not estimates of realizable savings, "
@@ -198,13 +207,18 @@ def main() -> None:
     args.out.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print("Census:", json.dumps(census, sort_keys=True))
     print("Candidate groups:", json.dumps(ranking["group_counts_by_class"], sort_keys=True))
-    for group in ranking["groups"][:15]:
-        print(json.dumps({
-            "class": group["class"], "key": group["key"],
-            "modules": group["modules"],
-            "hypothetical_upper_bound": group["hypothetical_reusable_body_upper_bound"],
-            "representatives": [r["path"] for r in group["representatives"][:3]]
-        }, sort_keys=True))
+    for klass in ("identical_proof_text", "matching_tactic_shape",
+                  "shared_qualified_dependency"):
+        selected = [g for g in ranking["groups"] if g["class"] == klass][:10]
+        for group in selected:
+            print(json.dumps({
+                "class": group["class"], "key": group["key"],
+                "modules": group["modules"],
+                "distinct_statements": group["distinct_statement_digests"],
+                "common_anchors": group["common_qualified_anchors"][:4],
+                "hypothetical_upper_bound": group["hypothetical_reusable_body_upper_bound"],
+                "representatives": [r["path"] for r in group["representatives"][:3]]
+            }, sort_keys=True))
 
 
 if __name__ == "__main__":
