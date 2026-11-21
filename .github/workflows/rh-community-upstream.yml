@@ -44,7 +44,8 @@ jobs:
           set -euo pipefail
           gitlink="$(git ls-tree HEAD upstream/riemann-hypothesis-community | awk '{print $3}')"
           test "$gitlink" = "$COMMUNITY_SHA"
-          grep -Fx 'url = https://github.com/leanprover-community/riemann-hypothesis.git' .gitmodules
+          actual_url="$(git config -f .gitmodules --get 'submodule.upstream/riemann-hypothesis-community.url')"
+          test "$actual_url" = 'https://github.com/leanprover-community/riemann-hypothesis.git'
       - name: Checkout the exact upstream community scripts, no source mirror
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
