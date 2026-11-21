@@ -55,8 +55,8 @@ jobs:
           cat > smoke/MiniMain.lean <<'EOF'
           import Lean
           namespace MiniMain
-          theorem leaf : True := True.intro
-          theorem entry : True := leaf
+          theorem leaf (n : Nat) : n = n := rfl
+          theorem entry (n : Nat) : n = n := leaf n
           end MiniMain
           EOF
           pushd smoke
@@ -64,6 +64,7 @@ jobs:
           python3 ../tools/rh_lean_graph.py --module MiniMain --root MiniMain.entry \
             --depth 4 --output SmokeGraph.lean
           /usr/bin/time -v -o extraction-time.txt lake env lean SmokeGraph.lean
+          cat extraction-time.txt
           python3 ../tools/validate_rh_lean_graph.py --root MiniMain.entry \
             --depth 4 --input-dir . --output-dir validated --require-closed \
             --source-revision "${GITHUB_SHA}"
