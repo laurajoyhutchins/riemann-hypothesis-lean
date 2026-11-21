@@ -1,0 +1,3 @@
+[submodule "upstream/riemann-hypothesis-community"]
+	path = upstream/riemann-hypothesis-community
+	url = https://github.com/leanprover-community/riemann-hypothesis.git

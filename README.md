@@ -167,6 +167,15 @@ A clean result lists only Lean's standard axioms: `propext`, `Classical.choice`,
 6. To understand the argument, follow the proof terms downward: `Supplements/Kernels/MainTheorems.lean` → `Formalism.VW.rh_of_every` and `UpperTheory.FinalTheorems.everyCharacter` (search with `grep -rn "theorem rh_of_every\|everyCharacter" src`). The author's own outline of the ideas (Stepanov-style multiplicity via chains of theta lifts of length about √X, Iwasawa towers, Rallis seesaw, Bost slope inequality, …) is in [remark.pdf](https://alpo.ge/remark.pdf).
 7. Report results to the community with the commit hash, toolchain and machine details.
 
+## Community build infrastructure
+
+This fork uses the original [leanprover-community RH build and cache controller](https://github.com/leanprover-community/riemann-hypothesis)
+as a pinned Git submodule instead of independently recreating its scripts.
+The [community integration instructions](CI-community.md) describe the exact
+revision, CI checks, manual large-runner build, and security/trust limitations.
+Restored community artifacts accelerate builds, but independent verification
+requires fresh compilation and checked proof exports.
+
 ## Credit and license
 
 The mathematics and the Lean code are by **Levent Alpöge**, working with Claude. The original archive was published at https://alpo.ge/ without a stated license; this mirror adds no license of its own and claims no authorship. If the author asks for this mirror to be changed or removed, it will be.
