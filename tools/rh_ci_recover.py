@@ -54,7 +54,21 @@ def module_file(name: str, extension: str) -> Path:
     return Path(*name.split(".")).with_suffix(extension)
 
 
+def validate_build_tree(workspace: Path) -> None:
+    """Never enter a symlinked Lake build/cache parent on an untrusted checkout."""
+    for relative in (
+        ".lake", ".lake/build", ".lake/build/lib",
+        ".lake/build/lib/lean", ".lake/build/ir", ".lake/cache",
+    ):
+        current = workspace / relative
+        if current.is_symlink():
+            raise ValueError(f"symlinked Lake build parent: {relative}")
+        if current.exists() and not current.is_dir():
+            raise ValueError(f"non-directory Lake build parent: {relative}")
+
+
 def candidates_from_traces(workspace: Path) -> list[str]:
+    validate_build_tree(workspace)
     base = workspace / ".lake/build/lib/lean"
     if base.is_symlink() or not base.is_dir():
         raise ValueError("no nonsymlink Lake output directory")
@@ -142,6 +156,7 @@ def recovery_once(
     if not helper.is_file():
         raise ValueError("missing trusted Lake helper")
     identity = source_identity(workspace)
+    validate_build_tree(workspace)
     selected = explicit_candidates(workspace, names)
     # This is in addition to (not a replacement for) stock Lake traces:
     # the helper version is recorded with every local accepted-output report.
@@ -205,12 +220,12 @@ def recovery_once(
         for item in decisions:
             module = item["module"]
             local = regular_file(
-                workspace / ".lake/build/ir", module_file(module, ".ltar")
+                workspace, Path(".lake/build/ir") / module_file(module, ".ltar")
             )
             if local.stat().st_size == 0:
                 raise ValueError(f"empty stock LTAR for {module}")
             trace = regular_file(
-                workspace / ".lake/build/lib/lean", module_file(module, ".trace")
+                workspace, Path(".lake/build/lib/lean") / module_file(module, ".trace")
             )
             contents = json.loads(trace.read_text())
             if contents.get("depHash") != item["input_hash"]:
