@@ -139,7 +139,7 @@ private theorem indicatorIntegral_le_clipped (c H : ℝ) (hH : 0 ≤ H) :
         split_ifs <;> norm_num
       simpa [max_eq_left hc0, min_eq_left hcH] using hbound
 
-/-- Integrate the *actual finite threshold counts* rather than their
+/- Integrate the *actual finite threshold counts* rather than their
 pointwise envelope. The full geometric theorem must preserve this function
 through its rank comparison to use this improvement. -/
 /-- The exact threshold-integral bound for any finite index set. This
