@@ -11,7 +11,7 @@ elaboration dependencies and declaration-to-source attribution are absent.
 """
 from __future__ import annotations
 import argparse
-from collections import Counter
+from collections import Counter, defaultdict
 import gzip
 import json
 from pathlib import Path
@@ -27,6 +27,26 @@ ROOTS = {
 KINDS = ("axiom", "def", "thm", "opaque", "quot", "inductive")
 
 
+def exact_type_families(rows, names):
+    """Group theorem types whose *exported Expr IDs* and universe params agree.
+
+    The pinned exporter globally interns expressions, so a shared type ID
+    witnesses syntactic identity of its exported kernel expression. Including
+    the ordered level parameter IDs avoids an unsound universe equivalence.
+    No definitional equality, proof-value identity, or safe source rewrite
+    is inferred from different IDs or from a group alone.
+    """
+    counts = Counter((expr, levels) for _, expr, levels in rows)
+    repeated = {key: count for key, count in counts.items() if count > 1}
+    members = defaultdict(list)
+    for name_id, expr, levels in rows:
+        key = (expr, levels)
+        if key in repeated:
+            members[key].append(names[name_id])
+    keys = sorted(repeated, key=lambda key: (-repeated[key], key))
+    return repeated, members, keys
+
+
 def consume(stream, *, require_roots: bool = True):
     # Name indices are assigned sequentially by the pinned exporter.
     names = [""]
@@ -37,6 +57,7 @@ def consume(stream, *, require_roots: bool = True):
     roots_found = set()
     found_names = set()
     declaration_rows = []
+    theorem_type_rows = []
     metadata = None
     for raw in stream:
         if not raw.strip():
@@ -69,7 +90,7 @@ def consume(stream, *, require_roots: bool = True):
             name_count += 1
             continue
 
-        def emit(n, kind):
+        def emit(n, kind, entry):
             if not isinstance(n, int) or not 0 <= n < len(names):
                 raise ValueError(f"declaration references missing name id {n!r}")
             if n in found_names:
@@ -81,8 +102,18 @@ def consume(stream, *, require_roots: bool = True):
             declaration_rows.append((name, kind))
             if kind == "axiom":
                 axioms.append(name)
-            if kind == "thm" and name in ROOTS:
-                roots_found.add(name)
+            if kind == "thm":
+                type_expr = entry.get("type")
+                levels = entry.get("levelParams")
+                if not isinstance(type_expr, int) or type_expr < 0:
+                    raise ValueError(f"bad theorem type expression index for {name}")
+                if not isinstance(levels, list) or any(
+                    not isinstance(v, int) or not 0 <= v < len(names) for v in levels
+                ):
+                    raise ValueError(f"bad theorem universe parameters for {name}")
+                theorem_type_rows.append((n, type_expr, tuple(levels)))
+                if name in ROOTS:
+                    roots_found.add(name)
 
         if "inductive" in obj:
             ind = obj["inductive"]
@@ -91,7 +122,7 @@ def consume(stream, *, require_roots: bool = True):
                                   (("recs", "recursorVals"), "recursor")):
                 entries = next((ind[k] for k in aliases if k in ind), [])
                 for entry in entries:
-                    emit(entry["name"], kind)
+                    emit(entry["name"], kind, entry)
             counts["inductive_blocks"] += 1
             continue
         for kind in KINDS[:-1]:
@@ -102,18 +133,36 @@ def consume(stream, *, require_roots: bool = True):
                 if not isinstance(entries, list):
                     raise ValueError(f"unexpected {kind} declaration layout")
                 for entry in entries:
-                    emit(entry["name"], kind)
+                    emit(entry["name"], kind, entry)
                 break
     if not declaration_rows:
         raise ValueError("export contains no declarations")
     if require_roots and roots_found != ROOTS:
         raise ValueError(f"five theorem targets absent: {sorted(ROOTS - roots_found)}")
+    repeated, members, keys = exact_type_families(theorem_type_rows, names)
+    type_index_report = {
+        "comparison": "identical exported expression ID AND ordered level parameter IDs",
+        "repeated_family_count": len(keys),
+        "theorems_in_repeated_families": sum(repeated.values()),
+        "largest_family_size": repeated[keys[0]] if keys else 0,
+        "top_families": [
+            {
+                "type_expr": key[0],
+                "level_params": [names[v] for v in key[1]],
+                "size": repeated[key],
+                "sample_members": sorted(members[key])[:12],
+            }
+            for key in keys[:30]
+        ],
+        "scope_warning": "Exported target closure, not all source theorems; no source deletions certified",
+    }
     return {
         "report": {
             "export_metadata": metadata,
             "distinct_exported_names": name_count,
             "exported_declarations": len(declaration_rows),
             "by_kind": dict(sorted(counts.items())),
+            "exact_type_index": type_index_report,
             "top_name_prefixes": prefixes.most_common(40),
             "axiom_names": sorted(axioms),
             "five_roots_found": sorted(roots_found),
@@ -122,6 +171,10 @@ def consume(stream, *, require_roots: bool = True):
             "verified_removable_lines": 0,
         },
         "declarations": declaration_rows,
+        "type_families": [
+            (key[0], [names[v] for v in key[1]], sorted(members[key]))
+            for key in keys
+        ],
     }
 
 
@@ -144,6 +197,12 @@ def main():
         out.write("name\tkind\n")
         for name, kind in sorted(result["declarations"]):
             out.write(f"{name}\t{kind}\n")
+    with gzip.open(a.output_dir / "rh-export-identical-theorem-types.tsv.gz",
+                   "wt", encoding="utf-8", compresslevel=5) as out:
+        out.write("type_expr\tlevel_params\tfamily_size\tname\n")
+        for expr, levels, member_names in result["type_families"]:
+            for name in member_names:
+                out.write(f"{expr}\t{','.join(levels)}\t{len(member_names)}\t{name}\n")
     print(json.dumps(report, indent=2, sort_keys=True))
 
 
