@@ -188,7 +188,7 @@ def analyze(stream, roots=ROOTS, *, compressed_sha256=None):
         }
         intersections = {
             roots[i] + " & " + roots[j]:
-                sum((mask & (1 << i)) and (mask & (1 << j)) for mask in masks.values())
+                sum(bool((mask & (1 << i)) and (mask & (1 << j))) for mask in masks.values())
             for i in range(len(roots)) for j in range(i + 1, len(roots))
         }
         histogram = Counter(mask for mask in masks.values() if mask)
