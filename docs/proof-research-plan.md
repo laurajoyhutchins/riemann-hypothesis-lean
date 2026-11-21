@@ -1,6 +1,6 @@
 # Research and navigation plan for the proposed RH/GRH formalization
 
-**Status:** proposed execution plan, grounded in source inspection. No full Lean build, independent kernel replay, import-pruning experiment, or semantic compression has been completed under this plan. See [navigation](proof-navigation.md) and [the `everyCharacter` spine](every-character-spine.md).
+**Status:** execution started: the [minimal Main experiment](minimal-main-experiment.md), import-graph analyzer, synthetic fixture tests, and a sparse-checkout fixture CI job exist on the documentation PR. No full Lean build, independent kernel replay, measured full-repo import comparison, or semantic compression has been completed. See [navigation](proof-navigation.md) and [the `everyCharacter` spine](every-character-spine.md).
 
 ## Goal and non-negotiable constraints
 
