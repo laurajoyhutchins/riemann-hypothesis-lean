@@ -1,0 +1,42 @@
+name: RH open-orbit minimal hypothesis source discovery
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/rh-open-orbit-minimal.yml
+      - src/Development/AutomorphicArithmetic/ThetaCorrespondence/ThetaPairLifts/ThirdPlaceSeries/OpenOrbitOfUnramifiedExponents.lean
+      - tools/RHOpenOrbitMinimalCheck.lean
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rh-open-orbit-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  locate-record-and-accessor:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Locate exact third-place structure declaration and geometricLemma accessor
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p analysis
+          rg -n --glob '*.lean' '^\s*(?:structure|class)\s+UnitaryGroupThirdPlaceHypotheses\b' src \
+            | tee analysis/rh-open-orbit-record-location.txt
+          test -s analysis/rh-open-orbit-record-location.txt
+          rg -n --glob '*.lean' '(^\s*(?:theorem|def|abbrev|instance)\s+.*geometricLemma\b|\bgeometricLemma\s*[:=])' src \
+            | head -n 100 | tee analysis/rh-open-orbit-geometric-lemma-accessors.txt || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rh-open-orbit-record-source-locations
+          path: analysis/rh-open-orbit-*.txt
+          retention-days: 14
+          if-no-files-found: warn
