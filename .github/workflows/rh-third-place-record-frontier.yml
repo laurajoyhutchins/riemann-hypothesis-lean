@@ -1,0 +1,42 @@
+name: RH third-place hypothesis field frontier (source evidence only)
+
+on:
+  pull_request:
+    paths:
+      - tools/third_place_record_frontier.py
+      - tools/test_third_place_record_frontier.py
+      - .github/workflows/rh-third-place-record-frontier.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rh-third-place-frontier-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  field-frontier:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            tools
+            src/Development/AutomorphicArithmetic/ThetaCorrespondence/ThetaPairLifts/ThirdPlaceSeries/SiegelEisensteinSecondTermHypotheses.lean
+            src/Development/AutomorphicArithmetic/ThetaCorrespondence/ThetaPairLifts/ThirdPlaceSeries/HypothesesNonemptyOfUnramifiedExponents.lean
+            src/Development/AutomorphicArithmetic/ThetaCorrespondence/ThetaPairLifts/ThirdPlaceSeries/OpenOrbitOfUnramifiedExponents.lean
+            src/Development/AutomorphicArithmetic/ThetaCorrespondence/ThetaPairLifts/ThirdPlaceSeries/EveryCharacterOfLiteratureOfVWin.lean
+          sparse-checkout-cone-mode: false
+      - name: Test exact field-name and opaque-record-call handling
+        run: python3 -m unittest discover -s tools -p 'test_third_place_record_frontier.py' -v
+      - name: Trace four proof-site field frontiers
+        run: python3 tools/third_place_record_frontier.py --src src --output analysis/rh-third-place-record-field-frontier.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rh-third-place-field-frontier
+          path: analysis/rh-third-place-record-field-frontier.json
+          retention-days: 30
+          if-no-files-found: error
