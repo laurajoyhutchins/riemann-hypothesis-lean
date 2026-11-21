@@ -59,12 +59,12 @@ class Core5ProjectionTests(unittest.TestCase):
             root.mkdir(parents=True)
             (root / "Chain.lean").write_text(
                 "theorem chain : ∀ (R F : Nat), GlobalTheory.Hk3.CoreNoChain R F → "
-                "R = F := by\\n  trivial\\n",
+                "R = F := by\n  trivial\n",
                 encoding="utf-8"
             )
             (root / "Five.lean").write_text(
                 "theorem five : ∀ (R F : Nat), GlobalTheory.Core5 R F → "
-                "R = F := by\\n  trivial\\n",
+                "R = F := by\n  trivial\n",
                 encoding="utf-8"
             )
             candidates, _ = collect(src)
