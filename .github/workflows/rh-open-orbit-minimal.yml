@@ -28,10 +28,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p analysis
-          rg -n --glob '*.lean' '^\s*(?:structure|class)\s+UnitaryGroupThirdPlaceHypotheses\b' src \
+          grep -RnE --include='*.lean' '^[[:space:]]*(structure|class)[[:space:]]+UnitaryGroupThirdPlaceHypotheses([[:space:]]|:)' src \
             | tee analysis/rh-open-orbit-record-location.txt
           test -s analysis/rh-open-orbit-record-location.txt
-          rg -n --glob '*.lean' '(^\s*(?:theorem|def|abbrev|instance)\s+.*geometricLemma\b|\bgeometricLemma\s*[:=])' src \
+          grep -RnE --include='*.lean' '(^[[:space:]]*(theorem|def|abbrev|instance)[[:space:]].*geometricLemma|geometricLemma[[:space:]]*[:=])' src \
             | head -n 100 | tee analysis/rh-open-orbit-geometric-lemma-accessors.txt || true
       - uses: actions/upload-artifact@v4
         if: always()
