@@ -16,6 +16,12 @@ on:
 permissions:
   contents: read
 
+# Candidate-only source scans are reproducible; superseded PR heads need not
+# consume runner time. This is intentionally different from proof gates.
+concurrency:
+  group: rh-source-atlas-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   source-atlas:
     runs-on: ubuntu-24.04
