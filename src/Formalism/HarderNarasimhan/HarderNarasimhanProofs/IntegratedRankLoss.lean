@@ -142,6 +142,47 @@ private theorem indicatorIntegral_le_clipped (c H : ℝ) (hH : 0 ≤ H) :
 /-- Integrate the *actual finite threshold counts* rather than their
 pointwise envelope. The full geometric theorem must preserve this function
 through its rank comparison to use this improvement. -/
+/-- The exact threshold-integral bound for any finite index set. This
+form can be instantiated directly with a sigma type of the actual source
+input slopes, avoiding an artificial enumeration by Fin N. -/
+theorem finiteThresholdIntegralBoundFinset {α : Type*} (S : Finset α)
+    (a : α → ℝ) (s u H : ℝ) (hu : 0 ≤ u) (hH : 0 ≤ H) (hpos : 0 < u + H)
+    (hmean : (S.card : ℝ) * s ≤ S.sum a)
+    (hupper : ∀ i ∈ S, a i ≤ s + u) :
+    (∫ t in (0 : ℝ)..H,
+      ((S.filter (fun i => a i < s - t)).card : ℝ)) ≤
+        (S.card : ℝ) * (u * H / (u + H)) := by
+  classical
+  have hcount (t : ℝ) :
+      ((S.filter (fun i => a i < s - t)).card : ℝ) =
+        S.sum (fun i => if t < s - a i then (1 : ℝ) else 0) := by
+    rw [Finset.sum_boole]
+    have hf :
+        S.filter (fun i => a i < s - t) =
+          S.filter (fun i => t < s - a i) :=
+      Finset.filter_congr (fun i _ => by constructor <;> intro h <;> linarith)
+    rw [hf]
+  have heq :
+      (fun t : ℝ => ((S.filter (fun i => a i < s - t)).card : ℝ)) =
+        (fun t : ℝ => S.sum (fun i => if t < s - a i then (1 : ℝ) else 0)) := by
+    funext t
+    exact hcount t
+  rw [show (∫ t in (0 : ℝ)..H, ((S.filter (fun i => a i < s - t)).card : ℝ)) =
+        ∫ t in (0 : ℝ)..H, S.sum (fun i => if t < s - a i then (1 : ℝ) else 0) from
+        congrArg (fun f : ℝ → ℝ => ∫ t in (0 : ℝ)..H, f t) heq]
+  rw [intervalIntegral.integral_finsetSum
+    (fun i _ => (indicatorAntitone (s - a i)).intervalIntegrable)]
+  have hstep :
+      S.sum (fun i => ∫ t in (0 : ℝ)..H, if t < s - a i then (1 : ℝ) else 0) ≤
+        S.sum (fun i => min H (max (s - a i) 0)) :=
+    Finset.sum_le_sum (fun i _ => indicatorIntegral_le_clipped (s - a i) H hH)
+  have hclip :
+      S.sum (fun i => min H (max (s - a i) 0)) ≤
+        (S.card : ℝ) * (u * H / (u + H)) :=
+    finiteClippedShortfallBound_div S a s u H hu hH hpos hmean hupper
+  exact le_trans hstep hclip
+
+/-- Convenient specialization to the canonical Fin N index. -/
 theorem finiteThresholdIntegralBound (N : ℕ) (a : Fin N → ℝ)
     (s u H : ℝ) (hu : 0 ≤ u) (hH : 0 ≤ H) (hpos : 0 < u + H)
     (hmean : (N : ℝ) * s ≤ ∑ i, a i)
@@ -149,37 +190,8 @@ theorem finiteThresholdIntegralBound (N : ℕ) (a : Fin N → ℝ)
     (∫ t in (0 : ℝ)..H,
       ((Finset.univ.filter (fun i : Fin N => a i < s - t)).card : ℝ)) ≤
         (N : ℝ) * (u * H / (u + H)) := by
-  have hcount (t : ℝ) :
-      ((Finset.univ.filter (fun i : Fin N => a i < s - t)).card : ℝ) =
-        ∑ i : Fin N, if t < s - a i then (1 : ℝ) else 0 := by
-    rw [Finset.sum_boole]
-    have hf :
-        (Finset.univ.filter (fun i : Fin N => a i < s - t)) =
-          (Finset.univ.filter (fun i : Fin N => t < s - a i)) :=
-      Finset.filter_congr (fun i _ => by constructor <;> intro h <;> linarith)
-    rw [hf]
-  have heq :
-      (fun t : ℝ => ((Finset.univ.filter (fun i : Fin N => a i < s - t)).card : ℝ)) =
-        (fun t : ℝ => ∑ i : Fin N, if t < s - a i then (1 : ℝ) else 0) := by
-    funext t
-    exact hcount t
-  rw [show (∫ t in (0 : ℝ)..H,
-      ((Finset.univ.filter (fun i : Fin N => a i < s - t)).card : ℝ)) =
-      ∫ t in (0 : ℝ)..H, ∑ i : Fin N, if t < s - a i then (1 : ℝ) else 0 from by
-        exact congrArg (fun f : ℝ → ℝ => ∫ t in (0 : ℝ)..H, f t) heq]
-  rw [intervalIntegral.integral_finset_sum
-    (fun i _ => (indicatorAntitone (s - a i)).intervalIntegrable)]
-  have hstep :
-      (∑ i : Fin N, ∫ t in (0 : ℝ)..H, if t < s - a i then (1 : ℝ) else 0) ≤
-        ∑ i : Fin N, min H (max (s - a i) 0) :=
-    Finset.sum_le_sum (fun i _ => indicatorIntegral_le_clipped (s - a i) H hH)
-  have hclip :
-      (∑ i : Fin N, min H (max (s - a i) 0)) ≤
-        (N : ℝ) * (u * H / (u + H)) := by
-    have h := finiteClippedShortfallBound_div (Finset.univ : Finset (Fin N))
-      a s u H hu hH hpos (by simpa using hmean) (by intro i _; exact hupper i)
-    simpa using h
-  exact le_trans hstep hclip
-
+  simpa using finiteThresholdIntegralBoundFinset (Finset.univ : Finset (Fin N))
+    a s u H hu hH hpos (by simpa using hmean)
+    (by intro i _; exact hupper i)
 
 end Formalism.HN
