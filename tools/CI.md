@@ -26,6 +26,20 @@ claim that these source-import candidates are a safe set of modules to build:
 Lean macros, elaborators, dynamic inputs and imported environment changes may
 create additional dependencies.
 
+## Focused Lean proof gate on review-ready candidates
+
+The Harris–Taylor four-module proof build (`rh-pullback-proof-gate.yml`) is
+expensive source-derived Lean elaboration, unlike the synthetic checks above.
+For a draft PR, its job is **skipped**, not passed. It runs when a PR with
+matching proof changes is marked ready for review, on subsequent updates while
+ready, or via explicit workflow dispatch. Cancellation is enabled only for
+superseded PR runs, not intentionally dispatched milestone runs. This prevents
+rapid draft commits from repeatedly abandoning large Mathlib preparation.
+
+This focused gate, even when green, covers four selected modules rather than
+all five final RH theorem roots. Its runtime and cache behavior still need
+measured tuning before generalizing to the whole development.
+
 ## Explicitly dispatched research/milestone jobs
 
 - `rh-census-smoke.yml` full-source-inventory job: count all source lines and
