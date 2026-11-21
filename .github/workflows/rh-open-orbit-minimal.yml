@@ -1,9 +1,10 @@
-name: RH open-orbit minimal hypothesis source discovery
+name: RH open-orbit 23-premise proof and source-contract gate
 
 on:
   pull_request:
     paths:
       - .github/workflows/rh-open-orbit-minimal.yml
+      - src/Development/AutomorphicArithmetic/ThetaCorrespondence/ThetaPairLifts/ThirdPlaceSeries/OpenOrbitInputs.lean
       - src/Development/AutomorphicArithmetic/ThetaCorrespondence/ThetaPairLifts/ThirdPlaceSeries/OpenOrbitOfUnramifiedExponents.lean
       - tools/RHOpenOrbitMinimalCheck.lean
   workflow_dispatch:
@@ -11,32 +12,140 @@ on:
 permissions:
   contents: read
 
+env:
+  LEAN_ABORT_ON_PANIC: '1'
+  LAKE_ARTIFACT_CACHE: 'false'
+  MATHLIB_CACHE_GET_URL: https://cache.mathlib.org/mathlib4
+
 concurrency:
   group: rh-open-orbit-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: false
 
 jobs:
-  locate-record-and-accessor:
+  source-contract:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    timeout-minutes: 16
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Locate exact third-place structure declaration and geometricLemma accessor
+      - name: Preserve original theorem type, identical proof body and typed 23-premise interface
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || '4ee985bc90444f45fb805d5221fb2d52b55eff75' }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          python3 - <<'PY'
+          import os, re, subprocess, sys
+          from pathlib import Path
+          sys.path.insert(0, "tools")
+          from import_closure import load_source, transitive_modules
+
+          prefix = Path("src/Development/AutomorphicArithmetic/ThetaCorrespondence/ThetaPairLifts/ThirdPlaceSeries")
+          path = prefix / "OpenOrbitOfUnramifiedExponents.lean"
+          record_file = prefix / "BernsteinUnitaryProductIrreducible.lean"
+          small_file = prefix / "OpenOrbitInputs.lean"
+
+          old = subprocess.check_output(["git", "show", os.environ["BASE_SHA"] + ":" + str(path)], text=True)
+          new = path.read_text()
+          record = record_file.read_text()
+          small = small_file.read_text()
+
+          public = "open_orbit_of_unramified_exponents_alt"
+          generic = "open_orbit_of_unramified_exponents_of_inputs"
+
+          def body(s, name, final):
+              match = re.search(r"^theorem " + name + r"(?=\\s|:)([^\\n]*)(?::= by\\n)", s, re.M)
+              assert match is not None, f"missing source theorem {name}"
+              start = match.end()
+              end = s.index(final, start)
+              return match.group(0), s[start:end]
+
+          old_head, old_body = body(old, public, "\nend GlobalTheory.Fc.S0.Open0ProofU")
+          new_head, new_body = body(new, public, "\nend GlobalTheory.Fc.S0.Open0ProofU")
+          generic_head, generic_body = body(new, generic, "\ntheorem " + public)
+          assert old_head == new_head, "public theorem header changed"
+          assert old_body.startswith("  intro P hL cDep\n")
+          assert generic_body.strip() == old_body.split("\n", 1)[1].strip(), (
+              "new generic proof differs from old proof after binder introduction"
+          )
+          assert "OpenOrbitInputs" in generic_head
+          assert "P.toOpenOrbitInputs" in new_body
+          assert "sorry" not in small and "sorry" not in new and "admit" not in small and "admit" not in new
+
+          record_fields = dict(re.findall(r"^  ([A-Za-z_][A-Za-z_0-9']*) : ([^\n]+)", record, re.M))
+          mini = small.split("structure OpenOrbitInputs : Prop where\n", 1)[1].split("\n\n", 1)[0]
+          mini_fields = dict(re.findall(r"^  ([A-Za-z_][A-Za-z_0-9']*) : ([^\n]+)", mini, re.M))
+          original_fields = set(re.findall(r"\bP\.([A-Za-z_][A-Za-z_0-9']*)", old_body)) - {"geometricLemma"}
+          assert len(original_fields) == 22, original_fields
+          assert set(mini_fields) == original_fields | {"geometricLemma"}, mini_fields
+          assert all(mini_fields[field] == record_fields[field] for field in original_fields)
+          assert mini_fields["geometricLemma"] == "GlobalTheory.Published.GeometricLemma"
+          assert "geometricLemma := P.geometricLemma" in small
+
+          deps, _, warnings = load_source(Path("src"))
+          assert not warnings, warnings[:8]
+          inner = "Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries."
+          assert inner + "OpenOrbitInputs" in deps[inner + "OpenOrbitOfUnramifiedExponents"]
+          assert inner + "OpenOrbitOfUnramifiedExponents" not in transitive_modules(deps, inner + "OpenOrbitInputs")
+          print("PASS: exact public theorem header, unchanged mathematical proof body,")
+          print("22 exact field types plus geometric lemma, no import cycle")
+          print("NOT a Lean elaboration/kernel certification")
+          PY
+
+  lean-proof:
+    needs: source-contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install checksum-pinned elan / Lean 4.33.1
         shell: bash
         run: |
           set -euo pipefail
+          curl --fail --silent --show-error --location --retry 3 \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            --output "$RUNNER_TEMP/elan.tar.gz"
+          printf '%s  %s\n' \
+            '42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63' \
+            "$RUNNER_TEMP/elan.tar.gz" | sha256sum --check -
+          tar -xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP"
+          "$RUNNER_TEMP/elan-init" -y --default-toolchain none --no-modify-path
+          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Capture exact source and lockfile identity
+        run: |
+          set -euo pipefail
           mkdir -p analysis
-          grep -RnE --include='*.lean' '^[[:space:]]*(structure|class)[[:space:]]+UnitaryGroupThirdPlaceHypotheses([[:space:]]|:)' src \
-            | tee analysis/rh-open-orbit-record-location.txt
-          test -s analysis/rh-open-orbit-record-location.txt
-          grep -RnE --include='*.lean' '(^[[:space:]]*(theorem|def|abbrev|instance)[[:space:]].*geometricLemma|geometricLemma[[:space:]]*[:=])' src \
-            | head -n 100 | tee analysis/rh-open-orbit-geometric-lemma-accessors.txt || true
+          python3 tools/rh_ci_identity.py --root . \
+            --output analysis/rh-open-orbit-input-identity.json
+      - name: Download only Mathlib official pinned dependency cache
+        run: |
+          set -euo pipefail
+          lake exe mathlib/cache get
+          git diff --quiet HEAD -- lakefile.toml lake-manifest.json lean-toolchain src
+      - name: Rebuild the real 23-premise theorem and unchanged public wrapper
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build \
+            Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.OpenOrbitOfUnramifiedExponents \
+            2>&1 | tee analysis/rh-open-orbit-build.log
+      - name: Check explicit theorem types and axiom dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean tools/RHOpenOrbitMinimalCheck.lean \
+            2>&1 | tee analysis/rh-open-orbit-axioms.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: rh-open-orbit-record-source-locations
-          path: analysis/rh-open-orbit-*.txt
-          retention-days: 14
+          name: rh-open-orbit-source-proof-gate
+          path: |
+            analysis/rh-open-orbit-*.log
+            analysis/rh-open-orbit-input-identity.json
+          retention-days: 30
           if-no-files-found: warn
