@@ -26,6 +26,46 @@ claim that these source-import candidates are a safe set of modules to build:
 Lean macros, elaborators, dynamic inputs and imported environment changes may
 create additional dependencies.
 
+## Community build-infrastructure adoption boundary
+
+The reference implementation is
+[leanprover-community/riemann-hypothesis](https://github.com/leanprover-community/riemann-hypothesis/tree/8ec38f92ac54b5c91bc07f4f6f88ea61691b7975)
+at pinned commit `8ec38f92ac54b5c91bc07f4f6f88ea61691b7975`.
+See [community cache documentation](https://github.com/leanprover-community/riemann-hypothesis/blob/8ec38f92ac54b5c91bc07f4f6f88ea61691b7975/verification/CACHE.md),
+[PR build workflow](https://github.com/leanprover-community/riemann-hypothesis/blob/8ec38f92ac54b5c91bc07f4f6f88ea61691b7975/.github/workflows/build-pr.yml),
+and [clean Comparator instructions](https://github.com/leanprover-community/riemann-hypothesis/blob/8ec38f92ac54b5c91bc07f4f6f88ea61691b7975/README.md).
+
+The immediate port uses the community's **five-field cache-input identity
+schema**, not its cache artifacts, publisher, or source build controller.
+`tools/rh_ci_identity.py` writes a clean-Git receipt containing the committed
+`src` tree identity, `lakefile.toml` SHA-256, dependency manifest SHA-256,
+Lean toolchain and build-roots field, plus the same canonical SHA-256 fingerprint.
+A documentation-only commit retains the fingerprint; changing the proof source,
+toolchain or configuration invalidates it. Dirty or untracked proof sources
+and ignored files under `src` are rejected. The receipt says
+`proof_verified: false` and is never an authorization to restore or trust an
+artifact. A matching digest authenticates input identity, **not proof validity**.
+
+The five-field convention is compatible with the community's identity
+calculation, but its published receipts are repository-scoped and its cache
+service expects an exact source/configuration match. Our fork has changed
+proof modules and a different lakefile. **No full community root cache is
+declared compatible with our modified fork** merely because the toolchain
+matches. Do not copy a cache map, patch repository fields, or re-label existing
+`.olean` outputs to make it appear compatible.
+
+The community's full pipeline also uses dedicated large Linux runners,
+untrusted-PR sandboxing, durable interrupted-build recovery, immutable packed
+artifacts, and an isolated publisher. Those capabilities require further
+adaptation and verification before being enabled here. The community
+documentation's recommended runner is about 128 GiB RAM with at least 250 GiB
+free SSD; the normal hosted runners are not interchangeable. No storage
+credentials or external publisher are configured by this change.
+
+Code and proof redistribution permissions must be checked before bulk
+vendoring the upstream scripts or proof artifacts. This change uses a small
+independently implemented interface and links to the upstream implementation.
+
 ## Focused Lean proof gate on review-ready candidates
 
 The Harris–Taylor four-module proof build (`rh-pullback-proof-gate.yml`) is
@@ -38,7 +78,13 @@ rapid draft commits from repeatedly abandoning large Mathlib preparation.
 
 This focused gate, even when green, covers four selected modules rather than
 all five final RH theorem roots. Its runtime and cache behavior still need
-measured tuning before generalizing to the whole development.
+measured tuning before generalizing to the whole development. The workflow
+now uses the community's **clean-verification invocation**:
+`LAKE_ARTIFACT_CACHE=false`, `LEAN_ABORT_ON_PANIC=1`, and
+`lake exe mathlib/cache get` (not project-root `lake exe cache get`).
+It does not run `lake update` or rewrite the pinned manifest, and it
+records the source/configuration fingerprint both before and after fetching
+Mathlib. A successful focused build still does **not** check all five theorems.
 
 ## Explicitly dispatched research/milestone jobs
 
