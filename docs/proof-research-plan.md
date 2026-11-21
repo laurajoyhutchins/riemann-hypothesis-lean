@@ -121,3 +121,7 @@ Maintain a compact `docs/proof-atlas/status.md` with one row per studied cut: so
 **Compression done:** fewer than 10,000,000 actual Lean lines in the complete independently rebuildable repository, unchanged elaborated types for all five results, and exact-head successful kernel verification with axioms/trust scope explicitly reported.
 
 **Present state:** repository source was inspected, but none of these verification gates has yet been established.
+
+## New mathematical compression experiment: guard-parametric covolume assembly
+
+See [covolume assembly](proof-atlas/covolume-assembly.md). The original `CovolX` proof and later `CovolumeBoundOfX` proof reuse identical local inequalities but differ in their row-realization guards. Prioritize a generic eventual/lifting theorem parameterized by the guard, specialize it to both without changing their statements, then measure verified source removal. A direct logical conversion additionally requires an unproved `RealisedCondition → Realised` bridge. Matching file basenames (60 in two inspected subtrees) are candidate links, not proof-equivalence evidence.
