@@ -2,6 +2,8 @@ name: RH Core5 theorem reuse source and Lean gate
 
 on:
   pull_request:
+    # One explicit transition out of draft triggers the expensive source gate.
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/ExistsCcIsEquivAtSerOfOneMapRowOfCore.lean
       - tools/RHCore5FactoringCheck.lean
@@ -74,12 +76,15 @@ jobs:
 
   source-elaboration-and-axioms:
     needs: source-contract-and-import-cycle
-    # A draft is a mathematical hypothesis; do not spend another 90-minute
+    # A draft is a mathematical hypothesis; do not spend another lengthy
     # hosted build on each textual audit correction. Review-ready or explicit
     # dispatch alone authorizes an actual source elaboration.
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    # The previous pinned build compiled 11,183/11,208 jobs before its 90-minute
+    # hosted timeout; allow enough time to reach the edited theorem and audit.
+    # This remains a one-off expensive review gate, not ordinary PR feedback.
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
         with:
