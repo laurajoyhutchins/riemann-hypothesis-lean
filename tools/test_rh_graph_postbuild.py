@@ -1,6 +1,7 @@
 """No Lean or RH checkout needed: retained-build admission tests."""
 import hashlib
 import json
+import subprocess
 from pathlib import Path
 import tempfile
 import unittest
@@ -8,7 +9,7 @@ from unittest.mock import patch
 
 from rh_graph_postbuild import (
     inspect_retained_build, load_trusted_controller, parse_time_receipt,
-    verify_retained_source,
+    verify_retained_source, TIME_FORMAT,
 )
 
 
@@ -131,6 +132,14 @@ class RetainedBuildTests(unittest.TestCase):
             timing.write_text(payload)
             with self.assertRaises(ValueError):
                 parse_time_receipt(timing)
+
+    def test_real_gnu_time_receipt_contract(self):
+        receipt = self.home / "real-time.txt"
+        subprocess.run(["/usr/bin/time", "--format", TIME_FORMAT,
+                        "--output", str(receipt), "/bin/true"], check=True)
+        metrics = parse_time_receipt(receipt)
+        self.assertGreaterEqual(metrics["wall_seconds"], 0)
+        self.assertGreater(metrics["peak_rss_kib"], 0)
 
     def test_refuses_missing_mapped_archive(self):
         (self.work / "cache/artifacts" / ("b" * 16 + ".ltar")).unlink()
