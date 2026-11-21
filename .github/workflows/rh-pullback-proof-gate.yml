@@ -10,6 +10,7 @@ on:
       - src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/ExistsHarrisTaylorObjectPullbackBis.lean
       - src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/ExistsHarrisTaylorObjectPullbackAlong.lean
       - tools/RHPullbackCheck.lean
+      - .github/workflows/rh-pullback-proof-gate.yml
 
 permissions:
   contents: read
@@ -22,7 +23,10 @@ env:
 
 concurrency:
   group: rh-harris-pullback-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  # Draft synchronize events create skipped jobs, which must not cancel a
+  # manually rerun source build on the same PR. Allow the expensive gate to
+  # finish and bind its evidence to the exact checked commit.
+  cancel-in-progress: false
 
 jobs:
   focused-source-elaboration:
