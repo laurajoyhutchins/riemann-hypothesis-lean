@@ -1,7 +1,7 @@
 name: RH five-root kernel expression graph census
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # expensive published-export job runs only for explicit dispatch
   pull_request:
     paths:
       - tools/export_exact_graph.py
@@ -10,7 +10,7 @@ on:
 
 concurrency:
   group: rh-exact-graph-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   graph-smoke:
@@ -44,6 +44,7 @@ jobs:
           PY
 
   published-proof-five-root-graph:
+    if: github.event_name == 'workflow_dispatch'
     needs: graph-smoke
     runs-on: ubuntu-24.04
     timeout-minutes: 150
