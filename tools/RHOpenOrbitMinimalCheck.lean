@@ -1,0 +1,12 @@
+import Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.OpenOrbitOfUnramifiedExponents
+
+#check GlobalTheory.Fc.S0.OpenOrbitInputs
+#check GlobalTheory.Fc.S0.UnitaryGroupThirdPlaceHypotheses.toOpenOrbitInputs
+#check GlobalTheory.Fc.S0.Open0ProofU.open_orbit_of_unramified_exponents_of_inputs
+#check GlobalTheory.Fc.S0.Open0ProofU.open_orbit_of_unramified_exponents_alt
+#check GlobalTheory.T.open0_of_unitary_group_hypotheses
+
+#print axioms GlobalTheory.Fc.S0.UnitaryGroupThirdPlaceHypotheses.toOpenOrbitInputs
+#print axioms GlobalTheory.Fc.S0.Open0ProofU.open_orbit_of_unramified_exponents_of_inputs
+#print axioms GlobalTheory.Fc.S0.Open0ProofU.open_orbit_of_unramified_exponents_alt
+#print axioms GlobalTheory.T.open0_of_unitary_group_hypotheses
