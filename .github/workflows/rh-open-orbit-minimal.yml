@@ -56,7 +56,7 @@ jobs:
           generic = "open_orbit_of_unramified_exponents_of_inputs"
 
           def body(s, name, final):
-              match = re.search(r"^theorem " + name + r"(?=\\s|:)([^\\n]*)(?::= by\\n)", s, re.M)
+              match = re.search(r"^theorem " + re.escape(name) + r"(?=\s|:)[\s\S]*?:= by\n", s, re.M)
               assert match is not None, f"missing source theorem {name}"
               start = match.end()
               end = s.index(final, start)
