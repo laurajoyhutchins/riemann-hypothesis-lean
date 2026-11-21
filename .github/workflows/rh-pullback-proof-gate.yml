@@ -44,7 +44,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p analysis
-          lake build -j 2 \
+          lake build \
             Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorExistsGluedFirstOrderDeformation \
             Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorObjectPullback \
             Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorObjectPullbackBis \
