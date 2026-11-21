@@ -7,6 +7,8 @@ on:
       - tools/rh_graph_viewer.html
       - tools/test_rh_graph_explorer.py
       - tools/RH_GRAPH_EXPLORER.md
+      - tools/export_lean_graph.py
+      - tools/test_export_lean_graph.py
       - .github/workflows/rh-lazy-graph.yml
   workflow_dispatch:
 
@@ -25,6 +27,8 @@ jobs:
           persist-credentials: false
       - name: Run hermetic expression-index and HTTP regressions
         run: python3 -m unittest discover -s tools -p test_rh_graph_explorer.py -v
+      - name: Test upstream Lean Graph adapter
+        run: python3 -m unittest discover -s tools -p 'test_export_lean_graph.py' -v
       - name: Index official lean4export example and inspect its theorem
         shell: bash
         run: |
