@@ -65,6 +65,8 @@ jobs:
           test "$(git -C community-harness rev-parse HEAD)" = '79c751e0b0a5ea3bbfc20198c852fa85f28661e6'
           cmp lean-toolchain community-harness/lean-toolchain
           cmp lake-manifest.json community-harness/lake-manifest.json
+      - name: Validate the fork-only identity adapter
+        run: python3 -m unittest discover -s tools -p 'test_rh_ci_identity.py' -v
       - name: Run community's own CI preparation and publication-trust tests
         run: |
           set -euo pipefail
