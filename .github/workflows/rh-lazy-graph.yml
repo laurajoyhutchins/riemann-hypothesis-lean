@@ -1,14 +1,11 @@
-name: RH lazy proof expression viewer
+name: RH upstream Lean Graph adapter
 
 on:
   pull_request:
     paths:
-      - tools/rh_graph_explorer.py
-      - tools/rh_graph_viewer.html
-      - tools/test_rh_graph_explorer.py
+      - tools/rh_lean_graph.py
+      - tools/test_rh_lean_graph.py
       - tools/RH_GRAPH_EXPLORER.md
-      - tools/export_lean_graph.py
-      - tools/test_export_lean_graph.py
       - .github/workflows/rh-lazy-graph.yml
   workflow_dispatch:
 
@@ -16,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  viewer-smoke:
+  upstream-adapter-smoke:
     runs-on: ubuntu-24.04
     timeout-minutes: 8
     steps:
@@ -25,53 +22,15 @@ jobs:
           sparse-checkout: tools
           sparse-checkout-cone-mode: true
           persist-credentials: false
-      - name: Run hermetic expression-index and HTTP regressions
-        run: python3 -m unittest discover -s tools -p test_rh_graph_explorer.py -v
-      - name: Test upstream Lean Graph adapter
-        run: python3 -m unittest discover -s tools -p 'test_export_lean_graph.py' -v
-      - name: Index official lean4export example and inspect its theorem
-        shell: bash
+      - name: Test RH source wrapper (no Lean build)
+        run: python3 -m unittest discover -s tools -p test_rh_lean_graph.py -v
+      - name: Generate driver from the pinned upstream Lean Graph extractor
         run: |
-          set -euo pipefail
-          curl --retry 3 --fail --location --silent --show-error \
-            https://raw.githubusercontent.com/leanprover/lean4export/v4.33.0/examples/Nat.add_succ.ndjson | \
-            python3 tools/rh_graph_explorer.py build --root Nat.add_succ --output-dir analysis/viewer-sample
+          python3 tools/rh_lean_graph.py --depth 2 --output analysis/RHLeanGraph.lean
           python3 - <<'PY'
-          import json
           from pathlib import Path
-          import sys
-          sys.path.insert(0,'tools')
-          from rh_graph_explorer import GraphStore
-          m=json.loads(Path('analysis/viewer-sample/manifest.json').read_text())
-          assert m['complete_index'] and m['unresolved_constant_count']==0
-          assert m['expression_count']>400
-          db=GraphStore('analysis/viewer-sample')
-          try:
-              decl=db.declaration('Nat.add_succ')
-              assert decl is not None and decl['kind']=='thm'
-              assert db.expression(decl['expression_roots'][-1])['id']==decl['expression_roots'][-1]
-          finally:
-              db.close()
-          print('Official sample: full Expr payload available by ID')
-          PY
-
-      - name: Export official sample in upstream Lean Graph JSON format
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tools/export_lean_graph.py \
-            --index-dir analysis/viewer-sample \
-            --root Nat.add_succ --depth 1 \
-            --max-nodes 2000 \
-            --output analysis/lean-graph-Nat.add_succ.json
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-          nodes=json.loads(Path('analysis/lean-graph-Nat.add_succ.json').read_text())
-          manifest=json.loads(Path('analysis/lean-graph-Nat.add_succ.manifest.json').read_text())
-          assert nodes and any(n['name']=='Nat.add_succ' for n in nodes)
-          assert all(set(n)=={'name','references','constCategory','constType'} for n in nodes)
-          assert manifest['boundary_count']>0
-          assert manifest['complete_transitive_closure'] is False
-          print('Upstream Lean Graph sample format: accepted')
+          s=Path('analysis/RHLeanGraph.lean').read_text()
+          assert s.count('#eval serializeAndWriteToFile') == 5
+          assert 'import Main' in s
+          print('Pin checked and five-root Lean driver generated')
           PY
