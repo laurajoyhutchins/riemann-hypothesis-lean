@@ -1,6 +1,6 @@
 # Research and navigation plan for the proposed RH/GRH formalization
 
-**Status:** execution started: the [minimal Main experiment](minimal-main-experiment.md), import-graph analyzer, synthetic fixture tests, and a sparse-checkout fixture CI job exist on the documentation PR. No full Lean build, independent kernel replay, measured full-repo import comparison, or semantic compression has been completed. See [navigation](proof-navigation.md) and [the `everyCharacter` spine](every-character-spine.md).
+**Status:** navigation research under way. The [minimal Main experiment](minimal-main-experiment.md), source import graph, Lean declaration census tooling and independent export-graph tooling are already being developed in [draft PR #1](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/pull/1). Its source-import comparison is measured, but a full RH build, independent kernel replay, and large-scale verified semantic compression remain outstanding. This PR adds documentation and proof-atlas pages rather than duplicating the tooling. See [navigation](proof-navigation.md) and [the `everyCharacter` spine](every-character-spine.md).
 
 ## Goal and non-negotiable constraints
 
@@ -69,7 +69,7 @@ For each cut record: exact theorem statement; assumptions and outputs; 5–10 li
 
 ### Experiment A: smaller final-theorem closure (low-risk, measurable)
 
-Construct an isolated `MainMinimal` target that imports `Statements` and `Supplements.Kernels.MainTheorems` directly, instead of `MainTheoremsAll`; reproduce the same five propositions and witnesses under temporary names. Measure the module closure and successful build. If equivalent, test replacing only the import in `Main.lean` and repeat exact-type, axiom, and kernel gates.
+**Already performed at the source-reachability level in [PR #1](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/pull/1):** it replaced `Main.lean`'s `MainTheoremsAll` import with `MainTheorems` and identified six excluded modules. Its changed source has not passed a complete build/independent kernel gate. Reuse its tooling and complete the proof verification before considering the experiment a certified reduction.
 
 This tests whether the extra `SmallClassNumbers` import fanout is needed. It may improve *main-target build cost* even if it removes zero lines from the complete repository. Do not claim line-count savings until modules are proven removable and actually removed.
 
@@ -95,7 +95,7 @@ An abstraction that merely moves code or changes formatting is not a counted com
 
 **Start the CI bootstrap immediately after Phase 0, in parallel with Phases 1–4.** Do not wait until semantic compression is already under way to establish correctness gates.
 
-There is no inspected `.github/` CI setup on the repository's default branch. Build verification incrementally, without confusing a fast PR check with proof validation:
+At the time of the initial inspection, the default branch had no `.github/` CI setup; [draft PR #1](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/pull/1) now adds multiple focused workflows. Integrate and improve those checks rather than creating a duplicate CI hierarchy. Build verification incrementally, without confusing a fast PR check with proof validation:
 
 - **Fast PR checks:** docs links, source index consistency, import-graph changes, theorem-name inventory, formatting, and changed-file classification. Target sub-30-second feedback where feasible.
 - **Affected closure checks:** compile changed modules and all affected reverse dependencies based on exact import graph; persist immutable toolchain/Mathlib and `.olean` caches keyed by source plus dependency fingerprints. Do not skip unknown or unparseable dependency edges.
@@ -106,7 +106,7 @@ No assumption about affordable full builds is justified until Phase 0 has measur
 
 ## Recommended order of work
 
-1. **First experiment:** test `MainMinimal` versus `MainTheoremsAll` while capturing the pinned baseline. This yields an early, falsifiable build-closure result.
+1. **First experiment (source-stage already done in PR #1):** use the existing direct-import change and source-reachability receipts, then complete its pinned build and kernel verification gates rather than implementing another `MainMinimal`.
 2. **First large-scale measurement:** compute the module import closure from the five final theorems and count reachable versus unreachable source lines.
 3. **First mathematical deep dive:** analyze the 60-field `published_results_eigen` interface and the exact arguments to `every_character_of_theta_integrals_local_matching`, then inspect their proof consumers.
 4. **First scalable reduction:** select one repeated Abelian variety theorem family backed by normalized elaborated types; prove a general lemma and migrate a representative sample before multiplying the pattern across the tree.
