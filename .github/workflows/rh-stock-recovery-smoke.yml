@@ -1,0 +1,52 @@
+name: RH stock Lake completed-module recovery fixture (not proof verification)
+
+on:
+  pull_request:
+    paths:
+      - 'tools/RHRecoverCompleted.lean'
+      - 'tools/rh_ci_recover.py'
+      - 'tools/rh_ci_recover_stock_smoke.py'
+      - 'tools/test_rh_ci_recover.py'
+      - '.github/workflows/rh-stock-recovery-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rh-stock-recovery-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  stock-lake-no-build:
+    # Uses a tiny local Lean fixture, not the RH proof. No untrusted PR secrets.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      ELAN_TOOLCHAIN: leanprover/lean4:v4.33.1
+      LEAN_ABORT_ON_PANIC: '1'
+      LAKE_ARTIFACT_CACHE: 'false'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          sparse-checkout: tools
+          sparse-checkout-cone-mode: true
+          persist-credentials: false
+      - name: Install checksum-pinned elan and Lean 4.33.1
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 3 \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            --output "$RUNNER_TEMP/elan.tar.gz"
+          printf '%s  %s\n' \
+            '42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63' \
+            "$RUNNER_TEMP/elan.tar.gz" | sha256sum --check -
+          tar -xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP"
+          "$RUNNER_TEMP/elan-init" -y --default-toolchain none --no-modify-path
+          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Validate the actual pinned Lean helper on a tiny Lake build
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/rh_ci_recover_stock_smoke.py
