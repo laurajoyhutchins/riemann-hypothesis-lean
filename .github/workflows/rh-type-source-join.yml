@@ -1,0 +1,55 @@
+name: RH original-export exact theorem types mapped to source (candidate only)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - tools/source_type_family_join.py
+      - tools/test_source_type_family_join.py
+      - .github/workflows/rh-type-source-join.yml
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  type-source-join:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Unit test conservative source-name attribution
+        run: python3 -m unittest discover -s tools -p 'test_source_type_family_join.py' -v
+      - name: Fetch immutable original-export type family artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/pinned-export"
+          gh run download 44891644791 --repo "${{ github.repository }}" \
+            --name rh-pinned-export-declaration-closure \
+            --dir "$RUNNER_TEMP/pinned-export"
+          test -s "$RUNNER_TEMP/pinned-export/rh-export-identical-theorem-types.tsv.gz"
+          test -s "$RUNNER_TEMP/pinned-export/rh-export-dependency-counts.json"
+      - name: Map checked theorem-type equality to physical source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/source_type_family_join.py \
+            --src src \
+            --root Development/AbelianVarietyTheory/Proofs \
+            --types "$RUNNER_TEMP/pinned-export/rh-export-identical-theorem-types.tsv.gz" \
+            --counts "$RUNNER_TEMP/pinned-export/rh-export-dependency-counts.json" \
+            --min-lines 40 \
+            --max-families 150 \
+            --out analysis/rh-exact-type-source-families.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rh-exact-type-source-attribution
+          path: analysis/rh-exact-type-source-families.json
+          retention-days: 30
+          if-no-files-found: warn
