@@ -42,6 +42,8 @@ theorem coupledFiniteSlopeBound (N M : ℕ) (a : Fin N → ℝ) (b : Fin M → �
       intro i hi
       simp only [mem_filter, mem_univ, true_and] at hi ⊢
       linarith
+    change (((univ.filter (fun i : Fin N => a i < s - t₂)).card : ℝ) ≤
+      ((univ.filter (fun i : Fin N => a i < s - t₁)).card : ℝ))
     exact_mod_cast Finset.card_le_card hs
   have hwanti : Antitone w := by
     intro t₁ t₂ ht
