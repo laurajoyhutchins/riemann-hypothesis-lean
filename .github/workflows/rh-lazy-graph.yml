@@ -36,6 +36,53 @@ jobs:
           python3 -m unittest discover -s tools -p test_rh_lean_graph.py -v
           python3 -m unittest discover -s tools -p test_validate_rh_lean_graph.py -v
           python3 -m unittest discover -s tools -p test_rh_graph_postbuild.py -v
+      - name: Checkout pinned community source verifier, not proof files
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: leanprover-community/riemann-hypothesis
+          ref: 79c751e0b0a5ea3bbfc20198c852fa85f28661e6
+          path: community-harness
+          sparse-checkout: scripts
+          sparse-checkout-cone-mode: true
+          persist-credentials: false
+      - name: Exercise real upstream snapshot verifier on Git blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib, subprocess, sys, tempfile
+          sys.path.insert(0, "tools")
+          from rh_graph_postbuild import load_trusted_controller, verify_retained_source
+          controller = load_trusted_controller(pathlib.Path("community-harness/scripts/ci-build.py"))
+          with tempfile.TemporaryDirectory() as tmp:
+              base = pathlib.Path(tmp)
+              source = base / "source"
+              source.mkdir()
+              (source / "src").mkdir()
+              (source / "src/Main.lean").write_text("theorem example : True := True.intro\n")
+              (source / "lakefile.toml").write_text("name = \"sample\"\n")
+              (source / "lake-manifest.json").write_text("{}\n")
+              (source / "lean-toolchain").write_text("leanprover/lean4:v4.33.1\n")
+              subprocess.run(["git", "init", "-q", str(source)], check=True)
+              subprocess.run(["git", "-C", str(source), "add", "."], check=True)
+              subprocess.run(["git", "-C", str(source), "-c", "user.name=CI",
+                              "-c", "user.email=ci@example.invalid",
+                              "commit", "-qm", "fixture"], check=True)
+              snapshot = base / "snapshot"
+              snapshot.mkdir()
+              controller.snapshot(source, "HEAD", snapshot)
+              assert verify_retained_source(source, snapshot, controller) == (
+                  subprocess.check_output(["git", "-C", str(source),
+                                           "rev-parse", "HEAD"], text=True).strip())
+              (snapshot / "src/Main.lean").write_text("theorem example : False := by trivial\n")
+              try:
+                  verify_retained_source(source, snapshot, controller)
+              except ValueError:
+                  pass
+              else:
+                  raise AssertionError("modified retained source passed the upstream Git-blob audit")
+          print("Pinned community source snapshot accepted intact bytes and rejected tampering")
+          PY
       - name: Install pinned Lean only (do NOT build RH)
         uses: leanprover/lean-action@fe408643ea7367d8c0404a8be3975bb145f5fb64 # v1.7.0
         with:
