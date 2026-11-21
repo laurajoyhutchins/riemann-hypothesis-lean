@@ -87,3 +87,27 @@ A verified graph or closed emitted-edge neighborhood is **not** a fresh Lean pro
 ## Integration branch and removal of obsolete viewer code
 
 [PR #17](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/pull/17) now targets `research/declaration-census-20261120`, not the archived feature branch used for the original PR #15. The integration explicitly removes `rh_graph_explorer.py`, `rh_graph_viewer.html`, `export_lean_graph.py` and their two tests from that active branch. It preserves the separate `export_exact_graph.py` kernel-expression research analyzer. The [reconciled diff](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/compare/research/declaration-census-20261120...feature/rh-lean-graph-real-extraction-20261121) should contain only graph tools, documentation, and CI, **no proof-source edits**. Re-run the fast checks against this final target tree before merging; the full modified RH extraction remains a separate manually dispatched obligation.
+
+
+### Command for a source-matching retained RH build
+
+The graph-only job can also be run directly on a correctly provisioned build runner using the retained successful checkpoint printed by the trusted community controller:
+
+```bash
+# After checking out the graph integration and pinned community-harness scripts:
+export RH_CHECKPOINT=/absolute/path/to/failed-work/run-.../checkpoint.json
+export RH_CI_STATE_DIR="${RH_CI_STATE_DIR:-$HOME/.local/share/riemann-build-state}"
+mkdir -p analysis
+curl -fsSL \
+  https://raw.githubusercontent.com/patrik-cihal/lean-graph/12fe82c12a41a827265bac725351cade3511d28a/static/DependencyExtractor.lean \
+  -o analysis/DependencyExtractor.upstream.lean
+python3 tools/rh_graph_postbuild.py \
+  --candidate . --community community-harness \
+  --state "$RH_CI_STATE_DIR" --checkpoint "$RH_CHECKPOINT" \
+  --extractor analysis/DependencyExtractor.upstream.lean \
+  --depth 2 --output analysis/lean-graph-json
+```
+
+The script validates the pinned upstream extractor's actual Git blob; arbitrary downloads cannot pass. For a fail-closed *emitted-edge* closure attempt, add `--require-closed` and increase `--depth` as needed. A failed attempt preserves `analysis/lean-graph-json/failure.json` and available receipts, **not** a complete graph. The existing viewer can open each validated `.json` through **Open extracted data**; RH-scale responsiveness has not been verified.
+
+GitHub Actions manual `workflow_dispatch` requires the workflow to be installed on the repository's default branch. While this job remains solely on the draft feature/research branch, its source is available, but its manual dispatchability through the default Actions UI is not established. Running the command directly avoids confusing workflow registration with source-build readiness.
