@@ -87,8 +87,7 @@ theorem covolume_of_guarded_steps (guard : PointAdmissibility) :
   intro hG hR hC hB hL hS hK hW
   refine Closed.imp (Closed.and (Closed.and (Closed.and hG hR) (Closed.and hC hB))
     (Closed.and (Closed.and hL hS) (Closed.and hK hW))) ?_
-  rintro eps Fm CH he ⟨⟨⟨⟨_, -, g⟩, ⟨_, -, r⟩⟩, ⟨⟨_, -, c⟩, ⟨_, -, b⟩⟩⟩,
-    ⟨⟨A, -, l⟩, ⟨B, -, s⟩⟩, ⟨C1, h1, k⟩, ⟨C2, h2, w⟩⟩
+  rintro eps Fm CH he ⟨⟨⟨⟨_, -, g⟩, ⟨_, -, r⟩⟩, ⟨⟨_, -, c⟩, ⟨_, -, b⟩⟩⟩, ⟨⟨A, -, l⟩, ⟨B, -, s⟩⟩, ⟨C1, h1, k⟩, ⟨C2, h2, w⟩⟩
   have hez : 0 < Fm.ez := by
     obtain ⟨i⟩ := Fm.Ix_zero
     rw [← Fm.L_ez 0 i]
