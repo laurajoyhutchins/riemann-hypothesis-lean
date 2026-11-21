@@ -1,0 +1,88 @@
+name: RH graph from retained community build
+
+on:
+  workflow_dispatch:
+    inputs:
+      checkpoint:
+        description: 'Absolute path to successful community failed-work/run-*/checkpoint.json on rh-build runner'
+        required: true
+        type: string
+      depth:
+        description: 'Explicit upstream BFS depth (not a completeness guarantee)'
+        required: true
+        default: '2'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  extract-from-retained-build:
+    runs-on: [self-hosted, linux, x64, rh-build]
+    timeout-minutes: 1440
+    env:
+      GRAPH_CHECKPOINT: ${{ inputs.checkpoint }}
+      GRAPH_DEPTH: ${{ inputs.depth }}
+    steps:
+      - name: Checkout source and graph integration, no RH rebuild
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+          submodules: false
+      - name: Checkout pinned trusted community controller
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: leanprover-community/riemann-hypothesis
+          ref: 79c751e0b0a5ea3bbfc20198c852fa85f28661e6
+          path: community-harness
+          sparse-checkout: |
+            scripts
+          sparse-checkout-cone-mode: true
+          persist-credentials: false
+      - name: Check pinned controller and completed Main.olean provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C community-harness rev-parse HEAD)" = 79c751e0b0a5ea3bbfc20198c852fa85f28661e6
+          python3 tools/rh_graph_postbuild.py \
+            --candidate . --community community-harness \
+            --checkpoint "$GRAPH_CHECKPOINT" \
+            --state "${RH_CI_STATE_DIR:-$HOME/.local/share/riemann-build-state}" \
+            --extractor /dev/null --output analysis/lean-graph-json \
+            --preflight-only
+      - name: Fetch and verify pinned upstream extractor
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p analysis
+          curl --fail --location --retry 3 --silent --show-error \
+            https://raw.githubusercontent.com/patrik-cihal/lean-graph/12fe82c12a41a827265bac725351cade3511d28a/static/DependencyExtractor.lean \
+            -o analysis/DependencyExtractor.upstream.lean
+          python3 - <<'PY'
+          from pathlib import Path
+          import sys
+          sys.path.insert(0, 'tools')
+          from rh_lean_graph import verify_extractor
+          verify_extractor(Path('analysis/DependencyExtractor.upstream.lean').read_bytes())
+          PY
+      - name: Extract through upstream Lean Graph in the existing community sandbox
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/rh_graph_postbuild.py \
+            --candidate . --community community-harness \
+            --checkpoint "$GRAPH_CHECKPOINT" \
+            --state "${RH_CI_STATE_DIR:-$HOME/.local/share/riemann-build-state}" \
+            --extractor analysis/DependencyExtractor.upstream.lean \
+            --output analysis/lean-graph-json \
+            --depth "$GRAPH_DEPTH"
+      - name: Upload complete graph artifacts and receipts, not a proof certificate
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: rh-graph-from-retained-source-build
+          path: analysis/lean-graph-json/
+          retention-days: 7
+          if-no-files-found: warn
+          compression-level: 1
