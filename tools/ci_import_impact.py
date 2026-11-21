@@ -66,7 +66,7 @@ def plan_impact(
             visited.add(module)
             if module in imports:
                 affected.add(module)
-            queue.extend(sorted(reverse.get(module, ()) - visited))
+            queue.extend(sorted(reverse.get(module, set()) - visited))
 
     absent_changed = sorted(changed_modules - set(imports))
     report = {
