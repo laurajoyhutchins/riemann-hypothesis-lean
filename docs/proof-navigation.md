@@ -94,6 +94,10 @@ For each substantive subsystem, add a short note with:
 
 Do not call a reduction proof-preserving until the final theorem types and kernel checks have been compared. The target of fewer than ten million lines is a research objective, not evidence of a successful reduction.
 
+## First executable investigation
+
+The separate [minimal Main experiment](minimal-main-experiment.md) contains a nondefault Lean target, a deterministic import-closure analyzer, fixture tests, and an axiom-inspection checklist. It does not change the original five results. An import-graph result is not a kernel dependency certificate.
+
 ## Next maps to build
 
 1. Exact transitive declaration-dependency graph for `everyCharacter` and `rh_of_every`.
