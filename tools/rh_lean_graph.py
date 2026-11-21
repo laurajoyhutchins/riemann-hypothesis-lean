@@ -23,6 +23,8 @@ RH_ROOTS = (
 )
 NAME_PATTERN = re.compile(r"[A-Za-z_][A-Za-z_0-9']*(?:\.[A-Za-z_][A-Za-z_0-9']*)*")
 COMBINED_FILE = "RH-combined.json"
+UPSTREAM_THEOREM_VALUE_OLD = "let constValue := constInfo.value?"
+UPSTREAM_THEOREM_VALUE_NEW = "let constValue := constInfo.value? (allowOpaque := true)"
 
 
 def git_blob_sha(data: bytes) -> str:
@@ -32,7 +34,14 @@ def git_blob_sha(data: bytes) -> str:
 def verify_extractor(data: bytes) -> str:
     if git_blob_sha(data) != EXTRACTOR_BLOB_SHA:
         raise ValueError("upstream Lean Graph extractor differs from pinned Git blob")
-    return data.decode("utf-8")
+    return patch_upstream_theorem_values(data.decode("utf-8"))
+
+
+def patch_upstream_theorem_values(source: str) -> str:
+    """One-line upstream correction: Lean hides theorem values by default."""
+    if source.count(UPSTREAM_THEOREM_VALUE_OLD) != 1:
+        raise ValueError("pinned upstream theorem-value patch point not unique")
+    return source.replace(UPSTREAM_THEOREM_VALUE_OLD, UPSTREAM_THEOREM_VALUE_NEW)
 
 
 def validate_names(roots: tuple[str, ...], module: str) -> None:
@@ -114,7 +123,8 @@ def main() -> None:
                              args.depth, args.module, not args.no_combined)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(source, encoding="utf-8")
-    print(f"Generated {args.output} at upstream commit {UPSTREAM_COMMIT}")
+    print(f"Generated {args.output} from pinned upstream {UPSTREAM_COMMIT} "
+          "with a one-line theorem-value correction")
     print(f"Run: lake env lean {args.output} (after building {args.module})")
     print("Validate with tools/validate_rh_lean_graph.py before using the JSON.")
 
