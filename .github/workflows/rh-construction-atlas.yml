@@ -6,6 +6,8 @@ on:
     paths:
       - tools/construction_atlas.py
       - tools/test_construction_atlas.py
+      - tools/compare_construction_pair.py
+      - tools/test_compare_construction_pair.py
       - .github/workflows/rh-construction-atlas.yml
       - src/Development/AbelianVarietyTheory/Proofs/**
 
@@ -31,11 +33,22 @@ jobs:
             --min-members 2 \
             --max-groups 150 \
             --out analysis/rh-construction-family-atlas.json
+      - name: Inspect semiabelian extension proof pair
+        run: |
+          python3 tools/compare_construction_pair.py \
+            --src src \
+            --left Development/AbelianVarietyTheory/Proofs/IwasawaDecomposition/IsOpenImmersionQuasiFiniteLocusOfIsIntegral \
+            --right Development/AbelianVarietyTheory/Proofs/IwasawaDecomposition/SemiabelianExtensionNormalModel \
+            --left-theorem existsUnique_hom_extension_of_dvr \
+            --right-theorem existsUnique_hom_extension_of_dvr \
+            --out analysis/rh-semiabelian-extension-pair.json
       - name: Archive inspectable candidate family evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: rh-construction-family-atlas
-          path: analysis/rh-construction-family-atlas.json
+          path: |
+            analysis/rh-construction-family-atlas.json
+            analysis/rh-semiabelian-extension-pair.json
           if-no-files-found: warn
           retention-days: 30
