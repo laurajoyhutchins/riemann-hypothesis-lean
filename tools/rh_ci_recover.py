@@ -186,9 +186,11 @@ def recovery_once(
         current = source_identity(workspace)
         if current["input_fingerprint"] != identity["input_fingerprint"]:
             raise ValueError("source/config inputs changed during recovery")
-        if proc.returncode != 0:
-            # Failed Lean API invocation or partial recovery must never be
-            # mistaken for valid module decisions. Retain diagnostic log.
+        # Lake's aggregate command may exit 3 when an individually reported
+        # noBuild target is stale or corrupt. That is EXPECTED in a selective
+        # recovery run; a successful per-module decision remains useful.
+        # Every requested module must nevertheless have an explicit verdict.
+        if proc.returncode not in (0, 3):
             tail = log.read_text(errors="replace")[-6000:]
             raise ValueError(
                 f"stock Lake recovery exited {proc.returncode}; "
@@ -197,6 +199,8 @@ def recovery_once(
         decisions, missing = read_report(report, selected)
         if missing:
             raise ValueError(f"stock Lake did not report {len(missing)} candidates")
+        if proc.returncode != 0 and len(decisions) == len(selected):
+            raise ValueError("stock Lake failed despite all modules reporting acceptance")
         receipts = []
         for item in decisions:
             module = item["module"]
@@ -232,6 +236,7 @@ def recovery_once(
             "proof_verified": False,
             "artifact_published": False,
             "completed": True,
+            "helper_exit_code": proc.returncode,
             "artifacts": receipts,
         }
         atomic_json(work / "receipt.json", result)
