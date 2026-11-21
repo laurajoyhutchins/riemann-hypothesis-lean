@@ -9,6 +9,8 @@ on:
       - 'lean-toolchain'
       - 'tools/ci_import_impact.py'
       - 'tools/test_ci_import_impact.py'
+      - 'tools/rh_ci_identity.py'
+      - 'tools/test_rh_ci_identity.py'
       - '.github/workflows/rh-source-impact.yml'
 
 permissions:
@@ -37,6 +39,8 @@ jobs:
       - name: Verify textual five-theorem source contract
         run: |
           PYTHONPATH=tools python3 -c 'from pathlib import Path; from source_inventory import verify_surface; verify_surface(Path("src/Main.lean"))'
+      - name: Record immutable community-schema cache identity (not proof verification)
+        run: python3 tools/rh_ci_identity.py --root . --output analysis/ci/rh-ci-input-identity.json
       - name: Compute reverse-import rebuild candidates (not a proof check)
         run: |
           python3 tools/ci_import_impact.py --src src \
