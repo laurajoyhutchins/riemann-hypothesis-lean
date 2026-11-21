@@ -108,15 +108,22 @@ private theorem indicatorIntegral_le_clipped (c H : ℝ) (hH : 0 ≤ H) :
         (indicatorAntitone c).intervalIntegrable
       have hfirst :
           (∫ t in (0 : ℝ)..c, if t < c then (1 : ℝ) else 0) ≤ c := by
-        have h := intervalIntegral.integral_mono_on hc0 hi1 intervalIntegrable_const
-          (fun t _ => by split_ifs <;> norm_num)
+        have h :
+            (∫ t in (0 : ℝ)..c, if t < c then (1 : ℝ) else 0) ≤
+              ∫ _t in (0 : ℝ)..c, (1 : ℝ) := by
+          apply intervalIntegral.integral_mono_on hc0 hi1 intervalIntegrable_const
+          intro t _
+          split_ifs <;> norm_num
         simpa using h
       have hsecond :
           (∫ t in c..H, if t < c then (1 : ℝ) else 0) ≤ 0 := by
-        have h := intervalIntegral.integral_mono_on hcH hi2 intervalIntegrable_const
-          (fun t ht => by
-            have ht' : t ∈ Set.Icc c H := by simpa [Set.uIcc_of_le hcH] using ht
-            simp [not_lt.mpr ht'.1])
+        have h :
+            (∫ t in c..H, if t < c then (1 : ℝ) else 0) ≤
+              ∫ _t in c..H, (0 : ℝ) := by
+          apply intervalIntegral.integral_mono_on hcH hi2 intervalIntegrable_const
+          intro t ht
+          have ht' : t ∈ Set.Icc c H := by simpa [Set.uIcc_of_le hcH] using ht
+          simp [not_lt.mpr ht'.1]
         simpa using h
       have hbound :
           (∫ t in (0 : ℝ)..H, if t < c then (1 : ℝ) else 0) ≤ c := by
@@ -146,10 +153,11 @@ theorem finiteThresholdIntegralBound (N : ℕ) (a : Fin N → ℝ)
       ((Finset.univ.filter (fun i : Fin N => a i < s - t)).card : ℝ) =
         ∑ i : Fin N, if t < s - a i then (1 : ℝ) else 0 := by
     rw [Finset.sum_boole]
-    congr 1
-    apply Finset.filter_congr
-    intro i _
-    constructor <;> intro h <;> linarith
+    have hf :
+        (Finset.univ.filter (fun i : Fin N => a i < s - t)) =
+          (Finset.univ.filter (fun i : Fin N => t < s - a i)) :=
+      Finset.filter_congr (fun i _ => by constructor <;> intro h <;> linarith)
+    rw [hf]
   have heq :
       (fun t : ℝ => ((Finset.univ.filter (fun i : Fin N => a i < s - t)).card : ℝ)) =
         (fun t : ℝ => ∑ i : Fin N, if t < s - a i then (1 : ℝ) else 0) := by
