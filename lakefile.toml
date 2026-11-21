@@ -59,8 +59,3 @@ globs = ["Supplements.+"]
 [[lean_lib]]
 name = "Main"
 roots = ["Statements", "Main"]
-
-# Non-default experimental build target; original Main remains unchanged.
-[[lean_lib]]
-name = "MainMinimal"
-roots = ["MainMinimal"]
