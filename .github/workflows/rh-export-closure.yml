@@ -1,7 +1,7 @@
 name: RH exact kernel dependency census from pinned proof export
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # expensive published-export job runs only for explicit dispatch
   pull_request:
     paths:
       - tools/export_closure.py
@@ -10,7 +10,7 @@ on:
 
 concurrency:
   group: rh-export-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   parser-smoke:
@@ -47,6 +47,7 @@ jobs:
           PY
 
   published-proof-census:
+    if: github.event_name == 'workflow_dispatch'
     needs: parser-smoke
     runs-on: ubuntu-24.04
     timeout-minutes: 180
