@@ -47,7 +47,7 @@ theorem EventuallyUnder.and {guard : PointAdmissibility}
      hb x hx ((le_max_right _ _).trans hle) ι p hp⟩⟩
 
 /-- Universally quantified bounds whose meaning is independent of which
-    realization predicate is used to admit a family point. -/
+    realization predicate is used to select a family point. -/
 def LiftsUnder (guard : PointAdmissibility)
     (Q : ∀ {eps : ℝ} (Fm : FamP eps) (x : ℝ)
       (hx : Fm.x1 < x) (ι : Fm.Ix x) (p : Pt Fm x hx ι)
@@ -87,9 +87,8 @@ theorem covolume_of_guarded_steps (guard : PointAdmissibility) :
   intro hG hR hC hB hL hS hK hW
   refine Closed.imp (Closed.and (Closed.and (Closed.and hG hR) (Closed.and hC hB))
     (Closed.and (Closed.and hL hS) (Closed.and hK hW))) ?_
-  rintro eps Fm CH he
-    ⟨⟨⟨⟨_, -, g⟩, ⟨_, -, r⟩⟩, ⟨⟨_, -, c⟩, ⟨_, -, b⟩⟩⟩,
-     ⟨⟨A, -, l⟩, ⟨B, -, s⟩⟩, ⟨C1, h1, k⟩, ⟨C2, h2, w⟩⟩
+  rintro eps Fm CH he ⟨⟨⟨⟨_, -, g⟩, ⟨_, -, r⟩⟩, ⟨⟨_, -, c⟩, ⟨_, -, b⟩⟩⟩,
+    ⟨⟨A, -, l⟩, ⟨B, -, s⟩⟩, ⟨C1, h1, k⟩, ⟨C2, h2, w⟩⟩
   have hez : 0 < Fm.ez := by
     obtain ⟨i⟩ := Fm.Ix_zero
     rw [← Fm.L_ez 0 i]
@@ -127,9 +126,15 @@ theorem covolX_of_steps_from_guard :
 /-- Alternative row predicate: exact same proposition as the third-place
     assembly theorem, without assuming `RowsTAlt → RowsT`. -/
 theorem covolX_of_lift_bounds_from_guard :
-    GramCondition → LiftRecursive → LiftTruncation → LiftBadSet →
-    LiftLambdaBound → SizeCondition → CoreBound' → LiftLowBound →
-    CovolumeBoundOfX := by
+    _root_.GlobalTheory.CovTop.GramCondition →
+    _root_.GlobalTheory.CovTop.LiftRecursive →
+    _root_.GlobalTheory.CovTop.LiftTruncation →
+    _root_.GlobalTheory.CovTop.LiftBadSet →
+    _root_.GlobalTheory.CovTop.LiftLambdaBound →
+    _root_.GlobalTheory.CovTop.SizeCondition →
+    _root_.GlobalTheory.CovTop.CoreBound' →
+    _root_.GlobalTheory.CovTop.LiftLowBound →
+    _root_.GlobalTheory.CovTop.CovolumeBoundOfX := by
   exact covolume_of_guarded_steps
     (fun _ _ _ _ p => RowsTAlt p)
 
