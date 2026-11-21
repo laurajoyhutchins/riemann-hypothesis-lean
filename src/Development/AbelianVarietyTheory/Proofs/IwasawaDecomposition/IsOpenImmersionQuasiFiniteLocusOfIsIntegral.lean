@@ -260,7 +260,7 @@ theorem isOpenImmersion_quasiFiniteLocus {W Γ Y : Scheme.{0}} (i : W ⟶ Γ) (p
   rw [← hb, Category.assoc]
   exact @IsOpenImmersion.comp _ _ _ b (Q'.ι ≫ p ∣_ V y) _ hint
 
-theorem existsUnique_hom_extension_of_dvr
+theorem existsUnique_hom_extension_of_dvr_core
     (H : (∀ (T K : Type) [CommRing T] [IsDomain T] [IsDiscreteValuationRing T] [Field K]
       [Algebra T K] [IsFractionRing T K] (G G' : Over (Sp T)) [GrpObj G] [GrpObj G'],
       IsSemiAbelian G → IsSemiAbelian G' →
@@ -268,7 +268,8 @@ theorem existsUnique_hom_extension_of_dvr
         (Over.pullback (spMap (algebraMap T K))).obj G', IsMonHom f →
       ∃! F : G ⟶ G', IsMonHom F ∧ (Over.pullback (spMap (algebraMap T K))).map F = f))
     (X U : Scheme.{0}) [IsLocallyNoetherian X] (j : U ⟶ X) (hX : Geo.Tor.IsNormalScheme X)
-    [IsOpenImmersion j] [IsDominant j] (G G' : Over X) [GrpObj G] [GrpObj G']
+    [IsPreimmersion j] [Flat j] [IsDominant j] (G G' : Over X) [GrpObj G] [GrpObj G']
+    [QuasiCompact (pullback.fst G.hom j)]
     (hG : IsSemiAbelian G) (hG' : IsSemiAbelian G')
     (f : (Over.pullback j).obj G ⟶ (Over.pullback j).obj G') (hf : IsMonHom f) :
     ∃! F : G ⟶ G', IsMonHom F ∧ (Over.pullback j).map F = f := by
@@ -554,6 +555,26 @@ theorem existsUnique_hom_extension_of_dvr
   refine ⟨F, ⟨?_, hF⟩, fun F' hF' ↦ pullback_map_injective_of_flat j (hF'.2.trans hF.symm)⟩
   have : IsMonHom ((Over.pullback j).map F) := hF ▸ hf
   exact isMonHom_of_pullback_of_flat j F
+
+theorem existsUnique_hom_extension_of_dvr
+    (H : (∀ (T K : Type) [CommRing T] [IsDomain T] [IsDiscreteValuationRing T] [Field K]
+      [Algebra T K] [IsFractionRing T K] (G G' : Over (Sp T)) [GrpObj G] [GrpObj G'],
+      IsSemiAbelian G → IsSemiAbelian G' →
+      ∀ f : (Over.pullback (spMap (algebraMap T K))).obj G ⟶
+        (Over.pullback (spMap (algebraMap T K))).obj G', IsMonHom f →
+      ∃! F : G ⟶ G', IsMonHom F ∧ (Over.pullback (spMap (algebraMap T K))).map F = f))
+    (X U : Scheme.{0}) [IsLocallyNoetherian X] (j : U ⟶ X) (hX : Geo.Tor.IsNormalScheme X)
+    [IsOpenImmersion j] [IsDominant j] (G G' : Over X) [GrpObj G] [GrpObj G']
+    (hG : IsSemiAbelian G) (hG' : IsSemiAbelian G')
+    (f : (Over.pullback j).obj G ⟶ (Over.pullback j).obj G') (hf : IsMonHom f) :
+    ∃! F : G ⟶ G', IsMonHom F ∧ (Over.pullback j).map F = f := by
+  have := hG.smooth
+  have := hG'.smooth
+  have := hG.quasiCompact
+  have := hG'.quasiCompact
+  have : QuasiCompact (pullback.fst G.hom j) :=
+    inferInstanceAs (QuasiCompact (pullback.fst G.hom j))
+  exact existsUnique_hom_extension_of_dvr_core H X U j hX G G' hG hG' f hf
 
 end GlobalTheory.HomExtNormal
 
