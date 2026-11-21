@@ -1,4 +1,5 @@
 import Mathlib
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorModuliObjectPullback
 import Development.AbelianVarietyTheory.Definitions.Divisors.ToRepFam
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.PushEquivSymmLeft
 import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsAbelianSchemeOfIsGrpPullback
@@ -157,87 +158,6 @@ theorem exists_objMap : ∀ (p : ℕ) [Fact p.Prime] (D : GlobalTheory.UPel.HT.D
     (N : ℕ) (S S' : Scheme.{0}) (s : S ⟶ Sp R) (s' : S' ⟶ Sp R) (o : Obj b N s) (f : S' ⟶ S), f ≫ s = s' →
     ∃ o' : Obj b N s', Nonempty (ObjMap o' o f) := by
   intro p _ D R _ b N S S' s s' o f hs
-  subst hs
-  have h : IsGrpPullback ((Over.pullback f).obj o.A) o.A f (PullbackComparison.pφ f o.A) := PullbackComparison.isGrpPullback f o.A
-  have hact := OActN.pull_left f o.act
-  have hP := pull_isLB o.isLB (PullbackComparison.pφ₂ f o.A)
-  have hL := pull_isLB o.isLB (lift (𝟙 o.A) (𝟙 o.A)).left
-  have hL' := pull_isLB hP (lift (𝟙 ((Over.pullback f).obj o.A)) (𝟙 ((Over.pullback f).obj o.A))).left
-  have hdiag : (lift (𝟙 ((Over.pullback f).obj o.A)) (𝟙 ((Over.pullback f).obj o.A))).left ≫ PullbackComparison.pφ₂ f o.A =
-      PullbackComparison.pφ f o.A ≫ (lift (𝟙 o.A) (𝟙 o.A)).left :=
-    lift_pφ₂ f _ _ _ _ _ (by simp) (by simp)
-  have hLi : LBIso ((o.P.pull (PullbackComparison.pφ₂ f o.A)).pull
-      (lift (𝟙 ((Over.pullback f).obj o.A)) (𝟙 ((Over.pullback f).obj o.A))).left)
-      ((o.P.pull (lift (𝟙 o.A) (𝟙 o.A)).left).pull (PullbackComparison.pφ f o.A)) :=
-    LBIso.chartPull (chartPullLinComb o.P (PullbackComparison.pφ₂ f o.A) _ _ (fun _ : PUnit => 1) (PullbackComparison.pφ f o.A) (fun _ => hdiag))
-      (chartPullPull _ (PullbackComparison.pφ f o.A) _ rfl) (PullbackComparison.gen_refl _ hL)
-  obtain ⟨hab, hamp, -⟩ := GlobalTheory.PolPull.pol_pull_of_relAmple_local GlobalTheory.AmpleLocal.relAmple_of_locally S S' o.A _ f _
-    _ _ hL hL' o.ab h hLi
-  have hrose : ∀ c : D.O, LBIso ((o.P.pull (PullbackComparison.pφ₂ f o.A)).pull
-      (lift (fst ((Over.pullback f).obj o.A) ((Over.pullback f).obj o.A) ≫ (OActN.pull f o.act).act c)
-        (snd ((Over.pullback f).obj o.A) ((Over.pullback f).obj o.A))).left)
-      ((o.P.pull (PullbackComparison.pφ₂ f o.A)).pull (lift (fst ((Over.pullback f).obj o.A) ((Over.pullback f).obj o.A))
-        (snd ((Over.pullback f).obj o.A) ((Over.pullback f).obj o.A) ≫
-          (OActN.pull f o.act).act (D.star c).unop)).left) := fun c => by
-    refine LBIso.chartPull (chartPullLinComb o.P _ _ _ (fun _ : PUnit => 1) (PullbackComparison.pφ₂ f o.A) (fun _ => ?_))
-      (chartPullLinComb o.P _ _ _ (fun _ : PUnit => 1) (PullbackComparison.pφ₂ f o.A) (fun _ => ?_)) (o.rosati c)
-    · refine lift_pφ₂ f _ _ _ _ _ ?_ (PullbackComparison.pφ₂_snd f o.A).symm
-      rw [Over.comp_left, Over.comp_left, Category.assoc, hact, ← Category.assoc, ← PullbackComparison.pφ₂_fst, Category.assoc]
-    · refine lift_pφ₂ f _ _ _ _ _ (PullbackComparison.pφ₂_fst f o.A).symm ?_
-      rw [Over.comp_left, Over.comp_left, Category.assoc, hact, ← Category.assoc, ← PullbackComparison.pφ₂_snd, Category.assoc]
-  obtain ⟨t₁, ht₁⟩ := o.rig₁
-  obtain ⟨t₂, ht₂⟩ := o.rig₂
-  refine ⟨{ A := (Over.pullback f).obj o.A
-            ab := hab
-            act := OActN.pull f o.act
-            P := o.P.pull (PullbackComparison.pφ₂ f o.A)
-            isLB := hP
-            rig₁ := gen_chartPull (chartPullLinComb o.P _ _ _ _ (PullbackComparison.pφ f o.A)
-              (fun _ => PullbackComparison.lift_one_id f o.A)) t₁ ht₁
-            rig₂ := gen_chartPull (chartPullLinComb o.P _ _ _ _ (PullbackComparison.pφ f o.A)
-              (fun _ => PullbackComparison.lift_id_one f o.A)) t₂ ht₂
-            symm := LBIso.chartPull (chartPullPull o.P _ _ rfl)
-              (chartPullLinComb o.P _ _ _ _ (PullbackComparison.pφ₂ f o.A) (fun _ => PullbackComparison.lift_swap f o.A)) o.symm
-            ample := hamp o.ample
-            kerP := ?_
-            rosati := hrose
-            lie := ?_
-            lieRank := fun k _ _ x β hx i =>
-              (GlobalTheory.LiePull.lieMult_pull (𝓞 D.F) S S' o.A _ f _ (o.act.toF D) ((OActN.pull f o.act).toF D) h
-                (fun c => hact _) k x (β.comp (b.t i)) D.m).2
-                (o.lieRank k (x ≫ f) β ((Category.assoc _ _ _).trans hx) i)
-            eta := fun y => GlobalTheory.ObjPull.secPull h (o.eta y)
-            eta_add := fun y z => by rw [o.eta_add, map_mul]
-            eta_lin := fun c y => by rw [o.eta_lin]; exact secPull_comp f h _ _ (hact c) _
-            eta_ker := fun y => by rw [o.eta_ker y, map_one]
-            geom := fun k _ _ x β hx => ?_ },
-    ⟨{ φ := PullbackComparison.pφ f o.A
-       φ₂ := PullbackComparison.pφ₂ f o.A
-       cart := h
-       sq := PullbackComparison.isSquare f o.A
-       act := hact
-       pol := PullbackComparison.gen_refl _ hP
-       eta := fun y => GlobalTheory.ObjPull.secPull_left h _ }⟩⟩
-  · obtain ⟨e, he, hk⟩ := o.kerP
-    refine ⟨e, he, fun T x H => ?_⟩
-    have := hk (Over.mk (T.hom ≫ f)) (GlobalTheory.ObjPull.pushEquiv h T x) (gen_ker_push f o.P T x H)
-    exact (GlobalTheory.ObjPull.pushEquiv h T).injective (by rw [map_pow, this, map_one])
-  · intro R' _ β x hx v hv
-    obtain ⟨e, he⟩ := GlobalTheory.LiePull.exists_pushEquiv h (epsPtR x) (spMap (algebraMap R' (DualNumber R')) ≫ x ≫ f)
-      (Category.assoc _ _ _).symm
-    obtain ⟨w₀, hw₀, hv₀⟩ := o.lie R' β (x ≫ f) ((Category.assoc _ _ _).trans hx) (e v)
-      ((isTanScal_push f h o.act _ hact x e he _ _ v).1 hv)
-    refine ⟨fun i => e.symm (w₀ i), fun i c => (isTanScal_push f h o.act _ hact x e he _ _ _).2
-      (by rw [e.apply_symm_apply]; exact hw₀ i c), e.injective ?_⟩
-    rw [hv₀, map_list_prod, List.map_ofFn]
-    simp [Function.comp_def]
-  · obtain ⟨I, hI⟩ := o.geom k (x ≫ f) β ((Category.assoc _ _ _).trans hx)
-    refine ⟨tateMoveO (GlobalTheory.ObjPull.pushEquiv h (Over.mk x)) (fun c g => ?_) (fun n g g' z hz => ?_) I, fun y => ?_⟩
-    · apply Over.OverMorphism.ext
-      show (g.left ≫ _) ≫ _ = (g.left ≫ _) ≫ _
-      rw [Category.assoc, hact, Category.assoc]
-    · exact (GlobalTheory.weilIs_grpPullback_of_comm S S' o.A _ f _ _ _ hL hL' h hLi
-        (Over.mk x) n g g' _ _ _ rfl rfl).2 hz
-    · exact (MulEquiv.eq_symm_apply _).2 ((GlobalTheory.ObjPull.pushEquiv_secPull h _ _).trans (hI y))
+  exact GlobalTheory.HTPullEvery.exists_objMap p D R b N S S' s s' f hs o
 
 end GlobalTheory.UPel.HT.BaseChange
