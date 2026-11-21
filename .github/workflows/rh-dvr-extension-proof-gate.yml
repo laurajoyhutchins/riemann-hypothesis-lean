@@ -24,7 +24,7 @@ concurrency:
 jobs:
   focused-dvr-source-proof:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,6 +54,8 @@ jobs:
           set -euo pipefail
           lake exe mathlib/cache get
           git diff --quiet HEAD -- lakefile.toml lake-manifest.json lean-toolchain src
+      # Source imports exceeded 30 minutes on the initial exact-head gate (9502/10542).
+      # Do not turn a legitimate long build into a false negative.
       - name: Build both affected theorems and their full source imports
         shell: bash
         run: |
