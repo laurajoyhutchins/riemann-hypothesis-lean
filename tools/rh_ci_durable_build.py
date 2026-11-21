@@ -205,6 +205,7 @@ def run_build(
             record["attempts"] = record.get("attempts", 0) + 1
             write_state(run_dir, record, "building")
             interrupted = None
+            interrupted_at = None
             child = None
             original_handlers = {}
             env = dict(os.environ)
@@ -223,8 +224,10 @@ def run_build(
                         stderr=subprocess.STDOUT, start_new_session=True,
                     )
                     def forward(signum, frame):
-                        nonlocal interrupted
-                        interrupted = signum
+                        nonlocal interrupted, interrupted_at
+                        if interrupted is None:
+                            interrupted = signum
+                            interrupted_at = time.monotonic()
                         try:
                             os.killpg(child.pid, signal.SIGTERM)
                         except ProcessLookupError:
@@ -232,7 +235,21 @@ def run_build(
                     for signum in (signal.SIGINT, signal.SIGTERM):
                         original_handlers[signum] = signal.signal(signum, forward)
                     try:
-                        code = child.wait()
+                        while True:
+                            try:
+                                code = child.wait(timeout=0.5)
+                                break
+                            except subprocess.TimeoutExpired:
+                                if (interrupted_at is not None and
+                                        time.monotonic() - interrupted_at >= 10):
+                                    # Termination-resistant Lean processes must not
+                                    # outlive the checkpoint owner's critical section.
+                                    try:
+                                        os.killpg(child.pid, signal.SIGKILL)
+                                    except ProcessLookupError:
+                                        pass
+                                    code = child.wait()
+                                    break
                     finally:
                         for signum, handler in original_handlers.items():
                             signal.signal(signum, handler)
@@ -252,9 +269,15 @@ def run_build(
                     )
                     return code
             except BaseException:
+                if child is not None and child.poll() is None:
+                    try:
+                        os.killpg(child.pid, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+                    child.wait()
                 if record["state"] == "building":
-                    # SIGKILL cannot run this cleanup; its orphaned journal is
-                    # intentionally not automatically resumable.
+                    # SIGKILL of *this controller* cannot run cleanup; its
+                    # orphaned 'building' journal remains blocked on retry.
                     write_state(run_dir, record, "failed", exit_code=None)
                 raise
 
