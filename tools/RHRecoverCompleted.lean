@@ -1,4 +1,4 @@
-/-!
+/-
 Stock Lake completion recovery for already-elaborated Lean modules.
 
 This is a bounded, local recovery *candidate* tool, not an independent
