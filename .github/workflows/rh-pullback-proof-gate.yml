@@ -10,7 +10,6 @@ on:
       - src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/ExistsHarrisTaylorObjectPullbackBis.lean
       - src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/ExistsHarrisTaylorObjectPullbackAlong.lean
       - tools/RHPullbackCheck.lean
-      - .github/workflows/rh-pullback-proof-gate.yml
 
 permissions:
   contents: read
