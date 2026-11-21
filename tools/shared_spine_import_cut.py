@@ -131,8 +131,8 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--src", type=Path, default=Path("src"))
     ap.add_argument("--root", default=(
-        "Development.AutomorphicArithmetic.CharacterBoxes."
-        "EveryCharacterOfLiteratureOfVWin"
+        "Development.AutomorphicArithmetic.ThetaCorrespondence."
+        "ThetaPairLifts.ThirdPlaceSeries.EveryCharacterOfLiteratureOfVWin"
     ))
     ap.add_argument("--out", type=Path, default=Path(
         "analysis/rh-common-spine-direct-import-footprints.json"
