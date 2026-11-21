@@ -35,5 +35,16 @@
       "lines": 41
     }
   ],
-  "scope": "Import-only unused after the direct MainTheorems import; NOT kernel-verified source pruning."
+  "scope": "Import-only six-module deletion and one explicit Harris–Taylor proof-sharing refactor; source-verified, not yet kernel-verified.",
+  "proof_refactors": [
+    {
+      "path": "src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/HarrisTaylorExistsGluedFirstOrderDeformation.lean",
+      "original_blob_sha": "d5d9af2f39f0b825a9a5fa2155fd4943b617dc54",
+      "current_blob_sha": "04bd9a610c73fa66156c3e02899e69bfdce22c0b",
+      "original_lines": 143,
+      "current_lines": 116,
+      "declaration": "GlobalTheory.HTGlue.exists_obj_of_summand",
+      "verification": "source-audited only; Lean compilation and independent kernel check not performed"
+    }
+  ]
 }
