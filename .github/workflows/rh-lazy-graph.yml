@@ -63,6 +63,12 @@ jobs:
           lake build MiniMain
           python3 ../tools/rh_lean_graph.py --module MiniMain --root MiniMain.entry \
             --depth 4 --output SmokeGraph.lean
+          cat >> SmokeGraph.lean <<'EOF'
+          #eval getRelevantConstsFromConst `MiniMain.entry
+          #eval do
+            let body ← getConstantBody `MiniMain.entry
+            return body.map (fun b => b.getUsedConstants)
+          EOF
           /usr/bin/time -v -o extraction-time.txt lake env lean SmokeGraph.lean
           cat extraction-time.txt
           python3 ../tools/validate_rh_lean_graph.py --root MiniMain.entry \
