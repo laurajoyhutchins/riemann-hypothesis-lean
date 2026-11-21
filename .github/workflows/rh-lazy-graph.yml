@@ -54,3 +54,24 @@ jobs:
               db.close()
           print('Official sample: full Expr payload available by ID')
           PY
+
+      - name: Export official sample in upstream Lean Graph JSON format
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/export_lean_graph.py \
+            --index-dir analysis/viewer-sample \
+            --root Nat.add_succ --depth 1 \
+            --max-nodes 2000 \
+            --output analysis/lean-graph-Nat.add_succ.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          nodes=json.loads(Path('analysis/lean-graph-Nat.add_succ.json').read_text())
+          manifest=json.loads(Path('analysis/lean-graph-Nat.add_succ.manifest.json').read_text())
+          assert nodes and any(n['name']=='Nat.add_succ' for n in nodes)
+          assert all(set(n)=={'name','references','constCategory','constType'} for n in nodes)
+          assert manifest['boundary_count']>0
+          assert manifest['complete_transitive_closure'] is False
+          print('Upstream Lean Graph sample format: accepted')
+          PY
