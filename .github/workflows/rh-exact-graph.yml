@@ -1,0 +1,95 @@
+name: RH five-root kernel expression graph census
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - tools/export_exact_graph.py
+      - tools/test_export_exact_graph.py
+      - .github/workflows/rh-exact-graph.yml
+
+concurrency:
+  group: rh-exact-graph-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  graph-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools
+          sparse-checkout-cone-mode: true
+          persist-credentials: false
+      - name: Test graph traversal and five-root intersection logic
+        run: python3 -m unittest discover -s tools -p 'test_export_exact_graph.py' -v
+      - name: Reconstruct official exporter Nat.add_succ sample graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 \
+            https://raw.githubusercontent.com/leanprover/lean4export/v4.33.0/examples/Nat.add_succ.ndjson |
+            python3 tools/export_exact_graph.py \
+              --root Nat.add_succ --output-dir analysis/smoke
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d = json.loads(Path('analysis/smoke/rh-exact-root-closures.json').read_text())
+          assert d['expression_nodes'] > 400, d
+          assert d['per_root_declaration_count']['Nat.add_succ'] > 0, d
+          assert d['exported_declarations'] >= d['union_of_five'], d
+          assert d['unresolved_constant_id_count'] == 0, d
+          print('Official lean4export sample graph: accepted')
+          PY
+
+  published-proof-five-root-graph:
+    needs: graph-smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools
+          sparse-checkout-cone-mode: true
+          persist-credentials: false
+      - name: Confirm available disk and streaming decompressor
+        run: |
+          set -euo pipefail
+          df -h .
+          free -h
+          command -v zstd || (sudo apt-get update -qq && sudo apt-get install -y -qq zstd)
+      - name: Download and verify published independent kernel export
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --connect-timeout 30 --max-time 3300 \
+            https://math.mit.edu/~drew/grh/solution.ndjson.zst \
+            -o "$RUNNER_TEMP/solution.ndjson.zst"
+          printf '%s  %s\n' \
+            '61a8938ad5f5e57397c1c0e3b954916af546d9004ade01c3555744a681b05381' \
+            "$RUNNER_TEMP/solution.ndjson.zst" | sha256sum --check -
+      - name: Traverse exact five-root proof types and values
+        shell: bash
+        run: |
+          set -euo pipefail
+          zstd -d --long=30 --stdout "$RUNNER_TEMP/solution.ndjson.zst" |
+            python3 tools/export_exact_graph.py \
+              --output-dir analysis/exact \
+              --compressed-sha256 61a8938ad5f5e57397c1c0e3b954916af546d9004ade01c3555744a681b05381
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d = json.loads(Path('analysis/exact/rh-exact-root-closures.json').read_text())
+          assert d['unresolved_constant_id_count'] == 0, d
+          assert len(d['per_root_declaration_count']) == 5, d
+          assert d['union_of_five'] > 0, d
+          print('Exact five-root closure graph exported')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rh-five-root-exact-kernel-dependency-graph
+          path: analysis/exact
+          retention-days: 30
+          if-no-files-found: warn
