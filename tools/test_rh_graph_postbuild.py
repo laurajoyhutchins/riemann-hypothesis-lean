@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from rh_graph_postbuild import inspect_retained_build
+from rh_graph_postbuild import inspect_retained_build, load_trusted_controller
 
 
 def digest(data):
@@ -87,6 +87,12 @@ class RetainedBuildTests(unittest.TestCase):
         (self.work / "result/outputs.jsonl").write_text(json.dumps("2026-03-17") + "\n")
         with self.assertRaisesRegex(ValueError, "Main trace"):
             self.inspect()
+
+    def test_refuses_unpinned_community_controller(self):
+        with patch("rh_graph_postbuild.subprocess.check_output",
+                   return_value="0" * 40 + "\\n"):
+            with self.assertRaisesRegex(ValueError, "pinned clean revision"):
+                load_trusted_controller(self.home / "community/scripts/ci-build.py")
 
     def test_refuses_missing_mapped_archive(self):
         (self.work / "cache/artifacts" / ("b" * 16 + ".ltar")).unlink()
