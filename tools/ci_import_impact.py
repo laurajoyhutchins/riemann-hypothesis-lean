@@ -48,7 +48,7 @@ def plan_impact(
     for module, dependencies in imports.items():
         for dependency in dependencies:
             reverse[dependency].add(module)
-            if dependency not in imports and dependency.partition(".")[0] in local_roots:
+            if dependency not in imports and (dependency.partition(".")[0] in local_roots or dependency in changed_modules):
                 unresolved.add(dependency)
 
     # A missing internal import may be a deletion, but is *not* known to be
