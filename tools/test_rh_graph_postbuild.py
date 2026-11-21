@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 from rh_graph_postbuild import (
     inspect_retained_build, load_trusted_controller, parse_time_receipt,
-    verify_retained_source, TIME_FORMAT,
+    verify_retained_source, TIME_FORMAT, preserve_extraction_failure,
 )
 
 
@@ -132,6 +132,24 @@ class RetainedBuildTests(unittest.TestCase):
             timing.write_text(payload)
             with self.assertRaises(ValueError):
                 parse_time_receipt(timing)
+
+    def test_failure_evidence_without_publishing_incomplete_graph(self):
+        work_result = self.work / "result"
+        (work_result / "rh-graph-lean.log").write_text("unresolved boundary")
+        (work_result / "rh-graph-time.txt").write_text(
+            "wall_seconds=2.5\\npeak_rss_kib=2048\\nexit_status=0\\n")
+        destination = self.home / "out"
+        preserve_extraction_failure(destination, work_result,
+                                    "3 external references remain",
+                                    self.identity["candidate_head"], 2)
+        record = json.loads((destination / "failure.json").read_text())
+        self.assertEqual(record["status"], "unverified_extraction_failure")
+        self.assertEqual(record["depth"], 2)
+        self.assertIn("3 external references", record["reason"])
+        self.assertFalse(record["complete_lean_dependency_closure"])
+        self.assertTrue((destination / "extraction-time.txt").is_file())
+        self.assertTrue((destination / "extraction.log").is_file())
+        self.assertFalse((destination / "manifest.json").exists())
 
     def test_real_gnu_time_receipt_contract(self):
         receipt = self.home / "real-time.txt"
