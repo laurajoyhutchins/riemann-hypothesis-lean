@@ -48,12 +48,15 @@ class ExactGraphTests(unittest.TestCase):
 
     def test_missing_constant_is_reported(self):
         rows = make_stream()
-        # Replace value with a reference to an introduced but undeclared name.
-        rows.insert(-1, b'{"ie":6,"const":{"name":7,"us":[]}}\n')
-        rows[-1] = b'{"thm":[{"name":7,"type":0,"value":6,"all":[7],"levelParams":[]}]}\n'
-        report, members = analyze(rows, roots=("first", "second"))
-        self.assertEqual(report["unresolved_constant_id_count"], 0)
-        self.assertTrue(members)
+        rows.insert(8, b'{"in":8,"str":{"pre":0,"str":"ghost"}}\n')
+        thm = next(i for i, line in enumerate(rows) if b'"thm"' in line)
+        rows.insert(thm, b'{"ie":6,"const":{"name":8,"us":[]}}\n')
+        first = next(i for i, line in enumerate(rows) if b'"name":5' in line
+                     and b'"thm"' in line)
+        rows[first] = rows[first].replace(b'"value":3', b'"value":6')
+        report, _ = analyze(rows, roots=("first", "second"))
+        self.assertEqual(report["unresolved_constant_id_count"], 1)
+        self.assertEqual(report["unresolved_constant_ids"], [8])
 
 
 if __name__ == "__main__":
