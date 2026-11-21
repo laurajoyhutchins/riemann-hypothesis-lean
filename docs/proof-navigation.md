@@ -96,7 +96,7 @@ Do not call a reduction proof-preserving until the final theorem types and kerne
 
 ## First executable investigation
 
-The separate [minimal Main experiment](minimal-main-experiment.md) contains a nondefault Lean target, a deterministic import-closure analyzer, fixture tests, and an axiom-inspection checklist. It does not change the original five results. An import-graph result is not a kernel dependency certificate.
+The [minimal Main experiment](minimal-main-experiment.md) has already been performed at the *source/import* level in separate [draft PR #1](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/pull/1), which also has more advanced dependency tooling. Those source results do not constitute a kernel dependency certificate. For the mathematics behind the final theorem witnesses, read the [analytic reduction](proof-atlas/analytic-reduction.md) and [literature/theta bridge](proof-atlas/literature-bridge.md).
 
 ## Next maps to build
 
