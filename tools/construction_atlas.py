@@ -155,6 +155,13 @@ def rank(records: list[dict], *, max_groups: int, min_members: int) -> dict:
         add_group("shared_qualified_dependency", anchor, ids)
 
     classes = Counter(g["class"] for g in groups)
+    exact_groups = [g for g in groups if g["class"] == "identical_proof_text"]
+    # Exact-body digest groups partition qualifying source proofs. This sum
+    # is a gross, unverified textual bound for those groups, NOT an estimate
+    # of lines removable after adding generic lemmas and bridge declarations.
+    exact_body_upper_bound = sum(
+        g["hypothetical_reusable_body_upper_bound"] for g in exact_groups
+    )
     groups.sort(key=lambda g: (
         -g["hypothetical_reusable_body_upper_bound"],
         -g["modules"], g["class"], g["key"]
@@ -171,6 +178,7 @@ def rank(records: list[dict], *, max_groups: int, min_members: int) -> dict:
     return {
         "groups_before_output_limit": len(groups),
         "group_counts_by_class": dict(classes),
+        "exact_body_gross_hypothetical_upper_bound": exact_body_upper_bound,
         "output_limit": max_groups,
         "groups": chosen,
         "integrity": (
@@ -207,6 +215,8 @@ def main() -> None:
     args.out.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print("Census:", json.dumps(census, sort_keys=True))
     print("Candidate groups:", json.dumps(ranking["group_counts_by_class"], sort_keys=True))
+    print("Exact-body gross hypothetical upper bound:",
+          ranking["exact_body_gross_hypothetical_upper_bound"])
     for klass in ("identical_proof_text", "matching_tactic_shape",
                   "shared_qualified_dependency"):
         selected = [g for g in ranking["groups"] if g["class"] == klass][:10]
