@@ -146,6 +146,30 @@ def parse_time_receipt(path: Path) -> dict:
     }
 
 
+def preserve_extraction_failure(output: Path, result: Path, error: str,
+                                source_revision: str, depth: int) -> None:
+    """Retain a machine-readable blocker even when no validated JSON exists."""
+    output.mkdir(parents=True, exist_ok=True)
+    summary = {
+        "status": "unverified_extraction_failure",
+        "reason": error,
+        "source_revision": source_revision,
+        "roots": list(RH_ROOTS),
+        "depth": depth,
+        "complete_lean_dependency_closure": False,
+        "independent_kernel_verification": False,
+    }
+    (output / "failure.json").write_text(
+        json.dumps(summary, sort_keys=True, indent=2) + "\n")
+    for source, destination in (
+        ("rh-graph-lean.log", "extraction.log"),
+        ("rh-graph-time.txt", "extraction-time.txt"),
+    ):
+        path = result / source
+        if path.is_file() and not path.is_symlink():
+            (output / destination).write_bytes(path.read_bytes())
+
+
 def extract(evidence: dict, *, candidate: Path, community: Path, extractor: Path,
             state: Path, depth: int, output: Path, jobs: int,
             require_closed: bool = False) -> dict:
@@ -191,15 +215,18 @@ def extract(evidence: dict, *, candidate: Path, community: Path, extractor: Path
     with (result / "rh-graph-lean.log").open("w") as log:
         completed = subprocess.run(time_cmd, stdout=log, stderr=subprocess.STDOUT,
                                    check=False)
-    if completed.returncode:
-        raise RuntimeError(f"upstream Lean extraction failed, exit {completed.returncode}; "
-                           f"see {result / 'rh-graph-lean.log'}")
-    if any(not (result / n).is_file() for n in RESULT_NAMES):
-        raise ValueError("upstream Lean did not produce all five root and combined graphs")
-    measured = parse_time_receipt(timing)
-    receipt = publish_graphs(result, output, RH_ROOTS, depth,
-                             require_closed=require_closed,
-                             source_revision=verified_head)
+    try:
+        if completed.returncode:
+            raise RuntimeError(f"upstream Lean extraction failed, exit {completed.returncode}")
+        if any(not (result / n).is_file() for n in RESULT_NAMES):
+            raise ValueError("upstream Lean did not produce all five root and combined graphs")
+        measured = parse_time_receipt(timing)
+        receipt = publish_graphs(result, output, RH_ROOTS, depth,
+                                 require_closed=require_closed,
+                                 source_revision=verified_head)
+    except (ValueError, OSError, RuntimeError, json.JSONDecodeError) as error:
+        preserve_extraction_failure(output, result, str(error), verified_head, depth)
+        raise
     receipt["retained_build"] = {
         k: str(v) if isinstance(v, Path) else v
         for k, v in evidence.items() if k != "work"
