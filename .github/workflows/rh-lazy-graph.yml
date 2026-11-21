@@ -24,6 +24,8 @@ jobs:
           sparse-checkout: |
             tools
             lean-toolchain
+            lakefile.toml
+            lake-manifest.json
           sparse-checkout-cone-mode: false
           persist-credentials: false
       - name: Run fast source and JSON-schema regressions
