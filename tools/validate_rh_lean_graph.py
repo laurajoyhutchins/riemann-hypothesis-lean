@@ -105,6 +105,7 @@ def publish_graphs(
         "format": "patrik-cihal/lean-graph upstream node-array JSON",
         "extractor_commit": UPSTREAM_COMMIT,
         "extractor_blob_sha1": EXTRACTOR_BLOB_SHA,
+        "extractor_theorem_value_patch": "constInfo.value? (allowOpaque := true)",
         "source_revision": source_revision,
         "roots": list(roots),
         "depth": depth,

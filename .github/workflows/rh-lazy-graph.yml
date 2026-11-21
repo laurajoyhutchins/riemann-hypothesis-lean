@@ -64,10 +64,10 @@ jobs:
           python3 ../tools/rh_lean_graph.py --module MiniMain --root MiniMain.entry \
             --depth 4 --output SmokeGraph.lean
           cat >> SmokeGraph.lean <<'EOF'
-          #eval getRelevantConstsFromConst `MiniMain.entry
           #eval do
-            let body ← getConstantBody `MiniMain.entry
-            return body.map (fun b => b.getUsedConstants)
+            let refs ← getRelevantConstsFromConst `MiniMain.entry
+            unless refs.contains `MiniMain.leaf do
+              throwError "theorem-to-theorem proof dependency missing"
           EOF
           /usr/bin/time -v -o extraction-time.txt lake env lean SmokeGraph.lean
           cat extraction-time.txt
@@ -78,6 +78,7 @@ jobs:
           import json
           m = json.load(open('validated/manifest.json'))
           assert m['graphs']['RH-combined.json']['nodes'] >= 2
+          assert m['graphs']['RH-combined.json']['edges_emitted'] >= 1
           assert m['graphs']['RH-combined.json']['external_reference_count'] == 0
           assert m['independent_kernel_verification'] is False
           PY

@@ -6,7 +6,8 @@ import tempfile
 import unittest
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from validate_rh_lean_graph import inspect_graph, publish_graphs
-from rh_lean_graph import generate_driver, RH_ROOTS, COMBINED_FILE
+from rh_lean_graph import (generate_driver, RH_ROOTS, COMBINED_FILE,
+                           patch_upstream_theorem_values)
 
 
 def node(name, refs=(), category="Theorem"):
@@ -58,6 +59,15 @@ class GraphValidationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "not a closed graph"):
                 publish_graphs(path, path / "out", ("Main.entry",), 1, require_closed=True)
             self.assertFalse((path / "out").exists())
+
+    def test_one_line_upstream_theorem_patch(self):
+        source = "let constValue := constInfo.value?\n"
+        self.assertEqual(
+            patch_upstream_theorem_values(source),
+            "let constValue := constInfo.value? (allowOpaque := true)\n")
+        for bad in ("import Lean", source + source):
+            with self.assertRaisesRegex(ValueError, "patch point not unique"):
+                patch_upstream_theorem_values(bad)
 
     def test_generation_import_and_strict_combined(self):
         source = generate_driver("import Lean", ("MiniMain.entry",), 2, "MiniMain")

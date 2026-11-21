@@ -2,6 +2,12 @@
 
 Use [patrik-cihal/lean-graph](https://github.com/patrik-cihal/lean-graph) and its [browser viewer](https://patrik-cihal.github.io/lean-graph/). No fork of its extractor, converter, database, renderer, or expression viewer is maintained here. The integration pins the exact upstream [`DependencyExtractor.lean`](https://github.com/patrik-cihal/lean-graph/blob/12fe82c12a41a827265bac725351cade3511d28a/static/DependencyExtractor.lean) Git blob `2cb37f37f01427086d2bf53a6fc8bdf4a8daaa69`.
 
+## Why a single pinned upstream correction is necessary
+
+The pinned upstream `getConstantBody` calls `ConstantInfo.value?` without an argument. The actual [Lean 4.33.1 implementation](https://github.com/leanprover/lean4/blob/v4.33.1/src/Lean/Declaration.lean) returns `none` for theorem proofs unless `allowOpaque := true`. Unmodified upstream extraction therefore silently emits theorem nodes with no theorem dependencies. A genuine `MiniMain.entry` smoke initially reproduced this bug.
+
+The wrapper first verifies the **unmodified** upstream Git blob, then applies exactly one replacement: `let constValue := constInfo.value?` becomes `let constValue := constInfo.value? (allowOpaque := true)`. It refuses to proceed if the replacement point is missing or duplicated. This is a one-line correction to the upstream extractor, **not** an independent traversal, graph format, or viewer. It should be retired once an upstream fix is merged and pinned. The validation manifest records the correction. It still does not recover type-only dependencies, filtered instances, or proof AST structure.
+
 ## Source roots
 
 The five top-level declarations are in `src/Main.lean`, which imports `Statements` and `Supplements.Kernels.MainTheorems`:
