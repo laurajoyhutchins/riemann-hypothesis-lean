@@ -20,7 +20,7 @@ import all Lake.Build.Run
 open Lake Lean System
 
 private def verifiedPack
-    (ws : Workspace) (modName : String) : FetchM Json := do
+    (ws : Workspace) (modName : String) : FetchM (Lake.Job Json) := do
   let some leanModule := ws.findModule? modName.toName
     | error s!"unknown Lean module {modName}"
   -- Lake validates the current source/imports and actual output descriptors.
@@ -54,7 +54,7 @@ private def verifiedPack
       ("accepted", toJson true),
       ("input_hash", toJson meta.depHash.toString),
       ("archive", toJson stored.descr.relPath.toString)]
-  return ← validated.await
+  return validated
 
 public def main (args : List String) : IO Unit := do
   let [root, candidatesPath, resultPath, widthArg] := args
@@ -87,8 +87,7 @@ public def main (args : List String) : IO Unit := do
       let mut running : Array (String × Lake.Job Json) := #[]
       for name in names.extract index (index + width) do
         try
-          let task ← Job.async do
-            verifiedPack ws name
+          let task ← verifiedPack ws name
           running := running.push (name, task)
         catch _ =>
           output.putStrLn ((Json.mkObj [
