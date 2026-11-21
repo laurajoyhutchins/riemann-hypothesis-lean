@@ -21,7 +21,7 @@ from rh_ci_identity import source_identity
 from rh_lean_graph import RH_ROOTS, generate_driver, verify_extractor
 from validate_rh_lean_graph import publish_graphs
 
-DEP_HASH = re.compile(r"[0-9a-f]{16}\\Z")
+DEP_HASH = re.compile(r"[0-9a-f]{16}\Z")
 RESULT_NAMES = tuple(root + ".json" for root in RH_ROOTS) + ("RH-combined.json",)
 FIELDS = ("source_tree", "lakefile_sha256", "manifest_sha256", "toolchain")
 
@@ -70,7 +70,7 @@ def inspect_retained_build(candidate: Path, checkpoint_path: Path, state: Path) 
     mappings = [json.loads(line) for line in outputs[1:]]
     matches = [pair[1] for pair in mappings
                if isinstance(pair, list) and len(pair) == 2 and pair[0] == dep_hash]
-    if len(matches) != 1 or not re.fullmatch(r"[0-9a-f]{16}\\.ltar", matches[0]):
+    if len(matches) != 1 or not re.fullmatch(r"[0-9a-f]{16}\.ltar", matches[0]):
         raise ValueError("Main trace is not represented exactly once in completed output map")
     archive = work / "cache/artifacts" / matches[0]
     if archive.is_symlink() or not archive.is_file():
