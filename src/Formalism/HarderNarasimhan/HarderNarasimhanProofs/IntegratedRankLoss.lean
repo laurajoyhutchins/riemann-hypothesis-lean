@@ -194,4 +194,34 @@ theorem finiteThresholdIntegralBound (N : ℕ) (a : Fin N → ℝ)
     a s u H hu hH hpos (by simpa using hmean)
     (by intro i _; exact hupper i)
 
+/-- Dependent sigma-index specialization. This is the index structure used
+by families of rank-weighted Hermitian slopes in the original source. -/
+theorem finiteThresholdIntegralBoundSigma {I : Type*} [Fintype I]
+    (m : I → ℕ) (a : ∀ i, Fin (m i) → ℝ)
+    (s u H : ℝ) (hu : 0 ≤ u) (hH : 0 ≤ H) (hpos : 0 < u + H)
+    (hmean : (∑ i, (m i : ℝ)) * s ≤ ∑ i, ∑ j, a i j)
+    (hupper : ∀ i j, a i j ≤ s + u) :
+    (∫ t in (0 : ℝ)..H,
+      ((Finset.univ.filter
+        (fun ij : Σ i, Fin (m i) => a ij.1 ij.2 < s - t)).card : ℝ)) ≤
+      (∑ i, (m i : ℝ)) * (u * H / (u + H)) := by
+  classical
+  let a' : (Σ i, Fin (m i)) → ℝ := fun ij => a ij.1 ij.2
+  have hcard :
+      (Fintype.card (Σ i, Fin (m i)) : ℝ) = ∑ i, (m i : ℝ) := by
+    simp [Fintype.card_sigma]
+  have hsum :
+      (∑ ij : Σ i, Fin (m i), a' ij) = ∑ i, ∑ j, a i j := by
+    simpa [a'] using (Fintype.sum_sigma' a)
+  have hm :
+      (Fintype.card (Σ i, Fin (m i)) : ℝ) * s ≤
+        ∑ ij : Σ i, Fin (m i), a' ij := by
+    rw [hcard, hsum]
+    exact hmean
+  have h := finiteThresholdIntegralBoundFinset
+    (Finset.univ : Finset (Σ i, Fin (m i))) a'
+    s u H hu hH hpos (by simpa using hm)
+    (by intro ij _; exact hupper ij.1 ij.2)
+  simpa only [a', Finset.card_univ, hcard] using h
+
 end Formalism.HN
