@@ -6,7 +6,10 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from rh_graph_postbuild import inspect_retained_build, load_trusted_controller
+from rh_graph_postbuild import (
+    inspect_retained_build, load_trusted_controller, parse_time_receipt,
+    verify_retained_source,
+)
 
 
 def digest(data):
@@ -93,6 +96,41 @@ class RetainedBuildTests(unittest.TestCase):
                    return_value="0" * 40 + "\\n"):
             with self.assertRaisesRegex(ValueError, "pinned clean revision"):
                 load_trusted_controller(self.home / "community/scripts/ci-build.py")
+
+    def test_snapshot_audit_uses_current_source_commit(self):
+        from unittest.mock import Mock
+        controller = Mock()
+        with patch("rh_graph_postbuild.subprocess.check_output",
+                   return_value="f" * 40 + "\\n"):
+            result = verify_retained_source(self.candidate, self.work / "project",
+                                            controller)
+        self.assertEqual(result, "f" * 40)
+        controller.verify_snapshot.assert_called_once_with(
+            self.candidate, "f" * 40, self.work / "project")
+
+    def test_snapshot_refuses_modified_retained_source(self):
+        from unittest.mock import Mock
+        controller = Mock()
+        controller.verify_snapshot.side_effect = ValueError("Git blob drift")
+        with patch("rh_graph_postbuild.subprocess.check_output",
+                   return_value="f" * 40):
+            with self.assertRaisesRegex(ValueError, "Git blob drift"):
+                verify_retained_source(self.candidate, self.work / "project",
+                                       controller)
+
+    def test_resource_receipt_exact_and_fail_closed(self):
+        timing = self.home / "rh-time.txt"
+        timing.write_text("wall_seconds=1.28\\npeak_rss_kib=1642000\\nexit_status=0\\n")
+        measured = parse_time_receipt(timing)
+        self.assertEqual(measured["wall_seconds"], 1.28)
+        self.assertEqual(measured["peak_rss_kib"], 1642000)
+        for payload in ("wall_seconds=1.28\\npeak_rss_kib=1\\n",
+                        "wall_seconds=1.28\\npeak_rss_kib=1\\nexit_status=1\\n",
+                        "wall_seconds=nan\\npeak_rss_kib=1\\nexit_status=0\\n",
+                        "wall_seconds=1\\npeak_rss_kib=1\\npeak_rss_kib=2\\nexit_status=0\\n"):
+            timing.write_text(payload)
+            with self.assertRaises(ValueError):
+                parse_time_receipt(timing)
 
     def test_refuses_missing_mapped_archive(self):
         (self.work / "cache/artifacts" / ("b" * 16 + ".ltar")).unlink()
