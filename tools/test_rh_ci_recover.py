@@ -60,6 +60,15 @@ class StockRecoveryReceiptTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "symlink"):
             candidates_from_traces(self.root)
 
+    def test_symlinked_lake_parent_is_refused(self):
+        external = self.root / "outside"
+        external.mkdir()
+        (self.root / ".lake/build/ir").mkdir(parents=True)
+        (self.root / ".lake/build/ir").rmdir()
+        (self.root / ".lake/build/ir").symlink_to(external, target_is_directory=True)
+        with self.assertRaisesRegex(ValueError, "symlinked Lake build parent"):
+            candidates_from_traces(self.root)
+
     def test_report_acceptance_and_explicit_rejection(self):
         p = self.make_report(
             {"module": "Domain.Bad", "accepted": False},
