@@ -78,3 +78,8 @@ python3 tools/rh_graph_postbuild.py \
 ```
 
 The `community-harness` checkout must be pinned to `79c751e0b0a5ea3bbfc20198c852fa85f28661e6`; the manual workflow verifies this and the upstream Lean Graph blob before actual execution. Do not run an arbitrary `ci-build.py` on the self-hosted runner. A verified graph or closed emitted-edge neighborhood is **not** a fresh Lean proof check, not a theorem-type comparison, and not evidence that source-only modules can be pruned. The manual workflow requires both a suitable registered runner and an already completed matching source build. No completed RH extraction is implied by the existence of this entry point.
+
+
+## Integration branch and removal of obsolete viewer code
+
+[PR #17](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/pull/17) now targets `research/declaration-census-20261120`, not the archived feature branch used for the original PR #15. The integration explicitly removes `rh_graph_explorer.py`, `rh_graph_viewer.html`, `export_lean_graph.py` and their two tests from that active branch. It preserves the separate `export_exact_graph.py` kernel-expression research analyzer. The [reconciled diff](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/compare/research/declaration-census-20261120...feature/rh-lean-graph-real-extraction-20261121) should contain only graph tools, documentation, and CI, **no proof-source edits**. Re-run the fast checks against this final target tree before merging; the full modified RH extraction remains a separate manually dispatched obligation.
