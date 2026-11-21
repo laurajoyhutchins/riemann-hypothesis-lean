@@ -92,3 +92,34 @@ Both are distinct from the final literature bridge. They should be documented in
 5. Use the existing dependency tools in [research PR #1](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/pull/1), which already includes source closure, Lean census, and export-graph work. Do not create a second, competing graph implementation.
 
 Related: [analytic reduction](analytic-reduction.md), [source-level spine](../every-character-spine.md), [research plan](../proof-research-plan.md).
+
+
+## Verified source location: the arithmetic covolume input
+
+The fifth argument of `every_character_of_literature_of_vWin` is defined in [`ThirdPlaceSeries/TopCovolSlim2Use.lean`](../../src/Development/AutomorphicArithmetic/ThetaCorrespondence/ThetaPairLifts/ThirdPlaceSeries/TopCovolSlim2Use.lean). The file is 26 lines and the theorem has this precise *source signature* (here names are retained verbatim):
+
+```lean
+theorem SelfIntersectionVolumeEstimates.topCovolSlim2_use_alt_alt :
+    GlobalTheory.CompanionTheory.Hypotheses₂.ResolutionCharZero →
+    GlobalTheory.CompanionTheory.Hypotheses₂.PrincipalisationCharZero →
+    GlobalTheory.CompanionTheory.Hypotheses₂.PoincareLelongInv →
+    PositivityTheory.MbHsUse.HSUse →
+    ReciprocityTheory.ChartRestriction.G.ArakelovGeometry.MoriwakiBigStatement →
+    HT.FarguesExact →
+    GR.ZarhinStatement →
+    Pub.NefRR →
+    GlobalTheory.Published.SiegelToroidalIntegral →
+    GlobalTheory.Published.ToroidalForFanKS →
+    GlobalTheory.Published.SemiAbelianLieSeminegative →
+    GlobalTheory.Published.PointSeparationPair →
+    GlobalTheory.Published.ArDegree →
+    GlobalTheory.CovTop.PublishedHodgeBundleTheorems →
+    GlobalTheory.Published.GrothendieckDeformation →
+    GlobalTheory.CovTop.CovolumeBoundOfX := ...
+```
+
+Its proof constructs `GlobalTheory.CovTop.HypothesesX` from the toroidal-fan input, seminegativity, Green regularity, point separation and the Hodge-bundle Chow-height formula; constructs `GlobalTheory.CovHt.HypothesesH` from Siegel/toroidal inputs and arithmetic degree; and invokes `SelfIntersectionVolumeEstimates.topCovolG_alt_alt` with an arithmetic height/positivity input from `PositivityTheory.HtPt.Ah.deep_slim_use`.
+
+This is an **explicit compositional proof interface**, not evidence that the 15 hypotheses are independent, minimal, or redundant. A useful next refactoring experiment is to compare the source and elaborated types of `topCovolG_alt_alt`, `deep_slim_use`, and the associated hypothesis structures; test whether a general theorem over an abstract package can subsume multiple concrete wrappers. Record actual consumers before deleting any module.
+
+The original open question remains: the defining file/type of `UpperTheory.Lit.every_character_of_theta_integrals_local_matching` has **not yet been located**. GitHub code search returned no indexed matches for the fully qualified identifier, so the direct proof-term reference above is the current evidence.
