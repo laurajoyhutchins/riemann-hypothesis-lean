@@ -32,7 +32,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/shared_spine_import_cut.py \
-            --root Development.AutomorphicArithmetic.CharacterBoxes.EveryCharacterOfLiteratureOfVWin \
+            --root Development.AutomorphicArithmetic.ThetaCorrespondence.ThetaPairLifts.ThirdPlaceSeries.EveryCharacterOfLiteratureOfVWin \
             --out analysis/rh-common-spine-direct-import-footprints.json
       - uses: actions/upload-artifact@v4
         if: always()
