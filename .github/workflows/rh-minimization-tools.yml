@@ -14,4 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test line accounting and malformed-input rejection
-        run: python3 -m unittest discover -s tools -p 'test_enrich_census.py' -v
+        run: |
+          python3 -m unittest discover -s tools -p 'test_enrich_census.py' -v
+          python3 -m unittest discover -s tools -p 'test_pruning_contract.py' -v

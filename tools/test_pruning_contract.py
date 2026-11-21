@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from pruning_contract import verify_proof_refactors
+from pruning_contract import verify_proof_refactors, verify_shared_imports_acyclic
 
 
 class ProofRefactorContractTests(unittest.TestCase):
@@ -41,6 +41,19 @@ class ProofRefactorContractTests(unittest.TestCase):
                 verify_proof_refactors(source, [
                     {"path": "src/A.lean"}, {"path": "src/A.lean"}
                 ])
+
+
+    def test_import_reuse_acyclicity(self):
+        donor = "Development.Donor"
+        consumer = "Development.Consumer"
+        row = {"path": "src/Development/Consumer.lean", "shared_module": donor}
+        verify_shared_imports_acyclic({donor: [], consumer: [donor]}, [row])
+        with self.assertRaisesRegex(ValueError, "import cycle"):
+            verify_shared_imports_acyclic(
+                {donor: [consumer], consumer: [donor]}, [row]
+            )
+        with self.assertRaisesRegex(ValueError, "lacks direct import"):
+            verify_shared_imports_acyclic({donor: [], consumer: []}, [row])
 
 
 if __name__ == "__main__":

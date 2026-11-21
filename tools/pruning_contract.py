@@ -44,6 +44,22 @@ def verify_proof_refactors(source: Path, entries: list[dict]) -> int:
     return savings
 
 
+def verify_shared_imports_acyclic(imports: dict[str, list[str]],
+                                  entries: list[dict]) -> None:
+    """Reject missing direct dependencies or cycles introduced by theorem reuse."""
+    for row in entries:
+        donor = row.get("shared_module")
+        if donor is None:
+            continue
+        source_module = ".".join(Path(row["path"]).relative_to("src").with_suffix("").parts)
+        if source_module not in imports or donor not in imports:
+            raise ValueError(f"unknown source/donor module: {source_module} / {donor}")
+        if donor not in imports[source_module]:
+            raise ValueError(f"shared theorem lacks direct import: {source_module} -> {donor}")
+        if source_module in transitive_modules(imports, donor):
+            raise ValueError(f"shared theorem creates import cycle: {source_module} -> {donor}")
+
+
 def verify(source: Path, manifest_path: Path) -> dict:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     names = manifest["modules"]
@@ -77,6 +93,7 @@ def verify(source: Path, manifest_path: Path) -> dict:
         raise ValueError(f"unreachable modules remain: {len(imports) - len(reached)}")
     refactors = manifest.get("proof_refactors", [])
     proof_sharing_savings = verify_proof_refactors(source, refactors)
+    verify_shared_imports_acyclic(imports, refactors)
     expected_count = manifest["baseline_files"] - len(names)
     expected_lines = manifest["baseline_lines"] - sum(row["lines"] for row in names) - proof_sharing_savings
     observed_lines = sum(sizes.values())

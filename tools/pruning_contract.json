@@ -44,7 +44,8 @@
       "original_lines": 143,
       "current_lines": 116,
       "declaration": "GlobalTheory.HTGlue.exists_obj_of_summand",
-      "verification": "source-audited only; Lean compilation and independent kernel check not performed"
+      "verification": "source-audited only; Lean compilation and independent kernel check not performed",
+      "shared_module": "Development.AbelianVarietyTheory.Proofs.DivisorProofs.HarrisTaylorExistsSquareZeroLiftOfFiltration"
     },
     {
       "path": "src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/ExistsHarrisTaylorObjectPullback.lean",
@@ -54,7 +55,8 @@
       "current_lines": 163,
       "declaration": "GlobalTheory.UPel.HT.BaseChange.exists_objMap",
       "shared_theorem": "GlobalTheory.HTPullEvery.exists_objMap",
-      "verification": "source audit only; actual Lean elaboration/kernel replay outstanding"
+      "verification": "source audit only; actual Lean elaboration/kernel replay outstanding",
+      "shared_module": "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorModuliObjectPullback"
     },
     {
       "path": "src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/ExistsHarrisTaylorObjectPullbackBis.lean",
@@ -64,7 +66,8 @@
       "current_lines": 109,
       "declaration": "GlobalTheory.HTPull.exists_objMap_pull",
       "shared_theorem": "GlobalTheory.HTPullEvery.exists_objMap",
-      "verification": "source audit only; actual Lean elaboration/kernel replay outstanding"
+      "verification": "source audit only; actual Lean elaboration/kernel replay outstanding",
+      "shared_module": "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorModuliObjectPullback"
     },
     {
       "path": "src/Development/AbelianVarietyTheory/Proofs/DivisorProofs/ExistsHarrisTaylorObjectPullbackAlong.lean",
@@ -74,7 +77,8 @@
       "current_lines": 89,
       "declaration": "GlobalTheory.UPel.HT.Pull.exists_objMap",
       "shared_theorem": "GlobalTheory.HTPullEvery.exists_objMap",
-      "verification": "source audit only; actual Lean elaboration/kernel replay outstanding"
+      "verification": "source audit only; actual Lean elaboration/kernel replay outstanding",
+      "shared_module": "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsHarrisTaylorModuliObjectPullback"
     }
   ]
 }
