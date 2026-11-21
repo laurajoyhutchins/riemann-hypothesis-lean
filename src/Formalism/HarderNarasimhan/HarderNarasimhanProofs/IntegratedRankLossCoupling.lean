@@ -20,30 +20,31 @@ open Formalism.CorankShareLayerCake.FR
 /-- Finite layer-cake comparison with a coupled, rather than pointwise-enveloped,
 input corank. The target loss bound follows from the actual input distribution.
 No input rank divisor appears; a caller may put it into C1 explicitly. -/
-theorem coupledFiniteSlopeBound (N M : ℕ) (a : Fin N → ℝ) (b : Fin M → ℝ)
+theorem coupledFinsetSlopeBound {α : Type*} (S : Finset α) (M : ℕ)
+    (a : α → ℝ) (b : Fin M → ℝ)
     (s u H C0 C1 : ℝ) (hu : 0 ≤ u) (hH : 0 ≤ H) (hpos : 0 < u + H)
     (hM : 0 < M) (hC1 : 0 ≤ C1)
-    (hmean : (N : ℝ) * s ≤ ∑ i, a i)
-    (hupper : ∀ i, a i ≤ s + u)
+    (hmean : (S.card : ℝ) * s ≤ S.sum a)
+    (hupper : ∀ i ∈ S, a i ≤ s + u)
     (hlower : ∀ j, s - H ≤ b j)
     (hcount : ∀ t ∈ Set.Icc (0 : ℝ) H,
       ((univ.filter (fun j : Fin M => b j < s - t)).card : ℝ) ≤
-        (C0 + C1 * ((univ.filter (fun i : Fin N => a i < s - t)).card : ℝ)) *
+        (C0 + C1 * ((S.filter (fun i => a i < s - t)).card : ℝ)) *
           (M : ℝ)) :
     s - (∑ j, b j) / (M : ℝ) ≤
-      C0 * H + C1 * ((N : ℝ) * (u * H / (u + H))) := by
-  let r : ℝ → ℝ := fun t =>
-    ((univ.filter (fun i : Fin N => a i < s - t)).card : ℝ)
+      C0 * H + C1 * ((S.card : ℝ) * (u * H / (u + H))) := by
+  classical
+  let r : ℝ → ℝ := fun t => ((S.filter (fun i => a i < s - t)).card : ℝ)
   let w : ℝ → ℝ := fun t => C0 + C1 * r t
   have hranti : Antitone r := by
     intro t₁ t₂ hle
-    have hs : (univ.filter (fun i : Fin N => a i < s - t₂)) ⊆
-        (univ.filter (fun i : Fin N => a i < s - t₁)) := by
+    have hs : (S.filter (fun i => a i < s - t₂)) ⊆
+        (S.filter (fun i => a i < s - t₁)) := by
       intro i hi
-      simp only [mem_filter, mem_univ, true_and] at hi ⊢
-      linarith
-    change (((univ.filter (fun i : Fin N => a i < s - t₂)).card : ℝ) ≤
-      ((univ.filter (fun i : Fin N => a i < s - t₁)).card : ℝ))
+      rcases Finset.mem_filter.mp hi with ⟨hiS, hiA⟩
+      exact Finset.mem_filter.mpr ⟨hiS, by linarith⟩
+    change (((S.filter (fun i => a i < s - t₂)).card : ℝ) ≤
+      ((S.filter (fun i => a i < s - t₁)).card : ℝ))
     exact_mod_cast Finset.card_le_card hs
   have hwanti : Antitone w := by
     intro t₁ t₂ ht
@@ -82,11 +83,28 @@ theorem coupledFiniteSlopeBound (N M : ℕ) (a : Fin N → ℝ) (b : Fin M → �
     exact min_le_right 1 (w t)
   have hinput :
       (∫ t in (0 : ℝ)..H, r t) ≤
-        (N : ℝ) * (u * H / (u + H)) := by
-    simpa only [r] using finiteThresholdIntegralBound N a s u H
+        (S.card : ℝ) * (u * H / (u + H)) := by
+    simpa only [r] using finiteThresholdIntegralBoundFinset S a s u H
       hu hH hpos hmean hupper
   have hscaled := mul_le_mul_of_nonneg_left hinput hC1
   rw [hint] at hmono
   linarith
+
+/-- Canonical Fin N specialization, retaining the first source-compatible API. -/
+theorem coupledFiniteSlopeBound (N M : ℕ) (a : Fin N → ℝ) (b : Fin M → ℝ)
+    (s u H C0 C1 : ℝ) (hu : 0 ≤ u) (hH : 0 ≤ H) (hpos : 0 < u + H)
+    (hM : 0 < M) (hC1 : 0 ≤ C1)
+    (hmean : (N : ℝ) * s ≤ ∑ i, a i)
+    (hupper : ∀ i, a i ≤ s + u)
+    (hlower : ∀ j, s - H ≤ b j)
+    (hcount : ∀ t ∈ Set.Icc (0 : ℝ) H,
+      ((univ.filter (fun j : Fin M => b j < s - t)).card : ℝ) ≤
+        (C0 + C1 * ((univ.filter (fun i : Fin N => a i < s - t)).card : ℝ)) *
+          (M : ℝ)) :
+    s - (∑ j, b j) / (M : ℝ) ≤
+      C0 * H + C1 * ((N : ℝ) * (u * H / (u + H))) := by
+  simpa using coupledFinsetSlopeBound (Finset.univ : Finset (Fin N)) M a b
+    s u H C0 C1 hu hH hpos hM hC1 (by simpa using hmean)
+    (by intro i _; exact hupper i) hlower (by intro t ht; exact hcount t ht)
 
 end Formalism.HN
