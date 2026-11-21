@@ -21,8 +21,9 @@ This fork adds **documentation only** to help readers trace the proposed formali
 - [Proof navigation: five entry points and reading method](docs/proof-navigation.md)
 - [The `everyCharacter` dependency spine](docs/every-character-spine.md)
 - [Research plan: dependency graphs, verification and semantic compression](docs/proof-research-plan.md)
+- [Minimal Main experiment: runnable import-closure comparison and audit](docs/minimal-main-experiment.md)
 
-These notes distinguish source inspection from independently verified kernel evidence. They do not certify the announced proof.
+These notes distinguish source inspection from independently verified kernel evidence. A separate, nondefault `MainMinimal` target and import-graph fixture tests are included as **unverified research infrastructure**; they do not certify the announced proof.
 
 ## What is proved
 
