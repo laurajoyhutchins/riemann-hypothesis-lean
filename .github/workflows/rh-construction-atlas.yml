@@ -1,0 +1,72 @@
+name: RH construction-family atlas (candidate discovery only)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - tools/construction_atlas.py
+      - tools/test_construction_atlas.py
+      - tools/compare_construction_pair.py
+      - tools/test_compare_construction_pair.py
+      - tools/core5_projection_atlas.py
+      - tools/test_core5_projection_atlas.py
+      - .github/workflows/rh-construction-atlas.yml
+      - src/Development/AbelianVarietyTheory/Proofs/**
+
+permissions:
+  contents: read
+
+# Candidate-only source scans are reproducible; superseded PR heads need not
+# consume runner time. This is intentionally different from proof gates.
+concurrency:
+  group: rh-source-atlas-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-atlas:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify source-atlas behavior on synthetic examples
+        run: python3 -m unittest discover -s tools -p 'test_construction_atlas.py' -v
+      - name: Scan actual Abelian variety proofs
+        run: |
+          python3 tools/construction_atlas.py \
+            --src src \
+            --root Development/AbelianVarietyTheory/Proofs \
+            --min-lines 40 \
+            --min-members 2 \
+            --max-groups 150 \
+            --out analysis/rh-construction-family-atlas.json
+      - name: Inspect semiabelian extension proof pair
+        run: |
+          python3 tools/compare_construction_pair.py \
+            --src src \
+            --left Development/AbelianVarietyTheory/Proofs/IwasawaDecomposition/IsOpenImmersionQuasiFiniteLocusOfIsIntegral \
+            --right Development/AbelianVarietyTheory/Proofs/IwasawaDecomposition/SemiabelianExtensionNormalModel \
+            --left-theorem existsUnique_hom_extension_of_dvr \
+            --right-theorem existsUnique_hom_extension_of_dvr \
+            --out analysis/rh-semiabelian-extension-pair.json
+      - name: Verify Core5 record-projection family detector
+        run: python3 -m unittest discover -s tools -p 'test_core5_projection_atlas.py' -v
+      - name: Find source theorem families connected by Core5 projections
+        run: |
+          python3 tools/core5_projection_atlas.py \
+            --src src \
+            --root Development/AbelianVarietyTheory/Proofs \
+            --max-families 150 \
+            --out analysis/rh-core5-projection-atlas.json
+      - name: Archive inspectable candidate family evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rh-construction-family-atlas
+          path: |
+            analysis/rh-construction-family-atlas.json
+            analysis/rh-semiabelian-extension-pair.json
+            analysis/rh-core5-projection-atlas.json
+          if-no-files-found: warn
+          retention-days: 30
