@@ -1,0 +1,47 @@
+name: RH source import impact (not proof verification)
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'lakefile.toml'
+      - 'lake-manifest.json'
+      - 'lean-toolchain'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rh-import-impact-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  import-impact:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Get pinned PR base for a complete name-status diff
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          git diff --name-only -z "$BASE_SHA" HEAD -- > "$RUNNER_TEMP/changed-paths.nul"
+      - name: Verify textual five-theorem source contract
+        run: |
+          PYTHONPATH=tools python3 -c 'from pathlib import Path; from source_inventory import verify_surface; verify_surface(Path("src/Main.lean"))'
+      - name: Compute reverse-import rebuild candidates (not a proof check)
+        run: |
+          python3 tools/ci_import_impact.py --src src \
+            --changed-nul "$RUNNER_TEMP/changed-paths.nul" --out-dir analysis/ci
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rh-import-impact
+          path: analysis/ci
+          retention-days: 7
+          if-no-files-found: warn
