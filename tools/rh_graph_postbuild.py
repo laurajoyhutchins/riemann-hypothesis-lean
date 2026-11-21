@@ -147,7 +147,8 @@ def parse_time_receipt(path: Path) -> dict:
 
 
 def extract(evidence: dict, *, candidate: Path, community: Path, extractor: Path,
-            state: Path, depth: int, output: Path, jobs: int) -> dict:
+            state: Path, depth: int, output: Path, jobs: int,
+            require_closed: bool = False) -> dict:
     if depth < 1 or jobs < 1:
         raise ValueError("depth and jobs must be positive")
     work = evidence["work"]
@@ -197,6 +198,7 @@ def extract(evidence: dict, *, candidate: Path, community: Path, extractor: Path
         raise ValueError("upstream Lean did not produce all five root and combined graphs")
     measured = parse_time_receipt(timing)
     receipt = publish_graphs(result, output, RH_ROOTS, depth,
+                             require_closed=require_closed,
                              source_revision=verified_head)
     receipt["retained_build"] = {
         k: str(v) if isinstance(v, Path) else v
@@ -221,6 +223,8 @@ def main() -> None:
     parser.add_argument("--depth", type=int, default=2)
     parser.add_argument("--jobs", type=int, default=8)
     parser.add_argument("--preflight-only", action="store_true")
+    parser.add_argument("--require-closed", action="store_true",
+                        help="refuse any omitted emitted-edge targets (not full Lean closure)")
     args = parser.parse_args()
     evidence = inspect_retained_build(args.candidate, args.checkpoint, args.state)
     if args.preflight_only:
@@ -229,7 +233,7 @@ def main() -> None:
         receipt = extract(evidence, candidate=args.candidate,
                           community=args.community, extractor=args.extractor,
                           state=args.state, depth=args.depth, output=args.output,
-                          jobs=args.jobs)
+                          jobs=args.jobs, require_closed=args.require_closed)
         print(json.dumps({"files": len(receipt["graphs"]),
                           "nodes": receipt["graphs"]["RH-combined.json"]["nodes"]}))
 
