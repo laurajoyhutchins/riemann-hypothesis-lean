@@ -82,8 +82,8 @@ def extract(header: str) -> tuple[str, str, str] | None:
     suffix = normal(body[first_arrow+1:])
     if not prefix.startswith("∀ ") or not (3 <= len(premise) <= 500) or not suffix:
         return None
-    if "→" in premise:
-        return None
+    # Nested arrows inside a grouped premise are allowed. Only the
+    # top-level arrow, already isolated by top_level_positions, separates Q.
     return prefix, premise, suffix
 
 
