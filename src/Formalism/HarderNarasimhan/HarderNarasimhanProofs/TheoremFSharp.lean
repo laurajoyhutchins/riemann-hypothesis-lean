@@ -222,24 +222,38 @@ theorem theoremFSharp_of (hLA : FrameLA1) : TheoremFSharp := by
   have hrkNt : ∀ τ i, rk (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (Nt τ i) =
       Module.finrank ℚ K * rkK (Nt τ i) := fun τ i =>
     (place_lattice_structure K (V i) (ι i) (b i) (X i) (hX i) (Nt τ i) (hNtFG τ i)).2.1
+  have hfilt : ∀ (τ : ℝ) i, ((univ.filter (fun j => 2 * slopeList (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i) j +
+      slopeNormalisingConstant K - h i < s - τ)).card : ℝ) =
+      (Module.finrank ℚ K : ℝ) * ((Fintype.card (ι i) : ℝ) - rkK (Nt τ i)) := by
+    intro τ i
+    rw [Finset.filter_congr (q := fun j => slopeList (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i) j < θ τ i)
+      (fun j _ => by simp only [θ]; constructor <;> intro hj <;> linarith),
+      frameB_count_lt _ (N i) (hLN i) (θ τ i)]
+    change (rk (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i) : ℝ) -
+      rk (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (Nt τ i) = _
+    rw [hrkN i, hrkNt τ i]
+    push_cast; ring
+
+  /-- The original exact rank loss before the pointwise envelope is introduced. -/
+  have hreal : ∀ (τ : ℝ),
+      (∑ i, ((univ.filter (fun j =>
+        2 * slopeList (Formalism.HermitianLatticesTheory.realize (b i) (X i))
+          (N i) j + slopeNormalisingConstant K - h i < s - τ)).card : ℝ)) =
+      (Module.finrank ℚ K : ℝ) *
+        ∑ i, ((Fintype.card (ι i) : ℝ) - rkK (Nt τ i)) := by
+    intro τ
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro i _
+    exact hfilt τ i
+
   have hcor : ∀ τ, 0 ≤ τ → (∑ i, ((Fintype.card (ι i) : ℝ) - rkK (Nt τ i))) ≤
       (u / (u + τ)) * ∑ i, (Fintype.card (ι i) : ℝ) := by
     intro τ hτ
     have hsh := thmF_share (fun i => rk (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i))
       (fun i j => 2 * slopeList (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i) j + slopeNormalisingConstant K - h i)
       s u τ hu hτ ?_ ?_
-    · have hfilt : ∀ i, ((univ.filter (fun j => 2 * slopeList (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i) j +
-          slopeNormalisingConstant K - h i < s - τ)).card : ℝ) =
-          (Module.finrank ℚ K : ℝ) * ((Fintype.card (ι i) : ℝ) - rkK (Nt τ i)) := by
-        intro i
-        rw [Finset.filter_congr (q := fun j => slopeList (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i) j < θ τ i)
-          (fun j _ => by simp only [θ]; constructor <;> intro hj <;> linarith),
-          frameB_count_lt _ (N i) (hLN i) (θ τ i)]
-        change (rk (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i) : ℝ) -
-          rk (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (Nt τ i) = _
-        rw [hrkN i, hrkNt τ i]
-        push_cast; ring
-      simp only [hfilt, hrkN] at hsh
+    · simp only [hfilt τ, hrkN] at hsh
       push_cast at hsh
       rw [← Finset.mul_sum, ← Finset.mul_sum, mul_assoc] at hsh
       have := le_of_mul_le_mul_left hsh hnR
