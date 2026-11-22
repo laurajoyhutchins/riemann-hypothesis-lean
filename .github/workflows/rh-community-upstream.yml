@@ -12,6 +12,13 @@ on:
       - 'lake-manifest.json'
       - 'lean-toolchain'
   workflow_dispatch:
+  # One-shot full source build from the graph integration branch. A push alone
+  # is insufficient: the gated head commit must also carry the exact sentinel.
+  push:
+    branches:
+      - feature/rh-lean-graph-real-extraction-20261121
+    paths:
+      - tools/RH_GRAPH_EXPLORER.md
 
 permissions:
   contents: read
@@ -76,7 +83,7 @@ jobs:
 
   community-full-build:
     name: Manually build RH fork via unchanged community CI controller
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[run rh full build 20261122]'))
     runs-on: [self-hosted, linux, x64, rh-build]
     timeout-minutes: 1440
     steps:
@@ -162,6 +169,46 @@ jobs:
               command += ['--cache-map', paths['latest_map']]
           raise SystemExit(subprocess.run(command).returncode)
           PY
+      - name: Extract five RH roots from the verified completed build
+        if: success() && github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          export RH_CI_STATE_DIR="${RH_CI_STATE_DIR:-$HOME/.local/share/riemann-build-state}"
+          mkdir -p analysis/lean-graph-json
+          # The upstream controller, not a fork-side cache reimplementation,
+          # decides whether the full proof build actually completed.
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          receipt = json.loads(Path("staging/receipt.json").read_text())
+          if receipt.get("build_exit_code") != 0:
+              raise SystemExit("Community full RH build did not succeed")
+          pointer = json.loads(Path("staging/work-checkpoint.json").read_text())
+          checkpoint = Path(pointer["checkpoint"])
+          if checkpoint.name != "checkpoint.json" or not checkpoint.is_file():
+              raise SystemExit("No completed retained RH checkpoint")
+          Path("identity/graph-checkpoint.txt").write_text(str(checkpoint) + "\n")
+          PY
+          curl --fail --location --retry 3 --silent --show-error \
+            https://raw.githubusercontent.com/patrik-cihal/lean-graph/12fe82c12a41a827265bac725351cade3511d28a/static/DependencyExtractor.lean \
+            -o identity/DependencyExtractor.upstream.lean
+          python3 candidate/tools/rh_graph_postbuild.py \
+            --candidate candidate --community community-harness \
+            --checkpoint "$(cat identity/graph-checkpoint.txt)" \
+            --state "$RH_CI_STATE_DIR" \
+            --extractor identity/DependencyExtractor.upstream.lean \
+            --output analysis/lean-graph-json --depth 2
+      - name: Upload graph data or explicit failure receipt
+        if: always() && github.event_name == 'push'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: rh-full-build-upstream-graph
+          path: analysis/lean-graph-json/
+          retention-days: 7
+          if-no-files-found: warn
+          compression-level: 1
       - name: Upload only small provenance / build logs (never untrusted LTARs)
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -170,6 +217,7 @@ jobs:
           path: |
             identity/*.json
             staging/receipt.json
+            staging/work-checkpoint.json
             staging/build.log
             staging/raw-recovery-summary.json
           retention-days: 7
