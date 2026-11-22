@@ -469,7 +469,7 @@ theorem theoremFSharp_of (hLA : FrameLA1) : TheoremFSharp := by
     rw [frameB_sum_sl _ cc hLcc hrkpos.ne', frameB_muDef]
     have : (rk (Formalism.HermitianLatticesTheory.realize b' X') cc : ℝ) ≠ 0 := by exact_mod_cast hrkpos.ne'
     field_simp
-  /-!
+  /-
   The following stronger source-local implication is the sharp integrated
   estimate, for U+H>0, before choosing the old logarithmic envelope.
   Its hypotheses are discharged by the same original HN input and target
