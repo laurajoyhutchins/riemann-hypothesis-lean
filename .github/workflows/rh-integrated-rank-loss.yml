@@ -5,6 +5,7 @@ on:
     paths:
       - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLoss.lean'
       - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossCoupling.lean'
+      - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossNormalization.lean'
       - '.github/workflows/rh-integrated-rank-loss.yml'
   workflow_dispatch:
 
@@ -30,6 +31,7 @@ jobs:
             .github/workflows/rh-integrated-rank-loss.yml
             src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLoss.lean
             src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossCoupling.lean
+            src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossNormalization.lean
             src/Formalism/CorankShare/StatementFR.lean
             src/Formalism/CorankShare/CorankShareProofs/LayerCakeFormula.lean
           sparse-checkout-cone-mode: false
@@ -49,4 +51,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lake build Formalism.HarderNarasimhan.HarderNarasimhanProofs.IntegratedRankLossCoupling
+          lake build Formalism.HarderNarasimhan.HarderNarasimhanProofs.IntegratedRankLossNormalization
