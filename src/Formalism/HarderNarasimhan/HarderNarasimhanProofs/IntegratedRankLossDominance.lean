@@ -23,12 +23,10 @@ theorem sharpIntegratedLoss_le_log_pos
   have hu0 : u ≠ 0 := hu.ne'
   have heq : u * H / (u + H) = u * (1 - (1 + H / u)⁻¹) := by
     have hsum : 1 + H / u = (u + H) / u := by
-      field_simp
-      ring
+      field_simp <;> ring
     rw [hsum]
     have hnonzero : (u + H) / u ≠ 0 := div_ne_zero hden hu0
-    field_simp
-    ring
+    field_simp <;> ring
   calc
     _ = u * (1 - (1 + H / u)⁻¹) := heq
     _ ≤ u * Real.log (1 + H / u) := mul_le_mul_of_nonneg_left hlog hu.le
