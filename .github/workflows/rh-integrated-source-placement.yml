@@ -34,7 +34,7 @@ jobs:
           mk_all-check: false
           use-mathlib-cache: true
           use-github-cache: false
-      - name: Compile the original geometric rank theorem and exact-corank wrapper
+      - name: Compile original HN theorem, exported sharp bound, and axiom audit
         run: |
           set -euo pipefail
           lake build Formalism.HarderNarasimhan.HarderNarasimhanProofs.IntegratedRankLossSourcePlacement
