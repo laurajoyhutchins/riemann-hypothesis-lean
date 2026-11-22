@@ -1,14 +1,16 @@
-name: RH lazy proof expression viewer
+name: RH upstream Lean Graph extraction checks
 
 on:
   pull_request:
     paths:
-      - tools/rh_graph_explorer.py
-      - tools/rh_graph_viewer.html
-      - tools/test_rh_graph_explorer.py
+      - tools/rh_lean_graph.py
+      - tools/validate_rh_lean_graph.py
+      - tools/test_rh_lean_graph.py
+      - tools/test_validate_rh_lean_graph.py
+      - tools/rh_graph_postbuild.py
+      - tools/test_rh_graph_postbuild.py
+      - .github/workflows/rh-graph-retained-build.yml
       - tools/RH_GRAPH_EXPLORER.md
-      - tools/export_lean_graph.py
-      - tools/test_export_lean_graph.py
       - .github/workflows/rh-lazy-graph.yml
   workflow_dispatch:
 
@@ -16,62 +18,129 @@ permissions:
   contents: read
 
 jobs:
-  viewer-smoke:
+  upstream-adapter-smoke:
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          sparse-checkout: tools
+          sparse-checkout: |
+            tools
+            lean-toolchain
+            lakefile.toml
+            lake-manifest.json
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - name: Run fast source and JSON-schema regressions
+        run: |
+          python3 -m unittest discover -s tools -p test_rh_lean_graph.py -v
+          python3 -m unittest discover -s tools -p test_validate_rh_lean_graph.py -v
+          python3 -m unittest discover -s tools -p test_rh_graph_postbuild.py -v
+      - name: Checkout pinned community source verifier, not proof files
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: leanprover-community/riemann-hypothesis
+          ref: 79c751e0b0a5ea3bbfc20198c852fa85f28661e6
+          path: community-harness
+          sparse-checkout: scripts
           sparse-checkout-cone-mode: true
           persist-credentials: false
-      - name: Run hermetic expression-index and HTTP regressions
-        run: python3 -m unittest discover -s tools -p test_rh_graph_explorer.py -v
-      - name: Test upstream Lean Graph adapter
-        run: python3 -m unittest discover -s tools -p 'test_export_lean_graph.py' -v
-      - name: Index official lean4export example and inspect its theorem
+      - name: Exercise real upstream snapshot verifier on Git blobs
         shell: bash
         run: |
           set -euo pipefail
-          curl --retry 3 --fail --location --silent --show-error \
-            https://raw.githubusercontent.com/leanprover/lean4export/v4.33.0/examples/Nat.add_succ.ndjson | \
-            python3 tools/rh_graph_explorer.py build --root Nat.add_succ --output-dir analysis/viewer-sample
           python3 - <<'PY'
-          import json
-          from pathlib import Path
-          import sys
-          sys.path.insert(0,'tools')
-          from rh_graph_explorer import GraphStore
-          m=json.loads(Path('analysis/viewer-sample/manifest.json').read_text())
-          assert m['complete_index'] and m['unresolved_constant_count']==0
-          assert m['expression_count']>400
-          db=GraphStore('analysis/viewer-sample')
-          try:
-              decl=db.declaration('Nat.add_succ')
-              assert decl is not None and decl['kind']=='thm'
-              assert db.expression(decl['expression_roots'][-1])['id']==decl['expression_roots'][-1]
-          finally:
-              db.close()
-          print('Official sample: full Expr payload available by ID')
+          import pathlib, subprocess, sys, tempfile
+          sys.path.insert(0, "tools")
+          from rh_graph_postbuild import load_trusted_controller, verify_retained_source
+          controller = load_trusted_controller(pathlib.Path("community-harness/scripts/ci-build.py"))
+          with tempfile.TemporaryDirectory() as tmp:
+              base = pathlib.Path(tmp)
+              source = base / "source"
+              source.mkdir()
+              (source / "src").mkdir()
+              (source / "src/Main.lean").write_text("theorem example : True := True.intro\n")
+              (source / "lakefile.toml").write_text("name = \"sample\"\n")
+              (source / "lake-manifest.json").write_text("{}\n")
+              (source / "lean-toolchain").write_text("leanprover/lean4:v4.33.1\n")
+              subprocess.run(["git", "init", "-q", str(source)], check=True)
+              subprocess.run(["git", "-C", str(source), "add", "."], check=True)
+              subprocess.run(["git", "-C", str(source), "-c", "user.name=CI",
+                              "-c", "user.email=ci@example.invalid",
+                              "commit", "-qm", "fixture"], check=True)
+              snapshot = base / "snapshot"
+              snapshot.mkdir()
+              controller.snapshot(source, "HEAD", snapshot)
+              assert verify_retained_source(source, snapshot, controller) == (
+                  subprocess.check_output(["git", "-C", str(source),
+                                           "rev-parse", "HEAD"], text=True).strip())
+              (snapshot / "src/Main.lean").write_text("theorem example : False := by trivial\n")
+              try:
+                  verify_retained_source(source, snapshot, controller)
+              except ValueError:
+                  pass
+              else:
+                  raise AssertionError("modified retained source passed the upstream Git-blob audit")
+          print("Pinned community source snapshot accepted intact bytes and rejected tampering")
           PY
-
-      - name: Export official sample in upstream Lean Graph JSON format
+      - name: Install pinned Lean only (do NOT build RH)
+        uses: leanprover/lean-action@fe408643ea7367d8c0404a8be3975bb145f5fb64 # v1.7.0
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Extract a real Lean declaration graph with upstream source
         shell: bash
         run: |
           set -euo pipefail
-          python3 tools/export_lean_graph.py \
-            --index-dir analysis/viewer-sample \
-            --root Nat.add_succ --depth 1 \
-            --max-nodes 2000 \
-            --output analysis/lean-graph-Nat.add_succ.json
+          mkdir -p smoke
+          cp lean-toolchain smoke/lean-toolchain
+          cat > smoke/lakefile.toml <<'EOF'
+          name = "lean-graph-smoke"
+          [[lean_lib]]
+          name = "MiniMain"
+          EOF
+          cat > smoke/MiniMain.lean <<'EOF'
+          import Lean
+          namespace MiniMain
+          theorem leaf (n : Nat) : n = n := rfl
+          theorem entry (n : Nat) : n = n := leaf n
+          end MiniMain
+          EOF
+          pushd smoke
+          lake build MiniMain
+          python3 ../tools/rh_lean_graph.py --module MiniMain --root MiniMain.entry \
+            --depth 4 --output SmokeGraph.lean
+          cat >> SmokeGraph.lean <<'EOF'
+          #eval do
+            let refs ← getRelevantConstsFromConst `MiniMain.entry
+            unless refs.contains `MiniMain.leaf do
+              throwError "theorem-to-theorem proof dependency missing"
+          EOF
+          /usr/bin/time -v -o extraction-time.txt lake env lean SmokeGraph.lean
+          cat extraction-time.txt
+          python3 ../tools/validate_rh_lean_graph.py --root MiniMain.entry \
+            --depth 4 --input-dir . --output-dir validated --require-closed \
+            --source-revision "${GITHUB_SHA}"
           python3 - <<'PY'
           import json
-          from pathlib import Path
-          nodes=json.loads(Path('analysis/lean-graph-Nat.add_succ.json').read_text())
-          manifest=json.loads(Path('analysis/lean-graph-Nat.add_succ.manifest.json').read_text())
-          assert nodes and any(n['name']=='Nat.add_succ' for n in nodes)
-          assert all(set(n)=={'name','references','constCategory','constType'} for n in nodes)
-          assert manifest['boundary_count']>0
-          assert manifest['complete_transitive_closure'] is False
-          print('Upstream Lean Graph sample format: accepted')
+          m = json.load(open('validated/manifest.json'))
+          assert m['graphs']['RH-combined.json']['nodes'] >= 2
+          assert m['graphs']['RH-combined.json']['edges_emitted'] >= 1
+          assert m['graphs']['RH-combined.json']['external_reference_count'] == 0
+          assert m['independent_kernel_verification'] is False
           PY
+          popd
+      - name: Publish genuine Lean smoke graph and resource receipt
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: upstream-lean-graph-genuine-smoke
+          path: |
+            smoke/validated/*.json
+            smoke/extraction-time.txt
+          retention-days: 7
+          if-no-files-found: warn
