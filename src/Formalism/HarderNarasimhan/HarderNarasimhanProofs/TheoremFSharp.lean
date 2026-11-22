@@ -1,6 +1,7 @@
 import Formalism.HarderNarasimhan.StatementFrameF
 import Formalism.HarderNarasimhan.HarderNarasimhanProofs.FrameHermSharpB
 import Formalism.HarderNarasimhan.HarderNarasimhanProofs.FrameLinearAlgebraFirst
+import Formalism.HarderNarasimhan.HarderNarasimhanProofs.IntegratedRankLossSigmaBridge
 
 open Module NumberField Finset Formalism.CorankShareLayerCake.FR
 
@@ -468,6 +469,84 @@ theorem theoremFSharp_of (hLA : FrameLA1) : TheoremFSharp := by
     rw [frameB_sum_sl _ cc hLcc hrkpos.ne', frameB_muDef]
     have : (rk (Formalism.HermitianLatticesTheory.realize b' X') cc : ℝ) ≠ 0 := by exact_mod_cast hrkpos.ne'
     field_simp
+  /-!
+  The following stronger source-local implication is the sharp integrated
+  estimate, for U+H>0, before choosing the old logarithmic envelope.
+  Its hypotheses are discharged by the same original HN input and target
+  filtration objects; the original public theorem type is unchanged.
+  -/
+  have hsharp_of_pos (hUH : 0 < u + HH) :
+      s - muDef b' X' cc ≤
+        (1 - δ)⁻¹ *
+          ((η + 4 * Real.sqrt e) * HH + 4 * (u * HH / (u + HH))) := by
+    let n : I → ℕ := fun i =>
+      rk (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i)
+    let a : (Σ i, Fin (n i)) → ℝ := fun ij =>
+      2 * slopeList (Formalism.HermitianLatticesTheory.realize
+        (b ij.1) (X ij.1)) (N ij.1) ij.2 +
+        slopeNormalisingConstant K - h ij.1
+    have htotal :
+        (Fintype.card (Σ i, Fin (n i)) : ℝ) =
+          (Module.finrank ℚ K : ℝ) * inputRank := by
+      simpa only [inputRank, n] using
+        (sigmaRealRankCard (fun i => Fintype.card (ι i))
+          (fun i => rk (Formalism.HermitianLatticesTheory.realize
+            (b i) (X i)) (N i)) (Module.finrank ℚ K) hrkN)
+    have hmeanS :
+        (Fintype.card (Σ i, Fin (n i)) : ℝ) * s ≤
+          ∑ ij : Σ i, Fin (n i), a ij := by
+      have hc : (Fintype.card (Σ i, Fin (n i)) : ℝ) =
+          ∑ i, (n i : ℝ) := by simp [Fintype.card_sigma]
+      have hsigma :
+          (∑ ij : Σ i, Fin (n i), a ij) =
+            ∑ i, ∑ j : Fin (n i), a ⟨i, j⟩ := by
+        simpa using (Fintype.sum_sigma'
+          (fun i (j : Fin (n i)) => a ⟨i, j⟩))
+      rw [hc, hsigma]
+      simpa only [n, a] using hmeanReal
+    have hrealS : ∀ t ∈ Set.Icc (0 : ℝ) HH,
+        (Module.finrank ℚ K : ℝ) * inputCorank t =
+          ((univ.filter (fun ij : Σ i, Fin (n i) =>
+            a ij < s - t)).card : ℝ) := by
+      intro t ht
+      have hσ := sigmaLowSlopeCorank n
+        (fun i => Fintype.card (ι i))
+        (fun i j => a ⟨i, j⟩)
+        (Module.finrank ℚ K : ℝ)
+        (fun τ i => (rkK (Nt τ i) : ℝ)) s
+        (by intro τ i; simpa only [n, a] using hfilt τ i) t
+      simpa only [inputCorank] using hσ.symm
+    have hgeom : ∀ t ∈ Set.Icc (0 : ℝ) HH,
+        ((univ.filter (fun j : Fin
+          (rk (Formalism.HermitianLatticesTheory.realize b' X') cc) =>
+            2 * slopeList (Formalism.HermitianLatticesTheory.realize b' X')
+              cc j + slopeNormalisingConstant K < s - t)).card : ℝ) ≤
+          (rk (Formalism.HermitianLatticesTheory.realize b' X') cc : ℝ) *
+            ((1 - δ)⁻¹ *
+              ((η + 4 * Real.sqrt e) +
+                4 * (inputCorank t / inputRank))) := by
+      intro t ht
+      calc
+        _ ≤ wActual t *
+          (rk (Formalism.HermitianLatticesTheory.realize b' X') cc : ℝ) :=
+            hcntActual t ht
+        _ = _ := by simp only [wActual]; ring
+    have hb := realRankNormalizedCoupledSlopeBound
+      (Finset.univ : Finset (Σ i, Fin (n i)))
+      (rk (Formalism.HermitianLatticesTheory.realize b' X') cc)
+      a
+      (fun j => 2 * slopeList
+        (Formalism.HermitianLatticesTheory.realize b' X') cc j +
+        slopeNormalisingConstant K)
+      (Module.finrank ℚ K : ℝ) inputRank inputCorank
+      s u HH δ (η + 4 * Real.sqrt e)
+      hu hHH0 hUH hrkpos hδ1 hnR hinputRank
+      (by simpa using htotal)
+      (by simpa using hmeanS)
+      (by intro ij _; exact hupperReal ij.1 ij.2)
+      hlow hrealS hgeom
+    simpa only [hmean] using hb
+
   rw [hmean] at hLC
   have hle := intervalIntegral.integral_mono_on hHH0 hminint hwint
     (fun τ _ => min_le_right 1 (w τ))
