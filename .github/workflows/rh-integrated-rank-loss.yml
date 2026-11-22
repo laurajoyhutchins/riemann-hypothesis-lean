@@ -7,6 +7,8 @@ on:
       - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossCoupling.lean'
       - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossNormalization.lean'
       - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossSigmaBridge.lean'
+      - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossTargetTransfer.lean'
+      - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossDominance.lean'
       - '.github/workflows/rh-integrated-rank-loss.yml'
   workflow_dispatch:
 
@@ -34,6 +36,8 @@ jobs:
             src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossCoupling.lean
             src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossNormalization.lean
             src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossSigmaBridge.lean
+            src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossTargetTransfer.lean
+            src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossDominance.lean
             src/Formalism/CorankShare/StatementFR.lean
             src/Formalism/CorankShare/CorankShareProofs/LayerCakeFormula.lean
           sparse-checkout-cone-mode: false
@@ -53,4 +57,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lake build Formalism.HarderNarasimhan.HarderNarasimhanProofs.IntegratedRankLossSigmaBridge
+          lake build Formalism.HarderNarasimhan.HarderNarasimhanProofs.IntegratedRankLossDominance
