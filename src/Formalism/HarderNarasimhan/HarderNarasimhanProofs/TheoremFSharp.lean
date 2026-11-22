@@ -234,7 +234,7 @@ theorem theoremFSharp_of (hLA : FrameLA1) : TheoremFSharp := by
     rw [hrkN i, hrkNt τ i]
     push_cast; ring
 
-  /-- The original exact rank loss before the pointwise envelope is introduced. -/
+  -- The original exact rank loss before the pointwise envelope is introduced.
   have hreal : ∀ (τ : ℝ),
       (∑ i, ((univ.filter (fun j =>
         2 * slopeList (Formalism.HermitianLatticesTheory.realize (b i) (X i))
