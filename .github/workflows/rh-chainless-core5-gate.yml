@@ -77,11 +77,14 @@ jobs:
   lean-proof:
     needs: source-contract
     runs-on: ubuntu-24.04
-    # A prior 90-minute run compiled 10,721/11,245 source tasks before
-    # being cancelled, without reaching any changed declaration. Reserve
-    # sufficient time for one exact-head proof verdict instead of
-    # restarting the full import DAG repeatedly.
-    timeout-minutes: 180
+    # On the 180-minute attempt, the Core5 ancestor reached 13776/13793
+    # Lake tasks before the hosted runner was cancelled by the job timeout.
+    # The open-orbit ancestor reached 11578/11614. This one exact-head gate
+    # builds both source targets; do not duplicate an independent hosted
+    # compilation on every component PR, or confuse source-gate passes
+    # with kernel/axiom certification. The community's separate durable
+    # self-hosted controller is authoritative for resumable full builds.
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
         with:
