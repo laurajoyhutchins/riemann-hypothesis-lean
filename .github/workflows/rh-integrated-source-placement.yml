@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossSourcePlacement.lean'
+      - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/TheoremFSharp.lean'
       - '.github/workflows/rh-integrated-source-placement.yml'
   workflow_dispatch:
 
