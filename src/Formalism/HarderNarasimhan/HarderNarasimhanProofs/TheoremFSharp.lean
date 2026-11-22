@@ -247,6 +247,46 @@ theorem theoremFSharp_of (hLA : FrameLA1) : TheoremFSharp := by
     intro i _
     exact hfilt τ i
 
+  have hx : ∀ i, ∑ j, (2 * slopeList (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i) j + slopeNormalisingConstant K -
+      h i) = (Module.finrank ℚ K : ℝ) *
+      ((Fintype.card (ι i) : ℝ) * (muDef (b i) (X i) (N i) - h i)) := by
+    intro i
+    by_cases hci : Fintype.card (ι i) = 0
+    · have h0 : rk (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i) = 0 := by rw [hrkN i, hci, mul_zero]
+      have : IsEmpty (Fin (rk (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i))) := by
+        rw [h0]; exact Fin.isEmpty'
+      simp [hci]
+    · simp_rw [add_sub_assoc]
+      rw [frameB_sum_sl _ (N i) (hLN i)
+          (by rw [hrkN i]; exact (Nat.mul_pos hn (Nat.pos_of_ne_zero hci)).ne'),
+        hrkN i, frameB_muDef]
+      push_cast; ring
+
+  have hmeanReal :
+      (∑ i, (rk (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i) : ℝ)) * s ≤
+        ∑ i, ∑ j, (2 * slopeList (Formalism.HermitianLatticesTheory.realize (b i) (X i))
+          (N i) j + slopeNormalisingConstant K - h i) := by
+    rw [Finset.sum_congr rfl fun i _ => hx i, ← Finset.mul_sum]
+    simp only [hrkN]
+    push_cast
+    rw [← Finset.mul_sum, mul_assoc]
+    exact mul_le_mul_of_nonneg_left (by rw [mul_comm]; exact hs) hnR.le
+
+  have hupperReal :
+      ∀ i (j : Fin (rk (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i))),
+        2 * slopeList (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i) j +
+          slopeNormalisingConstant K - h i ≤ s + u := by
+    intro i j
+    by_cases hci : Fintype.card (ι i) = 0
+    · exfalso
+      have hj : (j : ℕ) < rk (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i) := j.isLt
+      have h0 : rk (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i) = 0 := by rw [hrkN i, hci, mul_zero]
+      omega
+    · have hext := ((polygon_extreme_slopes _ _ _ _ (N i) (hLN i) (hNne i hci)).1 j).2
+      have hm := hmax i
+      rw [frameB_muMaxDef] at hm
+      linarith
+
   have hcor : ∀ τ, 0 ≤ τ → (∑ i, ((Fintype.card (ι i) : ℝ) - rkK (Nt τ i))) ≤
       (u / (u + τ)) * ∑ i, (Fintype.card (ι i) : ℝ) := by
     intro τ hτ
@@ -258,35 +298,8 @@ theorem theoremFSharp_of (hLA : FrameLA1) : TheoremFSharp := by
       rw [← Finset.mul_sum, ← Finset.mul_sum, mul_assoc] at hsh
       have := le_of_mul_le_mul_left hsh hnR
       linarith
-    · have hx : ∀ i, ∑ j, (2 * slopeList (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i) j + slopeNormalisingConstant K -
-          h i) = (Module.finrank ℚ K : ℝ) *
-          ((Fintype.card (ι i) : ℝ) * (muDef (b i) (X i) (N i) - h i)) := by
-        intro i
-        by_cases hci : Fintype.card (ι i) = 0
-        · have h0 : rk (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i) = 0 := by rw [hrkN i, hci, mul_zero]
-          have : IsEmpty (Fin (rk (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i))) := by
-            rw [h0]; exact Fin.isEmpty'
-          simp [hci]
-        · simp_rw [add_sub_assoc]
-          rw [frameB_sum_sl _ (N i) (hLN i)
-              (by rw [hrkN i]; exact (Nat.mul_pos hn (Nat.pos_of_ne_zero hci)).ne'),
-            hrkN i, frameB_muDef]
-          push_cast; ring
-      rw [Finset.sum_congr rfl fun i _ => hx i, ← Finset.mul_sum]
-      simp only [hrkN]
-      push_cast
-      rw [← Finset.mul_sum, mul_assoc]
-      exact mul_le_mul_of_nonneg_left (by rw [mul_comm]; exact hs) hnR.le
-    · intro i j
-      by_cases hci : Fintype.card (ι i) = 0
-      · exfalso
-        have hj : (j : ℕ) < rk (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i) := j.isLt
-        have h0 : rk (Formalism.HermitianLatticesTheory.realize (b i) (X i)) (N i) = 0 := by rw [hrkN i, hci, mul_zero]
-        omega
-      · have hext := ((polygon_extreme_slopes _ _ _ _ (N i) (hLN i) (hNne i hci)).1 j).2
-        have hm := hmax i
-        rw [frameB_muMaxDef] at hm
-        linarith
+    · exact hmeanReal
+    · exact hupperReal
 
   let θ' : ℝ → ℝ := fun τ => (s - τ - slopeNormalisingConstant K) / 2
   let St : ℝ → Submodule (𝓞 K) W := fun τ => hnStep (Formalism.HermitianLatticesTheory.realize b' X') cc (θ' τ)
