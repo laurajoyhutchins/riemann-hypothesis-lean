@@ -133,4 +133,57 @@ theorem geometricSigmaSlopeBound
     hS hmean' (by intro ij _; exact hupper ij.1 ij.2)
     hlower hreal hgeometric
 
+/-- The source-ready integrated loss bound, including the degenerate case
+\`u=H=0\`. No positive-denominator assumption escapes into the original
+Harder--Narasimhan theorem interface. -/
+theorem geometricSigmaSlopeBoundAll
+    {I : Type*} [Fintype I]
+    (m n : I → ℕ) (d : ℕ) (a : ∀ i, Fin (n i) → ℝ)
+    (M : ℕ) (b : Fin M → ℝ)
+    (rk : ℝ → I → ℝ) (placed step : ℝ → ℝ)
+    (K L s u H δ A : ℝ)
+    (hd : 0 < d) (hm : 0 < ∑ i, m i) (hM : 0 < M)
+    (hu : 0 ≤ u) (hH : 0 ≤ H)
+    (hδ : δ < 1) (hA : 0 ≤ A)
+    (hrank : ∀ i, n i = d * m i)
+    (hmean : (∑ i, (n i : ℝ)) * s ≤ ∑ i, ∑ j, a i j)
+    (hupper : ∀ i j, a i j ≤ s + u)
+    (hlower : ∀ j, s - H ≤ b j)
+    (hfilt : ∀ t i,
+      ((Finset.univ.filter (fun j : Fin (n i) => a i j < s - t)).card : ℝ) =
+        (d : ℝ) * ((m i : ℝ) - rk t i))
+    (htargetTotal : (M : ℝ) = (d : ℝ) * K)
+    (htargetCount : ∀ t ∈ Set.Icc (0 : ℝ) H,
+      ((Finset.univ.filter (fun j : Fin M => b j < s - t)).card : ℝ) =
+        (d : ℝ) * (K - step t))
+    (hplace : ∀ t ∈ Set.Icc (0 : ℝ) H,
+      K - placed t ≤
+        (A + 4 * ((∑ i, ((m i : ℝ) - rk t i)) /
+          (∑ i, (m i : ℝ)))) * L)
+    (hcontain : ∀ t ∈ Set.Icc (0 : ℝ) H, placed t ≤ step t)
+    (hcard : (1 - δ) * L ≤ K) :
+    s - (∑ j, b j) / (M : ℝ) ≤
+      (1 - δ)⁻¹ * (A * H + 4 * (u * H / (u + H))) := by
+  by_cases hpos : 0 < u + H
+  · exact geometricSigmaSlopeBound m n d a M b rk placed step
+      K L s u H δ A hd hm hM hu hH hpos hδ hA hrank hmean
+      hupper hlower hfilt htargetTotal htargetCount hplace hcontain hcard
+  · have hzero : u + H = 0 := by
+      exact le_antisymm (le_of_not_gt hpos) (add_nonneg hu hH)
+    have hH0 : H = 0 := by linarith
+    have hsum : (M : ℝ) * s ≤ ∑ j, b j := by
+      calc
+        _ = ∑ _j : Fin M, s := by simp [nsmul_eq_mul]
+        _ ≤ ∑ j : Fin M, b j := by
+          apply Finset.sum_le_sum
+          intro j _
+          have hj := hlower j
+          linarith
+    have hMpos : (0 : ℝ) < M := by exact_mod_cast hM
+    have havg : s ≤ (∑ j, b j) / (M : ℝ) := by
+      apply (le_div_iff₀ hMpos).2
+      nlinarith [hsum]
+    simp [hH0]
+    linarith
+
 end Formalism.HN
