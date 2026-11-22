@@ -2,6 +2,7 @@ import Formalism.HarderNarasimhan.StatementFrameF
 import Formalism.HarderNarasimhan.HarderNarasimhanProofs.FrameHermSharpB
 import Formalism.HarderNarasimhan.HarderNarasimhanProofs.FrameLinearAlgebraFirst
 import Formalism.HarderNarasimhan.HarderNarasimhanProofs.IntegratedRankLossSigmaBridge
+import Formalism.HarderNarasimhan.StatementFrameFIntegrated
 
 open Module NumberField Finset Formalism.CorankShareLayerCake.FR
 
@@ -166,7 +167,7 @@ theorem hilbert_schmidt_zero_map {E F : Type*} [NormedAddCommGroup E] [InnerProd
 
 set_option maxHeartbeats 4000000 in
 
-theorem theoremFSharp_of (hLA : FrameLA1) : TheoremFSharp := by
+theorem theoremFJoint_of (hLA : FrameLA1) : TheoremFJoint := by
   intro K W κ κ₁ I _ _ _ _ _ _ _ _ _ _ _ _ _ _ V ι _ _ _ _ _ _ b' X' cc b X N B h v Y Y' Ball γ
     s u HH e η δ hX' hX hY hY' hccFG hccSpan hNFG hNSpan hR hBN hht hs hu hmax hHH hHH0
     hδ0 hδ1 hcard hBall hγ hF2 he0 he1 hF1 hη
@@ -547,11 +548,49 @@ theorem theoremFSharp_of (hLA : FrameLA1) : TheoremFSharp := by
       hlow hrealS hgeom
     simpa only [hmean] using hb
 
+  have hsharp :
+      s - (1 - δ)⁻¹ *
+        ((η + 4 * Real.sqrt e) * HH + 4 * (u * HH / (u + HH))) ≤
+          muDef b' X' cc := by
+    by_cases hp : 0 < u + HH
+    · have hpos := hsharp_of_pos hp
+      linarith
+    · have hu0 : u = 0 := by linarith [hu, hHH0]
+      have hH0 : HH = 0 := by linarith [hu, hHH0]
+      have hz : s ≤ muDef b' X' cc := by
+        have hc := hLC
+        rw [hmean] at hc
+        simpa [hH0] using hc
+      simpa [hu0, hH0] using hz
+
   rw [hmean] at hLC
   have hle := intervalIntegral.integral_mono_on hHH0 hminint hwint
     (fun τ _ => min_le_right 1 (w τ))
   have hI := hwc.2
-  linarith
+  constructor
+  · linarith
+  · exact hsharp
+
+theorem theoremFSharp_of (hLA : FrameLA1) : TheoremFSharp := by
+  intro K W κ κ₁ I _ _ _ _ _ _ _ _ _ _ _ _ _ _ V ι _ _ _ _ _ _ b' X' cc b X N B h v Y Y' Ball γ
+    s u HH e η δ hX' hX hY hY' hccFG hccSpan hNFG hNSpan hR hBN hht hs hu hmax hHH hHH0
+    hδ0 hδ1 hcard hBall hγ hF2 he0 he1 hF1 hη
+  exact (theoremFJoint_of hLA K W κ κ₁ I V ι b' X' cc b X N B h v Y Y' Ball γ
+    s u HH e η δ hX' hX hY hY' hccFG hccSpan hNFG hNSpan hR hBN hht hs hu hmax hHH hHH0
+    hδ0 hδ1 hcard hBall hγ hF2 he0 he1 hF1 hη).1
+
+theorem theoremFIntegrated_of (hLA : FrameLA1) : TheoremFIntegrated := by
+  intro K W κ κ₁ I _ _ _ _ _ _ _ _ _ _ _ _ _ _ V ι _ _ _ _ _ _ b' X' cc b X N B h v Y Y' Ball γ
+    s u HH e η δ hX' hX hY hY' hccFG hccSpan hNFG hNSpan hR hBN hht hs hu hmax hHH hHH0
+    hδ0 hδ1 hcard hBall hγ hF2 he0 he1 hF1 hη
+  exact (theoremFJoint_of hLA K W κ κ₁ I V ι b' X' cc b X N B h v Y Y' Ball γ
+    s u HH e η δ hX' hX hY hY' hccFG hccSpan hNFG hNSpan hR hBN hht hs hu hmax hHH hHH0
+    hδ0 hδ1 hcard hBall hγ hF2 he0 he1 hF1 hη).2
+
+theorem frame_theorem_integrated : TheoremFIntegrated :=
+  theoremFIntegrated_of frame_linear_algebra_first
+
+#print axioms Formalism.HN.frame_theorem_integrated
 
 theorem frame_theorem_sharp : TheoremFSharp := theoremFSharp_of frame_linear_algebra_first
 
