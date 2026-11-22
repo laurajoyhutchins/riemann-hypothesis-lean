@@ -1,0 +1,81 @@
+name: RH semiabelian DVR extension core focused Lean gate
+
+on:
+  pull_request:
+    paths:
+      - src/Development/AbelianVarietyTheory/Proofs/IwasawaDecomposition/IsOpenImmersionQuasiFiniteLocusOfIsIntegral.lean
+      - src/Development/AbelianVarietyTheory/Proofs/IwasawaDecomposition/SemiabelianExtensionNormalModel.lean
+      - tools/RHDVRExtensionCheck.lean
+      - .github/workflows/rh-dvr-extension-proof-gate.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  LEAN_ABORT_ON_PANIC: '1'
+  LAKE_ARTIFACT_CACHE: 'false'
+  MATHLIB_CACHE_GET_URL: https://cache.mathlib.org/mathlib4
+
+concurrency:
+  group: rh-dvr-extension-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  focused-dvr-source-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install checksum-pinned elan and Lean 4.33.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 3 \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            --output "$RUNNER_TEMP/elan.tar.gz"
+          printf '%s  %s\n' \
+            '42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63' \
+            "$RUNNER_TEMP/elan.tar.gz" | sha256sum --check -
+          tar -xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP"
+          "$RUNNER_TEMP/elan-init" -y --default-toolchain none --no-modify-path
+          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Bind source identity and dependency lock
+        run: |
+          set -euo pipefail
+          mkdir -p analysis
+          python3 tools/rh_ci_identity.py --root . \
+            --output analysis/rh-dvr-extension-input-identity.json
+      - name: Fetch only pinned Mathlib cache
+        run: |
+          set -euo pipefail
+          lake exe mathlib/cache get
+          git diff --quiet HEAD -- lakefile.toml lake-manifest.json lean-toolchain src
+      # Source imports exceeded 30 minutes on the initial exact-head gate (9502/10542).
+      # Do not turn a legitimate long build into a false negative.
+      - name: Build both affected theorems and their full source imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build \
+            Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.IsOpenImmersionQuasiFiniteLocusOfIsIntegral \
+            Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SemiabelianExtensionNormalModel \
+            2>&1 | tee analysis/rh-dvr-extension-build.log
+      - name: Re-elaborate public contracts and audit axioms
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean tools/RHDVRExtensionCheck.lean \
+            2>&1 | tee analysis/rh-dvr-extension-axioms.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rh-dvr-extension-source-gate
+          path: |
+            analysis/rh-dvr-extension-*.log
+            analysis/rh-dvr-extension-input-identity.json
+          retention-days: 30
+          if-no-files-found: warn
