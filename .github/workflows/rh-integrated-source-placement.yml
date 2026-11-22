@@ -1,0 +1,38 @@
+name: Check source-connected actual-corank placement
+
+on:
+  pull_request:
+    paths:
+      - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossSourcePlacement.lean'
+      - '.github/workflows/rh-integrated-source-placement.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rh-integrated-source-placement-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  geometric-placement-lean:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Pinned Lean with official Mathlib cache
+        uses: leanprover/lean-action@ba3fdfe5c4476c925da13bf11a005ddb47e47aee # v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          mk_all-check: false
+          use-mathlib-cache: true
+          use-github-cache: false
+      - name: Compile the original geometric rank theorem and exact-corank wrapper
+        run: |
+          set -euo pipefail
+          lake build Formalism.HarderNarasimhan.HarderNarasimhanProofs.IntegratedRankLossSourcePlacement

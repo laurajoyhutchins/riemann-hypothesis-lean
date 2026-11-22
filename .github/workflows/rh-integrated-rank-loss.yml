@@ -1,0 +1,60 @@
+name: Check finite integrated rank-loss lemma
+
+on:
+  pull_request:
+    paths:
+      - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLoss.lean'
+      - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossCoupling.lean'
+      - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossNormalization.lean'
+      - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossSigmaBridge.lean'
+      - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossTargetTransfer.lean'
+      - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossDominance.lean'
+      - '.github/workflows/rh-integrated-rank-loss.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rh-integrated-rank-loss-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  finite-slope-lean:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            lean-toolchain
+            lakefile.toml
+            lake-manifest.json
+            .github/workflows/rh-integrated-rank-loss.yml
+            src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLoss.lean
+            src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossCoupling.lean
+            src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossNormalization.lean
+            src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossSigmaBridge.lean
+            src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossTargetTransfer.lean
+            src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossDominance.lean
+            src/Formalism/CorankShare/StatementFR.lean
+            src/Formalism/CorankShare/CorankShareProofs/LayerCakeFormula.lean
+          sparse-checkout-cone-mode: false
+
+      - name: Install pinned Lean and restore official Mathlib cache
+        uses: leanprover/lean-action@ba3fdfe5c4476c925da13bf11a005ddb47e47aee # v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          mk_all-check: false
+          use-mathlib-cache: true
+          use-github-cache: false
+
+      - name: Kernel-check only the new source module
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build Formalism.HarderNarasimhan.HarderNarasimhanProofs.IntegratedRankLossDominance
