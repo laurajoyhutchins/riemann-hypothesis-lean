@@ -17,7 +17,7 @@ envelope.
 
 namespace Formalism.HN
 
-open Module NumberField Finset
+open Module NumberField Finset Formalism.CorankShareLayerCake.FR
 
 /-- `thmF_place` specialized to the actual input corank share.
     This is an instance of the original theorem, not a stronger axiom. -/
