@@ -49,7 +49,7 @@ Census SHA256 (file contents) before and after PR #221:
 | Axiom dependencies and new assumptions | **NOT CHECKED** | Requires kernel-level constant/proof export or axiom audit on both builds |
 | Proof-bearing declaration and exact reachable DAG delta | **NOT CHECKED** | Requires export / graph census on both checked environments |
 | Clean build time and peak RSS | **NOT CHECKED** | Full build not executed |
-| Community CI controller fast contract check | **NOT PASSED** | Initial PR-side workflow returned `action_required`, requiring workflow approval/execution |
+| Community CI controller fast contract check | **PASS** | [Run 45216841053](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/actions/runs/45216841053) passed pinned submodule, manifest/toolchain identity, fork adapter unit tests, and community CI preparation / publication-trust tests. Full Lean build job skipped |
 
 ## Reproducible source checks
 
