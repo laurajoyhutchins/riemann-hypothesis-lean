@@ -11,6 +11,17 @@ Status: **source integration proved by Git history and source census, kernel ver
 - Fork source compression: `813e47dc1ccf86284e12f37b601f8130f20a984c`
 - Fork community CI repin: `442c7fde89d3fd285c576715375695fbdcfc1ae6`
 
+## Complete source-tree identity
+
+Independent Git object inspection confirms that the **whole `src/` tree**, not just the 3,369 changed files or final-theorem entrypoints, matches upstream exactly:
+
+| Source | Upstream Git `src/` tree SHA | Fork integration `src/` tree SHA |
+| --- | --- | --- |
+| Pre-#221 source | `b050c420c303cd0fd127a79d2700883fa399c18f` | `b050c420c303cd0fd127a79d2700883fa399c18f` |
+| Post-#221 source | `84e5e9889142f86f47b3156b54009f65fc274f82` | `84e5e9889142f86f47b3156b54009f65fc274f82` |
+
+Thus all tracked Lean source paths and bytes in `src/` are identical to the corresponding upstream snapshots. This establishes import completeness, not Lean theorem elaboration or kernel correctness.
+
 ## Five final source declarations
 
 All five are top-level declarations in `src/Main.lean`. Their *written expected propositions* are:
