@@ -56,8 +56,7 @@ theorem harmonicLoss_le_log (u H : ℝ)
   have hlog := Real.one_sub_inv_le_log_of_pos hq
   have hden : u + H ≠ 0 := ne_of_gt (by linarith)
   have heq : u * H / (u + H) = u * (1 - (1 + H / u)⁻¹) := by
-    field_simp
-    ring
+    field_simp [huPos.ne', hden, hq.ne'] <;> ring
   calc
     _ = u * (1 - (1 + H / u)⁻¹) := heq
     _ ≤ u * Real.log (1 + H / u) :=
