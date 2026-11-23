@@ -11,6 +11,9 @@ on:
       - 'tools/rh_ci_identity.py'
       - 'lake-manifest.json'
       - 'lean-toolchain'
+      - 'comparator.json'
+      - 'export-targets.txt'
+      - 'tools/rh_pr221_verify_inputs.py'
   workflow_dispatch:
 
 permissions:
@@ -33,6 +36,11 @@ jobs:
             .gitmodules
             lake-manifest.json
             lean-toolchain
+            comparator.json
+            export-targets.txt
+            src/Main.lean
+            src/Statements.lean
+            src/Challenge.lean
             tools
           sparse-checkout-cone-mode: false
           persist-credentials: false
@@ -56,7 +64,9 @@ jobs:
             scripts
             lake-manifest.json
             lean-toolchain
-          sparse-checkout-cone-mode: true
+            comparator.json
+            export-targets.txt
+          sparse-checkout-cone-mode: false
           persist-credentials: false
           submodules: false
       - name: Verify toolchain and dependency manifest remain identical
@@ -65,6 +75,13 @@ jobs:
           test "$(git -C community-harness rev-parse HEAD)" = '98cc3736f046abae883d8cda839c84f3004257a7'
           cmp lean-toolchain community-harness/lean-toolchain
           cmp lake-manifest.json community-harness/lake-manifest.json
+          cmp comparator.json community-harness/comparator.json
+          cmp export-targets.txt community-harness/export-targets.txt
+      - name: Check exact five-root comparator inputs and upstream source tree
+        run: |
+          set -euo pipefail
+          python3 tools/rh_pr221_verify_inputs.py --test
+          python3 tools/rh_pr221_verify_inputs.py .
       - name: Validate the fork-only identity adapter
         run: python3 -m unittest discover -s tools -p 'test_rh_ci_identity.py' -v
       - name: Run community's own CI preparation and publication-trust tests
