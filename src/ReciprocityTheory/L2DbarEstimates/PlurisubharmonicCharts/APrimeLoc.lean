@@ -77,7 +77,6 @@ private lemma exists_const_lintegral_comp_continuousLinearEquiv {n a b : ℕ} (A
     haveI : SigmaFinite (volume : Measure (V b)) := inferInstance
     first
       | infer_instance
-      | exact Measure.prod.instIsAddHaarMeasure _ _
       | exact
           { toIsFiniteMeasureOnCompacts := inferInstance
             toIsAddLeftInvariant := inferInstance
@@ -87,10 +86,6 @@ private lemma exists_const_lintegral_comp_continuousLinearEquiv {n a b : ℕ} (A
     rw [hν]
     first
       | infer_instance
-      | exact A.symm.isAddHaarMeasure_map volume
-      | exact ContinuousLinearEquiv.isAddHaarMeasure_map A.symm volume
-      | exact Measure.MapContinuousLinearEquiv.isAddHaarMeasure volume A.symm
-      | exact (A.symm.restrictScalars ℝ).isAddHaarMeasure_map volume
       | exact Measure.isAddHaarMeasure_map volume
           (A.symm : V a × V b →+ V n) A.symm.continuous A.symm.surjective
           (A.symm.toHomeomorph.toCocompactMap.cocompact_tendsto')
@@ -110,7 +105,6 @@ private lemma exists_const_lintegral_comp_continuousLinearEquiv {n a b : ℕ} (A
   rw [Measure.restrict_smul, lintegral_smul_measure]
   first
     | rfl
-    | simp [ENNReal.smul_def]
 
 
 
@@ -136,14 +130,12 @@ theorem ap_local_blowup (n d : ℕ) (hd : 1 ≤ d) (hMVd : ∀ k, MVStatement k)
     have h2 : DifferentiableAt ℂ (fun w => (p w, Lsnd w - Lsnd v0)) v := by
       first
         | exact h1.prodMk (Lsnd.differentiableAt.sub_const _)
-        | exact h1.prod (Lsnd.differentiableAt.sub_const _)
     exact (A.symm : V d × V (n - d) →L[ℂ] V n).differentiableAt.comp v h2
   have hΨc : ContDiffAt ℂ 1 Ψ v0 := by
     have h1 : ContDiffAt ℂ 1 p v0 := hpC.contDiffAt (hU.mem_nhds hv0)
     have h2 : ContDiffAt ℂ 1 (fun w => (p w, Lsnd w - Lsnd v0)) v0 := by
       first
         | exact h1.prodMk (Lsnd.contDiff.contDiffAt.sub contDiffAt_const)
-        | exact h1.prod (Lsnd.contDiff.contDiffAt.sub contDiffAt_const)
     exact (A.symm : V d × V (n - d) →L[ℂ] V n).contDiff.contDiffAt.comp v0 h2
   have hΨd : HasFDerivAt Ψ
       ((ContinuousLinearEquiv.refl ℂ (V n) : V n ≃L[ℂ] V n) : V n →L[ℂ] V n) v0 := by
@@ -153,7 +145,6 @@ theorem ap_local_blowup (n d : ℕ) (hd : 1 ≤ d) (hMVd : ∀ k, MVStatement k)
         ((fderiv ℂ p v0).prod Lsnd) v0 := by
       first
         | exact h1.prodMk (Lsnd.hasFDerivAt.sub_const (Lsnd v0))
-        | exact h1.prod (Lsnd.hasFDerivAt.sub_const (Lsnd v0))
     have h3 := (A.symm : V d × V (n - d) →L[ℂ] V n).hasFDerivAt.comp v0 h2
     refine h3.congr_fderiv ?_
     ext1 h
@@ -301,8 +292,6 @@ theorem ap_local_blowup (n d : ℕ) (hd : 1 ≤ d) (hMVd : ∀ k, MVStatement k)
   first
     | exact ENNReal.le_of_mul_le_mul_left hmain h0 htop
     | exact (ENNReal.mul_le_mul_iff_right h0 htop).1 hmain
-    | exact (ENNReal.mul_le_mul_iff_left h0 htop).1 hmain
-    | exact (ENNReal.mul_le_mul_left h0 htop).1 hmain
 
 end
 

@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.PositiveShells.ContinuousColElVal
 public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.AvgVanish
 public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.SchwartzBruhatMatrixTranslationModulationIrreduc
 public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LocallyConstantCompactSupportUnipotentStatement
@@ -188,22 +189,7 @@ theorem key {i t : ℕ} (m : Mir k ((i + 1) + t)) (v : Fin ((i + 1) + (t + 1)) �
 
 theorem det_unip (n : ℕ) (c : Fin n → k) :
     Matrix.GeneralLinearGroup.det (unip k n (Multiplicative.ofAdd c)) = 1 := by
-  apply Units.ext
-  rw [Matrix.GeneralLinearGroup.val_det_apply, Units.val_one]
-  show (1 + colMat k n c).det = 1
-  rw [Matrix.det_of_upperTriangular]
-  · refine Finset.prod_eq_one fun x _ => ?_
-    induction x using Fin.lastCases with
-    | last => simp [colMat]
-    | cast a => simp [colMat, Fin.castSucc_ne_last]
-  · intro x y hxy
-    have hy : y ≠ Fin.last n := fun e => by
-      subst e
-      exact absurd (Fin.le_last x) (not_le.2 hxy)
-    rw [Matrix.add_apply, colMat_of_ne _ _ _ hy, add_zero]
-    exact Matrix.one_apply_ne fun h => by
-      subst h
-      exact lt_irrefl _ hxy
+  apply PositivityTheory.RgUd.Form.U.Shell.det_unip <;> assumption
 
 theorem dpowM_of_unip (n : ℕ) (s : ℝ) (g : Mir k n) (c : Fin n → k)
     (hg : (g : GL (Fin (n + 1)) k) = unip k n (Multiplicative.ofAdd c)) : dpowM n s g = 1 := by

@@ -1,5 +1,6 @@
 module
 
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsEquivOfMemEndL
 public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.FiniteRepSetOfOrtho
 public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocalDensityRatio
 public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.AlgebraMapIntCastSmul
@@ -70,32 +71,7 @@ theorem pow_smul_anti (𝔭 : Ideal (𝓞 F)) (A : Submodule (𝓞 K) V) {i j : 
 theorem exists_pow_smul_le {M₁ M₂ : Submodule (𝓞 K) V} (hM₁ : Submodule.IsLattice K M₁)
     (hM₂ : Submodule.IsFullLattice K M₂) {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) :
     ∃ r : ℕ, ((extP K 𝔭) ^ r • locF 𝔭 M₁ : Submodule (𝓞 K) V) ≤ locF 𝔭 M₂ := by
-  have := h𝔭.isPrime
-  obtain ⟨n, hn, hnx⟩ := LocF.exists_zsmul_le hM₁ hM₂
-  have hc : ((n : ℤ) : 𝓞 F) ≠ 0 := by exact_mod_cast hn
-  obtain ⟨r, u, hu, hdvd⟩ := D2.exists_mul_dvd h𝔭 hc
-  refine ⟨r, ?_⟩
-  have key : extP K 𝔭 ^ r ≤ (locF 𝔭 M₂).colon (locF 𝔭 M₁ : Set V) := by
-    unfold extP
-    rw [← Ideal.map_pow, Ideal.map_le_iff_le_comap]
-    intro a ha
-    rw [Ideal.mem_comap, Submodule.mem_colon]
-    intro x hx
-    obtain ⟨s, hs, hsx⟩ := (LocalSpans.mem_locF 𝔭 M₁ x).1 hx
-    obtain ⟨d, hd⟩ := hdvd a ha
-    refine (LocalSpans.mem_locF 𝔭 M₂ _).2
-      ⟨u * s, fun h => (h𝔭.isPrime.mem_or_mem h).elim hu hs, ?_⟩
-    have e : algebraMap (𝓞 F) (𝓞 K) (u * s) • algebraMap (𝓞 F) (𝓞 K) a • x =
-        algebraMap (𝓞 F) (𝓞 K) d • (n • (algebraMap (𝓞 F) (𝓞 K) s • x)) := by
-      rw [← LocF.algebraMap_intCast_smul (F := F) (K := K) n]
-      simp only [smul_smul, ← map_mul]
-      congr 2
-      linear_combination s * hd
-    rw [e]
-    exact M₂.smul_mem _ (hnx _ hsx)
-  rw [Submodule.smul_le]
-  intro a ha x hx
-  exact Submodule.mem_colon.1 (key ha) x hx
+  apply Formalism.HermitianLattices.Ext.L3.D2.exists_smul_le <;> assumption
 
 set_option linter.unusedVariables false in
 theorem locF_inf {𝔭 : Ideal (𝓞 F)} (h𝔭 : 𝔭.IsMaximal) {A B : Submodule (𝓞 K) V}

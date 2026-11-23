@@ -78,7 +78,6 @@ private theorem hpk_apply_lemma (k r : ℕ) (i l : Fin (2 * r + k + 1)) :
     Formalism.QuantumDeterminants.Hpk k r i l = if (l : ℕ) = (if (i : ℕ) < r ∨ r + k < i then 2 * r + k - i else i) then
       (if (i : ℕ) = r + k then -1 else 1) else 0 := by
   have hi := i.2
-  have hl := l.2
   simp only [Formalism.QuantumDeterminants.Hpk]
   split_ifs <;> (try simp only [Fin.ext_iff] at *) <;> first | rfl | omega | norm_num
 

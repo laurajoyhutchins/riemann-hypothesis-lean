@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsPolyBallOfCompact
 public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MvecLeviMulUv
 public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.LeibnizOrders.PhiPG0
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NonemptyEquivMultiProdOne
@@ -117,31 +118,7 @@ theorem continuous_mvec (n : ℕ) : Continuous (mvec (k := k) (n := n)) := by
 
 theorem exists_compact_polyBall (n : ℕ) {C : Set (Fin n → k)} (hC : IsCompact C) :
     ∃ S : kˣ, ∀ v ∈ C, Multiplicative.ofAdd v ∈ polyBall (k := k) n S := by
-  have hC' : IsCompact (Multiplicative.ofAdd '' C) := hC.image continuous_ofAdd
-  obtain ⟨t, ht⟩ := hC'.elim_finite_subcover (fun s : kˣ => (polyBall (k := k) n s : Set (Multiplicative (Fin n → k))))
-    (fun s => isOpen_polyBall n s) (fun x _ => Set.mem_iUnion.2 (exists_mem_polyBall x))
-  classical
-  have hb : ∀ t : Finset kˣ, ∃ S : kˣ, ∀ s ∈ t, polyBall (k := k) n s ≤ polyBall n S := by
-    intro t
-    induction t using Finset.induction_on with
-    | empty => exact ⟨1, by simp⟩
-    | insert a t _ ih =>
-      obtain ⟨S, hS⟩ := ih
-      rcases le_total (ValuativeRel.valuation k (a : k)) (ValuativeRel.valuation k (S : k)) with h | h
-      · refine ⟨S, fun s hs => ?_⟩
-        rcases Finset.mem_insert.1 hs with rfl | hs
-        · exact polyBall_mono _ h
-        · exact hS s hs
-      · refine ⟨a, fun s hs => ?_⟩
-        rcases Finset.mem_insert.1 hs with rfl | hs
-        · exact le_rfl
-        · exact (hS s hs).trans (polyBall_mono _ h)
-  obtain ⟨S, hS⟩ := hb t
-  refine ⟨S, fun v hv => ?_⟩
-  have := ht ⟨v, hv, rfl⟩
-  simp only [Set.mem_iUnion] at this
-  obtain ⟨s, hs, hx⟩ := this
-  exact hS s hs hx
+  apply GlobalTheory.CompanionTheory.BZPhiPG.LocC.exists_polyBall_of_compact <;> assumption
 
 theorem support_abs (F : Mir k n → E) (C : Set (Mir k n))
     (hF : ∀ g, F g ≠ 0 → ∃ h ∈ LH k n, ∃ c ∈ C, g = h * c) (v : Fin n → k) (hv : F (uv n v) ≠ 0) :

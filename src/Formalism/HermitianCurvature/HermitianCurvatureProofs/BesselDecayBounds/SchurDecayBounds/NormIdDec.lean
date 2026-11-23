@@ -181,7 +181,6 @@ theorem dInt_of_bd {ε : Fin (2 * r + k + 1) → Bool} {lam : Fin (2 * r + k + 1
     have hsy : sM q.2 * Matrix.of q.1 ∈ UH (Hpk k r) := Formalism.QuantumDeterminants.WeylGroupFacts.uh_mul hs hy
     have gy := ((normInvP k r).1 _ hy).2
     have gsy := ((normInvP k r).1 _ hsy).2
-    have gs := ((normInvP k r).1 _ hs).2
     have hb2 : 0 ≤ b / 2 := by linarith
     have a1 : ‖⟪v, σ (Matrix.of q.1) u⟫_ℂ‖ ≤ |C| * Formalism.FourierDecayAlt.B.gN (Matrix.of q.1) ^ (-b) :=
       (hbd _ hy).trans (mul_le_mul_of_nonneg_right (le_abs_self C) (Real.rpow_nonneg (by linarith) _))

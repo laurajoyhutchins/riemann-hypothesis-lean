@@ -172,7 +172,6 @@ theorem adapted_pq (k r : ℕ) : Adapted (pq k r) (bq k r) (fun _ => 1) := by
     rw [pq_val, pq_val]
     split_ifs <;> omega
   · intro i j hij
-    have h : i.val ≤ j.val := hij
     rw [bq_eq, bq_eq]
     split_ifs <;> omega
   · intro i
@@ -202,7 +201,6 @@ theorem adapted_pq (k r : ℕ) : Adapted (pq k r) (bq k r) (fun _ => 1) := by
 theorem Hq_eq_dp (k r : ℕ) : Hq k r = dp (pq k r) 0 (fun _ => 1) := by
   ext i j
   have hi := i.2
-  have hj := j.2
   simp only [Hq, dp, Matrix.of_apply, Pi.zero_apply, ite_self, zero_add, Fin.ext_iff, pq_val]
   by_cases h : outer k r i
   · rw [if_pos h, if_pos (show i.val ≤ r ∨ r + k ≤ i.val from h)]

@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SizeAbsorption.BDivXNonneg
 public import Formalism.LocalRingCardinality.DataKap
 public import Formalism.LocalRingCardinality.DataParamsT
 public import Formalism.SharpRestriction.ElevenLe
@@ -148,35 +149,7 @@ theorem bprime_le_half (D : D7) (L : SizeData₂ D) (hEta : Formalism.MainNotion
   exact le_of_mul_le_mul_left fin (by positivity)
 
 theorem bT_le_two (D : D7) (L : SizeData₂ D) (hS : Formalism.MainNotions.SizesAt L) (t : D.host.TT) : (L.bT t : ℝ) ≤ 2 * L.sc.b' := by
-  obtain ⟨-, -, -, -, -, -, -, -, hLa, hRho, hBot, -⟩ := hS
-  have hx1 : 1 < L.sc.x := L.sc.one_lt_alt
-  have hx0 : 0 < L.sc.x := by linarith
-  have hk0 : (0 : ℝ) < D.R.k := by
-    have : 0 < D.R.k := by have := D.R.m_add_three_le_k; omega
-    exact_mod_cast this
-  have h1 := hBot t
-  have hLa0 : 0 ≤ L.LaG := le_trans (Real.rpow_pos_of_pos hx0 _).le hLa.1
-  have h2 : 0 ≤ L.sc.x ^ Formalism.MainNotions.szTh L * Real.log L.sc.x * L.LaG / D.R.k :=
-    div_nonneg (mul_nonneg (mul_nonneg (Real.rpow_pos_of_pos hx0 _).le (Real.log_nonneg hx1.le)) hLa0) hk0.le
-  have h3 : L.sc.x ^ (-2 : ℝ) ≤ 1 := Real.rpow_le_one_of_one_le_of_nonpos hx1.le (by norm_num)
-  have hb' : 0 ≤ L.sc.b' := by
-    unfold Scale.b' Scale.a Scale.X' Scale.b
-    positivity
-  have hR : 4 * Formalism.MainNotions.szNst L * L.sc.x ^ L.sc.eps * L.LaG / D.R.k +
-      L.sc.x ^ Formalism.MainNotions.szTh L * Real.log L.sc.x * L.LaG / D.R.k ≤ L.sc.x ^ (-2 : ℝ) := hRho
-  have h4 : Formalism.MainNotions.szNst L * L.sc.x ^ L.sc.eps * L.LaG / D.R.k ≤ 1 := by
-    have : 4 * Formalism.MainNotions.szNst L * L.sc.x ^ L.sc.eps * L.LaG / D.R.k =
-        4 * (Formalism.MainNotions.szNst L * L.sc.x ^ L.sc.eps * L.LaG / D.R.k) := by ring
-    have h0 : 0 ≤ Formalism.MainNotions.szNst L * L.sc.x ^ L.sc.eps * L.LaG / D.R.k := by
-      unfold Formalism.MainNotions.szNst Scale.delta1
-      have := Real.rpow_pos_of_pos hx0 (-(L.sc.eps / 8))
-      have := Real.rpow_pos_of_pos hx0 L.sc.eps
-      positivity
-    linarith
-  have h5 : Formalism.MainNotions.szNst L * L.sc.x ^ L.sc.eps * L.LaG * L.sc.b' / D.R.k =
-      Formalism.MainNotions.szNst L * L.sc.x ^ L.sc.eps * L.LaG / D.R.k * L.sc.b' := by ring
-  rw [h5] at h1
-  nlinarith
+  apply PI.SzEatI.W.bT_le <;> assumption
 
 theorem size_window (D : D7) (L : SizeData₂ D) (hS : Formalism.MainNotions.SizesAt L) (hlx : 2 ≤ Real.log L.sc.x)
     (j : ℕ) (h1 : 1 ≤ j) (h2 : j ≤ D.R.m) (τ : D.what₂.Tau) :

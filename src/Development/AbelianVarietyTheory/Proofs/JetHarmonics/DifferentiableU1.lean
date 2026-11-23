@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CpSeriesMultiplicativeShiftCompAndSubst
 public import Development.AbelianVarietyTheory.Definitions.Jets.CmLatticeCommutatorPairingPowEqOneOfGoodLift
 public import Development.AbelianVarietyTheory.Proofs.CoherentCohomologyProofs.ClosedBallValuationSubringToSubring
 public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ConstantCoeffShiftS
@@ -67,27 +68,7 @@ theorem norm_p_lt_one : ‖(p : ℂ_[p])‖ < 1 := by
   simpa using h2
 
 theorem norm_sub_one_lt {y : ℂ_[p]} {k : ℕ} (h : y ^ p ^ k = 1) : ‖y - 1‖ < 1 := by
-  have hne : p ^ k ≠ 0 := pow_ne_zero _ hp.out.ne_zero
-  have hy : ‖y‖ ≤ 1 := by
-    have h1 : ‖y‖ ^ p ^ k = 1 := by rw [← norm_pow, h, norm_one]
-    exact ((pow_eq_one_iff_of_nonneg (norm_nonneg _) hne).1 h1).le
-  let Y : ball p := ⟨y, hy⟩
-  obtain ⟨r, hr⟩ := exists_add_pow_prime_pow_eq hp.out (Y - 1) 1 k
-  have hr' := congrArg (fun t : ball p => (t : ℂ_[p])) hr
-  simp only [sub_add_cancel, one_pow, mul_one] at hr'
-  push_cast at hr'
-  have hz : ‖y - 1‖ ≤ 1 := (Y - 1).2
-  have hrr : ‖(r : ℂ_[p])‖ ≤ 1 := r.2
-  have e : (y - 1) ^ p ^ k = -((p : ℂ_[p]) * (y - 1) * r) := by
-    have : (Y : ℂ_[p]) = y := rfl
-    rw [this, h] at hr'
-    linear_combination -hr'
-  have h2 : ‖(y - 1) ^ p ^ k‖ < 1 := by
-    rw [e, norm_neg, norm_mul, norm_mul, mul_assoc]
-    exact mul_lt_one_of_nonneg_of_lt_one_left (norm_nonneg _) norm_p_lt_one
-      (mul_le_one₀ hz (norm_nonneg _) hrr)
-  rw [norm_pow] at h2
-  exact (pow_lt_one_iff_of_nonneg (norm_nonneg _) hne).1 h2
+  apply GlobalTheory.MomOne.ShiftComp.norm_sub_one_lt_of_root <;> assumption
 
 theorem bd_derivative {f : ℂ_[p]⟦X⟧} (hf : Bd 1 f) : Bd 1 (PowerSeries.derivative f) := by
   intro n

@@ -1,7 +1,6 @@
 module
 
 public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HasLenOfLatLen
-public import Development.AutomorphicSpectrum.Proofs.TwistedProofs.DualPairingExists
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
 import Mathlib.Algebra.Order.Interval.Basic
@@ -40,10 +39,11 @@ import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DualInterEqSumStatement
 
 @[expose] public section
 
 open GlobalTheory.InertZeta
 
-theorem _root_.GlobalTheory.T.dual_pairing_exists : Dual := by
-  first | exact @GlobalTheory.CompanionTheory.InertDual.dual | exact GlobalTheory.CompanionTheory.InertDual.dual | (intros; apply GlobalTheory.CompanionTheory.InertDual.dual <;> assumption)
+theorem _root_.GlobalTheory.T.dual_pairing_exists : Dual :=
+  @_root_.GlobalTheory.T.dual_inter_eq_sum'

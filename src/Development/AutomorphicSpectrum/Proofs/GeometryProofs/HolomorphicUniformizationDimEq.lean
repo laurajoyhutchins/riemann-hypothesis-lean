@@ -145,16 +145,6 @@ theorem eq_relativeDimension : ∀ (A : Over (Sp ℂ)) [GrpObj A] (L : LB A.left
         (HolOn.comp hσ (hW.prod hW) differentiableOn_snd fun p hp => hp.2)
       refine hH.analyticAt t (w := 0) ⟨h0, h0⟩ ?_
       simpa only [Prod.fst_zero, Prod.snd_zero, hσ0, _root_.mul_one] using hU1
-  have hsurj : Function.Surjective hφ.exp := hφ.exp_surjective fun n hn x => by
-    obtain ⟨z, hz⟩ := u.ex_onto x.toMul
-    have hn' : (n : ℂ) ≠ 0 := Nat.cast_ne_zero.2 hn
-    refine ⟨Additive.ofMul (u.ex ((n : ℂ)⁻¹ • z)), ?_⟩
-    have h1 : n • ((n : ℂ)⁻¹ • z) = z := by
-      rw [← Nat.cast_smul_eq_nsmul ℂ, smul_smul, mul_inv_cancel₀ hn', one_smul]
-    have h2 := holUnif_ex_nsmul_eq_pow u ((n : ℂ)⁻¹ • z) n
-    rw [h1, hz] at h2
-    rw [← ofMul_pow, ← h2]
-    rfl
   have hu := holOn_ex u
   have hu0 : u.ex 0 = 1 := holUnif_ex_zero_eq_one u
   have h1 : φ (u.ex 0) = 0 := by rw [hu0]; exact hφ.map_zero

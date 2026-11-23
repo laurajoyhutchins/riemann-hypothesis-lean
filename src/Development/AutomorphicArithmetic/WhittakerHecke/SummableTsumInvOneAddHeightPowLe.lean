@@ -102,8 +102,6 @@ private lemma nu_lower (κ Bu α T d ν a b : ℝ) (hd : 1 ≤ d) (hκ : 0 < κ)
     (κ / (Bu * d)) * (κ / (T * d)) * ((1 + d * a) * (1 + d * b)) ≤ (1 + κ * ν) ^ 2 := by
   have hBu0 : 0 < Bu := by linarith
   have hα0 : 0 < α := lt_of_lt_of_le (inv_pos.mpr hBu0) hα
-  have hT0 : 0 < T := by linarith
-  have hd0 : 0 < d := by linarith
   have hδ : κ / (Bu * d) ≤ 1 := by
     rw [div_le_one (by positivity)]
     nlinarith
@@ -135,7 +133,6 @@ private lemma lower_bound_first_case (d Bu T α a b : ℝ) (hd : 1 ≤ d) (hBu :
     (ha : 0 ≤ a) (hb : 0 ≤ b) (h : 1 ≤ d * a) : 1 / (d * Bu * T) ≤ a * α + b / α := by
   have hBu0 : 0 < Bu := by linarith
   have hα0 : 0 < α := lt_of_lt_of_le (inv_pos.mpr hBu0) hα
-  have hT0 : 0 < T := by linarith
   have hd0 : 0 < d := by linarith
   have h1 : d⁻¹ ≤ a := by
     rw [inv_le_iff_one_le_mul₀ hd0]; linarith
@@ -154,7 +151,6 @@ private lemma lower_bound_second_case (d Bu T α a b : ℝ) (hd : 1 ≤ d) (hBu 
     (hT : 1 ≤ T) (ha : 0 ≤ a) (hb : 0 ≤ b) (h : 1 ≤ d * b) : 1 / (d * Bu * T) ≤ a * α + b / α := by
   have hBu0 : 0 < Bu := by linarith
   have hα0 : 0 < α := lt_of_lt_of_le (inv_pos.mpr hBu0) hα
-  have hT0 : 0 < T := by linarith
   have hd0 : 0 < d := by linarith
   have h1 : d⁻¹ ≤ b := by
     rw [inv_le_iff_one_le_mul₀ hd0]; linarith
@@ -180,7 +176,6 @@ private lemma term_bd (n : ℕ) (κ Bu α T d ν a b t L M : ℝ) (hd : 1 ≤ d)
   have hBu0 : 0 < Bu := by linarith
   have hα0 : 0 < α := lt_of_lt_of_le (inv_pos.mpr hBu0) hα
   have hT0 : 0 < T := by linarith
-  have hd0 : 0 < d := by linarith
   have hν0 : 0 ≤ ν := by rw [hν]; positivity
   have hE1 : 1 ≤ Real.exp t := Real.one_le_exp ht
   set E := Real.exp t with hE
@@ -189,7 +184,6 @@ private lemma term_bd (n : ℕ) (κ Bu α T d ν a b t L M : ℝ) (hd : 1 ≤ d)
   set X := 1 + κ * E * ν with hX
   have hX1 : κ * E * (1 / (d * Bu * T)) ≤ X := by
     have : κ * E * (1 / (d * Bu * T)) ≤ κ * E * ν := by gcongr
-    have h0 : 0 ≤ κ * E * ν := by positivity
     linarith
   have hX2 : 1 + κ * ν ≤ X := by
     have : κ * ν ≤ κ * E * ν := by
@@ -201,12 +195,9 @@ private lemma term_bd (n : ℕ) (κ Bu α T d ν a b t L M : ℝ) (hd : 1 ≤ d)
     nlinarith
   set c1 := κ / (Bu * d) with hc1
   set c2 := κ / (T * d) with hc2
-  have hc10 : 0 < c1 := by positivity
-  have hc20 : 0 < c2 := by positivity
   have hY : (c1 * c2 / 4) * ((1 + L) * (1 + M)) ≤ (1 + κ * ν) ^ 2 := by
     have h1 : c1 * c2 * ((1 + L) * (1 + M)) ≤ c1 * c2 * (4 * ((1 + d * a) * (1 + d * b))) := by gcongr
     nlinarith
-  have hY0 : 0 < (c1 * c2 / 4) * ((1 + L) * (1 + M)) := by positivity
   have hX4 : ((c1 * c2 / 4) * ((1 + L) * (1 + M))) ^ 2 ≤ X ^ 4 := by
     calc ((c1 * c2 / 4) * ((1 + L) * (1 + M))) ^ 2 ≤ ((1 + κ * ν) ^ 2) ^ 2 := by gcongr
       _ = (1 + κ * ν) ^ 4 := by ring
@@ -263,7 +254,6 @@ theorem UpperTheory.summable_tsum_inv_one_add_height_pow_le :
   refine ⟨C * ∑' p, w p, mul_nonneg hC0 (tsum_nonneg hw0), ?_⟩
   intro R β α T t ht hα hαT hT h1 h2 h3
   have hα0 : 0 < α := lt_of_lt_of_le (inv_pos.mpr hBu0) hα
-  have hT0 : 0 < T := by linarith
   set τ : {r : Fin 2 → ℚ // r ≠ 0} → ℤ × ℤ := fun ξ =>
     (round ((d : ℝ) * ((ξ.1 0 : ℚ) : ℝ)),
       round ((d : ℝ) * (((ξ.1 0 : ℚ) : ℝ) * β + ((ξ.1 1 : ℚ) : ℝ)))) with hτ

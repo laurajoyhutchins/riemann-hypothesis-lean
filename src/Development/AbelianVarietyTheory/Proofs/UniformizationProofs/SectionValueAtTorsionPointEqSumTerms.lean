@@ -68,6 +68,7 @@ import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRin
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.SectionArithmetic
 public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsNsmulIffEq
 public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.RelationsAreFunctions
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.TorsionCoordinatesEqDegenerationSeries
 
 @[expose] public section
 
@@ -258,23 +259,7 @@ theorem exists_frm_kap {k' k : ℕ} {b b' : TF (R := R) F ⟶ D.P.A} {a : D.P.A 
     (W : Frm D F k' b) (hW : W.IsGen) (κ : LB.Gen (kapLB D a k' k)) (hκ : κ.IsGen) :
     ∃ w : Frm D F k b', w.IsGen ∧ ∀ z J, Good D.P.L z J →
       val W (𝟙 _) z J * val κ b.left z J = val w (𝟙 _) z J := by
-  have a₁ : b.left ≫ a.left = b'.left := by rw [hb, Over.comp_left]
-  have a₂ : b.left ≫ (1 : D.P.A ⟶ D.P.A).left = (1 : TF (R := R) F ⟶ D.P.A).left := by
-    rw [← Over.comp_left, MonObj.comp_one]
-  obtain ⟨w, hw, hv⟩ := exists_gen D.P.isLB (φ' := DegPre.lineφ D F b') (ε' := DegPre.lineε k) (fun U _ h => by
-      refine (Fintype.prod_sum_type _).trans ?_
-      refine (congrArg₂ (· * ·) (prod_line k' b h) (Fin.prod_univ_three _)).trans ?_
-      rw [prod_line]
-      show _ * (h (b.left ≫ 𝟙 _) ^ (k' : ℤ) * h (b.left ≫ a.left) ^ (-(k : ℤ)) *
-        h (b.left ≫ (1 : D.P.A ⟶ D.P.A).left) ^ ((k : ℤ) - k')) = _
-      rw [Category.comp_id, a₁, a₂]
-      apply Additive.ofMul.injective
-      simp only [ofMul_mul, ofMul_inv, ofMul_zpow, ofMul_pow]
-      module)
-    (LB.mulGen D.P.L _ _ _ _ W (LB.pullGen D.P.L _ _ κ b.left))
-    (mulGen_isGen _ _ _ _ _ _ _ hW (pullGen_isGen _ _ _ _ hκ _))
-  refine ⟨w, hw, fun z J hJ => Eq.symm ((hv _ _ z J hJ).trans ((val_mul hJ _ _ _).trans (congrArg₂ (· * ·) rfl ?_)))⟩
-  exact (val_pull hJ _ _ _).trans (by rw [Category.id_comp])
+  apply _root_.GlobalTheory.Ex.CoordSeries.exists_frm_kap <;> assumption
 
 theorem exists_secA_mul {A : PolAV (Spec (CommRingCat.of (FractionRing R)))} {k k' : ℕ} (t : SecA A F k)
     (t' : SecA A F k') : ∃ t'' : SecA A F (k + k'), ∀ (Z : Scheme.{0}) (r : Z ⟶ (TFK (R := R) F ⊗ A.A).left) (z : Z) (J),

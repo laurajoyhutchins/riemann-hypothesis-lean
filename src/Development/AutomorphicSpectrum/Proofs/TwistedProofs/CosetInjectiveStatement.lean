@@ -1,7 +1,6 @@
 module
 
 public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HasLenOfLatLen
-public import Development.AutomorphicSpectrum.Proofs.TwistedProofs.CosetInjective
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
 import Mathlib.Algebra.Order.Interval.Basic
@@ -40,10 +39,11 @@ import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnitaryIwasawaCellsDisjointStatement
 
 @[expose] public section
 
 open GlobalTheory.InertZeta
 
-theorem _root_.GlobalTheory.T.coset_injective : CosetInj := by
-  first | exact @GlobalTheory.CompanionTheory.InertZeta.cosetInj | exact GlobalTheory.CompanionTheory.InertZeta.cosetInj | (intros; apply GlobalTheory.CompanionTheory.InertZeta.cosetInj <;> assumption)
+theorem _root_.GlobalTheory.T.coset_injective : CosetInj :=
+  @_root_.GlobalTheory.T.unitary_iwasawa_cells_disjoint

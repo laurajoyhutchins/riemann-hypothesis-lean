@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.DiscriminantEstimates.DiscriminantLemmas.WickFormula.GenPow
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.DiscriminantEstimates.DiscriminantLemmas.DividedPowerIntegrals.GenDefs
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -57,18 +58,7 @@ variable {K I J : Type} [CommRing K] [Fintype I] [Fintype J]
 
 theorem pderiv_comm (a b : I ⊕ J) (p : MvPolynomial (I ⊕ J) K) :
     pderiv a (pderiv b p) = pderiv b (pderiv a p) := by
-  classical
-  have hc : ∀ (c d : I ⊕ J) (n : I ⊕ J),
-      pderiv c (Pi.single (M := fun _ => MvPolynomial (I ⊕ J) K) d 1 n) = 0 := by
-    intro c d n
-    rw [Pi.single_apply]
-    split_ifs <;> simp
-  induction p using MvPolynomial.induction_on with
-  | C x => simp
-  | add p q hp hq => simp only [map_add (f := _), hp, hq]
-  | mul_X p n hp =>
-    simp only [Derivation.leibniz, pderiv_X, smul_eq_mul, map_add (f := _), hc, hp, mul_zero, zero_add]
-    ring
+  apply PI.WickFormula.Gen.pderiv_comm <;> assumption
 
 noncomputable abbrev pd (a : I ⊕ J) : Module.End K (MvPolynomial (I ⊕ J) K) :=
   (pderiv a).toLinearMap
@@ -136,28 +126,7 @@ theorem dR_apply (κ : I → J → K) (j : J) (R : MvPolynomial (I ⊕ J) K) :
 
 theorem gdelta_X_inl (κ : I → J → K) (i : I) (R : MvPolynomial (I ⊕ J) K) :
     gdelta κ (X (Sum.inl i) * R) = X (Sum.inl i) * gdelta κ R + dL κ i R := by
-  classical
-  have h1 : ∀ j, pderiv (Sum.inr j) (X (Sum.inl i) * R) = X (Sum.inl i) * pderiv (Sum.inr j) R := by
-    intro j
-    rw [Derivation.leibniz, pderiv_X_of_ne Sum.inl_ne_inr, smul_zero, add_zero, smul_eq_mul]
-  have h2 : ∀ (i' : I) (S : MvPolynomial (I ⊕ J) K), pderiv (Sum.inl i') (X (Sum.inl i) * S) =
-      X (Sum.inl i) * pderiv (Sum.inl i') S + if i' = i then S else 0 := by
-    intro i' S
-    rw [Derivation.leibniz]
-    simp only [smul_eq_mul]
-    by_cases h : i' = i
-    · subst h
-      rw [pderiv_X_self, mul_one, if_pos rfl]
-    · rw [pderiv_X_of_ne (fun e => h (Sum.inl_injective e).symm), mul_zero, add_zero, if_neg h, add_zero]
-  have hΔ : ∀ S : MvPolynomial (I ⊕ J) K,
-      gdelta κ S = ∑ j, ∑ i', κ i' j • pderiv (Sum.inl i') (pderiv (Sum.inr j) S) := by
-    intro S
-    rw [gdelta_apply, Finset.sum_comm]
-  rw [hΔ, hΔ, dL_apply, Finset.mul_sum, ← Finset.sum_add_distrib]
-  refine Finset.sum_congr rfl fun j _ => ?_
-  rw [h1, Finset.mul_sum]
-  simp only [h2, smul_add, Finset.sum_add_distrib, mul_smul_comm, smul_ite, smul_zero,
-    Finset.sum_ite_eq', Finset.mem_univ, if_true]
+  apply PI.WickFormula.Gen.gdelta_X_inl <;> assumption
 
 theorem gdelta_X_inr (κ : I → J → K) (j : J) (R : MvPolynomial (I ⊕ J) K) :
     gdelta κ (X (Sum.inr j) * R) = X (Sum.inr j) * gdelta κ R + dR κ j R := by

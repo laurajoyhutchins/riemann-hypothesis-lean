@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ScaledThetaTranslationQuotientElliptic
 public import Development.AbelianVarietyTheory.Definitions.Jets.CmLatticeCommutatorPairingPowEqOneOfGoodLift
 public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CpSeriesCoeffBoundedTaylorEllipticOfPolesStatement
 public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CpSeriesCoeffNormBoundedRingLawsStatement
@@ -78,23 +79,7 @@ lemma fac_mul (d : ℕ) (α : ℂ) (m : ℕ) (hm : (m : ℂ) = α * conj α) (y 
   ring
 
 lemma not_half (d : ℕ) (hd : 0 < d) : ¬ InOK d (0 - 1 / 2) := by
-  rintro ⟨u, v, h⟩
-  have hs : 0 < Real.sqrt d := Real.sqrt_pos.mpr (by exact_mod_cast hd)
-  have h2 : (-1 : ℂ) = 2 * u + v * (1 + Complex.I * ((Real.sqrt d : ℝ) : ℂ)) := by
-    simp only [wK] at h
-    linear_combination 2 * h
-  have him := congrArg Complex.im h2
-  have hre := congrArg Complex.re h2
-  simp at him hre
-  have hv : v = 0 := by
-    rcases him with h | h
-    · exact h
-    · exact absurd h hd.ne'
-  subst hv
-  have : (-1 : ℤ) = 2 * u := by
-    have : (-1 : ℝ) = 2 * u := by simpa using hre
-    exact_mod_cast this
-  omega
+  apply GlobalTheory.MomOne.ScaledQuot.not_inOK_neg_half <;> assumption
 
 lemma inOK_mul (d : ℕ) (hd : d % 4 = 3) {α β : ℂ} (ha : InOK d α) (hb : InOK d β) : InOK d (α * β) := by
   obtain ⟨u, v, rfl⟩ := ha

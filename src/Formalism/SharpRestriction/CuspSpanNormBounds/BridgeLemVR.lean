@@ -1,5 +1,6 @@
 module
 
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ConjOMemHcompl
 public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.MassSt
 public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.ExistsNeZeroOfIsLattice
 import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.IsClassRepsMap
@@ -81,21 +82,7 @@ theorem mul_mem_locR {p : Ideal (𝓞 K)} {x y : K} (hx : x ∈ locR (K := K) p)
 
 theorem conjO_mem_hcompl {p : Ideal (𝓞 K)} {s : 𝓞 K} (hs : s ∈ hcompl (K := K) p) :
     conjO K s ∈ hcompl (K := K) p := by
-  have key : hcompl (K := K) p ≤ (hcompl (K := K) p).comap (conjO K : 𝓞 K →* 𝓞 K) := by
-    conv_lhs => unfold hcompl
-    rw [Submonoid.closure_le]
-    intro s hs
-    show conjO K s ∈ hcompl (K := K) p
-    apply Submonoid.subset_closure
-    refine ⟨hs.2 (conjO K s) rfl, fun t ht => ?_⟩
-    have e : t = s := by
-      apply RingOfIntegers.ext
-      have : (t : K) = star (star (s : K)) := ht
-      rw [star_star] at this
-      exact this
-    rw [e]
-    exact hs.1
-  exact key hs
+  apply Formalism.HermitianLattices.Ext.L3.SplitA.conjO_mem_hcompl <;> assumption
 
 theorem star_mem_locR {p : Ideal (𝓞 K)} {x : K} (hx : x ∈ locR (K := K) p) :
     star x ∈ locR (K := K) p := by

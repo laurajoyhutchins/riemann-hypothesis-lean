@@ -79,24 +79,7 @@ attribute [local instance] Over.cartesianMonoidalCategory
 
 theorem tay_coord {N : ℕ} (k : Fin N) :
     tay (fun v : Fin N → ℂ => v k) 0 = MvPowerSeries.X ((0 : Fin 1), k) := by
-  classical
-  have hθ : ContDiffAt ℂ ω (fun v : Fin N → ℂ => v k) 0 := (contDiff_apply ℂ (fun _ => ℂ) k).contDiffAt
-  refine TCPf.eq_of_cc _ _ fun l => ?_
-  rcases l.eq_nil_or_concat with rfl | ⟨l', ⟨a, j⟩, rfl⟩
-  · simp only [List.foldr_nil, constantCoeff_tay, TM.mD_zero, MvPowerSeries.constantCoeff_X, Pi.zero_apply]
-  · obtain rfl : a = 0 := Subsingleton.elim _ _
-    have hd : (fun y : Fin N → ℂ => fderiv ℂ (fun v : Fin N → ℂ => v k) y (Pi.single j 1)) =
-        fun _ => (Pi.single j (1 : ℂ) : Fin N → ℂ) k := by
-      funext y
-      exact congrArg (fun T : (Fin N → ℂ) →L[ℂ] ℂ => T (Pi.single j 1))
-        (ContinuousLinearMap.proj (R := ℂ) (φ := fun _ : Fin N => ℂ) k).fderiv
-    rw [List.concat_eq_append, List.foldr_append, List.foldr_append]
-    simp only [List.foldr_cons, List.foldr_nil]
-    rw [TM.pderiv_tay hθ, hd, TM.tay_const, MvPowerSeries.pderiv_X]
-    congr 2
-    by_cases h : k = j
-    · subst h; simp
-    · simp [h, Ne.symm h, Pi.single_apply]
+  apply GlobalTheory.JetLinSub.tay_coord <;> assumption
 
 
 theorem jetN_coord {n g : ℕ} (m : ℕ) (a : ℂ) (i : Fin n) (j : Fin g) :

@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SpecMapCompAppLE
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.OneLeftSpMap
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.AppLEBasicOpenIsStandardSmooth
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.DerivationVanishingConstants
@@ -65,24 +66,7 @@ variable {R C D : Type} [CommRing R] [CommRing C] [CommRing D]
 
 theorem surj_fstC (q : Sp (DualNumber C)) :
     ∃ p : Sp C, spMap (TrivSqZeroExt.fstHom C C C).toRingHom p = q := by
-  refine ⟨PrimeSpectrum.comap (algebraMap C (DualNumber C)) q, ?_⟩
-  show PrimeSpectrum.comap (TrivSqZeroExt.fstHom C C C).toRingHom
-    (PrimeSpectrum.comap (algebraMap C (DualNumber C)) q) = q
-  apply PrimeSpectrum.ext
-  ext x
-  have hn : TrivSqZeroExt.inr x.snd ∈ q.asIdeal := by
-    have h2 : (TrivSqZeroExt.inr x.snd : DualNumber C) * TrivSqZeroExt.inr x.snd = 0 := by simp
-    have : (TrivSqZeroExt.inr x.snd : DualNumber C) * TrivSqZeroExt.inr x.snd ∈ q.asIdeal := by
-      rw [h2]; exact zero_mem _
-    exact (q.isPrime.mem_or_mem this).elim id id
-  have hx : x = algebraMap C (DualNumber C) x.fst + TrivSqZeroExt.inr x.snd := by
-    ext <;> simp [TrivSqZeroExt.algebraMap_eq_inl]
-  show algebraMap C (DualNumber C) x.fst ∈ q.asIdeal ↔ x ∈ q.asIdeal
-  constructor
-  · intro h; rw [hx]; exact add_mem h hn
-  · intro h
-    have : algebraMap C (DualNumber C) x.fst = x - TrivSqZeroExt.inr x.snd := eq_sub_of_add_eq hx.symm
-    rw [this]; exact sub_mem h hn
+  apply GlobalTheory.CompanionTheory.Ar.InvDer.surj_fst <;> assumption
 
 theorem le_dual {X : Scheme.{0}} {v : Sp (DualNumber C) ⟶ X} {x : Sp C ⟶ X}
     (h : spMap (TrivSqZeroExt.fstHom C C C).toRingHom ≫ v = x) {U : X.Opens} (hx : ⊤ ≤ x ⁻¹ᵁ U) : ⊤ ≤ v ⁻¹ᵁ U := by

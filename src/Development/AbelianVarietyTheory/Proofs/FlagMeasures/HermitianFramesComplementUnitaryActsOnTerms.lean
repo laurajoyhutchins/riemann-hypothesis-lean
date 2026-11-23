@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MoveLatticeIsTermSameDatumWithWitnesses
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ComplementReferenceCompactSubgroup
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BasisOfIsCompl
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MemPerpSpan
@@ -71,28 +72,7 @@ theorem mem_smul (h : S.GLV) (Λ : Submodule L.O S.V) (x : S.V) : x ∈ h • Λ
 
 theorem isSD_smul {h : S.GLV} (hh : h ∈ isomG L S.Hm) {Λ : Submodule L.O S.V} (hΛ : IsSD L S.Hm Λ) :
     IsSD L S.Hm (h • Λ) := by
-  refine ⟨⟨hΛ.1.1.map _, ?_⟩, fun y => ?_⟩
-  · rw [eq_top_iff]
-    rintro x -
-    have h1 : h⁻¹ x ∈ Submodule.span E (Λ : Set S.V) := by rw [hΛ.1.2]; trivial
-    have h2 := Submodule.mem_map_of_mem (f := h.toLinearMap) h1
-    rw [Submodule.map_span] at h2
-    have h3 : h.toLinearMap (h⁻¹ x) = x := h.apply_symm_apply x
-    rw [h3] at h2
-    refine Submodule.span_mono ?_ h2
-    rintro _ ⟨y, hy, rfl⟩
-    exact Submodule.smul_mem_pointwise_smul y h Λ hy
-  · rw [mem_smul, ← hΛ.2]
-    have hi := (isomG L S.Hm).inv_mem hh
-    constructor
-    · intro H x hx
-      have := H (h x) (Submodule.smul_mem_pointwise_smul x h Λ hx)
-      rw [← hi] at this
-      have h3 : h⁻¹ (h x) = x := h.symm_apply_apply x
-      rwa [h3] at this
-    · intro H x hx
-      rw [← hi]
-      exact H _ ((mem_smul S h Λ x).1 hx)
+  apply GlobalTheory.HL.MoveWit.isSD_smul <;> assumption
 
 theorem spanTo_mono (g : Fin (r + 1) → S.V) : S.spanTo g r ≤ S.spanTo g (r + 1) :=
   Submodule.span_mono (Set.image_mono fun _ hi => Nat.lt_succ_of_lt hi)

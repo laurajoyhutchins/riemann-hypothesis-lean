@@ -248,26 +248,18 @@ theorem lower {x : Ix κ → Ω} {m : ConeMetric ℂ (Ix κ)} {μ : Measure (Ix 
   set R' := projDeg x e * (Finset.Nat.antidiagonalTuple (D + 1) (n - kε)).card
   set r := finrank ℤ (sec ℤ x n)
   have hrR : (R' : ℝ) ≤ r := by exact_mod_cast hr
-  have hR0 : (0 : ℝ) ≤ R' := Nat.cast_nonneg _
   have hrb : (r : ℝ) ≤ (projDeg x e : ℝ) * ((1 + k' + D : ℕ) : ℝ) ^ D * (n : ℝ) ^ D := by
     have h1 : (r : ℝ) ≤ (projDeg x e : ℝ) * (((n + k' + D).choose D : ℕ) : ℝ) := by
       exact_mod_cast hk' n
     rw [mul_assoc]
     exact h1.trans (mul_le_mul_of_nonneg_left (choose_bound k' D hn1) (Nat.cast_nonneg _))
   have hX : 0 ≤ (projDeg x e : ℝ) * ((1 + k' + D : ℕ) : ℝ) ^ D * (n : ℝ) ^ D := by positivity
-  have hlogn : 0 ≤ Real.log ((n : ℝ) + 1) := Real.log_nonneg (by linarith)
   have h3 : (R' : ℝ) * Real.log A ≤ (projDeg x e : ℝ) * ((1 + k' + D : ℕ) : ℝ) ^ D * (n : ℝ) ^ D *
       ((1 / 2) * (Real.log T / Real.log 2 + D) * Real.log (n + 1)) :=
     (mul_le_mul_of_nonneg_right (hrR.trans hrb) hL0).trans (mul_le_mul_of_nonneg_left hL hX)
   have h4 : ((r : ℝ) - R') * Real.log lam ≤ (projDeg x e : ℝ) * ((1 + k' + D : ℕ) : ℝ) ^ D *
       (n : ℝ) ^ D * (Real.log lam / Real.log 2 * Real.log (n + 1)) :=
     (mul_le_mul_of_nonneg_right (by linarith) hloglam).trans (mul_le_mul_of_nonneg_left hll hX)
-  have h5 : (projDeg x e : ℝ) * ((1 + k' + D : ℕ) : ℝ) ^ D *
-      ((1 / 2) * (Real.log T / Real.log 2 + D) + Real.log lam / Real.log 2) * (n : ℝ) ^ D *
-        Real.log (n + 1) = (projDeg x e : ℝ) * ((1 + k' + D : ℕ) : ℝ) ^ D * (n : ℝ) ^ D *
-      ((1 / 2) * (Real.log T / Real.log 2 + D) * Real.log (n + 1)) +
-      (projDeg x e : ℝ) * ((1 + k' + D : ℕ) : ℝ) ^ D * (n : ℝ) ^ D *
-      (Real.log lam / Real.log 2 * Real.log (n + 1)) := by ring
   linarith
 
 end

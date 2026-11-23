@@ -635,7 +635,6 @@ theorem act_A (X : GMod n) (B : GradBasis A) : actM X.E A = trB X B 2 - trB X B 
 
 theorem rho_eq (B : GradBasis A) : rhoA A = (B.j : ℝ) * ((n : ℝ) - B.j) := by
   have htr : Matrix.trace ((1 / 2 : ℂ) • (A * A + A)) = (B.j : ℂ) := by
-    have h1 : A = ∑ p, (dz (bl B p) : ℂ) • Ym B p p := A_eq B
     have hA := B.eq
     set d : Fin n → ℂ := fun p => ((![-1, 0, 1] : Fin 3 → ℂ) ((stdBlocks (dims n B.j) B.hj).symm p).1) with hd
     have h2 : A * A + A = B.U * Matrix.diagonal (fun p => d p * d p + d p) * B.Ui := by

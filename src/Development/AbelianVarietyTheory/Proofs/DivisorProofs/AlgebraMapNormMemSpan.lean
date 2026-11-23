@@ -53,6 +53,7 @@ import Mathlib.Tactic.ReduceModChar
 import Mathlib.Topology.Sheaves.Init
 public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
 public import Mathlib.RingTheory.Norm.Basic
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsSquarefreePolyDistinctZerosOnCurve
 
 @[expose] public section
 
@@ -63,19 +64,7 @@ namespace GlobalTheory.PicDiv.SquarefreeFibre
 theorem algebraMap_norm_mem_span {R S : Type} [CommRing R] [CommRing S] [Algebra R S]
     [Module.Free R S] [Module.Finite R S] (g : S) :
     algebraMap R S (Algebra.norm R g) ∈ Ideal.span {g} := by
-  set p := LinearMap.charpoly (Algebra.lmul R S g) with hp
-  have h1 : aeval g p = 0 := by
-    have h2 := congrArg (fun φ : Module.End R S => φ 1) (LinearMap.aeval_self_charpoly (Algebra.lmul R S g))
-    rw [← hp, Polynomial.aeval_algHom_apply (Algebra.lmul R S) g p] at h2
-    simpa using h2
-  have h3 : algebraMap R S (p.coeff 0) = -(g * aeval g p.divX) := by
-    have h4 := X_mul_divX_add p
-    rw [← h4] at h1
-    simp only [map_add (f := _), map_mul, aeval_X, aeval_C] at h1
-    linear_combination h1
-  rw [Algebra.norm_apply, LinearMap.det_eq_sign_charpoly_coeff, map_mul, ← hp, h3]
-  exact Ideal.mul_mem_left _ _ ((Ideal.span {g}).neg_mem
-    (Ideal.mul_mem_right _ _ (Ideal.mem_span_singleton_self g)))
+  apply _root_.GlobalTheory.SquarefreeFibre.algebraMap_norm_mem_span <;> assumption
 
 theorem main : ∀ (k A : Type) [Field k] [IsAlgClosed k] [CommRing A] [IsDedekindDomain A] [Algebra k A] [Algebra k[X] A] [IsScalarTower k k[X] A] [Module.Finite k[X] A] [Module.Free k[X] A], (∃ δ : k[X], δ ≠ 0 ∧ ∀ α : k, δ.eval α ≠ 0 → ∀ Q : Ideal A, Q.IsMaximal → algebraMap k[X] A (X - C α) ∉ Q ^ 2) → ∀ (g : A) (s : ℕ), g ≠ 0 → ∃ (q : k[X]) (r : ℕ) (Q : Fin r → Ideal A), q.Monic ∧ q.natDegree = s ∧ (∀ i, (Q i).IsMaximal) ∧ Function.Injective Q ∧ (∀ i, g ∉ Q i) ∧ Ideal.span {algebraMap k[X] A q} = ∏ i, Q i := by
   intro k A _ _ _ _ _ _ _ _ _ hred g s hg

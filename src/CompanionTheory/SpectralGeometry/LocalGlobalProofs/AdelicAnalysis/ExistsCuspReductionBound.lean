@@ -228,8 +228,6 @@ theorem exists_small_pair : ∀ (F : Type) [Field F] [NumberField F], IsTotallyR
     set y := (τ w).im with hy
     set X := (τ w).re with hX
     have hy0 : 0 < y := hτ w
-    have hs : 0 < √y := Real.sqrt_pos.mpr hy0
-    have hss : √y * √y = y := Real.mul_self_sqrt hy0.le
     set a : ℝ := ρ w (c : F) with ha
     set e : ℝ := ρ w (d : F) with he
     have h1' : |√y * a| ≤ R := h1

@@ -65,10 +65,6 @@ private theorem exists_nat_mul_lemma {E : Type} [Field E] [NumberField E] (x : E
     first
     | (obtain ⟨m, hm⟩ := IsIntegral.exists_multiple_integral_of_isLocalization (nonZeroDivisors ℤ) x hq
        exact ⟨m, nonZeroDivisors.coe_ne_zero m, by rw [← zsmul_eq_mul]; exact hm⟩)
-    | (obtain ⟨m, hm⟩ := IsIntegral.exists_multiple_integral_of_isLocalization (Rₘ := ℚ) (nonZeroDivisors ℤ) x hq
-       exact ⟨m, nonZeroDivisors.coe_ne_zero m, by rw [← zsmul_eq_mul]; exact hm⟩)
-    | (obtain ⟨y, hy, h⟩ := ((IsFractionRing.isAlgebraic_iff ℤ ℚ E).2 hq.isAlgebraic).exists_integral_multiple
-       exact ⟨y, hy, by rw [← zsmul_eq_mul]; exact h⟩)
   obtain ⟨y, hy0, hint⟩ := H
   have hmem : (y : E) * x ∈ Formalism.UG.intOE E :=
     RingHom.mem_range.2 ((IsIntegralClosure.isIntegral_iff (A := 𝓞 E)).1 hint)
@@ -96,7 +92,6 @@ theorem algebraMap_mem_intOE {E : Type} [Field E] [NumberField E] (a : 𝓞 E) :
     algebraMap (𝓞 E) E a ∈ Formalism.UG.intOE E := by
   first
   | exact RingHom.mem_range_self _ a
-  | exact ⟨a, rfl⟩
 
 theorem exists_den_lat {E : Type} [Field E] [NumberField E] {n : ℕ}
     (L : Submodule (𝓞 E) (Fin n → E)) (hL : L.FG) :
@@ -190,8 +185,6 @@ theorem inclE_mem_int (x : E) (hx : x ∈ Formalism.UG.intOE E) :
     Formalism.UG.inclE (F := F) (Formalism.MainNotions.S.Af F) x ∈ Formalism.MainNotions.S.IntAf F E := by
   first
   | exact Subring.subset_closure (Or.inl ⟨⟨x, hx⟩, rfl⟩)
-  | (unfold Formalism.MainNotions.S.IntAf Formalism.UG.tensInt Formalism.UG.inclE
-     exact Subring.subset_closure (Or.inl ⟨⟨x, hx⟩, rfl⟩))
 
 theorem lat_den {n : ℕ} (L : Submodule (𝓞 E) (Fin n → E)) (c : ℕ)
     (hc : ∀ x ∈ L, ∀ i, (c : E) * x i ∈ Formalism.UG.intOE E) :
@@ -287,9 +280,6 @@ theorem entries_integral_of_lattice : EntriesLat := by
   have hM'M : M' * M = 1 := by
     first
     | exact mul_eq_one_comm.1 hMM'
-    | exact Matrix.mul_eq_one_comm.1 hMM'
-    | (letI := Matrix.invertibleOfRightInverse M M' hMM'
-       exact invOf_mul_self M)
   refine ⟨fun y => ⟨fun hy => ?_, fun hy => ?_⟩, fun y hy => matrix_entries_integral I c g h1 h2 (M - 1) hM y hy⟩
   · obtain ⟨z, hz, e⟩ := matrix_entries_integral I c g h1 h2 (M - 1) hM y hy
     have h3 : M *ᵥ y = y + (M - 1) *ᵥ y := by

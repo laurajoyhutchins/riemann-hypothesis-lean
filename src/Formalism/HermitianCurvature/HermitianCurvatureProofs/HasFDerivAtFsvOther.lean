@@ -365,10 +365,6 @@ theorem waveCommQQAll : WaveCommQQAll := by
   have hW2 : ∀ (Φ : RadSp P.k P.r z z' π π') c g, (Wv' Φ : Fn P.k P.r (Wq →L[ℂ] Wp)) c g =
       fsv (-s) (c l) • (Φ : Fn P.k P.r (Wq →L[ℂ] Wp)) c g := hW'
   set T := cenW Wv Wv' with hT
-  have hop : ∀ l' : Fin P.r, l' ≠ l → ∀ i, mkP (X.op l' i) (X.op l' i) ∈ T ∧ True := by
-    intro l' hl' i
-    exact ⟨mem_cenW_of (mulOp_comm_op X Wv s l hW1 hl' i) (mulOp_comm_op X Wv' (-s) l hW2 hl' i)
-      (mulOp_comm_op X Wv s l hW1 hl' i) (mulOp_comm_op X Wv' (-s) l hW2 hl' i), trivial⟩
   have hcomm : ∀ l' : Fin P.r, l' ≠ l → ∀ i j, mkP (X.op l' i) (X.op l' j) ∈ T := by
     intro l' hl' i j
     exact mem_cenW_of (mulOp_comm_op X Wv s l hW1 hl' i) (mulOp_comm_op X Wv' (-s) l hW2 hl' i)

@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.GrowthBounds.ColumnSpanDensity.Tensor
 public import Formalism.LocalToGlobal.GroupLattices.FockModels.NablaLTwEqMap
 public import Formalism.LocalToGlobal.GroupLattices.FockModels.MkP
 import Formalism.SharpRestriction.GrowthBounds.LatticeSystems
@@ -225,21 +226,7 @@ theorem bc_Hten (hinj : Function.Injective (algebraMap O Kf)) (hinj' : Function.
 theorem Hten_le_V {n' m : ℕ} (lam0 : Fin n' → Fin (m + 1) → ℤ) (hd : IsDominant lam0)
     (Λ : Fin n' → Submodule O (Fin (m + 1) → Kf)) (hΛ : ∀ s, IsLattice O (Λ s)) :
     ∀ z ∈ Hten O lam0 Λ, z ∈ Vsp Kf lam0 := by
-  have hle : Hten O lam0 Λ ≤ (Vsp Kf lam0).restrictScalars O := by
-    unfold Hten tensorLat
-    rw [Submodule.span_le]
-    rintro _ ⟨F, hF, rfl⟩
-    apply Submodule.subset_span
-    refine ⟨F, fun s => ?_, rfl⟩
-    have hanti := kp_lamAt_antitone lam0 hd s
-    beta_reduce
-    rw [if_pos hanti]
-    have h1 := hF s
-    beta_reduce at h1
-    obtain ⟨g, hg, hge⟩ := hΛ s
-    rw [hge] at h1
-    exact la_nablaLTw_le _ _ _ hg _ (H0_le_twisted_nabla _ _ hanti _ hg h1)
-  exact fun z hz => hle hz
+  apply Formalism.MainNotions.flipOneThree.Pf.tn_Hten_le <;> assumption
 
 theorem bc_Vsp {n' m : ℕ} (lam0 : Fin n' → Fin (m + 1) → ℤ) (hd : IsDominant lam0) :
     BC (MvPolynomial.map φK) (Vsp Kf lam0) (Vsp Kf' lam0) := by

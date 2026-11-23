@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AppellHumbertHomCompatible
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsAHOfIsFactorAH
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -63,16 +64,7 @@ namespace GlobalTheory.TorusRM
 
 theorem ahFactor_im_int_chart {X : Scheme.{0}} (L : LB X) (hL : L.IsLB) (y : Sp ℂ ⟶ X) :
     ∃ j, ⊤ ≤ y ⁻¹ᵁ L.U j := by
-  let p0 : Sp ℂ := (⟨⊥, Ideal.isPrime_bot⟩ : PrimeSpectrum ℂ)
-  have hmem : y p0 ∈ (⨆ i, L.U i : X.Opens) := by rw [hL.cover]; trivial
-  obtain ⟨j, hj⟩ := TopologicalSpace.Opens.mem_iSup.mp hmem
-  refine ⟨j, fun q _ => ?_⟩
-  have : q = p0 := by
-    haveI := q.isPrime
-    haveI := p0.isPrime
-    exact PrimeSpectrum.ext ((Ideal.eq_bot_of_prime q.asIdeal).trans (Ideal.eq_bot_of_prime p0.asIdeal).symm)
-  rw [this]
-  exact hj
+  apply _root_.GlobalTheory.LamPullFrame.exists_chart_pt' <;> assumption
 
 theorem ahFactor_herm_swap {g : ℕ} {Hm : Matrix (Fin g) (Fin g) ℂ} (hH : Hm.IsHermitian)
     (v w : Fin g → ℂ) : w ⬝ᵥ Hm.mulVec (star v) = star (v ⬝ᵥ Hm.mulVec (star w)) := by

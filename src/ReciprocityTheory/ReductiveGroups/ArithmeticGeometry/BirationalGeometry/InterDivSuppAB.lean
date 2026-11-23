@@ -81,7 +81,6 @@ theorem height_eq_of_isMaximal_of_intCast_eq_zero {B : Type*} [CommRing B] [IsDo
   have hdvd : (p : ℤ) ∣ n := by
     first
       | exact (CharP.intCast_eq_zero_iff B p n).mp hnB
-      | exact (CharP.int_cast_eq_zero_iff B p n).mp hnB
   have hp0 : p ≠ 0 := by
     rintro rfl
     simp at hdvd
@@ -151,8 +150,6 @@ theorem height_int_of_isMaximal (M : Ideal ℤ) (hM : M.IsMaximal) : M.height = 
       have hmax : z.asIdeal.IsMaximal := by
         first
           | exact z.isPrime.isMaximal hne
-          | exact Ring.DimensionLEOne.maximalOfPrime hne z.isPrime
-          | exact Ideal.IsPrime.to_maximal_ideal z.isPrime hne
       exact (ne_of_lt hz') (hmax.eq_of_le hM.ne_top (le_of_lt hz'))
     intro w _
     show z.asIdeal ≤ w.asIdeal
@@ -169,11 +166,6 @@ theorem height_int_of_isMaximal (M : Ideal ℤ) (hM : M.IsMaximal) : M.height = 
          refine iSup₂_le fun z hz => ?_
          rw [Order.height_eq_zero.mpr (hmin z hz)]
          simp)
-      | (show Order.height _ ≤ ((1 : ℕ) : ℕ∞)
-         rw [Order.height_le_coe_iff]
-         intro z hz
-         rw [Order.height_eq_zero.mpr (hmin z hz)]
-         exact zero_lt_one)
   · first
       | exact Order.one_le_height_iff.mpr hx
       | exact ENat.one_le_iff_ne_zero.mpr (fun h0 => hx (Order.height_eq_zero.mp h0))
@@ -379,14 +371,9 @@ theorem height_eq_of_isMaximal_int {σ : Type*} [Finite σ] (P : Ideal (MvPolyno
     have hq : Algebra.FiniteType ℤ (MvPolynomial σ ℤ ⧸ P) := by
       first
         | infer_instance
-        | exact Algebra.FiniteType.of_surjective inferInstance (Ideal.Quotient.mkₐ ℤ P)
-            (Ideal.Quotient.mkₐ_surjective ℤ P)
     refine @height_eq_of_isMaximal_of_intCast_eq_zero _ _ _ ?_ n hn0 ?_ M N hM hN
     · first
         | exact hq
-        | (convert hq using 1 <;> first
-            | exact Subsingleton.elim _ _
-            | exact Algebra.algebra_ext _ _ fun r => (eq_intCast _ r).trans (eq_intCast _ r).symm)
     have e1 : (MvPolynomial.C n : MvPolynomial σ ℤ) = (n : MvPolynomial σ ℤ) := eq_intCast MvPolynomial.C n
     have e2 : ((n : ℤ) : MvPolynomial σ ℤ ⧸ P) = Ideal.Quotient.mk P (n : MvPolynomial σ ℤ) :=
       (map_intCast _ n).symm

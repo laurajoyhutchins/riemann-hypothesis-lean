@@ -84,14 +84,10 @@ theorem eq_xz {n : Fin 2 × Fin d →₀ ℕ} {l m : Fin d} (h0 : n (0, l) ≠ 0
     intro a b
     first
       | exact map_add _ a b
-      | simp [Finsupp.degree_eq_weight_one, map_add (f := _)]
-      | simp [Finsupp.degree, Finsupp.sum_add_index']
   have hsg : ∀ x : Fin 2 × Fin d, (single x 1).degree = 1 := by
     intro x
     first
       | exact Finsupp.degree_single x 1
-      | simp [Finsupp.degree_eq_weight_one]
-      | simp [Finsupp.degree]
   have hdu : u.degree = 2 := by
     rw [hu, hadd, hsg, hsg]
   rw [hadd, hdu] at hd
@@ -206,14 +202,10 @@ theorem degree_xz (j i : Fin d) : (single ((0 : Fin 2), j) 1 + single ((1 : Fin 
     intro a b
     first
       | exact map_add _ a b
-      | simp [Finsupp.degree_eq_weight_one, map_add (f := _)]
-      | simp [Finsupp.degree, Finsupp.sum_add_index']
   have hsg : ∀ x : Fin 2 × Fin d, (single x 1).degree = 1 := by
     intro x
     first
       | exact Finsupp.degree_single x 1
-      | simp [Finsupp.degree_eq_weight_one]
-      | simp [Finsupp.degree]
   rw [hadd, hsg, hsg]
 
 theorem coeff_xz_mul_X (φ : PS k 1 d) (j i m : Fin d) :

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ComplementaryModuleEqTopFormsOfFiniteCover
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorsorsTrivial
 public import Mathlib.RingTheory.Ideal.Height
 public import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
@@ -64,32 +65,7 @@ open GlobalTheory.NormalApprox
 theorem height_comap_eq_one_of_goingDown {A B : Type} [CommRing A] [IsDomain A] [CommRing B]
     [Algebra A B] [Algebra.HasGoingDown A B] (Q : Ideal B) [Q.IsPrime] (hQ : Q.height = 1)
     (hne : Q.comap (algebraMap A B) ≠ ⊥) : (Q.comap (algebraMap A B)).height = 1 := by
-  set p : Ideal A := Q.comap (algebraMap A B) with hp
-  haveI : p.IsPrime := Ideal.comap_isPrime _ Q
-  haveI : Q.LiesOver p := ⟨rfl⟩
-  apply le_antisymm
-  · rw [show ((1 : ℕ∞)) = ((1 : ℕ) : ℕ∞) from rfl, Ideal.height_le_iff]
-    intro r hr hrp
-    by_contra hcon
-    have hr0 : r ≠ ⊥ := by
-      rintro rfl
-      simp at hcon
-    haveI := hr
-    obtain ⟨P₁, hP₁Q, hP₁, hP₁o⟩ := Ideal.exists_ideal_lt_liesOver_of_lt (p := r) (q := p) Q hrp
-    haveI := hP₁
-    haveI : (⊥ : Ideal A).IsPrime := Ideal.isPrime_bot
-    obtain ⟨P₀, hP₀P₁, hP₀, -⟩ := Ideal.exists_ideal_lt_liesOver_of_lt (p := ⊥) (q := r) P₁
-      (bot_lt_iff_ne_bot.mpr hr0)
-    haveI := hP₀
-    have h1 := Ideal.height_add_one_le_of_lt_of_isPrime hP₀P₁
-    have h2 := Ideal.height_add_one_le_of_lt_of_isPrime hP₁Q
-    rw [hQ] at h2
-    have h4 : (1 : ℕ∞) ≤ P₁.height := le_trans le_add_self h1
-    have h3 : (1 : ℕ∞) + 1 ≤ 1 := le_trans (by gcongr) h2
-    exact absurd h3 (by decide)
-  · haveI : (⊥ : Ideal A).IsPrime := Ideal.isPrime_bot
-    have := Ideal.height_add_one_le_of_lt_of_isPrime (bot_lt_iff_ne_bot.mpr hne)
-    simpa using this
+  apply GlobalTheory.ComplementaryForms.height_under_eq_one <;> assumption
 
 theorem exists_uniformiser (A : Type) [CommRing A] [IsDomain A] [IsNoetherianRing A]
     [IsIntegrallyClosed A] (p : Ideal A) :

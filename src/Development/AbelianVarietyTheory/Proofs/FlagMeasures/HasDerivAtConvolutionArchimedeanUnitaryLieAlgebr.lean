@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MeasurePreservingReindex
 public import Development.AbelianVarietyTheory.BlockTheory.SiegelWeilLocal.OrthonormalPlaceBasis
 public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.AdelicUnitaryHaarBiInvariantStatement
@@ -186,22 +187,7 @@ theorem hasDerivAt_exp_mul {n : ℕ} (Y M : Matrix (Fin n) (Fin n) ℂ) (i j : F
     exact L.hasFDerivAt.comp_hasDerivAt (0 : ℝ) h1
 
 theorem continuous_expU {n : ℕ} {ε : Fin n → Bool} (X : gLie ε) : Continuous fun t : ℝ => expU (t • X) := by
-  have hexp : ∀ Y : gLie ε, Continuous fun t : ℝ =>
-      ((expU (t • Y) : (Matrix (Fin n) (Fin n) ℂ)ˣ) : Matrix (Fin n) (Fin n) ℂ) := by
-    intro Y
-    have h : (fun t : ℝ => ((expU (t • Y) : (Matrix (Fin n) (Fin n) ℂ)ˣ) : Matrix (Fin n) (Fin n) ℂ)) =
-        fun t => NormedSpace.exp (t • (Y : Matrix (Fin n) (Fin n) ℂ)) := by
-      funext t
-      rw [← Submodule.coe_smul, ← uMat_expU]
-    rw [h]
-    open Matrix.Norms.Operator in
-    · exact continuous_iff_continuousAt.2 fun t =>
-        (hasDerivAt_exp_smul_const (𝕂 := ℝ) (Y : Matrix (Fin n) (Fin n) ℂ) t).continuousAt
-  refine continuous_induced_rng.2 (Units.continuous_iff.2 ⟨hexp X, ?_⟩)
-  convert hexp (-X) using 1
-  funext t
-  rw [← expU_inv]
-  rfl
+  apply GlobalTheory.SobolevBound.continuous_expU <;> assumption
 
 private lemma uMat_expU_inv_mul {n : ℕ} {ε : Fin n → Bool} (X : gLie ε) (t : ℝ) (g : UJ ε) :
     uMat ((expU (t • X))⁻¹ * g) =

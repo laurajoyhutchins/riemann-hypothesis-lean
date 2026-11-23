@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.EvalSinglePointId
 public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.CIndVerb
 public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ExpAct
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.KillAdd
@@ -101,47 +102,7 @@ theorem tie_val (C : ChartAt Xo c y) (φ : Fin C.d → MvPowerSeries (Fin 1 × F
 
 theorem cc_diagL {d : ℕ} {O : Type} [CommRing O] [StarRing O] (B : FB S d O) (w0 : O) (cc : Fin d → Fin d → S) :
     MvPowerSeries.constantCoeff (diagL B w0 cc) = 0 := by
-
-  have hpt : ∀ {n : ℕ} (j : Fin n) (i : Fin d), MvPowerSeries.constantCoeff (pt S d j i) = 0 := by
-    intro n j i
-    simp [pt]
-
-  have hlg : ∀ (j : Fin 2) (i : Fin d), MvPowerSeries.constantCoeff (lg B.G j i) = 0 := by
-    intro j i
-    exact ReciprocityTheory.ChartRestriction.G.TB.LogPf.constantCoeff_ev
-      (fun j' i' => by
-        fin_cases j'
-        first
-          | exact hpt j i'
-          | simp [pt])
-      ((HarmInvB.logOf_props B.G).1 i)
-  unfold diagL
-  refine ReciprocityTheory.ChartRestriction.G.TB.LogPf.constantCoeff_ev ?_ ?_
-  · intro j i
-    fin_cases j
-    · first
-        | exact hpt 0 i
-        | simp [pt]
-    · exact ReciprocityTheory.ChartRestriction.G.TB.LogPf.constantCoeff_ev
-        (fun j' i' => by
-          fin_cases j'
-          first
-            | exact hpt 0 i'
-            | simp [pt])
-        (B.A.const w0 i)
-  · unfold bilL
-
-    rw [map_sum]
-    refine Finset.sum_eq_zero fun i _ => ?_
-
-    rw [map_sum]
-    refine Finset.sum_eq_zero fun l _ => ?_
-    first
-      | simp [hlg]
-      | simp [hlg, MvPowerSeries.smul_eq_C_mul]
-      | (rw [← MvPowerSeries.coeff_zero_eq_constantCoeff_apply, MvPowerSeries.coeff_smul,
-            MvPowerSeries.coeff_zero_eq_constantCoeff_apply, map_mul, hlg]
-         simp)
+  apply Formalism.MainNotions.ModuliIntegralCharts.H1.CIndFrFix3.const_diagL <;> assumption
 
 end HarmInvPf
 

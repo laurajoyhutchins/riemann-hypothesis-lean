@@ -1,5 +1,6 @@
 module
 
+import CompanionTheory.AutomorphicTheory.ZuckermanCommutation.CapelliEigenvalues.BetaAtInfinityZero
 public import Development.AbelianVarietyTheory.Definitions.Jets.SideFam
 import Mathlib.Algebra.Order.Archimedean.Real.Hom
 import Mathlib.Algebra.Order.Floor.Extended
@@ -61,28 +62,7 @@ open PI.DSInfCharCap
 lemma eq_of_capP {n : ℕ} (mu mu' : Fin n → ℝ) (h : StrictAnti mu) (h' : StrictAnti mu')
     (e : ∀ Y : ℂ, Formalism.QuantumDeterminants.capP (fun s => (mu s : ℂ)) Y = Formalism.QuantumDeterminants.capP (fun s => (mu' s : ℂ)) Y) :
     mu = mu' := by
-  have key : ∀ (a b : Fin n → ℝ),
-      (∀ Y : ℂ, Formalism.QuantumDeterminants.capP (fun s => (a s : ℂ)) Y = Formalism.QuantumDeterminants.capP (fun s => (b s : ℂ)) Y) →
-      Set.range a ⊆ Set.range b := by
-    rintro a b e _ ⟨s, rfl⟩
-    have h0 : Formalism.QuantumDeterminants.capP (fun s => (a s : ℂ)) (-(a s : ℂ)) = 0 :=
-      Finset.prod_eq_zero (Finset.mem_univ s) (by simp)
-    rw [e] at h0
-    obtain ⟨t, -, ht⟩ := Finset.prod_eq_zero_iff.mp h0
-    refine ⟨t, ?_⟩
-    have : (b t : ℂ) = (a s : ℂ) := by linear_combination ht
-    exact_mod_cast this
-  have hr : Set.range mu = Set.range mu' :=
-    Set.Subset.antisymm (key _ _ e) (key _ _ fun Y => (e Y).symm)
-  have h1 : StrictMono (fun s => -mu s) := fun a b hab => neg_lt_neg (h hab)
-  have h2 : StrictMono (fun s => -mu' s) := fun a b hab => neg_lt_neg (h' hab)
-  have hr' : Set.range (fun s => -mu s) = Set.range (fun s => -mu' s) := by
-    have := congrArg (fun S => Neg.neg '' S) hr
-    simp only [← Set.range_comp] at this
-    exact this
-  have := (h1.range_inj h2).mp hr'
-  funext s
-  exact neg_injective (congrFun this s)
+  apply CompanionTheory.CapEig.eq_of_capelliPolynomial_eq <;> assumption
 
 section
 variable {n : ℕ} {ε : Fin n → Bool} {H H' : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H]

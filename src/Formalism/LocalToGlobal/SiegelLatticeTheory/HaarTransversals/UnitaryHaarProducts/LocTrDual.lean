@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ValuationLocalVolumes.DVIsDiffVal
 public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.CondStd
 public import Mathlib.Algebra.AffineMonoid.Basic
 import Mathlib.Algebra.Order.Floor.Extended
@@ -52,61 +53,7 @@ namespace Formalism.L2.SG.Pf.LocTr
 variable {F : Type} [Field F] [NumberField F] (v : HeightOneSpectrum (𝓞 F))
 
 theorem isDiffVal_dV : Formalism.L2.SG.LocVol.IsDiffVal v (Formalism.L2.SG.LocVol.dV v) := by
-  classical
-
-  have hex : ∃ d, Formalism.L2.SG.LocVol.IsDiffVal v d := by
-    have hne : differentIdeal ℤ (𝓞 F) ≠ ⊥ := by
-      first
-        | exact differentIdeal_ne_bot
-        | exact differentIdeal_ne_bot (A := ℤ) (B := 𝓞 F)
-    obtain ⟨x0, hx0D, hx0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hne
-    obtain ⟨s, hs⟩ := (IsNoetherian.noetherian (differentIdeal ℤ (𝓞 F)) :
-      (differentIdeal ℤ (𝓞 F)).FG)
-    obtain ⟨g, hgs, hgmax⟩ := Finset.exists_max_image (insert x0 s)
-      (fun x : 𝓞 F => Valued.v (algebraMap F (v.adicCompletion F) (x : F)))
-      (Finset.insert_nonempty _ _)
-    have hgD : g ∈ differentIdeal ℤ (𝓞 F) := by
-      rcases Finset.mem_insert.mp hgs with h | h
-      · rw [h]; exact hx0D
-      · rw [← hs]; exact Submodule.subset_span h
-    have hv0 : Valued.v (algebraMap F (v.adicCompletion F) (x0 : F)) ≠ 0 := by
-      rw [Ne, Valuation.zero_iff, map_eq_zero_iff _ (algebraMap F (v.adicCompletion F)).injective]
-      exact fun h => hx0 (by exact_mod_cast h)
-    have hle0 := hgmax x0 (Finset.mem_insert_self _ _)
-    refine ⟨algebraMap F (v.adicCompletion F) (g : F), ?_, ?_, ⟨g, hgD, rfl⟩⟩
-    · intro h0
-      rw [h0, Valuation.map_zero] at hle0
-      exact hv0 (le_antisymm hle0 zero_le')
-    · intro x hx
-      rw [← hs] at hx
-      induction hx using Submodule.span_induction with
-      | mem y hy => exact hgmax y (Finset.mem_insert_of_mem hy)
-      | zero => simp
-      | add a b _ _ ha hb =>
-        rw [show ((a + b : 𝓞 F) : F) = (a : F) + (b : F) from rfl, map_add (f := _)]
-        exact le_trans (Valuation.map_add _ _ _) (max_le ha hb)
-      | smul a b _ hb =>
-        rw [show ((a • b : 𝓞 F) : F) = (a : F) * (b : F) from rfl, map_mul, Valuation.map_mul]
-        have ha1 : Valued.v (algebraMap F (v.adicCompletion F) (a : F)) ≤ 1 := by
-          have e : Valued.v (algebraMap F (v.adicCompletion F) (a : F)) = v.valuation F (a : F) := by
-            show Valued.v ((a : F) : v.adicCompletion F) = v.valuation F (a : F)
-            first
-              | exact valuedAdicCompletion_eq_valuation v (a : F)
-              | exact v.valuedAdicCompletion_eq_valuation (a : F)
-              | exact valuedAdicCompletion_eq_valuation (a : F)
-              | exact valuedAdicCompletion_eq_valuation F v (a : F)
-              | simp
-          rw [e]
-          first
-            | exact v.valuation_le_one a
-            | exact v.valuation_le_one F a
-            | exact valuation_le_one v a
-            | exact valuation_le_one F v a
-            | simp
-        calc _ ≤ 1 * Valued.v (algebraMap F (v.adicCompletion F) (g : F)) := mul_le_mul' ha1 hb
-          _ = _ := one_mul _
-  rw [show Formalism.L2.SG.LocVol.dV v = hex.choose from dif_pos hex]
-  exact hex.choose_spec
+  apply Formalism.L2.SG.Pf.NcVal.OmVSt.OmX.dV_isDiffVal <;> assumption
 
 open Classical in
 theorem single_at (y : Fv F v) : (singleV F v y) v = y := by

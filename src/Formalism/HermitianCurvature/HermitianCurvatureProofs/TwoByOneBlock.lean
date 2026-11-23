@@ -1,5 +1,6 @@
 module
 
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LongWeylElement
 public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
 public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
 public import Formalism.FormalDegreeBessel.FinalG
@@ -141,56 +142,7 @@ lemma bc_one_mid (c : Fin r → ℂ) (i j : Fin (2 * r + k + 1)) (hi : mid k r i
   · rw [if_neg (by omega), if_neg h]
 
 theorem bigCellFactor : BigCellFactor := by
-  intro k r c μ
-  constructor
-  · ext i j
-    rw [Matrix.mul_apply]
-    by_cases hj : mid k r j
-    · by_cases hi : mid k r i
-      · rw [Finset.sum_eq_single i]
-        · rw [bc_one_mid c i i hi hi, if_pos rfl, one_mul, emb_mid μ i j hi hj, bc_mid_col c μ i j hj, dif_pos hi]
-        · intro q _ hq
-          by_cases hqm : mid k r q
-          · rw [bc_one_mid c i q hi hqm, if_neg (fun h => hq h.symm), zero_mul]
-          · rw [bc_mid_row_out c 1 i q hi hqm, zero_mul]
-        · intro h; exact absurd (Finset.mem_univ _) h
-      · rw [bc_mid_col c μ i j hj, dif_neg hi]
-        symm
-        apply Finset.sum_eq_zero
-        intro q _
-        by_cases hqm : mid k r q
-        · rw [bc_mid_col c 1 i q hqm, dif_neg hi, zero_mul]
-        · rw [emb_out_row μ q j hqm, if_neg (show ¬ (q = j) from fun h => hqm (h ▸ hj)), mul_zero]
-    · rw [Finset.sum_eq_single j]
-      · rw [emb_out_col μ j j hj, if_pos rfl, mul_one]
-        exact bc_out_col c μ 1 i j hj
-      · intro q _ hq
-        rw [emb_out_col μ q j hj, if_neg hq, mul_zero]
-      · intro h; exact absurd (Finset.mem_univ _) h
-  · ext i j
-    rw [Matrix.mul_apply]
-    by_cases hi : mid k r i
-    · by_cases hj : mid k r j
-      · rw [Finset.sum_eq_single j]
-        · rw [bc_one_mid c j j hj hj, if_pos rfl, mul_one, emb_mid μ i j hi hj, bc_mid_col c μ i j hj, dif_pos hi]
-        · intro q _ hq
-          by_cases hqm : mid k r q
-          · rw [bc_one_mid c q j hqm hj, if_neg hq, mul_zero]
-          · rw [emb_out_col μ i q hqm, if_neg (show ¬ (i = q) from fun h => hqm (h ▸ hi)), zero_mul]
-        · intro h; exact absurd (Finset.mem_univ _) h
-      · rw [bc_mid_row_out c μ i j hi hj]
-        symm
-        apply Finset.sum_eq_zero
-        intro q _
-        by_cases hqm : mid k r q
-        · rw [bc_mid_row_out c 1 q j hqm hj, mul_zero]
-        · rw [emb_out_col μ i q hqm, if_neg (show ¬ (i = q) from fun h => hqm (h ▸ hi)), zero_mul]
-    · rw [Finset.sum_eq_single i]
-      · rw [emb_out_row μ i i hi, if_pos rfl, one_mul]
-        exact bc_out_row c μ 1 i j hi
-      · intro q _ hq
-        rw [emb_out_row μ i q hi, if_neg (fun h => hq h.symm), zero_mul]
-      · intro h; exact absurd (Finset.mem_univ _) h
+  apply Formalism.FourierDecayAlt.P.bruhat_big_cell_factorization <;> assumption
 
 lemma mid_wI (a : Fin (k + 1)) : mid k r (wI k r a) := by
   have := a.isLt

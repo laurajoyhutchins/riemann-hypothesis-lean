@@ -1,7 +1,6 @@
 module
 
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.SplitSt
-public import Development.AbelianVarietyTheory.Proofs.TorusSplitting.GreedySplittingPrincipalTorusExists
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
 import Mathlib.Algebra.Order.Interval.Basic
@@ -40,9 +39,11 @@ import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GCauchyHolds
 
 @[expose] public section
 
 open NumberField Complex ReciprocityTheory.ChartRestriction.G.I2
-theorem _root_.GlobalTheory.T.greedy_splitting_principal_torus_exists : SplitStatement := by
-  first | exact @GlobalTheory.greedy_splitting_exists | exact GlobalTheory.greedy_splitting_exists | (intros; apply GlobalTheory.greedy_splitting_exists <;> assumption)
+
+theorem _root_.GlobalTheory.T.greedy_splitting_principal_torus_exists : SplitStatement :=
+  ReciprocityTheory.ChartRestriction.G.I2.split_holds

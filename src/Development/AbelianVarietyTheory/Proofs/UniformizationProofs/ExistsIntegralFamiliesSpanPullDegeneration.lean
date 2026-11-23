@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.LinearIndependentOfIsExtension
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.TwistBCPf
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsMonHomOfMul
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.AppCompatGeneric
@@ -77,42 +78,7 @@ theorem exists_up_sec {w : LB.Iso L' (L.pull F)} (hw : PGen w) (hL : L.IsLB) (hL
         r z ∈ LB.wchart L (fun k => φ' k ≫ F) p → r z ∈ LB.wchart L' φ' q →
         gs r z (LB.wchart L (fun k => φ' k ≫ F) p) (a.f p) =
           (pw w φ' ε r z p q).val * gs r z (LB.wchart L' φ' q) (s.f q) := by
-  choose u hu using fun p q => exists_pw w φ' ε p q
-  have glue : ∀ p : K → L.ι, ∃ a : Γ(Y, LB.wchart L (fun k => φ' k ≫ F) p),
-      ∀ (Z : Scheme.{0}) (r : Z ⟶ Y) (z : Z) q,
-      r z ∈ LB.wchart L (fun k => φ' k ≫ F) p → r z ∈ LB.wchart L' φ' q →
-      gs r z _ a = (pw w φ' ε r z p q).val * gs r z (LB.wchart L' φ' q) (s.f q) := by
-    intro p
-    let W : (K → L'.ι) → Y.Opens := fun q => LB.wchart L (fun k => φ' k ≫ F) p ⊓ LB.wchart L' φ' q
-    obtain ⟨v, hv⟩ : ∃ v : ∀ q, Γ(Y, W q), ∀ (Z : Scheme.{0}) (r : Z ⟶ Y) (z : Z) q, r z ∈ W q →
-        gs r z (W q) (v q) = (pw w φ' ε r z p q).val * gs r z (LB.wchart L' φ' q) (s.f q) :=
-      ⟨fun q => (u p q).val * (Y.presheaf.map (homOfLE (inf_le_right : W q ≤ LB.wchart L' φ' q)).op).hom (s.f q),
-        fun Z r z q hz => (gs_mul r z _ hz _ _).trans (congrArg₂ (· * ·)
-          ((gs_unit r z _ hz _).trans (congrArg Units.val (hu p q Z r z hz)))
-          (gs_res r z _ hz _))⟩
-    obtain ⟨a, ha, -⟩ := Y.sheaf.existsUnique_gluing' W (LB.wchart L (fun k => φ' k ≫ F) p)
-      (fun q => homOfLE inf_le_left) (fun y hy => by
-        choose q hq using fun k => exists_chart hL' (φ' k y)
-        exact Opens.mem_iSup.2 ⟨q, hy, Set.mem_iInter.2 hq⟩) v
-      (fun q q' => fn_ext (V := W q ⊓ W q') fun y hy => by
-        refine (gs_res (𝟙 Y) y inf_le_left hy _).trans (Eq.trans ?_ (gs_res (𝟙 Y) y inf_le_right hy _).symm)
-        rw [hv _ _ y q hy.1, hv _ _ y q' hy.2, sec_trans s (𝟙 Y) y hy.1.2 hy.2.2,
-          pw_trans hw φ' ε (𝟙 Y) y hy.1.1 hy.1.1 hy.1.2 hy.2.2, trF_self hL _ ε (𝟙 Y) y hy.1.1, _root_.one_mul,
-          ← _root_.mul_assoc, ← Units.val_mul, mul_right_comm, inv_mul_cancel, _root_.one_mul])
-    refine ⟨a, fun Z r z q h₁ h₂ => ?_⟩
-    have hz : r z ∈ W q := ⟨h₁, h₂⟩
-    exact (gs_res r z inf_le_left hz a).symm.trans ((congrArg (gs r z (W q)) (ha q)).trans (hv Z r z q hz))
-  choose a ha using glue
-  refine ⟨⟨a, fun j j' => fn_ext fun y hy => ?_⟩, fun Z r z p q => ha p Z r z q⟩
-  choose q hq using fun k => exists_chart hL' (φ' k y)
-  have m : (𝟙 Y : Y ⟶ Y) y ∈ LB.wchart L' φ' q := Set.mem_iInter.2 hq
-  refine (gs_res (𝟙 Y) y _ hy _).trans (Eq.trans ?_ ((gs_mul (𝟙 Y) y _ hy _ _).trans (congrArg₂ (· * ·)
-    ((gs_unit (𝟙 Y) y _ hy _).trans (congrArg Units.val (gm_linComb L _ ε (𝟙 Y) y j j' hy.1 hy.2)))
-    (gs_res (𝟙 Y) y _ hy _))).symm)
-  refine (ha j _ (𝟙 Y) y q hy.1 m).trans (Eq.trans ?_ (congrArg _ (ha j' _ (𝟙 Y) y q hy.2 m)).symm)
-  rw [pw_trans hw φ' ε (𝟙 Y) y hy.1 hy.2 m m, trF_self hL' _ ε (𝟙 Y) y m, inv_one, _root_.mul_one, Units.val_mul,
-    _root_.mul_assoc]
-  rfl
+  apply GlobalTheory.ConstFam.exists_sec_up <;> assumption
 
 def fac (w : LB.Iso L' (L.pull F)) (φ' : K → (Y ⟶ X')) (ε : K → ℤ) {Z : Scheme.{0}} (r : Z ⟶ Y) (z : Z)
     (J : (Z ⟶ X) → L.ι) (J' : (Z ⟶ X') → L'.ι) : (Z.presheaf.stalk z)ˣ :=

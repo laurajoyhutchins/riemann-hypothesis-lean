@@ -67,8 +67,6 @@ noncomputable section
 theorem gauge_right_line_holds : GLRight := by
   intro Wp Wq _ _ _ _ _ _ P Bs e hpl hk he hQQ ζ hζ Fr hFr X hX Y X' hX' ρ
   obtain ⟨hOK, hz, hz', hTz, hTz', -, -⟩ := id hpl
-  have hT : 0 < Tz P.k P.r Bs.z := Bs.T_pos
-  have hT' : 0 < Tz P.k P.r Bs.z' := Bs.T'_pos
   have hζ' : Tz P.k P.r Bs.z * Tz P.k P.r Bs.z' < Complex.normSq ζ := by
     rw [hTz, hTz']; exact hζ
   set c0 : Fin P.r → ℂ := fun _ => 1 with hc0def

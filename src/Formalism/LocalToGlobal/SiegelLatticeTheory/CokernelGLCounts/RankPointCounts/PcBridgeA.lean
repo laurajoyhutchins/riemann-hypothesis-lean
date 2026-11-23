@@ -70,8 +70,6 @@ theorem mkQ_eq_zero_iff (τ : E) : (Rs R).mkQ τ = 0 ↔ ∃ r : R, (r : E) = τ
   rw [Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero]
   first
     | exact Iff.rfl
-    | (rw [LinearMap.mem_range]; exact Iff.rfl)
-    | (simp [Rs]; done)
 
 section G
 
@@ -83,8 +81,6 @@ def NF : Submodule R (C × E) :=
 theorem mem_NF {x : C × E} : x ∈ NF α ↔ α x.1 + (Rs R).mkQ x.2 = 0 := by
   first
     | exact Iff.rfl
-    | (rw [NF, LinearMap.mem_ker]; exact Iff.rfl)
-    | (simp [NF]; done)
 
 theorem one_mem_NF : ((0 : C), (1 : E)) ∈ NF α := by
   rw [mem_NF]
@@ -114,11 +110,8 @@ theorem diff_of_fst {x x' : NF α} (h : (x : C × E).1 = (x' : C × E).1) : ∃ 
   refine ⟨r, Subtype.ext (Prod.ext ?_ ?_)⟩
   · first
       | (show (x : C × E).1 - (x' : C × E).1 = r • (0 : C); rw [h, sub_self, smul_zero])
-      | (simp [e0, h]; done)
   · first
       | (show (x : C × E).2 - (x' : C × E).2 = (r : E) * 1; rw [mul_one, hr])
-      | (simp [e0, hr, Subring.smul_def]; done)
-      | (simp [e0, ← hr, Algebra.smul_def]; done)
 
 variable (β : C) (u : E) (hb : α β + (Rs R).mkQ u = 0)
 
@@ -154,7 +147,6 @@ theorem unit_cancel {r : R} (h : (r : E) * u = 0) : r = 0 := by
   have h' : (r : E) = 0 := by
     first
       | exact hu.mul_left_eq_zero.1 h
-      | (obtain ⟨v, rfl⟩ := hu; simpa using h)
   first | exact Subtype.ext h' | exact_mod_cast h' | simpa using h'
 
 include hu in
@@ -168,8 +160,6 @@ theorem uniq_N {z z' : NF α₂} (h1 : (Submodule.Quotient.mk z : CG α₂ β₂
     simp only [Submodule.coe_smul, Submodule.coe_sub, Prod.smul_snd, Prod.snd_sub, h2, sub_self] at h4
     first
       | exact h4
-      | simpa [Subring.smul_def, bN] using h4
-      | simpa [Algebra.smul_def, bN] using h4
   have hr0 := unit_cancel hu h3
   rw [hr0, zero_smul] at hr
   exact sub_eq_zero.1 hr.symm
@@ -206,19 +196,15 @@ theorem Phi_add (x y : NF α₁) : Phi hu ψ hψl (x + y) = Phi hu ψ hψl x + P
   refine uniq_N (β₂ := β₂) (hb₂ := hb₂) hu ?_ ?_
   · first
       | (simp only [Phi_mk, Submodule.Quotient.mk_add, map_add (f := _)]; done)
-      | (simp [Phi_mk]; done)
   · first
       | (simp only [Phi_snd, Submodule.coe_add, Prod.snd_add]; done)
-      | (simp [Phi_snd]; done)
 
 theorem Phi_smul (r : R) (x : NF α₁) : Phi hu ψ hψl (r • x) = r • Phi hu ψ hψl x := by
   refine uniq_N (β₂ := β₂) (hb₂ := hb₂) hu ?_ ?_
   · first
       | (simp only [Phi_mk, Submodule.Quotient.mk_smul, map_smul]; done)
-      | (simp [Phi_mk]; done)
   · first
       | (simp only [Phi_snd, Submodule.coe_smul, Prod.smul_snd]; done)
-      | (simp [Phi_snd]; done)
 
 theorem fiberMap_fiberUnit (hψe : ψ (eG α₁ β₁ u hb₁) = eG α₂ β₂ u hb₂) : Phi hu ψ hψl (e0 α₁) = e0 α₂ := by
   refine uniq_N (β₂ := β₂) (hb₂ := hb₂) hu ?_ ?_
@@ -235,7 +221,6 @@ theorem Phi_fst (hψe : ψ (eG α₁ β₁ u hb₁) = eG α₂ β₂ u hb₂) {x
   rw [hx, Phi_add, Phi_smul, fiberMap_fiberUnit hu ψ hψl hψe]
   first
     | (simp [e0]; done)
-    | (show ((Phi hu ψ hψl x' : NF α₂) : C₂ × E).1 + r • (0 : C₂) = _; rw [smul_zero, add_zero])
 
 def phiF (c : C₁) : C₂ := ((Phi hu ψ hψl (liftN α₁ c) : NF α₂) : C₂ × E).1
 
@@ -275,10 +260,6 @@ theorem NF_map (φ : C₁ ≃ₗ[R] C₂) (hα : ∀ v, α₂ (φ v) = α₁ v) 
     | (rw [Submodule.mem_map_equiv, mem_NF, mem_NF]
        show α₁ (φ.symm y.1) + (Rs R).mkQ y.2 = 0 ↔ _
        rw [hα'])
-    | (rw [Submodule.map_equiv_eq_comap_symm, Submodule.mem_comap, mem_NF, mem_NF]
-       show α₁ (φ.symm y.1) + (Rs R).mkQ y.2 = 0 ↔ _
-       rw [hα'])
-    | (simp [Submodule.mem_map_equiv, mem_NF, hα']; done)
 
 
 omit hu hb₁ hb₂ in

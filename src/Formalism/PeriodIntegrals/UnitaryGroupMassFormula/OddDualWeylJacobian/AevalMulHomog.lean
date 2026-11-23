@@ -72,13 +72,11 @@ lemma sbs_X (A : Matrix (Fin k) (Fin k) (MvPolynomial (Fin k × Fin k) R)) (v : 
     sbs A (X v) = A v.1 v.2 := by
   first
   | simp [sbs]
-  | exact aeval_X _ _
 
 lemma sbs_C (A : Matrix (Fin k) (Fin k) (MvPolynomial (Fin k × Fin k) R)) (r : R) :
     sbs A (C r) = C r := by
   first
   | simp [sbs]
-  | rw [sbs, aeval_C, algebraMap_eq]
 
 lemma sbs_sbs (A B : Matrix (Fin k) (Fin k) (MvPolynomial (Fin k × Fin k) R))
     (p : MvPolynomial (Fin k × Fin k) R) : sbs A (sbs B p) = sbs (B.map (sbs A)) p := by
@@ -125,7 +123,6 @@ lemma sbs_det (A : Matrix (Fin k) (Fin k) (MvPolynomial (Fin k × Fin k) R)) :
   first
   | simpa [RingHom.mapMatrix_apply, genM_map] using
       RingHom.map_det (sbs A).toRingHom (PI.OddDualWeyl.genM R k)
-  | rw [AlgHom.map_det, AlgHom.mapMatrix_apply, genM_map]
 
 lemma sbs_adj (A : Matrix (Fin k) (Fin k) (MvPolynomial (Fin k × Fin k) R)) (i j : Fin k) :
     sbs A ((genM R k).adjugate i j) = A.adjugate i j := by
@@ -152,7 +149,6 @@ private theorem sum_support_eq_degree_of_isHomogeneous' {σ : Type*} {p : MvPoly
   have h1 := hp (MvPolynomial.mem_support_iff.mp hm)
   first
   | simpa [Finsupp.weight_apply, Finsupp.sum] using h1
-  | simpa [Finsupp.degree] using h1
   | (rw [← h1]; simp [Finsupp.weight_apply, Finsupp.sum])
   | (rw [← h1]; simp [Finsupp.degree, Finsupp.weight_apply, Finsupp.sum])
   | (simp only [Finsupp.weight_apply, Finsupp.sum, Pi.one_apply, smul_eq_mul, mul_one] at h1; exact h1)
@@ -243,8 +239,6 @@ variable {K : Type*} [Field K] {k : ℕ}
 lemma det_inv_eq (g : Matrix (Fin k) (Fin k) K) : (g⁻¹).det = (g.det)⁻¹ := by
   first
   | rw [Matrix.det_nonsing_inv, Ring.inverse_eq_inv']
-  | simp [Matrix.det_nonsing_inv]
-  | simp [Matrix.det_inv]
 
 lemma adj_inv (g : Matrix (Fin k) (Fin k) K) (hd : g.det ≠ 0) : (g⁻¹).adjugate = (g.det)⁻¹ • g := by
   have hu : IsUnit g.det := isUnit_iff_ne_zero.mpr hd
@@ -281,7 +275,6 @@ lemma key_mat (g : Matrix (Fin k) (Fin k) K) (hd : g.det ≠ 0) :
   first
   | (rw [← h]; exact Finset.sum_congr rfl fun l _ => mul_comm _ _)
   | (refine Eq.trans (Finset.sum_congr rfl fun l _ => mul_comm _ _) ?_; exact h)
-  | simpa [mul_comm] using h
 
 lemma dualSub_rowAct (g : Matrix (Fin k) (Fin k) K) (hd : g.det ≠ 0)
     {p p' : MvPolynomial (Fin k × Fin k) K} {M D : ℕ} (hrel : Rel K k M p p') (hp' : p'.IsHomogeneous D) :
@@ -347,7 +340,6 @@ private theorem mem_twisted_weyl_det_iff {O K : Type*} [CommRing O] [Field K] [A
   | rfl
   | (simp only [LinearMap.coe_restrictScalars, AlgHom.toLinearMap_apply, LinearMap.lsmul_apply,
       MvPolynomial.mapAlgHom_apply]; rfl)
-  | exact Iff.rfl
 
 theorem twistedWeylStep : GStep := by
   unfold GStep

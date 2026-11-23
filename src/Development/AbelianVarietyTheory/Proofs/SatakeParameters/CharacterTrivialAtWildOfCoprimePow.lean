@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.WildEqOneOfCharpolyUnipotentModL
 public import Formalism.ConjugateSelfDual.Statement
 public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
 public import Mathlib.RingTheory.Flat.TorsionFree
@@ -63,24 +64,7 @@ namespace GlobalTheory.WildChar
 
 theorem val_natCast_not_lt {Ω : Type} [Field Ω] (A : ValuationSubring Ω) {l p : ℕ}
     (hcop : Nat.Coprime l p) (hp : A.valuation (p : Ω) < 1) : ¬ A.valuation (l : Ω) < 1 := by
-  intro hl
-  have e : ((l : ℤ) * l.gcdA p + (p : ℤ) * l.gcdB p : ℤ) = 1 := by
-    have := Nat.gcd_eq_gcd_ab l p
-    rw [hcop.gcd_eq_one] at this
-    push_cast at this
-    exact this.symm
-  have e' : (l : Ω) * (l.gcdA p : Ω) + (p : Ω) * (l.gcdB p : Ω) = 1 := by
-    have := congrArg (Int.cast : ℤ → Ω) e
-    push_cast at this
-    exact this
-  have ha : A.valuation (l.gcdA p : Ω) ≤ 1 := (A.valuation_le_one_iff _).mpr (intCast_mem A _)
-  have hb : A.valuation (l.gcdB p : Ω) ≤ 1 := (A.valuation_le_one_iff _).mpr (intCast_mem A _)
-  have h1 : A.valuation ((l : Ω) * (l.gcdA p : Ω) + (p : Ω) * (l.gcdB p : Ω)) < 1 := by
-    refine lt_of_le_of_lt (A.valuation.map_add _ _) (max_lt ?_ ?_)
-    · rw [map_mul]; exact (mul_le_of_le_one_right' ha).trans_lt hl
-    · rw [map_mul]; exact (mul_le_of_le_one_right' hb).trans_lt hp
-  rw [e', map_one] at h1
-  exact lt_irrefl _ h1
+  apply GlobalTheory.WildKill.not_lt_one_of_coprime <;> assumption
 
 theorem sub_lt_of_wild {F Ω : Type} [Field F] [Field Ω] [Algebra F Ω] (A : ValuationSubring Ω)
     (τ : Gal(Ω/F)) (hτ : ∀ y : Ω, y ≠ 0 → A.valuation (τ y / y - 1) < 1) (y : Ω) (hy : y ≠ 0) :

@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.LatticeRationalEmbedding
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocRatio
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GradedSandwichDegreeBoundStatement
@@ -94,24 +95,7 @@ variable {L : Type} [Field L] [NumberField L] {B T : Type} [AddCommGroup B] [Mod
   [AddCommGroup T] [Module L T] [Module (𝓞 L) T] [IsScalarTower (𝓞 L) L T]
 
 theorem dvd_nat (c : 𝓞 L) (hc : c ≠ 0) : ∃ (n : ℕ) (d : 𝓞 L), n ≠ 0 ∧ (n : 𝓞 L) = d * c := by
-  obtain ⟨d, k, hk, h⟩ := Algebra.IsAlgebraic.exists_smul_eq_mul ℤ (1 : 𝓞 L) hc
-  refine ⟨k.natAbs, if 0 ≤ k then d else -d, by simpa using hk, ?_⟩
-  have h' : (k : 𝓞 L) = c * d := by simpa [zsmul_eq_mul] using h
-  rcases le_total 0 k with h0 | h0
-  · have : ((k.natAbs : ℤ)) = k := Int.natAbs_of_nonneg h0
-    have e : ((k.natAbs : ℕ) : 𝓞 L) = (k : 𝓞 L) := by
-      rw [← this]; simp
-    by_cases h1 : 0 ≤ k
-    · simp only [h1, if_true]; rw [e, h', mul_comm]
-    · exact absurd h0 h1
-  · have : ((k.natAbs : ℤ)) = -k := Int.ofNat_natAbs_of_nonpos h0
-    have e : ((k.natAbs : ℕ) : 𝓞 L) = -(k : 𝓞 L) := by
-      have := congrArg (fun q : ℤ => (q : 𝓞 L)) this
-      simpa using this
-    by_cases h1 : 0 ≤ k
-    · have : k = 0 := le_antisymm h0 h1
-      exact absurd this hk
-    · simp only [h1, if_false]; rw [e, h']; ring
+  apply GlobalTheory.CompanionTheory.Ar.Cusp.Dict.LatticeCoordinates.exists_nat_eq_mul <;> assumption
 
 theorem clear_int [Module.Projective (𝓞 L) B] (j : B →ₗ[𝓞 L] T) (h : IsBaseChange L j) :
     Function.Injective j ∧ ∀ t : T, ∃ (n : ℕ) (x : B), n ≠ 0 ∧ j x = n • t := by

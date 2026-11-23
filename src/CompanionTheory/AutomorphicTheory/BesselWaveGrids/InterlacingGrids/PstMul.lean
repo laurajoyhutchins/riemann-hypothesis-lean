@@ -54,7 +54,6 @@ open Finset
 theorem bracket_const_le (k r : ℕ) (c b : ℝ) (hc : 0 ≤ c) (hb : 3 ≤ b) (hkb : (k : ℝ) ≤ b)
     (hcb : c + 2 ≤ b) :
     (2 + c) ^ 2 * (k : ℝ) ^ 2 * (3 * b) ^ (2 * r + 3) ≤ b ^ (4 * r + 10) := by
-  have hb0 : 0 ≤ b := by linarith
   have h1 : (2 + c) ^ 2 ≤ b ^ 2 := pow_le_pow_left₀ (by linarith) (by linarith) 2
   have h2 : (k : ℝ) ^ 2 ≤ b ^ 2 := pow_le_pow_left₀ (Nat.cast_nonneg k) hkb 2
   have h3 : (3 * b) ^ (2 * r + 3) ≤ (b * b) ^ (2 * r + 3) :=

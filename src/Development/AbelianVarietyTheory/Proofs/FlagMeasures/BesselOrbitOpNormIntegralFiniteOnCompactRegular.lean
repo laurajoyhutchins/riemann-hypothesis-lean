@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LocInOfUniqOfDecLow
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.MatrixOfBesselTwoSidedAction
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselOpNormPowerIntegralLtTopClosedSubgroupStatement
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselRegularDoubleCosetPolynomialPropernessStatement
@@ -60,23 +61,7 @@ theorem continuous_opn {n : ℕ} : Continuous (opn : Matrix (Fin n) (Fin n) ℂ 
   exact continuous_norm.comp h
 
 theorem opn_pos {k r : ℕ} {g : Mat k r} (hg : g ∈ GG k r) : 0 < opn g := by
-  rcases (opn_nonneg g).lt_or_eq with h | h
-  · exact h
-  exfalso
-  have h0 : g = 0 := by
-    have h1 : Matrix.toEuclideanCLM (𝕜 := ℂ) (n := Fin (2 * r + k + 1)) g = 0 := by
-      rw [← norm_eq_zero]; exact h.symm
-    simpa using h1
-  have hg' : gᴴ * Hpk k r * g = Hpk k r := hg
-  rw [h0] at hg'
-  have hH : Hpk k r = 0 := by simpa using hg'.symm
-  have hr : r < 2 * r + k + 1 := by omega
-  have hent : Hpk k r ⟨r, hr⟩ ⟨r, hr⟩ = 0 := by rw [hH]; rfl
-  simp only [Hpk] at hent
-  split_ifs at hent
-  all_goals first
-    | exact absurd ⟨le_refl r, Nat.le_add_right r k, trivial⟩ ‹¬(r ≤ r ∧ r ≤ r + k ∧ True)›
-    | norm_num at hent
+  apply GlobalTheory.Amp.LocalInputs.opn_pos <;> assumption
 
 theorem integrable_of_normInt {k r : ℕ} {μ : Measure (Mt k r)} {A : ℝ} (h : normInt μ A < ⊤) :
     Integrable (fun x : Mt k r => opn (Matrix.of x) ^ (-A)) μ := by

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StrongApproximationSL2Adeles
 public import Development.AbelianVarietyTheory.Definitions.Divisors.OneMemH0WeightZero
 public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NotIsCompactUnivFv
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.QuaternionNormOnePrescribedReAtIdempotentStatement
@@ -51,22 +52,7 @@ namespace GlobalTheory.QSA
 
 theorem isPlacesIdem_mul_self {F : Type} [Field F] [NumberField F] {S₁ : Finset (InfinitePlace F)}
     {S₂ : Finset (HeightOneSpectrum (𝓞 F))} {ε : AF F} (hε : IsPlacesIdem S₁ S₂ ε) : ε * ε = ε := by
-  have h1 : fstA F (ε * ε) = fstA F ε := by
-    rw [map_mul]
-    funext w
-    change fstA F ε w * fstA F ε w = fstA F ε w
-    by_cases hw : w ∈ S₁
-    · rw [hε.1 w hw, one_mul]
-    · rw [hε.2.1 w hw, zero_mul]
-  have h2 : sndA F (ε * ε) = sndA F ε := by
-    rw [map_mul]
-    refine RestrictedProduct.ext _ _ fun v => ?_
-    change evalV F v (sndA F ε * sndA F ε) = evalV F v (sndA F ε)
-    rw [map_mul]
-    by_cases hv : v ∈ S₂
-    · rw [hε.2.2.1 v hv, one_mul]
-    · rw [hε.2.2.2 v hv, zero_mul]
-  exact Prod.ext h1 h2
+  apply GlobalTheory.StrongApproximationSL2.idem_of_isPlacesIdem <;> assumption
 
 theorem strongApprox_nrm_one : ∀ (F : Type) [Field F] [NumberField F] (a b : F), a ≠ 0 → b ≠ 0 → ∀ (S₁ : Finset (InfinitePlace F)) (S₂ : Finset (HeightOneSpectrum (𝓞 F))) (ε : AF F), IsPlacesIdem S₁ S₂ ε → (S₁.Nonempty ∨ S₂.Nonempty) → (∃ p q : AF F, ε * (algebraMap F (AF F) b - (p ^ 2 - algebraMap F (AF F) a * q ^ 2)) = 0) → ∀ g : DA F a b, nrm g = 1 → g ∈ closure (H0 (a := a) (b := b) ε) := by
   intro F _ _ a b ha hb S₁ S₂ ε hε hS hpq g hg

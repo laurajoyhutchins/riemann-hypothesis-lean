@@ -186,9 +186,6 @@ theorem khw_mem_layer (hE : IsGlRep E) (hU : IsInfUnitary ε E)
     (hgap : StdGap ε lam) (μ : Fin n → ℝ) :
     ∃ k : ℕ, ∀ w ∈ genSub E V, IsKHWVec ε E μ w → w ∈ layer ε E V k := by
   obtain ⟨hmono, h, hh, hbig⟩ := hgap
-  have hn : (0 : ℝ) < h - n + 1 := by
-    have : (0 : ℝ) ≤ n := Nat.cast_nonneg n
-    linarith
   have hmon : Monotone (layer ε E V) := by
     refine monotone_nat_of_le_succ fun k => ?_
     simp only [layer]

@@ -72,7 +72,6 @@ theorem pratio (s : Finset ℕ) (lam : ℕ → ℝ) (α β y : ℝ) (hI : 3 ≤ 
     rw [abs_of_pos a1, abs_of_pos (by linarith : 0 < y + 1 + lam t)]
     nlinarith
   · have a2 : y + 1 + lam t < 0 := by linarith
-    have hd : (β - α) / 3 ≤ -(y + 1 + lam t) := by linarith
     rw [abs_of_neg (by linarith : y + lam t < 0), abs_of_neg a2]
     have : 1 ≤ 3 / (β - α) * -(y + 1 + lam t) := by
       rw [div_mul_eq_mul_div, le_div_iff₀ hI0]; linarith
@@ -115,10 +114,6 @@ theorem final_cmp (Pa x0 F q TT sA E1 qw : ℝ) (hPa : 0 ≤ Pa) (hx0 : 0 < x0) 
     have eR : (E1 * sA * (√TT)⁻¹ * q) ^ 2 = E1 * (sA ^ 2 * q) * (q / TT) * E1 := by
       rw [mul_pow, mul_pow, mul_pow, hsq]; field_simp
     rw [eL, eR]
-    have hx2 : 0 ≤ x0 ^ 2 := sq_nonneg _
-    have hF2 : 0 ≤ F ^ 2 := sq_nonneg _
-    have hA : 0 ≤ E1 * (sA ^ 2 * q) := by positivity
-    have hB : 0 ≤ q / TT := by positivity
     calc Pa ^ 2 * x0 ^ 2 * F ^ 2 ≤ E1 * (sA ^ 2 * q) * x0 ^ 2 * F ^ 2 := by gcongr
       _ ≤ E1 * (sA ^ 2 * q) * (q / TT) * F ^ 2 := by gcongr
       _ ≤ E1 * (sA ^ 2 * q) * (q / TT) * E1 := by gcongr

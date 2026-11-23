@@ -54,6 +54,7 @@ import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AbelianVarietyTheory.Definitions.Divisors.GhostFrobenius
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TangentCoordsNonunit
 
 @[expose] public section
 
@@ -162,18 +163,7 @@ theorem QL_comb' (O E : Type) [CommRing O] [CommRing E] [Algebra O E] (d : ℕ)
     (μ : Fin d → MvPowerSeries (Fin d ⊕ Fin d) O) (hμ : ∀ i, constantCoeff (μ i) = 0)
     (f g : MvPowerSeries (Fin d) E) (a : O) (hf : QL μ ⊤ f) (hg : QL μ ⊤ g) :
     QL μ ⊤ (f + algebraMap O E a • g) := by
-  have hμE : ∀ i, constantCoeff (up E μ i) = 0 := fun i => by simp [up, hμ]
-  refine ⟨?_, fun i => ?_, fun α => ?_⟩
-  · simp [hf.1, hg.1]
-  · obtain ⟨x, -, hx⟩ := hf.2.1 i
-    obtain ⟨y, -, hy⟩ := hg.2.1 i
-    refine ⟨x + a * y, trivial, ?_⟩
-    simp only [lin] at hx hy ⊢
-    rw [map_add (f := _), coeff_smul, hx, hy, map_add (f := _), map_mul]
-  · obtain ⟨x, -, hx⟩ := hf.2.2 α
-    obtain ⟨y, -, hy⟩ := hg.2.2 α
-    refine ⟨x + a * y, trivial, ?_⟩
-    rw [formalCoboundary_add hμE, formalCoboundary_smul hμE, map_add (f := _), coeff_smul, hx, hy, map_add (f := _), map_mul]
+  apply _root_.GlobalTheory.TangentIndep.QL_comb <;> assumption
 
 theorem isLie_comb (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClosed C] [CharZero C]
     (v : Valuation C NNReal) (O : Type) [CommRing O] [Algebra O C] [Fact ¬IsUnit (p : O)]

@@ -53,6 +53,7 @@ import Mathlib.Tactic.ReduceModChar
 import Mathlib.Topology.Sheaves.Init
 import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.NGAnalytic
 import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.StepHeightOfNormOne
+import Formalism.HermitianLattices.HermitianLatticesProofs.UnimodularSpan
 
 @[expose] public section
 
@@ -207,64 +208,8 @@ theorem stabY_finite : ∀ (D : D7) (Z : LocDat D) (FP : ∀ p : PlF D, LocNG.FP
     have h5 := Submodule.finrank_le (U ⊔ W)
     omega
   have hΛlat : Submodule.IsLattice D.host.E Λ := hΛ.1
-  have hriesz (φ : (VS D).V →ₗ[D.host.E] D.host.E) : ∃ μ : (VS D).V, ∀ v, (VS D).hT μ v = φ v := by
-    classical
-    obtain ⟨bs, hbs⟩ := Formalism.HermitianLatticesTheory.dualLattice_dualBasis (VS D).hT (VS D).nondeg (VS D).frame
-    refine ⟨∑ j, star (φ ((VS D).frame j)) • bs j, fun v => ?_⟩
-    have key : (VS D).hT (∑ j, star (φ ((VS D).frame j)) • bs j) = φ := by
-      apply (VS D).frame.ext
-      intro i
-
-      rw [map_sum, LinearMap.sum_apply]
-      have hs : ∀ j, (VS D).hT (star (φ ((VS D).frame j)) • bs j) ((VS D).frame i) =
-          φ ((VS D).frame j) * (if i = j then 1 else 0) := by
-        intro j
-        rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply, star_star]
-        congr 1
-        rw [← (VS D).herm.eq ((VS D).frame i) (bs j), hbs]
-        split_ifs <;> simp
-      simp only [hs, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
-    rw [key]
-  
-  have hspan : Submodule.span D.host.E (Λ : Set (VS D).V) = ⊤ := by
-    by_contra hspan
-    obtain ⟨φ, hφ₀, hφ⟩ := Submodule.exists_le_ker_of_lt_top _ (lt_top_iff_ne_top.mpr hspan)
-    obtain ⟨μ, hμ⟩ := hriesz φ
-    have hμ₀ : μ ≠ 0 := by
-      intro h
-      apply hφ₀
-      ext y
-      simpa [h] using (hμ y).symm
-    have hline (a : D.host.E) : a • μ ∈ Λ := by
-      rw [← _hGl.2.1]
-      change a • μ ∈ Formalism.E.hdual (VS D).hT Λ
-      simp only [Formalism.E.hdual, Submodule.mem_iInf, Submodule.mem_comap,
-          LinearMap.restrictScalars_apply]
-      intro y hy
-      have hy₀ := LinearMap.mem_ker.mp (hφ (Submodule.subset_span hy))
-      simp [← (VS D).herm.eq (a • μ) y, LinearMap.map_smulₛₗ, hμ, hy₀]
-    obtain ⟨ψ, hψ, -⟩ := Submodule.exists_le_ker_of_notMem
-      (show μ ∉ (⊥ : Submodule D.host.E (VS D).V) by simpa using hμ₀)
-    let f := ψ.restrictScalars (𝓞 D.host.E)
-    have hmap (x : D.host.E) : x ∈ Λ.map f := by
-      refine ⟨(x / ψ μ) • μ, hline _, ?_⟩
-      change ψ ((x / ψ μ) • μ) = x
-      rw [map_smul, smul_eq_mul, div_mul_cancel₀ _ hψ]
-    obtain ⟨d, hd₀, hd⟩ := FractionalIdeal.isFractional_of_fg
-      (S := nonZeroDivisors (𝓞 D.host.E)) (hΛlat.fg.map f)
-    have hinj := IsFractionRing.injective (𝓞 D.host.E) D.host.E
-    have hne {a : 𝓞 D.host.E} (ha : a ≠ 0) : algebraMap (𝓞 D.host.E) D.host.E a ≠ 0 :=
-      fun h => ha (hinj (h.trans (map_zero _).symm))
-    have hinteger (x : D.host.E) : IsLocalization.IsInteger (𝓞 D.host.E) x := by
-      have hx := hd _ (hmap ((algebraMap (𝓞 D.host.E) D.host.E d)⁻¹ * x))
-      rwa [Algebra.smul_def, ← mul_assoc, mul_inv_cancel₀ (hne (nonZeroDivisors.ne_zero hd₀)),
-        one_mul] at hx
-    apply RingOfIntegers.not_isField D.host.E
-    refine ⟨⟨0, 1, zero_ne_one⟩, mul_comm, ?_⟩
-    intro a ha
-    obtain ⟨b, hb⟩ := hinteger ((algebraMap (𝓞 D.host.E) D.host.E a)⁻¹)
-    refine ⟨b, hinj ?_⟩
-    rw [map_mul, hb, map_one, mul_inv_cancel₀ (hne ha)]
+  have hspan : Submodule.span D.host.E (Λ : Set (VS D).V) = ⊤ :=
+    Formalism.HermitianLatticesTheory.IsUnimodular.span_eq_top _hGl.2.1 (VS D).herm hΛlat.fg
   have hmul : ∀ v : (VS D).V, ∃ d : 𝓞 D.host.E, d ≠ 0 ∧ d • v ∈ Λ := fun v => by
     have hv : v ∈ Submodule.span D.host.E (Λ : Set (VS D).V) := by rw [hspan]; trivial
     obtain ⟨t, ht⟩ := multiple_mem_span_of_mem_localization_span (nonZeroDivisors (𝓞 D.host.E)) D.host.E _ v hv

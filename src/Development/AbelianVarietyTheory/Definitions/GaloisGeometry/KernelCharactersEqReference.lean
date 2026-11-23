@@ -39,6 +39,7 @@ import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Topology.Sheaves.Init
 import ReciprocityTheory.NeutralLocalFields.LocalFieldComparison.HCFFromRecipA
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsProdInfMulFinPart
 
 @[expose] public section
 
@@ -55,20 +56,7 @@ variable {L : Type} [Field L] [NumberField L]
 
 theorem prod_inf_mul_finPart (a : Ideles L) :
     ∃ y : ∀ w : InfinitePlace L, (w.Completion)ˣ, (∏ w, infIdele L w (y w)) * finPartI L a = a := by
-  classical
-  let p : ∀ w : InfinitePlace L, AdeleRing (𝓞 L) L →* w.Completion := fun w =>
-    { toFun := fun x => x.1 w, map_one' := rfl, map_mul' := fun _ _ => rfl }
-  refine ⟨fun w => Units.map (p w) a, ?_⟩
-  have h : ((∏ w, infIdele L w (Units.map (p w) a) : Ideles L) : AdeleRing (𝓞 L) L) = ((a : AdeleRing (𝓞 L) L).1, 1) := by
-    rw [Units.coe_prod]
-    let ι : (∀ w : InfinitePlace L, w.Completion) →* AdeleRing (𝓞 L) L :=
-      MonoidHom.inl (InfiniteAdeleRing L) (FiniteAdeleRing (𝓞 L) L)
-    change ∏ w : InfinitePlace L, ι (Pi.mulSingle w ((a : AdeleRing (𝓞 L) L).1 w)) = ι (fun w => (a : AdeleRing (𝓞 L) L).1 w)
-    rw [← map_prod]
-    exact congrArg ι (Finset.univ_prod_mulSingle (fun w : InfinitePlace L => ((a : AdeleRing (𝓞 L) L).1 w : w.Completion)))
-  apply Units.ext
-  rw [Units.val_mul, h]
-  exact Prod.ext (mul_one _) (one_mul _)
+  apply _root_.GlobalTheory.Mem.Chr.Determ.exists_prod_inf_mul_finPart <;> assumption
 
 theorem isFin_finPart (a : Ideles L) : IsFinIdele (finPartI L a) := fun _ => rfl
 

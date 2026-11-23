@@ -366,8 +366,6 @@ variable {V : Type} [NormedAddCommGroup V] [InnerProductSpace ℂ V] {n : ℕ}
 private theorem arr_ext {j : ℕ} {F G : Arr V n j} (h : ∀ α, F α = G α) : F = G := by
   first
   | exact PiLp.ext h
-  | exact (WithLp.linearEquiv 2 ℂ ((Fin j → Fin n × Fin n) → V)).injective (funext h)
-  | exact funext h
 
 private theorem arr_sub_apply {j : ℕ} (F G : Arr V n j) (α : Fin j → Fin n × Fin n) :
     (F - G) α = F α - G α := rfl
@@ -659,8 +657,6 @@ theorem pfil_succ_le_theta_image_sup (j : ℕ) : pfil ε E u (j + 1) ≤
       have hm : α0 i ∈ w.reverse := by
         first
         | exact List.get_mem _ _
-        | exact List.get_mem _ _ _
-        | simp [α0, List.getElem_mem]
       exact hnc (α0 i) (List.mem_reverse.mp hm)
     let F : Arr V n (j + 1) :=
       (WithLp.linearEquiv 2 ℂ ((Fin (j + 1) → Fin n × Fin n) → V)).symm
@@ -706,13 +702,10 @@ theorem permuted_words_diff_mem_pfil (hE : GlRel E) (y : V) (hy : y ∈ kSpan ε
       have e1 : l₁ = [] := by
         first
         | exact List.eq_nil_of_length_eq_zero (by omega)
-        | exact List.length_eq_zero_iff.mp (by omega)
-        | exact List.length_eq_zero.mp (by omega)
       subst e1
       have e2 : l₂ = [] := by
         first
         | exact h.symm.eq_nil
-        | exact h.nil_eq.symm
       subst e2
       rw [sub_self, map_zero]
       exact Submodule.zero_mem _
@@ -766,7 +759,6 @@ theorem symmetrization_perm_sub_mem (hE : GlRel E) (j : ℕ) (F : Arr V n (j + 1
       have h0 : (List.ofFn (β ∘ σ.symm)).Perm (List.ofFn β) := by
         first
         | exact Equiv.Perm.ofFn_comp_perm σ.symm β
-        | exact List.ofFn_comp_perm σ.symm β
       exact (List.reverse_perm _).trans (h0.trans (List.reverse_perm _).symm)
     exact permuted_words_diff_mem_pfil ε E u hE (F β) hβ _ _ hperm
       (reverse_of_fn_noncompact ε (β ∘ σ.symm) (fun i => h (σ.symm i))) j (by simp)

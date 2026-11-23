@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagGapHolomorphicPullbackSecond
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.HasStepCharts
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.BlockDiagonalMinorVanishingStatement
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagPotentialBlockDecompositionStatement
@@ -64,36 +65,12 @@ variable {e : ℕ} {X : Type} [TopologicalSpace X] {A : FinHolAtlas e X}
 
 theorem continuousOn_of_holoOn {V : Set X} (hV : IsOpen V) {g : X → ℂ} (h : A.HoloOn V g) :
     ContinuousOn g V := by
-  intro y hy
-  obtain ⟨k, hk⟩ := A.cover y
-  have hz : A.chart k y ∈ (A.chart k).target ∩ (A.chart k).symm ⁻¹' V :=
-    ⟨(A.chart k).map_source hk, by
-      show (A.chart k).symm (A.chart k y) ∈ V
-      rw [(A.chart k).left_inv hk]; exact hy⟩
-  have h1 : ContinuousAt (g ∘ (A.chart k).symm) (A.chart k y) := (h k _ hz).continuousAt
-  have h2 : ContinuousAt (A.chart k) y := (A.chart k).continuousAt hk
-  have h3 : ContinuousAt ((g ∘ (A.chart k).symm) ∘ (A.chart k)) y := ContinuousAt.comp h1 h2
-  refine (h3.congr ?_).continuousWithinAt
-  filter_upwards [(A.chart k).open_source.mem_nhds hk] with u hu
-  simp [(A.chart k).left_inv hu]
+  apply GlobalTheory.CompanionTheory.Ar.PB.StepW.PshW.continuousOn_of_holoOn <;> assumption
 
 theorem holoOn_comp {e' : ℕ} {Y : Type} [TopologicalSpace Y] {B : FinHolAtlas e' Y} {h : Y → X}
     (hh : HoloMap B A h) {V : Set X} {g : X → ℂ} (hg : A.HoloOn V g) :
     B.HoloOn (h ⁻¹' V) fun y => g (h y) := by
-  intro c z hz
-  obtain ⟨k, hk⟩ := A.cover (h ((B.chart c).symm z))
-  have h1 : AnalyticAt ℂ (A.chart k ∘ h ∘ (B.chart c).symm) z := hh.2 c k z ⟨hz.1, hk⟩
-  have h2 : AnalyticAt ℂ (g ∘ (A.chart k).symm) ((A.chart k ∘ h ∘ (B.chart c).symm) z) :=
-    hg k _ ⟨(A.chart k).map_source hk, by
-      show (A.chart k).symm (A.chart k (h ((B.chart c).symm z))) ∈ V
-      rw [(A.chart k).left_inv hk]; exact hz.2⟩
-  refine (h2.comp h1).congr ?_
-  have hc : ContinuousAt (h ∘ (B.chart c).symm) z :=
-    hh.1.continuousAt.comp ((B.chart c).continuousAt_symm hz.1)
-  filter_upwards [hc.preimage_mem_nhds ((A.chart k).open_source.mem_nhds hk)] with u hu
-  have hu' : h ((B.chart c).symm u) ∈ (A.chart k).source := hu
-  simp only [Function.comp]
-  rw [(A.chart k).left_inv hu']
+  apply GlobalTheory.CompanionTheory.Ar.PB.StepW.PshW.holoOn_comp <;> assumption
 
 theorem holoOn_mono {U V : Set X} {g : X → ℂ} (h : A.HoloOn U g) (hVU : V ⊆ U) : A.HoloOn V g :=
   fun j => (h j).mono (Set.inter_subset_inter_right _ (Set.preimage_mono hVU))
@@ -144,15 +121,7 @@ theorem holoOn_detFac {N j : ℕ} (i : Fin N) {V : Set X} {m : X → Matrix (Fin
 theorem exists_log {S : Set X} (hS : IsOpen S) {f : X → ℂ} (h : A.HoloOn S f) {y : X} (hy : y ∈ S)
     (h0 : f y ≠ 0) : ∃ W', IsOpen W' ∧ y ∈ W' ∧ W' ⊆ S ∧ ∃ G : X → ℂ, A.HoloOn W' G ∧
       ∀ z ∈ W', (G z).re = Real.log ‖f z‖ := by
-  refine ⟨S ∩ (fun z => f z * (f y)⁻¹) ⁻¹' Complex.slitPlane,
-    ((continuousOn_of_holoOn hS h).mul continuousOn_const).isOpen_inter_preimage hS Complex.isOpen_slitPlane,
-    ⟨hy, ?_⟩, Set.inter_subset_left, fun z => Complex.log (f z * (f y)⁻¹) + Real.log ‖f y‖,
-    fun k u hu => ?_, fun z hz => ?_⟩
-  · simp [mul_inv_cancel₀ h0]
-  · exact (AnalyticAt.clog ((h k u ⟨hu.1, hu.2.1⟩).mul analyticAt_const) hu.2.2).add analyticAt_const
-  · have hz0 : f z ≠ 0 := left_ne_zero_of_mul (Complex.slitPlane_ne_zero hz.2)
-    rw [Complex.add_re, Complex.log_re, Complex.ofReal_re, ← div_eq_mul_inv, norm_div,
-      Real.log_div (norm_ne_zero_iff.2 hz0) (norm_ne_zero_iff.2 h0), sub_add_cancel]
+  apply GlobalTheory.CompanionTheory.Ar.PB.StepW.PshW.exists_log <;> assumption
 
 end Holo
 
@@ -162,15 +131,7 @@ theorem minorIJ_one_self {N : ℕ} (I : Finset (Fin N)) : minorIJ (1 : Matrix (F
 
 theorem detFac_ne_zero' {N j : ℕ} (hj : j ≤ N) (i : Fin N) {H : Matrix (Fin N) (Fin N) ℂ}
     (hb : IsBlockDiag j H) (hd : H.det ≠ 0) : detFac j i H ≠ 0 := by
-  have hu : IsUnit H.det := hd.isUnit
-  have h1 := ((GlobalTheory.T.block_diagonal_minor_vanishing ℂ N j i hj).2.2.2 H H⁻¹ hb (hb.inv hu)).2
-  rw [Matrix.mul_nonsing_inv _ hu] at h1
-  have h2 : detFac j i (1 : Matrix (Fin N) (Fin N) ℂ) = 1 := by
-    unfold detFac
-    split_ifs <;> simp [minorIJ_one_self]
-  intro h0
-  rw [h2, h0, zero_mul] at h1
-  exact one_ne_zero h1
+  apply GlobalTheory.CompanionTheory.Ar.PB.StepW.PshW.detFac_ne_zero' <;> assumption
 
 theorem isPshOn_stepPot : ∀ (K : Type) [Fintype K] (ι : K → Type) [∀ k, Fintype (ι k)] (Φ : Type) [Field Φ] (y : (Σ k, ι k) → Φ) (Ψ : Type) [Fintype Ψ] [DecidableEq Ψ] (N j : ℕ) (M : FlagModel y Ψ N j) (n : ℕ) (BM : BaseMetric M n) (p : Ψ × Fin N) (Kk : Type) [Fintype Kk] (ιk : Kk → Type) [∀ k, Fintype (ιk k)] (κ : Kk → K) (v : (Σ k, ιk k) → (Σ k, ι k)) (e : ℕ) (R : AnLogRes (mCoordIdeal (y ∘ v)) ⊤ e) (pr : R.X → BM.Rb.X) (hp : HoloMap R.A BM.Rb.A pr), HasStepCharts M BM p κ v R pr → IsPshOn R.A (bdry (fun x y => BM.s (pr x) (pr y)))ᶜ (potOf R (fsHerm ιk fun k => M.dy p (κ k)) + LocPot.ofFun (stepPh M BM p v R pr)) := by
   intro K _ ι _ Φ _ y Ψ _ _ N j M n BM p Kk _ ιk _ κ v e R pr hp hS x c y₀ hy w

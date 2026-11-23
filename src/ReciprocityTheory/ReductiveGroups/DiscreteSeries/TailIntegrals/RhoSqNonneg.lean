@@ -130,24 +130,6 @@ theorem scl_mp {p m : ℕ} (τ : ℝ) (hτ : τ ≠ 0) :
   simp
 
 theorem scl_meas {p m : ℕ} : Measurable (fun q : ℝ × Xp (p + 1) m => scl q.1 q.2) := by
-  have h1 : Measurable (fun q : ℝ × Xp (p + 1) m =>
-      Function.update q.2.1 0 ((q.1 : ℂ) * q.2.1 0)) := by
-    refine Measurable.of_eval (fun i => ?_)
-    by_cases hi : i = 0
-    · subst hi
-      simp only [Function.update_apply, if_true]
-      fun_prop
-    · simp only [Function.update_apply, hi, if_false]
-      fun_prop
-  have h2 : Measurable (fun q : ℝ × Xp (p + 1) m =>
-      Function.update q.2.2.1 0 (q.2.2.1 0 / (q.1 : ℂ))) := by
-    refine Measurable.of_eval (fun i => ?_)
-    by_cases hi : i = 0
-    · subst hi
-      simp only [Function.update_apply, if_true]
-      fun_prop
-    · simp only [Function.update_apply, hi, if_false]
-      fun_prop
   unfold scl
   fun_prop
 

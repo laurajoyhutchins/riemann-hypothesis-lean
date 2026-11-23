@@ -145,7 +145,6 @@ lemma onb {z z' : Fin (2 * r + k + 1) → ℂ} (hstd : C2.Std k r z z') {γ : B.
         funext i
         have hl : 0 < hHerm.eigenvalues i := hPD.eigenvalues_pos i
         have hsq := Real.mul_self_sqrt hl.le
-        have hne : Real.sqrt (hHerm.eigenvalues i) ≠ 0 := (Real.sqrt_pos.mpr hl).ne'
         have hreal : (Real.sqrt (hHerm.eigenvalues i))⁻¹ * hHerm.eigenvalues i *
             (Real.sqrt (hHerm.eigenvalues i))⁻¹ = 1 := by
           rw [mul_right_comm, ← mul_inv, hsq, inv_mul_cancel₀ hl.ne']
@@ -281,7 +280,6 @@ theorem fibre_orbit_description : C2.FibreOrbit := by
   have hfb : ∀ b, s0 *ᵥ (g₁ *ᵥ fvec k r z' b) = g₂ *ᵥ fvec k r z' b := fun b => hcol (Sum.inr b)
   have hu0 := hunit s0 hs0
   have hu1 := hunit g₁ hg₁
-  have hu2 := hunit g₂ hg₂
   refine ⟨s0⁻¹, ?_, g₁⁻¹ * s0⁻¹ * g₂, ?_, ?_⟩
   · rw [← fixed_frame_property k r z hstd.2.1]
     refine ⟨hinv s0 hs0, fun a => ?_⟩

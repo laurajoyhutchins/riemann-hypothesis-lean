@@ -85,15 +85,6 @@ lemma lagrange (c : Fin 3 → ℂ) {t1 t2 t3 g la : ℝ} (hg : 0 < g) (h1 : 1 �
   have d3 : g ^ 2 ≤ |(t3 - t1) * (t3 - t2)| := by
     rw [abs_of_nonneg (by nlinarith)]; nlinarith
   have hg2 : 0 < g ^ 2 := by positivity
-  have n1 : ((t1 - t2) * (t1 - t3) : ℂ) ≠ 0 := by
-    have : (t1 - t2) * (t1 - t3) ≠ 0 := by intro h; rw [h, abs_zero] at d1; linarith
-    exact_mod_cast this
-  have n2 : ((t2 - t1) * (t2 - t3) : ℂ) ≠ 0 := by
-    have : (t2 - t1) * (t2 - t3) ≠ 0 := by intro h; rw [h, abs_zero] at d2; linarith
-    exact_mod_cast this
-  have n3 : ((t3 - t1) * (t3 - t2) : ℂ) ≠ 0 := by
-    have : (t3 - t1) * (t3 - t2) ≠ 0 := by intro h; rw [h, abs_zero] at d3; linarith
-    exact_mod_cast this
   have a12 : (t1 : ℂ) - t2 ≠ 0 := by
     rw [sub_ne_zero]; intro h; have := Complex.ofReal_injective h; linarith
   have a13 : (t1 : ℂ) - t3 ≠ 0 := by

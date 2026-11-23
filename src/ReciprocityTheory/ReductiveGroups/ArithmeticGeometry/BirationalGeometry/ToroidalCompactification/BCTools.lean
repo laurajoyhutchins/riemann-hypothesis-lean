@@ -213,9 +213,6 @@ private lemma germ_app_presheaf_map_eq_germ_app {A B : Scheme.{0}} (f : A ⟶ B)
   rw [nat]
   first
     | exact TopCat.Presheaf.germ_res_apply _ _ _ _ _
-    | exact TopCat.Presheaf.germ_res_apply _ _ _ _ _ _
-    | (erw [TopCat.Presheaf.germ_res_apply])
-    | (simp; done)
 
 private lemma germ_app_app_eq_germ_app_comp {A B C : Scheme.{0}} (r : A ⟶ B) (h : B ⟶ C) (y : A) (W : C.Opens)
     (hy : h (r y) ∈ W) (a : Γ(C, W)) :
@@ -223,8 +220,6 @@ private lemma germ_app_app_eq_germ_app_comp {A B C : Scheme.{0}} (r : A ⟶ B) (
       (A.presheaf.germ ((r ≫ h) ⁻¹ᵁ W) y hy).hom (((r ≫ h).app W).hom a) := by
   first
     | rfl
-    | (simp only [Scheme.Hom.comp_app, CommRingCat.hom_comp, RingHom.comp_apply]; rfl)
-    | (simp [Scheme.Hom.comp_app]; done)
 
 private lemma gm_res_toroidal_compactification {A B : Scheme.{0}} (f : A ⟶ B) (y : A) {U V : B.Opens} (hVU : V ≤ U)
     (hy : f y ∈ V) (u : Γ(B, U)ˣ) : gm f y V (res hVU u) = gm f y U u := by
@@ -275,8 +270,6 @@ theorem top_le_iff_mem (x : Sp F ⟶ X) (U : X.Opens) (z : Sp F) : ⊤ ≤ x ⁻
     have hwz : w = z := by
       first
         | exact Subsingleton.elim _ _
-        | exact PrimeSpectrum.ext ((Ideal.eq_bot_of_prime _).trans (Ideal.eq_bot_of_prime _).symm)
-        | exact PrimeSpectrum.ext (by simp)
     subst hwz
     exact hz
 
@@ -293,12 +286,6 @@ theorem toStk_valF (x : Sp F ⟶ X) (U : X.Opens) (z : Sp F) (h : x z ∈ U) (a 
   first
     | (simp only [Scheme.Hom.appLE, CommRingCat.hom_comp, RingHom.comp_apply]
        exact TopCat.Presheaf.germ_res_apply _ _ _ _ _)
-    | (simp only [Scheme.Hom.appLE, CommRingCat.hom_comp, RingHom.comp_apply]
-       erw [TopCat.Presheaf.germ_res_apply])
-    | (simp only [Scheme.Hom.appLE, CommRingCat.hom_comp, RingHom.comp_apply]
-       exact (TopCat.Presheaf.germ_res_apply _ _ _ _ _).trans rfl)
-    | (simp only [Scheme.Hom.appLE, CommRingCat.hom_comp, RingHom.comp_apply]
-       exact Eq.refl _)
 
 variable {B B' B₀ : Scheme.{0}} {M : LB B} {M' : LB B'} {M₀ : LB B₀} {K : Type} [Fintype K] {ε : K → ℤ}
 

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsExtensionCharacter
 public import Mathlib.FieldTheory.IsAlgClosed.Basic
 public import Mathlib.GroupTheory.Divisible
 import Mathlib.Algebra.Order.Floor.Extended
@@ -54,28 +55,7 @@ namespace GlobalTheory.DivisibleUnits
 
 theorem units_zpow_surjective {F : Type} [Field F] [IsAlgClosed F] {n : ℤ} (hn : n ≠ 0) :
     Function.Surjective (fun a : Fˣ => a ^ n) := by
-  have nat_root : ∀ (m : ℕ), 0 < m → ∀ x : Fˣ, ∃ y : Fˣ, y ^ m = x := by
-    intro m hm x
-    obtain ⟨z, hz⟩ := IsAlgClosed.exists_pow_nat_eq (x : F) hm
-    have hz0 : z ≠ 0 := by
-      rintro rfl
-      rw [zero_pow hm.ne'] at hz
-      exact x.ne_zero hz.symm
-    refine ⟨Units.mk0 z hz0, ?_⟩
-    ext
-    simp [hz]
-  intro x
-  rcases Int.lt_or_gt_of_ne hn with h | h
-  · obtain ⟨y, hy⟩ := nat_root n.natAbs (Int.natAbs_pos.mpr hn) x⁻¹
-    refine ⟨y, ?_⟩
-    show y ^ n = x
-    have : n = -(n.natAbs : ℤ) := by omega
-    rw [this, zpow_neg, zpow_natCast, hy, inv_inv]
-  · obtain ⟨y, hy⟩ := nat_root n.natAbs (Int.natAbs_pos.mpr hn) x
-    refine ⟨y, ?_⟩
-    show y ^ n = x
-    have : n = (n.natAbs : ℤ) := by omega
-    rw [this, zpow_natCast, hy]
+  apply GlobalTheory.ExtensionCharacter.units_zpow_surjective <;> assumption
 
 noncomputable def divisibleUnits (F : Type) [Field F] [IsAlgClosed F] :
     DivisibleBy (Additive Fˣ) ℤ :=

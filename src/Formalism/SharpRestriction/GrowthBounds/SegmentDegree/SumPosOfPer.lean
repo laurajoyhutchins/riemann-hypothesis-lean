@@ -1,5 +1,7 @@
 module
 
+import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.CardFinRange
+import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.CoarseLabelFactorisation
 public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.RestCountOf
 public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.StrictMonoIntExists
 public import Formalism.SharpRestriction.GrowthBounds.SegmentDegree.TopDegreeComparison
@@ -56,36 +58,16 @@ section Geo
 variable {n' r : ℕ} [NeZero n'] [NeZero r] {F : Frames n' r} {L₁ N₁ : ℕ}
 
 theorem fr_add_mul_period (hV : F.Valid L₁ N₁) (j : ℤ) (i : ℕ) (m : ℤ) :
-    F.fr (j + m * F.J) i = F.fr j i + m * n' := by
-  have hper := hV.2.1
-  induction m using Int.induction_on with
-  | zero => simp
-  | succ k ih =>
-    have h1 := hper (j + k * F.J) i
-    rw [show j + ((k : ℤ) + 1) * (F.J : ℤ) = j + k * F.J + F.J by ring, h1, ih]
-    ring
-  | pred k ih =>
-    have h1 := hper (j + (-(k : ℤ) - 1) * F.J) i
-    rw [show j + (-(k : ℤ) - 1) * (F.J : ℤ) + F.J = j + -(k : ℤ) * F.J by ring, ih] at h1
-    linarith
+    F.fr (j + m * F.J) i = F.fr j i + m * n' :=
+  fr_period hV j i m
 
 theorem fr_lt_fr_of_lt_of_valid (hV : F.Valid L₁ N₁) (j : ℤ) (i : ℕ) :
-    ∀ i', i < i' → i' < r → F.fr j i < F.fr j i' := by
-  intro i' hii' hi'r
-  induction i' with
-  | zero => omega
-  | succ k ih =>
-    rcases Nat.lt_succ_iff_lt_or_eq.mp hii' with h | h
-    · exact lt_trans (ih h (by omega)) (hV.2.2.1 j k (by omega))
-    · subst h
-      exact hV.2.2.1 j i (by omega)
+    ∀ i', i < i' → i' < r → F.fr j i < F.fr j i' :=
+  TE.fr_lt hV j i
 
 theorem sum_fr_le (hV : F.Valid L₁ N₁) (j : ℤ) (i i' : ℕ) (h : i ≤ i') (h' : i' < r) :
-    F.fr j i ≤ F.fr j i' := by
-  rcases h.lt_or_eq with h | h
-  · exact (fr_lt_fr_of_lt_of_valid hV j i i' h h').le
-  · subst h
-    exact le_rfl
+    F.fr j i ≤ F.fr j i' :=
+  TE.fr_le hV j i i' h h'
 
 theorem sum_posOf_per (x m : ℤ) : posOf n' (x + m * n') = posOf n' x := by
   unfold posOf

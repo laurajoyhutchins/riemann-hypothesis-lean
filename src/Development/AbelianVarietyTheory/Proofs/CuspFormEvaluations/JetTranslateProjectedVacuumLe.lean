@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.DeterminantBlockProductRenameTorusPolynomial
 public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsStabForm
 public import Development.AbelianVarietyTheory.Definitions.ThetaValues.FlatMemLatIffStdLat
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.IsotropicCoefficientSplitting
@@ -97,23 +98,7 @@ theorem sum_norm_coeff_rename {σ κ : Type} {ρ : σ → κ} (hρ : Function.In
 theorem polyDeriv_smul_dir {σ W : Type} [NormedAddCommGroup W] [NormedSpace ℂ W] {P : MvPolynomial σ ℂ} {d : ℕ}
     (hP : P.IsHomogeneous d) (c : ℂ) (u : σ → W) (F : W → ℂ) (x : W) :
     I2.polyDeriv P (fun l => c • u l) F x = c ^ d * I2.polyDeriv P u F x := by
-  have h (m) (hm : m ∈ P.support) : (m.prod fun _ e => c ^ e) = c ^ d := by
-    have := hP (MvPolynomial.mem_support_iff.1 hm)
-    rw [Finsupp.prod, Finset.prod_pow_eq_pow_sum, ← this]
-    congr 1
-    simp [Finsupp.weight_apply, Finsupp.sum]
-  unfold I2.polyDeriv
-  rw [Finset.mul_sum]
-  refine Finset.sum_congr rfl fun m hm => ?_
-  rw [ContinuousMultilinearMap.map_smul_univ, smul_eq_mul, ← h m hm, mul_left_comm]
-  have h1 := (finCongr (Multiset.length_toList (Finsupp.toMultiset m)).symm).prod_comp
-    fun _ => c
-  have h2 : ∏ k, (fun _ => c) ((Finsupp.toMultiset m).toList.get k) =
-      ((Finsupp.toMultiset m).toList.map fun _ => c).prod := by
-    simp [← Fin.prod_univ_fun_getElem]
-  refine congrArg (· * _) ((h1.trans h2).trans ?_)
-  rw [Multiset.prod_map_toList, Finsupp.toMultiset_map, Finsupp.prod_toMultiset,
-    Finsupp.prod_mapDomain_index (fun _ => pow_zero _) fun _ _ _ => pow_add _ _ _]
+  apply GlobalTheory.BlockRen.polyDeriv_scale <;> assumption
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r g n : ℕ} {X : Data E r}
   {bas : (Fin g ⊕ Fin g → ℤ) ≃ₗ[ℤ] X.Λ}

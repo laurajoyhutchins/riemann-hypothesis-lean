@@ -175,9 +175,6 @@ theorem tmF_memLp {F : Matrix (Fin n) (Fin n) ℂ → ℂ} (hF : Formalism.REAL.
   have hae : AEStronglyMeasurable (fun g : S7.UJ ε => F (S7.toM g)) ν :=
     (Formalism.REAL.continuous_smooth_on_group_eval hF).aestronglyMeasurable
   rw [memLp_two_iff_integrable_sq_norm hae]
-  have ha1 : 0 ≤ a - 1 := by
-    have : (0 : ℝ) ≤ ((2 * (n * Fintype.card (S7.SgIxV ε s)) : ℕ) : ℝ) := Nat.cast_nonneg _
-    linarith
   have hn : (1 : ℝ) ≤ n := by exact_mod_cast a₀.pos
   have key : ∀ g : S7.UJ ε, 1 ≤ S7.hs (S7.toM g) ∧
       ‖‖F (S7.toM g)‖ ^ 2‖ ≤ C ^ 2 * S7.hs (S7.toM g) ^ (1 - a) := by

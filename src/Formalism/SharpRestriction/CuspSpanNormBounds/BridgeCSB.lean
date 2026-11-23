@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.UnitaryGroupGaugeVolumeInHermitianUnitary
 public import Formalism.FormalDegreeBessel.FormalDegreeRatio.UnitaryWeylNormalHolds
 public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
 public import Formalism.FormalDegreeBessel.FinalG
@@ -693,22 +694,7 @@ theorem exp_smul_inj {d : ℕ} (A B : Matrix (Fin d) (Fin d) ℂ)
 
 theorem entry_zero_of_const' {d : ℕ} (X : Matrix (Fin d) (Fin d) ℂ) (i j : Fin d) (c : ℂ)
     (h : ∀ t : ℝ, NormedSpace.exp ((t : ℂ) • X) i j = c) : X i j = 0 := by
-  letI : SeminormedRing (Matrix (Fin d) (Fin d) ℂ) := Matrix.linftyOpSemiNormedRing
-  letI : NormedRing (Matrix (Fin d) (Fin d) ℂ) := Matrix.linftyOpNormedRing
-  letI : NormedAlgebra ℝ (Matrix (Fin d) (Fin d) ℂ) := Matrix.linftyOpNormedAlgebra
-  have h1 : HasDerivAt (fun u : ℝ => NormedSpace.exp (u • X)) (NormedSpace.exp ((0 : ℝ) • X) * X) 0 :=
-    hasDerivAt_exp_smul_const X 0
-  let L : Matrix (Fin d) (Fin d) ℂ →L[ℝ] ℂ := LinearMap.toContinuousLinearMap (Matrix.entryLinearMap ℝ ℂ i j)
-  have h2 := L.hasFDerivAt.comp_hasDerivAt (0 : ℝ) h1
-  have h3 : (L ∘ fun u : ℝ => NormedSpace.exp (u • X)) = fun _ => c := by
-    funext u
-    have hu : (u • X) = ((u : ℂ) • X) := (Complex.coe_smul u X).symm
-    simp only [Function.comp, hu]
-    exact h u
-  rw [h3] at h2
-  have h4 := h2.unique (hasDerivAt_const (0 : ℝ) c)
-  have h5 : (NormedSpace.exp ((0 : ℝ) • X) * X) i j = 0 := h4
-  simpa using h5
+  apply GlobalTheory.GaugeVolFixer.entry_zero_of_const <;> assumption
 
 theorem hpk_inv : (Hpk k r)⁻¹ = Hpk k r := Matrix.inv_eq_left_inv hpk_sq
 

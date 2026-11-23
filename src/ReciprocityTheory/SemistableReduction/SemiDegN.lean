@@ -149,9 +149,6 @@ theorem mid_le_zero (hN : IntegralIndexStatement) (hA : AbsDetStatement) {K : Ty
     have h5 := hA k (gramC (diagMet δ σ) σ c) ((hGram Sm c).map σ)
       (gramC_posDef S _ (hDpd σ) σ c hc.2.1) hherm hineq
     rwa [show ((hGram Sm c).map σ).det = σ (hGram Sm c).det from (RingHom.map_det σ _).symm] at h5
-  have hN0 : 0 < |((Algebra.norm ℚ (hGram Sm c).det : ℚ) : ℝ)| := by
-    apply abs_pos.2
-    exact_mod_cast (Algebra.norm_ne_zero_iff).2 hdet
   have hsum : Real.log |((Algebra.norm ℚ (hGram Sm c).det : ℚ) : ℝ)| ≤
       ∑ σ : K →+* ℂ, Real.log (gramC (diagMet δ σ) σ c).det.re := by
     rw [← sum_log_norm_emb]

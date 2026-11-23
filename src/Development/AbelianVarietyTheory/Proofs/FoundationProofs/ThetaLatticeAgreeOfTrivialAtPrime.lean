@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.RelIndexNeZeroOfMoves
 public import Formalism.SharpRestriction.GlobalSchurBounds.StandardLatticesGL3
 public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CmFiniteAdeleStrongApproxModAdelicIdeal
 public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CmThetaLatticePointMemThetaLatticeOfAdelicStatement
@@ -57,48 +58,7 @@ theorem exists_int_mul (D : D7) {N : ℕ} (q : ℕ) (k : GA D N) (h : TrivAt D q
       (∀ i j, (s : AE D) * ((k : GL (Fin N) (AE D)) : Matrix (Fin N) (Fin N) (AE D)) i j ∈ OhE D) ∧
       ∀ i j, (s : AE D) * (((k : GL (Fin N) (AE D))⁻¹ : GL (Fin N) (AE D)) :
         Matrix (Fin N) (Fin N) (AE D)) i j ∈ OhE D := by
-  have h0 : ∀ i j, ∃ m : ℕ, Nat.Coprime m q ∧ (m : AE D) *
-      (((k : GL (Fin N) (AE D)) : Matrix (Fin N) (Fin N) (AE D)) i j -
-        (1 : Matrix (Fin N) (Fin N) (AE D)) i j) ∈ OhE D := by
-    intro i j
-    obtain ⟨m, -, hm, s, hs, he⟩ := h i j 0
-    refine ⟨m, hm, ?_⟩
-    rw [pow_zero, one_mul] at he
-    rw [he]
-    exact hs
-  choose m hm hmS using h0
-  set s : ℕ := ∏ r : Fin N × Fin N, m r.1 r.2 with hs
-  have hint : ∀ i j, (s : AE D) * ((k : GL (Fin N) (AE D)) : Matrix (Fin N) (Fin N) (AE D)) i j ∈ OhE D := by
-    intro i j
-    obtain ⟨c, hc⟩ := Finset.dvd_prod_of_mem (fun r : Fin N × Fin N => m r.1 r.2) (Finset.mem_univ (i, j))
-    have h1 : (1 : Matrix (Fin N) (Fin N) (AE D)) i j ∈ OhE D := by
-      rw [Matrix.one_apply]
-      split_ifs
-      · exact one_mem _
-      · exact zero_mem _
-    have : (s : AE D) * ((k : GL (Fin N) (AE D)) : Matrix (Fin N) (Fin N) (AE D)) i j = (c : AE D) * ((m i j : AE D) *
-        (((k : GL (Fin N) (AE D)) : Matrix (Fin N) (Fin N) (AE D)) i j -
-          (1 : Matrix (Fin N) (Fin N) (AE D)) i j)) + (s : AE D) * (1 : Matrix (Fin N) (Fin N) (AE D)) i j := by
-      rw [hs, hc]; push_cast; ring
-    rw [this]
-    exact add_mem (mul_mem (natCast_mem _ c) (hmS i j)) (mul_mem (natCast_mem _ s) h1)
-  refine ⟨s, Nat.Coprime.prod_left fun r _ => hm r.1 r.2, hint, fun i j => ?_⟩
-  have hinv : (((k : GL (Fin N) (AE D))⁻¹ : GL (Fin N) (AE D)) :
-      Matrix (Fin N) (Fin N) (AE D)) i j =
-      Formalism.UG.sigR (D.host.conj : D.host.E →ₐ[ℚ] D.host.E)
-        (IsDedekindDomain.FiniteAdeleRing (𝓞 ℚ) ℚ) (((k : GL (Fin N) (AE D)) : Matrix _ _ _) j i) := by
-    have hU := k.2
-    change Formalism.UG.cT (Formalism.UG.sigR (D.host.conj : D.host.E →ₐ[ℚ] D.host.E)
-      (IsDedekindDomain.FiniteAdeleRing (𝓞 ℚ) ℚ)) ((k : GL (Fin N) (AE D)) : Matrix _ _ _) *
-      (1 : Matrix (Fin N) (Fin N) D.host.E).map (Formalism.UG.inclE (F := ℚ) (E := D.host.E) (IsDedekindDomain.FiniteAdeleRing (𝓞 ℚ) ℚ)) *
-      ((k : GL (Fin N) (AE D)) : Matrix _ _ _) =
-      (1 : Matrix (Fin N) (Fin N) D.host.E).map (Formalism.UG.inclE (F := ℚ) (E := D.host.E) (IsDedekindDomain.FiniteAdeleRing (𝓞 ℚ) ℚ)) at hU
-    rw [Matrix.map_one _ (map_zero _) (map_one _), Matrix.mul_one] at hU
-    have he := Units.inv_eq_of_mul_eq_one_left hU
-    exact congrFun (congrFun he i) j
-  rw [hinv]
-  have := Formalism.UG.P.csDual_sig_mem (D.host.conj : D.host.E →ₐ[ℚ] D.host.E) (hint j i)
-  rwa [map_mul, map_natCast] at this
+  apply GlobalTheory.InertParity.LengthSign.exists_int_mul <;> assumption
 
 theorem pt_nsmul (D : D7) (cc : Ideal (𝓞 D.host.K)) (δ : ℂ) {N N' : ℕ} (m : ℕ)
     (z : Matrix (Fin N') (Fin N) D.host.E) :

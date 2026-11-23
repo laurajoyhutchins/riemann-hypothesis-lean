@@ -182,7 +182,6 @@ theorem conj_levi {d : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ} (
     (haarLie (Nset k r) 1).map (conjM d) = ENNReal.ofReal ((t ^ B.kap k r)⁻¹) • haarLie (Nset k r) 1 := by
   have hG := unitary_group_closed k r
   have ha : B.aDil k r t ∈ B.GV k r := B4.aDil_mem k r t ht.ne'
-  have htc : ∀ a : Fin r, ((t : ℂ) ^ (r - a.val)) ≠ 0 := fun a => pow_ne_zero _ (by exact_mod_cast ht.ne')
   have hi := B2x7.aDil_inv_mul k r t ht.ne'
   have hρ : (B.aDil k r t)⁻¹ * d ∈ B2.UWb k r := by
     refine ⟨hG.mul_mem _ (hG.inv_mem _ ha) _ hd, fun a => ⟨?_, ?_⟩⟩

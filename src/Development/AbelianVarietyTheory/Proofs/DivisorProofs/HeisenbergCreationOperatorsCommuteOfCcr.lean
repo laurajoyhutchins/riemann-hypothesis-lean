@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HeisenbergAnnihilationCreationCommutatorEqDelta
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PolEval
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -55,24 +56,7 @@ namespace GlobalTheory.CCRFock
 theorem fockM_comm_sum {W : Type} [Fintype W] [DecidableEq W] {P Q R S : ℕ} (j k : W × (Ix P Q × Ix R S)) (z z' : ℂ) :
     (∑ w, ∑ a, ∑ b, lineSign a b * unitAt j z w a b * star (unitAt k z' w a b)) =
       if j = k then lineSign j.2.1 j.2.2 * z * star z' else 0 := by
-  obtain ⟨w, a, b⟩ := j
-  obtain ⟨w', a', b'⟩ := k
-  rw [Finset.sum_eq_single w, Finset.sum_eq_single a, Finset.sum_eq_single b]
-  · by_cases hw : w = w'
-    · subst hw
-      by_cases ha : a = a'
-      · subst ha
-        by_cases hb : b = b'
-        · subst hb; simp [unitAt]
-        · simp [unitAt, hb, Ne.symm hb]
-      · simp [unitAt, ha, Ne.symm ha]
-    · simp [unitAt, hw]
-  · intro c _ hc; simp [unitAt, Ne.symm hc]
-  · simp
-  · intro c _ hc; simp [unitAt, Ne.symm hc]
-  · simp
-  · intro c _ hc; simp [unitAt, hc]
-  · simp
+  apply GlobalTheory.CCRFock.CommDM.sum_unitAt <;> assumption
 
 theorem fockM_comm : ∀ {V : Type} [AddCommGroup V] [Module ℂ V] {W : Type} [Fintype W] [DecidableEq W] {P Q R S : ℕ}
     (H : (W → Matrix (Ix P Q) (Ix R S) ℂ) → Module.End ℂ V),

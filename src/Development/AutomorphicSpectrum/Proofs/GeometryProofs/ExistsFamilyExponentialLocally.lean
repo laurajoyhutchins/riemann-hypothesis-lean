@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsLinearEquivLift
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExponentialFamilyPeriods
 public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
 public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.IsHolToOfComponents
@@ -70,22 +71,7 @@ variable {E E' : Type} [NormedAddCommGroup E] [NormedSpace ℂ E] [NormedAddComm
 theorem isHolTo_precomp {X : Scheme.{0}} {B : Set E} {y : E → (Sp ℂ ⟶ X)} (hy : IsHolTo B y)
     {W : Set E'} (hW : IsOpen W) {φ : E' → E} (hφ : DifferentiableOn ℂ φ W) (hm : Set.MapsTo φ W B) :
     IsHolTo W (fun w => y (φ w)) := by
-  intro U f
-  have hset : {w ∈ W | ⊤ ≤ y (φ w) ⁻¹ᵁ U} = W ∩ φ ⁻¹' {b ∈ B | ⊤ ≤ y b ⁻¹ᵁ U} := by
-    ext w
-    constructor
-    · rintro ⟨h1, h2⟩
-      exact ⟨h1, hm h1, h2⟩
-    · rintro ⟨h1, -, h2⟩
-      exact ⟨h1, h2⟩
-  have hopen : IsOpen {w ∈ W | ⊤ ≤ y (φ w) ⁻¹ᵁ U} := by
-    rw [hset]
-    exact hφ.continuousOn.isOpen_inter_preimage hW (hy U f).1
-  refine ⟨hopen, ?_⟩
-  refine DifferentiableOn.comp (g := fun b => valAt' (y b) U f) (t := {b ∈ B | ⊤ ≤ y b ⁻¹ᵁ U})
-    (hy U f).2 (hφ.mono fun w hw => hw.1) ?_
-  intro w hw
-  exact ⟨hm hw.1, hw.2⟩
+  apply GlobalTheory.LocLift.isHolTo_comp <;> assumption
 
 theorem isHolTo_congr {X : Scheme.{0}} {B : Set E} {y y' : E → (Sp ℂ ⟶ X)} (hy : IsHolTo B y)
     (h : ∀ b ∈ B, y' b = y b) : IsHolTo B y' := by

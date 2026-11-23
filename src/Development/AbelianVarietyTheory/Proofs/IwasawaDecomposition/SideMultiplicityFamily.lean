@@ -37,6 +37,7 @@ import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Tactic.TypeStar
+import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoverStdB
 
 @[expose] public section
 
@@ -118,20 +119,7 @@ section Gen
 variable {D : D7} {M : MtFam D}
 
 theorem jMt_inj' (μ : D.what₂.Tup) (j : ℕ) : Function.Injective (D.what₂.jMt μ j) := by
-  classical
-  let b := Module.Free.chooseBasis D.what₂.LL (D.what₂.MtL μ j)
-  have hb := (D.what₂.jMt_basis μ j b).1
-  have : Finite (Module.Free.ChooseBasisIndex D.what₂.LL (D.what₂.MtL μ j)) := hb.finite
-  haveI := Fintype.ofFinite (Module.Free.ChooseBasisIndex D.what₂.LL (D.what₂.MtL μ j))
-  refine (injective_iff_map_eq_zero (D.what₂.jMt μ j)).2 fun y hy => ?_
-  have hsum := b.sum_repr y
-
-  rw [← hsum, map_sum] at hy
-  simp only [LinearMap.map_smulₛₗ] at hy
-  have hz := Fintype.linearIndependent_iff.1 hb _ hy
-  rw [← hsum]
-  refine Finset.sum_eq_zero fun a _ => ?_
-  rw [(map_eq_zero_iff _ D.what₂.embLL.injective).1 (hz a), zero_smul]
+  apply _root_.Formalism.L2.jMt_injective <;> assumption
 
 theorem hypOutside_transport' {μ μ' : D.what₂.Tup} {j j' : ℕ} (hμ : μ = μ') (hj : j = j')
     (a1 : 1 ≤ j) (a2 : j ≤ D.R.m) (b1 : 1 ≤ j') (b2 : j' ≤ D.R.m)

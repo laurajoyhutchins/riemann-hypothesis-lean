@@ -1,5 +1,6 @@
 module
 
+import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PProjDegreePositive
 public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsDegreePositive
 public import GroundTheory.ArithmeticGeometry.AbelianVarieties.JacobianSmoothness.RingKrullDimLeRingKrullDimQuotientAddOne
 public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.AssemblyCN
@@ -130,77 +131,19 @@ omit [Fintype ι₀] in
 theorem isRelevant_of_ringKrullDim (W : Ideal (MRing (fun _ : Unit => ι₀) F)) [W.IsPrime] (e : ℕ)
     (hW : ringKrullDim (MRing (fun _ : Unit => ι₀) F ⧸ W) = ((e + 1 : ℕ) : WithBot ℕ∞)) :
     IsRelevant W := by
-  intro k
-  by_contra h
-  simp only [not_exists, not_not] at h
-  have hX : ∀ v : (Σ _ : Unit, ι₀), (X v : MRing (fun _ : Unit => ι₀) F) ∈ W := by
-    rintro ⟨⟨⟩, i⟩
-    cases k
-    exact h i
-  have hsurj : Function.Surjective (algebraMap F (MRing (fun _ : Unit => ι₀) F ⧸ W)) := by
-    intro z
-    obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective z
-    induction p using MvPolynomial.induction_on with
-    | C a =>
-      exact ⟨a, by rw [← MvPolynomial.algebraMap_eq, Ideal.Quotient.mk_algebraMap]⟩
-    | add p r hp hr =>
-      obtain ⟨a, ha⟩ := hp
-      obtain ⟨b, hb⟩ := hr
-      exact ⟨a + b, by rw [map_add (f := _), ha, hb, map_add (f := _)]⟩
-    | mul_X p v _ =>
-      refine ⟨0, ?_⟩
-      rw [map_zero, map_mul, Ideal.Quotient.eq_zero_iff_mem.mpr (hX v), mul_zero]
-  have hle := ringKrullDim_le_of_surjective _ hsurj
-  rw [hW, ringKrullDim_eq_zero_of_field] at hle
-  have : e + 1 ≤ 0 := by exact_mod_cast hle
-  omega
+  apply _root_.GroundTheory.Heights₂.Heights.Kleiman.ProjDegreePositive.isRelevant_of_ringKrullDim <;> assumption
 
 
 set_option synthInstance.maxHeartbeats 400000 in
 theorem hilbFn_pos (q : Ideal (MRing (fun _ : Unit => ι₀) F)) (hq : IsMultiProjPrime q) (n : ℕ) :
     0 < hilbFn q (fun _ => (n : ℤ)) := by
-  obtain ⟨i, hi⟩ := hq.relevant ()
-  have hqp := hq.isPrime
-  obtain ⟨hfin, heq⟩ :=
-    GroundTheory.Heights₂.Heights.FieldNumbers.GradedFinite.full F Unit (fun _ => ι₀) q (fun _ => n)
-  have heq' : hilbFn q (fun _ => (n : ℤ)) =
-      (Module.finrank F (gradedPiece q (fun _ : Unit => n)) : ℤ) := heq
-  rw [heq']
-  have hmem : Ideal.Quotient.mk q ((X ⟨(), i⟩ : MRing (fun _ : Unit => ι₀) F) ^ n) ∈
-      gradedPiece q (fun _ : Unit => n) := by
-    refine ⟨(X ⟨(), i⟩ : MRing (fun _ : Unit => ι₀) F) ^ n, ?_, rfl⟩
-    change _ ∈ weightedHomogeneousSubmodule F (blockWeight (fun _ : Unit => ι₀)) (fun _ : Unit => n)
-    rw [mem_weightedHomogeneousSubmodule]
-    have hp := (isWeightedHomogeneous_X F (blockWeight (fun _ : Unit => ι₀)) ⟨(), i⟩).pow n
-    convert hp using 1
-    funext k
-    cases k
-    simp [blockWeight]
-  have hne : Ideal.Quotient.mk q ((X ⟨(), i⟩ : MRing (fun _ : Unit => ι₀) F) ^ n) ≠ 0 := by
-    rw [Ne, Ideal.Quotient.eq_zero_iff_mem]
-    exact fun h => hi (hqp.mem_of_pow_mem n h)
-  have := hfin
-  have : Nontrivial (gradedPiece q (fun _ : Unit => n)) :=
-    ⟨⟨⟨_, hmem⟩, 0, fun h => hne (congrArg Subtype.val h)⟩⟩
-  have hpos : 0 < Module.finrank F (gradedPiece q (fun _ : Unit => n)) := Module.finrank_pos
-  exact_mod_cast hpos
+  apply _root_.GroundTheory.Heights₂.Heights.Kleiman.ProjDegreePositive.hilbFn_pos <;> assumption
 
 
 omit [Fintype ι₀] in
 theorem le_ker_constantCoeff (q : Ideal (MRing (fun _ : Unit => ι₀) F)) (hq : IsMultiProjPrime q) :
     q ≤ RingHom.ker (constantCoeff : MRing (fun _ : Unit => ι₀) F →+* F) := by
-  intro p hp
-  rw [RingHom.mem_ker]
-  by_contra h
-  have h0 := hq.multiHomog p hp 0
-  rw [weightedHomogeneousComponent_zero p (fun v => by
-    obtain ⟨⟨⟩, _⟩ := v
-    intro h'
-    have := congrFun h' ()
-    simp [blockWeight] at this)] at h0
-  have hu : IsUnit (C (AddMonoidAlgebra.coeff p 0) : MRing (fun _ : Unit => ι₀) F) :=
-    (isUnit_iff_ne_zero.mpr (by rwa [← constantCoeff_eq])).map C
-  exact hq.isPrime.ne_top (Ideal.eq_top_of_isUnit_mem _ h0 hu)
+  apply _root_.GroundTheory.Heights₂.Heights.Kleiman.ProjDegreePositive.le_ker_constantCoeff <;> assumption
 
 theorem pos (D : ℕ) : ∀ q : Ideal (MRing (fun _ : Unit => ι₀) F), IsMultiProjPrime q →
     ringKrullDim (MRing (fun _ : Unit => ι₀) F ⧸ q) = ((D + 1 : ℕ) : WithBot ℕ∞) →

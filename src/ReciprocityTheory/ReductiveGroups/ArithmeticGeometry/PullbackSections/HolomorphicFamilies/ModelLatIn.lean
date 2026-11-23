@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.TorusFrame
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.ModelLat
 import Mathlib.Algebra.AffineMonoid.Basic
 import Mathlib.Algebra.Order.Floor.Extended
@@ -101,21 +102,6 @@ theorem bb_ne_bot (D : D7) : D.host.𝔟 ≠ ⊥ := by
   exact lt_irrefl 0 h0
 
 theorem finrank_E (D : D7) : Module.finrank ℚ D.host.E = 2 * D.R.f := by
-  haveI := D.host.galois
-  rw [← IsGalois.card_aut_eq_finrank, Nat.card_congr D.host.gal.toEquiv]
-  simp only [Formalism.BasicNotions.Ranks.f, Formalism.BasicNotions.Ranks.n, Formalism.HC.Frame.GG, Nat.card_prod]
-  have h2 : Nat.card ℤˣ = 2 := by
-    first
-      | rw [Nat.card_eq_fintype_card, Int.card_units_eq_two]
-      | simp
-      | (rw [Nat.card_eq_fintype_card]; rfl)
-      | (rw [Nat.card_eq_fintype_card]; decide)
-  have hA : Nat.card D.R.MA = D.R.ord := by
-    unfold Formalism.HC.Frame.MA
-    rw [Nat.card_congr Multiplicative.toAdd]
-    unfold Formalism.HC.Frame.A Formalism.HC.Idx
-    exact Nat.card_fin _
-  rw [h2, hA]
-  ring
+  apply ReciprocityTheory.ChartRestriction.G.PullbackSections.PfTorusFrame.finrank_eq <;> assumption
 
 end ReciprocityTheory.ChartRestriction.G.PullbackSections.MLI

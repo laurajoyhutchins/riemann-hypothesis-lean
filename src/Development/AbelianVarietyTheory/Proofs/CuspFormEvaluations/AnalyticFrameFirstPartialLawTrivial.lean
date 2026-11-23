@@ -69,29 +69,7 @@ open scoped ContDiff
 attribute [local instance] Over.cartesianMonoidalCategory
 
 theorem tay_coord {N : ℕ} (k : Fin N) : tay (fun v : Fin N → ℂ => v k) 0 = MvPowerSeries.X ((0 : Fin 1), k) := by
-  have hc : ContDiffAt ℂ ω (fun v : Fin N → ℂ => v k) 0 := (contDiff_apply ℂ (fun _ => ℂ) k).contDiffAt
-  refine MvPowerSeries.pderiv.ext (fun q => ?_) ?_
-  · obtain ⟨a, j⟩ := q
-    obtain rfl : a = 0 := Subsingleton.elim _ _
-    have hd : MvPowerSeries.pderiv ((0 : Fin 1), j) (tay (fun v : Fin N → ℂ => v k) 0) =
-        tay (fun y : Fin N → ℂ => fderiv ℂ (fun v : Fin N → ℂ => v k) y (Pi.single j 1)) 0 := by
-      ext n
-      rw [MvPowerSeries.coeff_pderiv, coeff_tay, coeff_tay, dirs_add_single, fct_add_single,
-        add_zero, add_zero, TM.mD_cons_deriv hc]
-      push_cast
-      rw [← div_div, div_mul_cancel₀ _ (Nat.cast_add_one_ne_zero _)]
-    rw [hd]
-    have : (fun y : Fin N → ℂ => fderiv ℂ (fun v : Fin N → ℂ => v k) y (Pi.single j 1)) =
-        fun _ => (Pi.single j (1 : ℂ) : Fin N → ℂ) k := by
-      funext y
-      have := (ContinuousLinearMap.proj (R := ℂ) (φ := fun _ : Fin N => ℂ) k).fderiv (x := y)
-      change fderiv ℂ (fun v : Fin N → ℂ => v k) y = _ at this
-      rw [this]; rfl
-    rw [this, TM.tay_const, MvPowerSeries.pderiv_X]
-    by_cases h : k = j
-    · subst h; simp
-    · simp [h, Prod.ext_iff]
-  · rw [constantCoeff_tay, TM.mD_zero]; simp
+  apply GlobalTheory.JetLinSub.tay_coord <;> assumption
 
 theorem jetOf_coord {N : ℕ} (m : ℕ) (k : Fin N) :
     jetOf m (fun v : Fin N → ℂ => v k) = Ideal.Quotient.mk _ (MvPolynomial.X ((0 : Fin 1), k)) := by

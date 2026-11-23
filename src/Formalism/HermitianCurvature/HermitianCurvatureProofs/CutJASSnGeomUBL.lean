@@ -277,7 +277,6 @@ theorem ubl_nuG (h6 : UBLInvSqrt) {z z' : Fin (2 * r + k + 1) → ℂ} (hz : C2.
     (c := ε / Tz k r z) (div_pos hε hT) (fun g hg => ?_) n
   show ε / Tz k r z ≤ (herm (Hpk k r) (PI.UnitaryGroupMassFormula.GsFr.omW k r z z' g) (PI.UnitaryGroupMassFormula.GsFr.omW k r z z' g)).re
   rw [omW_sq hz hz' hg.1, Complex.ofReal_re]
-  have hT0 : 0 ≤ Tz k r z := hT.le
   have hG : ε ≤ Gf k r z z' g := hg.2
   gcongr
 
@@ -295,7 +294,6 @@ theorem ubl_nuG' (h6 : UBLInvSqrt) {z z' : Fin (2 * r + k + 1) → ℂ} (hz : C2
       (c := ε / Tz k r z') (div_pos hε hT) (fun g hg => ?_) n
     show ε / Tz k r z' ≤ (herm (Hpk k r) (PI.UnitaryGroupMassFormula.GsFr.omS k r z z' g) (PI.UnitaryGroupMassFormula.GsFr.omS k r z z' g)).re
     rw [omS_sq hz hz' hg.1, Complex.ofReal_re]
-    have hT0 : 0 ≤ Tz k r z' := hT.le
     have hG : ε ≤ Gf k r z z' g := hg.2
     gcongr
   refine ubl_congr isOpen_univ (Set.subset_univ _) (geG_sub z z' ε) (fun g hg _ => ?_) key

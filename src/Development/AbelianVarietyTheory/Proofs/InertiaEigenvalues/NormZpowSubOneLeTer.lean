@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicTowerGeneratorMatrixPerturbation
 public import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsTateOperatorLevelComplement
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NormPowSubOneLe
@@ -179,19 +180,7 @@ end Abstract
 variable {l : ℕ} [hl : Fact l.Prime]
 
 theorem pow_lt_rho {j : ℕ} (hj : Lev l j) : (l : ℝ) ^ (-(j : ℤ)) < rho1 l := by
-  have h2 : 2 ≤ l := hl.1.two_le
-  have h1 : (1 : ℝ) < l := by exact_mod_cast hl.1.one_lt
-  rw [rho1, ← Real.rpow_intCast]
-  apply Real.rpow_lt_rpow_of_exponent_lt h1
-  rw [lt_div_iff₀ (by linarith)]
-  push_cast
-  have hj1 : (1 : ℝ) ≤ j := by exact_mod_cast hj.1
-  rcases h2.eq_or_lt with h | h
-  · have hj2 : (2 : ℝ) ≤ j := by exact_mod_cast hj.2 h.symm
-    have : (l : ℝ) = 2 := by exact_mod_cast h.symm
-    rw [this]; linarith
-  · have : (3 : ℝ) ≤ l := by exact_mod_cast h
-    nlinarith
+  apply GlobalTheory.CycPerturb.pow_lt_rho <;> assumption
 
 theorem rho_lt_one : rho1 l < 1 := by
   have h1 : (1 : ℝ) < l := by exact_mod_cast hl.1.one_lt
@@ -209,16 +198,7 @@ theorem mem_inC_iff (F : IntermediateField ℚ_[l] (Om l)) (y : PadicComplex l) 
 
 theorem root_mem_inC (K : FinExt l) {j : ℕ} (hj : 1 ≤ j) {ζ : PadicComplex l}
     (h : IsPrimitiveRoot ζ l) : ζ ∈ inC (Ks K j) := by
-  haveI : NeZero l := ⟨hl.1.ne_zero⟩
-  obtain ⟨η, hη⟩ := HasEnoughRootsOfUnity.exists_primitiveRoot (Om l) l
-  have hη' := hη.map_of_injective (algebraMap (Om l) (PadicComplex l)).injective
-  obtain ⟨k, -, hk⟩ := hη'.eq_pow_of_pow_eq_one h.pow_eq_one
-  refine ⟨η ^ k, ?_, ?_⟩
-  · refine pow_mem (?_ : η ∈ Ks K j) k
-    refine (le_sup_right : _ ≤ Ks K j) (IntermediateField.subset_adjoin _ _ ?_)
-    exact (hη.pow_eq_one_iff_dvd _).2 (dvd_pow_self l (by omega))
-  · simp only [PadicComplex.coe_eq, map_pow]
-    exact hk
+  apply GlobalTheory.CycPerturb.root_mem_inC <;> assumption
 
 theorem chiC_mem_inC (χ : GQ l →* ℚ_[l]ˣ) (i : ℤ) (g : GQ l)
     (F : IntermediateField ℚ_[l] (Om l)) : chiC χ i g ∈ inC F :=

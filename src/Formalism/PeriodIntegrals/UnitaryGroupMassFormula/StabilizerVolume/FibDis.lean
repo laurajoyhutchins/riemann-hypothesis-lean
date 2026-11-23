@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.FibDis
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.FibGlue
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -58,56 +59,13 @@ variable {V : Type} [TopologicalSpace V] [T2Space V] [LocallyCompactSpace V]
 
 theorem cover (U : Set V) (hU : IsOpen U) : ∃ W : ℕ → Set V,
     (∀ n, IsOpen (W n) ∧ IsCompact (closure (W n)) ∧ closure (W n) ⊆ U) ∧ ⋃ n, W n = U := by
-  haveI : LocallyCompactSpace U := hU.isOpenEmbedding_subtypeVal.locallyCompactSpace
-  let E := CompactExhaustion.choice U
-  have h : ∀ n, ∃ W, IsOpen W ∧ Subtype.val '' E n ⊆ W ∧ closure W ⊆ U ∧ IsCompact (closure W) :=
-    fun n => exists_open_between_and_isCompact_closure ((E.isCompact n).image continuous_subtype_val)
-      hU (by rintro _ ⟨u, -, rfl⟩; exact u.2)
-  choose W hW1 hW2 hW3 hW4 using h
-  refine ⟨W, fun n => ⟨hW1 n, hW4 n, hW3 n⟩,
-    subset_antisymm (iUnion_subset fun n => subset_closure.trans (hW3 n)) ?_⟩
-  intro x hx
-  obtain ⟨n, hn⟩ := E.exists_mem ⟨x, hx⟩
-  exact mem_iUnion.2 ⟨n, hW2 n ⟨_, hn, rfl⟩⟩
+  apply PI.VolStabSW.DiscreteGroups.cover <;> assumption
 
 theorem approx (O : Set V) (hO : IsOpen O) : ∃ φ : ℕ → V → ℝ,
     (∀ k, Continuous (φ k) ∧ HasCompactSupport (φ k) ∧ tsupport (φ k) ⊆ O) ∧
     (∀ k x, 0 ≤ φ k x ∧ φ k x ≤ 1) ∧ (∀ x, Monotone fun k => φ k x) ∧
     ∀ x, ⨆ k, ENNReal.ofReal (φ k x) = O.indicator 1 x := by
-  haveI : LocallyCompactSpace O := hO.isOpenEmbedding_subtypeVal.locallyCompactSpace
-  let E := CompactExhaustion.choice O
-  have h : ∀ k, ∃ g : C(V, ℝ), EqOn g 1 (Subtype.val '' E k) ∧ IsCompact (tsupport g) ∧
-      tsupport g ⊆ Subtype.val '' interior (E (k + 1)) ∧ ∀ x, g x ∈ Icc (0 : ℝ) 1 := fun k =>
-    exists_continuousMap_one_of_isCompact_subset_isOpen ((E.isCompact k).image continuous_subtype_val)
-      (hO.isOpenMap_subtype_val _ isOpen_interior) (image_mono (E.subset_interior_succ k))
-  choose g hg1 hgc hgs hg01 using h
-  have hsubO : ∀ k, tsupport (g k) ⊆ O :=
-    fun k => (hgs k).trans (by rintro _ ⟨u, -, rfl⟩; exact u.2)
-  have hmono : ∀ x, Monotone fun k => g k x := by
-    intro x
-    refine monotone_nat_of_le_succ fun k => ?_
-    by_cases hx : x ∈ tsupport (g k)
-    · obtain ⟨u, hu, rfl⟩ := hgs k hx
-      rw [hg1 (k + 1) ⟨u, interior_subset hu, rfl⟩]
-      exact (hg01 k _).2
-    · rw [image_eq_zero_of_notMem_tsupport hx]
-      exact (hg01 (k + 1) x).1
-  refine ⟨fun k => g k, fun k => ⟨(g k).continuous, hgc k, hsubO k⟩, fun k x => hg01 k x, hmono,
-    fun x => ?_⟩
-  by_cases hx : x ∈ O
-  · obtain ⟨n, hn⟩ := E.exists_mem ⟨x, hx⟩
-    rw [indicator_of_mem hx]
-    apply le_antisymm
-    · refine iSup_le fun k => ?_
-      have := ENNReal.ofReal_le_ofReal (hg01 k x).2
-      simpa using this
-    · refine le_iSup_of_le n ?_
-      have h1 : g n x = 1 := hg1 n ⟨⟨x, hx⟩, hn, rfl⟩
-      show (1 : V → ℝ≥0∞) x ≤ ENNReal.ofReal (g n x)
-      rw [h1]
-      simp
-  · rw [indicator_of_notMem hx]
-    simp [image_eq_zero_of_notMem_tsupport (fun h => hx (hsubO _ h))]
+  apply PI.VolStabSW.DiscreteGroups.approx <;> assumption
 
 variable {X Y : Type} [MeasurableSpace V] [BorelSpace V] [TopologicalSpace X] [MeasurableSpace X]
   [BorelSpace X] [T2Space X] [TopologicalSpace Y] [T2Space Y]
@@ -243,25 +201,7 @@ theorem meas_fib : ∀ A, MeasurableSet A → Measurable fun b => fib b A := by
 end
 
 theorem disintStep_holds : DisintStep := by
-  intro V X Y _ _ _ _ _ _ _ _ _ _ _ _ _ _ μ ν hμ hν hpos f ι U hf hι hr hU fib h0 h2 h3 φ hφ
-  have hmf : Measurable fib :=
-    Measure.measurable_of_measurable_coe fib (meas_fib hf hι hr hU h0 h2 h3)
-  have hρ : μ.restrict U = ν.bind fib := by
-    obtain ⟨B, hB, hBU⟩ := cover (univ : Set V) isOpen_univ
-    refine Measure.ext_of_generateFrom_of_iUnion {s : Set V | IsOpen s} B BorelSpace.measurable_eq
-      isPiSystem_isOpen hBU (fun i => (hB i).1) (fun i => ?_) ?_
-    · exact ((Measure.restrict_apply_le _ _).trans_lt
-        ((measure_mono subset_closure).trans_lt (hB i).2.1.measure_lt_top)).ne
-    · intro s hs
-      rw [Measure.restrict_apply (hs : IsOpen s).measurableSet,
-        Measure.bind_apply hs.measurableSet hmf.aemeasurable,
-        (open_case hf hι hr hU h0 h2 h3 (s ∩ U) (hs.inter hU) inter_subset_right).2]
-      congr 1
-      funext b
-      rw [← measure_inter_add_diff s hU.measurableSet,
-        measure_mono_null (show s \ U ⊆ Uᶜ from fun x hx => hx.2)
-          (null_compl hf hι hr hU h0 h2 h3 b), add_zero]
-  rw [hρ, Measure.lintegral_bind hmf.aemeasurable hφ.aemeasurable]
+  apply PI.VolStabSW.DiscreteGroups.disintStep_holds <;> assumption
 
 theorem fibOfDens_holds : FibOfDens := fibOfDens_of disintStep_holds
 

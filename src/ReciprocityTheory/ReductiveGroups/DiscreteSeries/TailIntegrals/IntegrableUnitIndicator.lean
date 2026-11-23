@@ -81,15 +81,12 @@ lemma integrable_unitIndicator : Integrable one1 := by
   unfold one1
   first
   | exact (continuous_one.integrableOn_Icc).integrable_indicator measurableSet_Icc
-  | exact (Continuous.integrableOn_Icc continuous_const).integrable_indicator measurableSet_Icc
-  | exact (integrableOn_const.2 (Or.inr measure_Icc_lt_top)).integrable_indicator measurableSet_Icc
 
 lemma integrable_powIndicator {β : ℝ} (hβ : β < 1) : Integrable (pw1 β) := by
   have hr : (-1 : ℝ) < -β := by linarith
   have h0 : IntervalIntegrable (fun t : ℝ => t ^ (-β)) volume 0 1 := by
     first
     | exact intervalIntegral.intervalIntegrable_rpow' hr
-    | exact intervalIntegrable_rpow' hr
   have hpos : IntervalIntegrable (fun t : ℝ => |t| ^ (-β)) volume 0 1 := by
     rw [intervalIntegrable_iff_integrableOn_Ioc_of_le zero_le_one] at h0 ⊢
     refine h0.congr_fun (fun t ht => ?_) measurableSet_Ioc
@@ -107,8 +104,6 @@ lemma integrable_reim {p q : ℝ → ℝ} (hp : Integrable p) (hq : Integrable q
   have h : Integrable (fun z : ℝ × ℝ => p z.1 * q z.2) (volume.prod volume) := by
     first
     | exact Integrable.mul_prod hp hq
-    | exact Integrable.prod_mul hp hq
-    | exact Integrable.prod_smul hp hq
   have e := Complex.volume_preserving_equiv_real_prod
   have h2 := (e.integrable_comp_emb Complex.measurableEquivRealProd.measurableEmbedding).2 h
   first
@@ -146,8 +141,6 @@ lemma volume_bad (ι : Type*) [Fintype ι] :
   rw [volume_pi]
   first
   | exact Measure.pi_eval_preimage_null _ volume_axes
-  | exact Measure.pi_eval_preimage_null volume_axes
-  | exact Measure.pi_eval_preimage_null (μ := fun _ => volume) volume_axes
 
 lemma mp_unitary {ι : Type*} [Fintype ι] [DecidableEq ι] (h : Matrix ι ι ℂ) (hu : h.conjTranspose * h = 1) :
     MeasurePreserving (fun y : ι → ℂ => h.mulVec y) volume volume := by
@@ -156,7 +149,6 @@ lemma mp_unitary {ι : Type*} [Fintype ι] [DecidableEq ι] (h : Matrix ι ι �
     funext y
     first
     | rfl
-    | simp [L, Matrix.toLin'_apply]
   have hdetC : Complex.normSq h.det = 1 := by
     have h1 := congrArg Matrix.det hu
     rw [Matrix.det_mul, Matrix.det_conjTranspose, Matrix.det_one] at h1
@@ -165,7 +157,6 @@ lemma mp_unitary {ι : Type*} [Fintype ι] [DecidableEq ι] (h : Matrix ι ι �
       first
       | exact h1
       | (rw [starRingEnd_apply]; exact h1)
-      | simpa using h1
     exact_mod_cast h2
   have hdet : LinearMap.det L = 1 := by
     first
@@ -285,7 +276,6 @@ lemma psi_le {p q : ι} (hpq : p ≠ q) {k : ℕ} (hk : Fintype.card ι = k + 1)
     have h1 : |(1 - star (x p) / (tW q x : ℂ)).im| ≤ ‖1 - star (x p) / (tW q x : ℂ)‖ := by
       first
       | exact Complex.abs_im_le_norm _
-      | exact Complex.abs_im_le_abs _
     rw [him, abs_div, abs_of_pos htpos] at h1
     have h2 : |(x p).im| ≤ |(x p).im| / tW q x := by
       first
@@ -334,7 +324,6 @@ lemma psi_le {p q : ι} (hpq : p ≠ q) {k : ℕ} (hk : Fintype.card ι = k + 1)
     first
     | exact (ofReal_norm_eq_coe_nnnorm _).symm
     | (rw [ofReal_norm_eq_enorm, enorm_eq_nnnorm])
-    | exact (enorm_eq_nnnorm _).symm.trans (ofReal_norm_eq_enorm _).symm
     | (simp; rfl)
   rw [hP]
   apply ENNReal.ofReal_le_ofReal
@@ -411,9 +400,7 @@ lemma integrable_gprod (p q : ι) {β : ℝ} (hβ : β < 1) :
     Integrable (fun x : ι → ℂ => ∏ i, gF p q β i (x i)) := by
   first
   | exact Integrable.fintype_prod (f := fun i => gF p q β i) (fun i => gF_integrable p q hβ i)
-  | exact Integrable.fintype_prod (fun i => gF_integrable p q hβ i)
   | (rw [volume_pi]; exact Integrable.fintype_prod (fun i => gF_integrable p q hβ i))
-  | exact Integrable.fintype_prod_dep (fun i => gF_integrable p q hβ i)
 
 lemma ae_good : ∀ᵐ x : ι → ℂ, ∀ i, (x i).im ≠ 0 ∧ (x i).re ≠ 0 := by
   rw [ae_iff]
@@ -444,7 +431,6 @@ lemma lint_Bset_lt_top {p q : ι} (hpq : p ≠ q) {k : ℕ} (hk : Fintype.card �
   have h3 : ∫⁻ x : ι → ℂ, ENNReal.ofReal (∏ i, gF p q (s / k) i (x i)) < ∞ := by
     first
     | exact Integrable.lintegral_lt_top hG
-    | exact HasFiniteIntegral.lintegral_lt_top hG.2
   exact lt_of_le_of_lt (h1.trans h2) h3
 
 end Shell2

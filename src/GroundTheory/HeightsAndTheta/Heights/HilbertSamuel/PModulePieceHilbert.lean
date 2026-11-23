@@ -193,8 +193,6 @@ theorem pow_shift_le {a s b : K → ℕ} (h : tdeg b ≤ tdeg a + tdeg s) (m : �
     ((tdeg b : ℝ) + 1) ^ m ≤ ((tdeg s : ℝ) + 1) ^ m * ((tdeg a : ℝ) + 1) ^ m := by
   rw [← mul_pow]
   have h' : (tdeg b : ℝ) ≤ tdeg a + tdeg s := by exact_mod_cast h
-  have ha : (0 : ℝ) ≤ tdeg a := by positivity
-  have hs : (0 : ℝ) ≤ tdeg s := by positivity
   gcongr
   nlinarith
 
@@ -249,7 +247,6 @@ theorem factor_est [DecidableEq K] {J₂ q : Ideal (MRing ι)} {N d : ℕ} (hN :
     rw [add_tsub_cancel_right] at h3
     have m1 := pow_shift_le (htb a) (d - 1)
     have m2 := pow_shift_le (a := a) (s := s) (b := a + s) (tdeg_add a s).le (d - 1)
-    have hd0 : (0 : ℝ) ≤ d := by positivity
     have e1 := le_abs_self (lg q (a + s - c) - appr (Real.log (charOf q)) d q (a + s - c))
     have e1' := neg_abs_le (lg q (a + s - c) - appr (Real.log (charOf q)) d q (a + s - c))
     have e2 := le_abs_self (appr (Real.log (charOf q)) d q (a + s) -
@@ -260,8 +257,6 @@ theorem factor_est [DecidableEq K] {J₂ q : Ideal (MRing ι)} {N d : ℕ} (hN :
     have e3' := neg_abs_le (appr (Real.log (charOf q)) d q (a + s) - appr (Real.log (charOf q)) d q a)
     set P := ((tdeg a : ℝ) + 1) ^ (d - 1)
     set Q := ((tdeg s : ℝ) + 1) ^ (d - 1)
-    have hP : 0 ≤ P := by positivity
-    have hQ : 0 ≤ Q := by positivity
     have b1 : C' * d * ((tdeg (a + s - c) : ℝ) + 1) ^ (d - 1) ≤ C' * d * (Q * P) := by gcongr
     have b2 : K1 * d * ((tdeg (a + s) : ℝ) + 1) ^ (d - 1) ≤ K1 * d * (Q * P) := by gcongr
     have b3 : K2 * d * ((tdeg (a + s) : ℝ) + 1) ^ (d - 1) ≤ K2 * d * (Q * P) := by gcongr
@@ -305,16 +300,12 @@ theorem factor_est [DecidableEq K] {J₂ q : Ideal (MRing ι)} {N d : ℕ} (hN :
     have m1 := pow_shift_le (htb a) (d - 1)
     set P := ((tdeg a : ℝ) + 1) ^ (d - 1)
     set Q := ((tdeg s : ℝ) + 1) ^ (d - 1)
-    have hP : 0 ≤ P := by positivity
-    have hQ : 0 ≤ Q := by positivity
     have hd1 : (1 : ℝ) ≤ d := by exact_mod_cast (show 1 ≤ d by omega)
     have hlg : |lg q b| ≤ (C' * d' + Real.log (charOf q) * coefB d' q) * ((tdeg b : ℝ) + 1) ^ (d - 1) := by
       have e := abs_sub_abs_le_abs_sub (lg q b) (appr (Real.log (charOf q)) d' q b)
-      have hC'd : 0 ≤ C' * d' := by positivity
       have : C' * d' * ((tdeg b : ℝ) + 1) ^ (d' - 1) ≤ C' * d' * ((tdeg b : ℝ) + 1) ^ (d - 1) := by
         gcongr
       nlinarith
-    have hM : 0 ≤ C' * d' + Real.log (charOf q) * coefB d' q := by positivity
     calc |lg q b| ≤ (C' * d' + Real.log (charOf q) * coefB d' q) * ((tdeg b : ℝ) + 1) ^ (d - 1) := hlg
       _ ≤ (C' * d' + Real.log (charOf q) * coefB d' q) * (Q * P) := by gcongr
       _ = (C' * d' + Real.log (charOf q) * coefB d' q) * Q * 1 * P := by ring

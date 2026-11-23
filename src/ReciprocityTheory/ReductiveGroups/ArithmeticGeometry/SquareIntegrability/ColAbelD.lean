@@ -415,9 +415,6 @@ theorem cab_expo2 {q t u : ℝ} (hq : 0 < q) :
       (q * Real.pi * t ^ 2 / 2 + 2 * q * Real.pi * t ^ 2) - Real.pi / 2 * q * u ^ 2 := by
   have h1 : 0 ≤ q * Real.pi * (2 * (t - u / 2) ^ 2) :=
     mul_nonneg (mul_nonneg hq.le Real.pi_pos.le) (by positivity)
-  have h2 : (q * Real.pi * t ^ 2 / 2 + 2 * q * Real.pi * t ^ 2) - Real.pi / 2 * q * u ^ 2 -
-      (q * Real.pi * t ^ 2 / 2 - q * Real.pi * u ^ 2 + 2 * q * Real.pi * t * u) =
-      q * Real.pi * (2 * (t - u / 2) ^ 2) := by ring
   linarith
 
 theorem cab_R (hI : IsSplit P I) (hP : Ext.PackingCount) (hA : Ext.GaussianTailBound)

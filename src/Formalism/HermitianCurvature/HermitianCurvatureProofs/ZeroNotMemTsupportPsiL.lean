@@ -104,7 +104,6 @@ theorem psiL_zero_near0 (n : ℕ) : psiL n =ᶠ[𝓝 0] fun _ => 0 := by
     have hlog : Real.log ‖w‖ < -(2 * ((n:ℝ) + 1)) := by
       rw [Real.log_lt_iff_lt_exp (norm_pos_iff.2 h0)]
       exact hw
-    have h2 : (0:ℝ) < 2 * ((n:ℝ) + 1) := by positivity
     rw [abs_of_neg (by linarith)]
     linarith
 

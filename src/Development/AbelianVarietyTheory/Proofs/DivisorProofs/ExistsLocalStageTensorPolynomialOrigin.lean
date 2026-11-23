@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNoetherianModelOfDivisorOfConstants
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OriginIdeal
 public import Mathlib.RingTheory.Etale.Basic
 public import Mathlib.RingTheory.Localization.AtPrime.Basic
@@ -56,25 +57,7 @@ namespace GlobalTheory.LocalStage
 
 theorem mem_originIdeal_iff {T : Type} [CommRing T] [IsLocalRing T] (f : Polynomial T) :
     f ∈ GlobalTheory.KeyOriginCut.originIdeal T ↔ f.coeff 0 ∈ maximalIdeal T := by
-  constructor
-  · intro hf
-    have hle : GlobalTheory.KeyOriginCut.originIdeal T ≤
-        (maximalIdeal T).comap (Polynomial.constantCoeff : Polynomial T →+* T) := by
-      refine sup_le ?_ ?_
-      · rw [Ideal.map_le_iff_le_comap]
-        intro x hx
-        simpa using hx
-      · rw [Ideal.span_le]
-        intro x hx
-        rw [Set.mem_singleton_iff] at hx
-        subst hx
-        simp
-    simpa using hle hf
-  · intro hf
-    rw [← Polynomial.X_mul_divX_add f]
-    refine Ideal.add_mem _ ?_ ?_
-    · exact Ideal.mem_sup_right (Ideal.mul_mem_right _ _ (Ideal.subset_span rfl))
-    · exact Ideal.mem_sup_left (Ideal.mem_map_of_mem _ hf)
+  apply GlobalTheory.VertUnitsNoeth.mem_originIdeal_iff' <;> assumption
 
 theorem comap_originIdeal {R S : Type} [CommRing R] [IsLocalRing R] [CommRing S] [IsLocalRing S]
     (φ : R →+* S) [IsLocalHom φ] :

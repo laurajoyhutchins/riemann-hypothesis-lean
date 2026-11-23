@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.UnitOnInjectiveOfCommRing
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsSympLevel
 public import Development.AbelianVarietyTheory.Counterexamples.AbelianLawCounterexamples.WeilIsUniqueOfLocal
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsFullSymplecticLevelStructureOfTateIsoStatement
@@ -63,26 +64,7 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E}
 theorem weilIs_unitOn_unique {S : Scheme.{0}} (G : Over S) [GrpObj G] {L : LB G.left} (hL : L.IsLB)
     {k : Type} [Field k] (x : Sp k ⟶ S) (n : ℤ) (g g' : Over.mk x ⟶ G) (c c' : kˣ)
     (h : Out.WeilIs G L n g g' (unitOn c)) (h' : Out.WeilIs G L n g g' (unitOn c')) : c = c' := by
-  have hU : Subsingleton (Sp k) := by
-    show Subsingleton (PrimeSpectrum k); infer_instance
-  obtain ⟨p⟩ : Nonempty (Sp k) := by
-    show Nonempty (PrimeSpectrum k); infer_instance
-  have hp : ∀ V : (Over.mk x).left.Opens, p ∈ V → V = ⊤ := by
-    intro V hV
-    apply TopologicalSpace.Opens.ext
-    ext y
-    exact ⟨fun _ => trivial, fun _ => (Subsingleton.elim (α := Sp k) p y) ▸ hV⟩
-  have H := GlobalTheory.ThetaGroupTest.weilIs_unique_of_local p hp hL h h'
-  have hinj : Function.Injective (Units.map ((⊤ : (Over.mk x).left.Opens).ι.appTop.hom.toMonoidHom)) := by
-    apply Units.map_injective
-    haveI : IsIso ((⊤ : (Over.mk x).left.Opens).ι.app ⊤) := Scheme.Hom.isIso_app _ _ (by simp)
-    exact (ConcreteCategory.bijective_of_isIso ((⊤ : (Over.mk x).left.Opens).ι.app ⊤)).1
-  have H2 : unitOn c = unitOn c' := hinj H
-  unfold unitOn at H2
-  have hinj2 : Function.Injective (Units.map (Scheme.ΓSpecIso (CommRingCat.of k)).inv.hom.toMonoidHom) := by
-    apply Units.map_injective
-    exact (ConcreteCategory.bijective_of_isIso (Scheme.ΓSpecIso (CommRingCat.of k)).inv).1
-  exact hinj2 H2
+  apply (config := { allowSynthFailures := true }) GlobalTheory.weilIs_unique_fieldPoint <;> assumption
 
 theorem exists_unique_fullLevel {D : Datum H} {l : Level H} {B : Type} [CommRing B] {b : Base l B}
     {S : Scheme.{0}} {s : S ⟶ Sp B} (o : Obj D l b s) (k : Type) [Field k] [IsAlgClosed k] (x : Sp k ⟶ S)

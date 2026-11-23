@@ -336,7 +336,6 @@ theorem split_case (h0 : B 0 = 1) (h1 : B 1 * B 1 = algebraMap L K Δ)
     · simp only [Fin.mk_one]; rw [c.2, wi2 t ht]
   have he_int := hei s hws
   have hf_int := hei (-s) (by rw [Valuation.map_neg, hws])
-  have h10 : (1 : K) ≠ 0 := h0 ▸ B.ne_zero 0
   have he0 : e ≠ 0 := fun h => by
     have := (ev_idm (B := B) h20 hs0).1
     rw [← he_def, h] at this
@@ -387,7 +386,6 @@ theorem split_case (h0 : B 0 = 1) (h1 : B 1 * B 1 = algebraMap L K Δ)
     rw [huy]
     exact int_ef w he_int hf_int (hle _ _ (hi k) hpi') (hle _ _ (hj k) hqj') l
   · intro k l
-    have hz0 : ∀ l, w (B.repr (0 : K) l) ≤ 1 := fun l => by simp
     have h1' : ∀ (g : K) (m : Fin M), (∀ l, w (B.repr g l) ≤ 1) →
         w (B.repr ((Pi.single m g : Fin M → K) k) l) ≤ 1 := by
       intro g m hg

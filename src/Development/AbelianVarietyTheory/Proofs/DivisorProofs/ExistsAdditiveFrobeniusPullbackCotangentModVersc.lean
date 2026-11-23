@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsHopfIdealKerIdealOfBialgHom
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FrobTwistBaseChangeHomApp
 public import Mathlib.RingTheory.HopfAlgebra.Quotient
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AppOneEqZeroOfKernelIdealOfCompEqPrimeSmul
@@ -60,74 +61,7 @@ namespace GlobalTheory.PDiv
 
 theorem isHopfIdeal_kerIdeal {R A C : Type} [CommRing R] [CommRing A] [CommRing C]
     [HopfAlgebra R A] [HopfAlgebra R C] (f : C →ₐc[R] A) : (kerIdeal f).IsHopfIdeal R := by
-  refine { toIsCoideal := { counit_eq_zero := ?_, map_mkQ_comul_eq_zero := ?_ },
-           antipode_mem := ?_ }
-  · intro x hx
-    have hle : kerIdeal f ≤ augIdeal R A := by
-      refine Ideal.map_le_iff_le_comap.mpr fun c hc => ?_
-      have hc' : counit (R := R) c = 0 := by simpa using hc
-      rw [Ideal.mem_comap, RingHom.mem_ker]
-      simpa [CoalgHomClass.counit_comp_apply] using hc'
-    simpa using hle hx
-  · intro x hx
-    let Q := A ⧸ kerIdeal f
-    let q := Ideal.Quotient.mkₐ R (kerIdeal f)
-    let Φ : A →ₐ[R] Q ⊗[R] Q := (Algebra.TensorProduct.map q q).comp (Bialgebra.comulAlgHom R A)
-    have hqf : ∀ c : C, q (f c) = algebraMap R Q (counit (R := R) c) := by
-      intro c
-      have hmem : f (c - algebraMap R C (counit (R := R) c)) ∈ kerIdeal f := by
-        refine Ideal.mem_map_of_mem (f : C →ₐ[R] A) ?_
-        rw [RingHom.mem_ker]
-        simp
-      have h0 : q (f (c - algebraMap R C (counit (R := R) c))) = 0 :=
-        Ideal.Quotient.eq_zero_iff_mem.mpr hmem
-      rw [map_sub, map_sub, AlgHomClass.commutes, AlgHomClass.commutes, sub_eq_zero] at h0
-      exact h0
-    have hg : q.toLinearMap ∘ₗ (f : C →ₗ[R] A) = Algebra.linearMap R Q ∘ₗ counit :=
-      LinearMap.ext hqf
-    have hΦ : kerIdeal f ≤ RingHom.ker Φ := by
-      refine Ideal.map_le_iff_le_comap.mpr fun c hc => ?_
-      have hc' : counit (R := R) c = 0 := by simpa using hc
-      rw [Ideal.mem_comap, RingHom.mem_ker]
-      change TensorProduct.map q.toLinearMap q.toLinearMap (comul (f c)) = 0
-      rw [← CoalgHomClass.map_comp_comul_apply, ← LinearMap.comp_apply, ← TensorProduct.map_comp,
-        hg]
-      have hsplit : TensorProduct.map (Algebra.linearMap R Q ∘ₗ counit)
-          (Algebra.linearMap R Q ∘ₗ counit) =
-          TensorProduct.map (Algebra.linearMap R Q) (Algebra.linearMap R Q ∘ₗ counit) ∘ₗ
-            LinearMap.rTensor C (counit (R := R) (A := C)) := by
-        rw [LinearMap.rTensor, ← TensorProduct.map_comp, LinearMap.comp_id]
-      rw [hsplit, LinearMap.comp_apply, Coalgebra.rTensor_counit_comul, TensorProduct.map_tmul]
-      simp [hc']
-    exact hΦ hx
-  · have h0 : ((1 : WithConv (A →ₐ[R] A)).ofConv).comp (f : C →ₐ[R] A) =
-        (1 : WithConv (C →ₐ[R] A)).ofConv := by
-      ext c
-      simp [CoalgHomClass.counit_comp_apply]
-    have h1 : WithConv.toConv ((HopfAlgebra.antipodeAlgHom R A).comp (f : C →ₐ[R] A)) *
-        WithConv.toConv (f : C →ₐ[R] A) = 1 := by
-      have := AlgHom.convMul_comp_bialgHom_distrib
-        (WithConv.toConv (HopfAlgebra.antipodeAlgHom R A)) (WithConv.toConv (AlgHom.id R A)) f
-      rw [AlgHom.antipode_id_cancel, h0] at this
-      apply WithConv.ofConv_injective
-      rw [this]
-      rfl
-    have h2 : (HopfAlgebra.antipodeAlgHom R A).comp (f : C →ₐ[R] A) =
-        (f : C →ₐ[R] A).comp (HopfAlgebra.antipodeAlgHom R C) :=
-      congrArg WithConv.ofConv (eq_inv_of_mul_eq_one_left h1)
-    have hS : ∀ c : C, HopfAlgebra.antipode R (f c) = f (HopfAlgebra.antipode R c) := fun c => by
-      simpa using DFunLike.congr_fun h2 c
-    have hle : kerIdeal f ≤ Ideal.comap (HopfAlgebra.antipodeAlgHom R A) (kerIdeal f) := by
-      refine Ideal.map_le_iff_le_comap.mpr fun c hc => ?_
-      rw [Ideal.mem_comap, Ideal.mem_comap]
-      have hc' : counit (R := R) c = 0 := by simpa using hc
-      change HopfAlgebra.antipode R (f c) ∈ kerIdeal f
-      rw [hS]
-      refine Ideal.mem_map_of_mem (f : C →ₐ[R] A) ?_
-      rw [RingHom.mem_ker]
-      simpa using hc'
-    intro x hx
-    exact hle hx
+  apply GlobalTheory.PDiv.isHopfIdeal_kerIdeal_of_bialgHom <;> assumption
 
 theorem isCocomm_of_surjective {R A B : Type} [CommRing R] [CommRing A] [CommRing B]
     [Bialgebra R A] [Bialgebra R B] [IsCocomm R A] (f : A →ₐc[R] B)

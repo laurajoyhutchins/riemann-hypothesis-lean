@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.GlobalProofs.JacquetModuleFiniteLength
 public import Development.AbelianVarietyTheory.Definitions.TwistedInnerProducts.LeviEmbMemNormalizerLower
 public import GroundTheory.AutomorphicForms.FiniteBruhat
 public import GroundTheory.AutomorphicForms.Iwasawa
@@ -67,25 +68,7 @@ open GroundTheory.Automorphic.Parabolic
 
 theorem eq_iff_of_lt_iff {C A B : Type} [LinearOrder A] [LinearOrder B] (f : C → A) (g : C → B)
     (h : ∀ x y, f x < f y ↔ g x < g y) (x y : C) : f x = f y ↔ g x = g y := by
-  constructor
-  · intro hxy
-    by_contra hne
-    rcases lt_or_gt_of_ne hne with h1 | h1
-    · have := (h _ _).2 h1
-      rw [hxy] at this
-      exact lt_irrefl _ this
-    · have := (h _ _).2 h1
-      rw [hxy] at this
-      exact lt_irrefl _ this
-  · intro hxy
-    by_contra hne
-    rcases lt_or_gt_of_ne hne with h1 | h1
-    · have := (h _ _).1 h1
-      rw [hxy] at this
-      exact lt_irrefl _ this
-    · have := (h _ _).1 h1
-      rw [hxy] at this
-      exact lt_irrefl _ this
+  apply GlobalTheory.CompanionTheory.JacquetBridge.eq_iff_of_lt_iff <;> assumption
 
 theorem card_cell_of_card_corner {n : ℕ} {β γ : Fin n → ℕ} {w w' : Equiv.Perm (Fin n)}
     (h : ∀ a b, (Finset.univ.filter fun j => γ j ≤ b ∧ a ≤ β (w j)).card =

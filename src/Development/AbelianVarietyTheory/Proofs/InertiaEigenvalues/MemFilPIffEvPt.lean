@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NonemptyThetaOnBdRPlusPeriodData
 public import Formalism.LocalRingCardinality.AdicCompletionLocal.LocTied
 public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsCrisP
 public import Development.AbelianVarietyTheory.CrystallinePeriods.CrisIncl
@@ -110,25 +111,7 @@ theorem mem_filtration_iff_eval_eq_zero' {e : Per.Fl l} (he : IsEps e) (n : ℕ)
 
 theorem mu_sub_log {e : Per.Fl l} (he : IsEps e) {y : Per.BdRp l} (hy : Per.IsLog l e y) :
     aDp l (mu e) - y ∈ Per.FilP l 2 := by
-  have h2 := GlobalTheory.CrisIncl.factorial_mul_ev l e y he.1 hy 2
-  have hsq : Per.ev l 2 (aDp l (mu e ^ 2)) = 0 := by
-    refine (mem_filtration_iff_eval_eq_zero' he 2 _).1 (((filtration_eq_xi_pow l e he).1 2 _).2 ?_)
-    rw [mu_eq, map_pow, map_mul, mul_pow]
-    exact dvd_mul_right _ _
-  rw [ev_aDp, map_pow, map_pow] at hsq
-  have hu : IsUnit (((2 : ℕ) : Per.AinfP l ⧸ Per.kerP l ^ 2)) := by
-    have := (GlobalTheory.RingBasics.isUnit_nat l 2 two_ne_zero).map (Ideal.Quotient.mk (Per.kerP l ^ 2))
-    rwa [map_natCast] at this
-  rw [mem_filtration_iff_eval_eq_zero' he, map_sub, ev_aDp, sub_eq_zero]
-  apply hu.mul_left_cancel
-  have hf : Nat.factorial 2 = 2 := rfl
-  rw [hf] at h2
-  rw [h2]
-  change _ = Ideal.Quotient.mk _ (∑ k ∈ Finset.range 2, (-1) ^ k * ((2 / (k + 1) : ℕ) : Per.AinfP l) *
-      (algebraMap (Per.Ainf l) (Per.AinfP l) (mu e)) ^ (k + 1))
-  rw [Finset.sum_range_succ, Finset.sum_range_one, map_add (f := _), map_mul _ _ (_ ^ (1 + 1)), map_pow _ _ (1 + 1),
-    show (1 + 1 : ℕ) = 2 from rfl, hsq]
-  simp [map_ofNat]
+  apply GlobalTheory.ThetaTie.log_mu <;> assumption
 
 theorem log_eq_xi_mul {e : Per.Fl l} (he : IsEps e) {y : Per.BdRp l} (hy : Per.IsLog l e y) :
     ∃ v : Per.BdRp l, IsUnit v ∧ y = aDp l (xi e) * v := by

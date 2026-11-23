@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MaximalCompactOneParameterLinesOfLieLines
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -171,57 +172,7 @@ theorem linInd_one {σ : E →ₐ[F] E} {ξ : E} (hξ : σ ξ ≠ ξ) : LinearIn
 
 theorem eq_zero_of_at {σ : E →ₐ[F] E} (h : IsCMExt F E σ) (τ : ∀ w : InfinitePlace F, EmbOver E w)
     {z : AE F E} (hz : At (evI F) z) (h0 : ∀ w, piInf (τ w) z = 0) : z = 0 := by
-  have := h.1
-  obtain ⟨ξ, hξ⟩ := exists_moved h
-  have hcard : Fintype.card (Fin 2) = Module.finrank F E := by rw [h.2.2.1]; rfl
-  let bE := basisOfLinearIndependentOfCardEqFinrank (linInd_one hξ) hcard
-  let B := Algebra.TensorProduct.basis (AF F) bE
-  have hB : ∀ i, B i = (1 : AF F) ⊗ₜ[F] ![(1 : E), ξ] i := fun i => by
-    simp [B, bE, Algebra.TensorProduct.basis_apply]
-  set a := B.repr z with ha_def
-  have hz' : z = a 0 ⊗ₜ[F] (1 : E) + a 1 ⊗ₜ[F] ξ := by
-    conv_lhs => rw [← B.sum_repr z]
-    rw [Fin.sum_univ_two, hB, hB, TensorProduct.smul_tmul', TensorProduct.smul_tmul', smul_eq_mul, smul_eq_mul,
-      mul_one, mul_one]
-    rfl
-  let u : AF F := LinearMap.inr F (Ainf F) (Af F) 1
-  have hu : evI F u = 0 := by
-    change InfiniteAdeleRing.ringEquiv_mixedSpace F 0 = 0
-    exact map_zero _
-  have hfin : ∀ i, u * a i = 0 := fun i => by
-    have e := congrArg (fun y => B.repr y i) (hz u hu)
-    simpa [ha_def] using e
-  have hinf : ∀ w, evInf F w (a 0) = 0 ∧ evInf F w (a 1) = 0 := fun w => by
-    have e := h0 w
-    rw [hz', map_add (f := _), piInf_tmul, piInf_tmul, map_one, mul_one,
-      ← InfinitePlace.Completion.extensionEmbeddingOfIsReal_apply (IsTotallyReal.isReal w),
-      ← InfinitePlace.Completion.extensionEmbeddingOfIsReal_apply (IsTotallyReal.isReal w)] at e
-    set x := InfinitePlace.Completion.extensionEmbeddingOfIsReal (IsTotallyReal.isReal w) (evInf F w (a 0)) with hx
-    set y := InfinitePlace.Completion.extensionEmbeddingOfIsReal (IsTotallyReal.isReal w) (evInf F w (a 1)) with hy
-    have hne := im_ne_zero h hξ (τ w).1
-    have him := congrArg Complex.im e
-    have hre := congrArg Complex.re e
-    simp at him hre
-    have y0 : y = 0 := by
-      rcases him with h1 | h1
-      · exact h1
-      · exact absurd h1 hne
-    rw [y0, zero_mul, add_zero] at hre
-    constructor
-    · exact (map_eq_zero _).1 (hx ▸ hre)
-    · exact (map_eq_zero _).1 (hy ▸ y0)
-  have ha : ∀ i, a i = 0 := fun i => by
-    refine Prod.ext ?_ ?_
-    · funext w
-      change evInf F w (a i) = 0
-      fin_cases i
-      · exact (hinf w).1
-      · exact (hinf w).2
-    · have e := congrArg Prod.snd (hfin i)
-      change (1 : Af F) * (a i).2 = 0 at e
-      rw [one_mul] at e
-      exact e
-  rw [hz', ha 0, ha 1, TensorProduct.zero_tmul, TensorProduct.zero_tmul, add_zero]
+  apply GlobalTheory.RealLift.KLineProof.eq_zero_of_piInf <;> assumption
 end GlobalTheory.RealLift.OneParam
 
 namespace GlobalTheory.RealLift.OneParam

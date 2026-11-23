@@ -179,7 +179,6 @@ theorem ei_bound : ∀ (F : Type) [Field F] [NumberField F] [MeasurableSpace (A 
     have hs' : Summable (fun r : 𝓞 F => |C1| * a q *
         (∏ w, ‖(τ w + (ρ w (out q) : ℝ)) + (ρ w (r : F) : ℝ)‖ ^ M)⁻¹) := hs.mul_left _
     refine ⟨hs', ?_⟩
-    have hq0 := ha0 q
     change ∑' r : 𝓞 F, |C1| * a q *
         (∏ w, ‖(τ w + (ρ w (out q) : ℝ)) + (ρ w (r : F) : ℝ)‖ ^ M)⁻¹ ≤ _
     rw [tsum_mul_left]
@@ -197,7 +196,6 @@ theorem ei_bound : ∀ (F : Type) [Field F] [NumberField F] [MeasurableSpace (A 
     rw [← e.tsum_eq (fun b => ‖eiTerm ψ lf B ρ P φ τ b‖)]
     exact (Summable.tsum_le_tsum hle hsumc hsum').trans hbd'
   have hwt0 : 0 ≤ wt M τ := Finset.prod_nonneg fun w _ => by positivity
-  have hA0 : 0 ≤ ∑' q, a q := tsum_nonneg ha0
   have hwY : wt M τ * Y ≤ ∏ _w : InfinitePlace F, ((Real.sqrt t) ^ (M - 2))⁻¹ := by
     rw [hYdef]
     unfold wt

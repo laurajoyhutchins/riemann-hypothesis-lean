@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.JetReadingLinearSubstitutionPoints
 public import Development.AbelianVarietyTheory.Definitions.ThetaValues.ThConst
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PullbackSections.HolomorphicFamilies.ComposeLinearAction
 public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.CorrOfJetsOfAnalyticFrameProductsStatement
@@ -65,60 +66,7 @@ attribute [local instance] Over.cartesianMonoidalCategory
 
 theorem tay_coord {g : ℕ} (k : Fin g) :
     tay (fun v : Fin g → ℂ => v k) 0 = MvPowerSeries.X ((0 : Fin 1), k) := by
-  classical
-  have hθ : ContDiffAt ℂ ω (fun v : Fin g → ℂ => v k) 0 := (contDiff_apply ℂ (fun _ => ℂ) k).contDiffAt
-  have eq_of_cc (F G : MvPowerSeries (Fin 1 × Fin g) ℂ)
-      (h : ∀ l : List (Fin 1 × Fin g), MvPowerSeries.constantCoeff (l.foldr (fun q H => MvPowerSeries.pderiv q H) F) =
-        MvPowerSeries.constantCoeff (l.foldr (fun q H => MvPowerSeries.pderiv q H) G)) : F = G := by
-    have coeff_foldr (l : List (Fin 1 × Fin g)) (m : (Fin 1 × Fin g) →₀ ℕ) :
-        ∃ c : ℂ, c ≠ 0 ∧ ∀ F : MvPowerSeries (Fin 1 × Fin g) ℂ,
-          MvPowerSeries.coeff m (l.foldr (fun q G => MvPowerSeries.pderiv q G) F) =
-            c * MvPowerSeries.coeff (m + (l.map fun q => Finsupp.single q 1).sum) F := by
-      induction l generalizing m with
-      | nil => exact ⟨1, one_ne_zero, fun F => by simp⟩
-      | cons q l ih =>
-        obtain ⟨c, hc, hF⟩ := ih (m + Finsupp.single q 1)
-        refine ⟨c * ((m q : ℂ) + 1), mul_ne_zero hc (Nat.cast_add_one_ne_zero _), fun F => ?_⟩
-        simp only [List.foldr_cons]
-        rw [MvPowerSeries.coeff_pderiv, hF, List.map_cons, List.sum_cons, add_assoc]
-        ring
-    have sum_single_toList (m : (Fin 1 × Fin g) →₀ ℕ) :
-        ((Finsupp.toMultiset m).toList.map fun q => Finsupp.single q 1).sum = m := by
-      have hs : ∀ t : Multiset (Fin 1 × Fin g), (t.map fun q => Finsupp.single q 1).sum = Multiset.toFinsupp t := by
-        intro t
-        induction t using Multiset.induction_on with
-        | empty => simp
-        | cons a t ih =>
-          rw [Multiset.map_cons, Multiset.sum_cons, ih, ← Multiset.singleton_add, Multiset.toFinsupp_add,
-            Multiset.toFinsupp_singleton]
-      have h2 := hs (Finsupp.toMultiset m)
-      rw [Finsupp.toMultiset_toFinsupp] at h2
-      calc
-        _ = (Multiset.map (fun q => Finsupp.single q 1) (Finsupp.toMultiset m)).sum := by
-          rw [← Multiset.sum_coe, ← Multiset.map_coe, Multiset.coe_toList]
-        _ = m := h2
-    ext m
-    have h1 := h (Finsupp.toMultiset m).toList
-    obtain ⟨c, hc, h0⟩ := coeff_foldr (Finsupp.toMultiset m).toList 0
-    rw [← MvPowerSeries.coeff_zero_eq_constantCoeff_apply, ← MvPowerSeries.coeff_zero_eq_constantCoeff_apply,
-      h0, h0, zero_add, sum_single_toList] at h1
-    exact mul_left_cancel₀ hc h1
-  refine eq_of_cc _ _ fun l => ?_
-  rcases l.eq_nil_or_concat with rfl | ⟨l', ⟨a, j⟩, rfl⟩
-  · simp only [List.foldr_nil, constantCoeff_tay, TM.mD_zero, MvPowerSeries.constantCoeff_X, Pi.zero_apply]
-  · obtain rfl : a = 0 := Subsingleton.elim _ _
-    have hd : (fun y : Fin g → ℂ => fderiv ℂ (fun v : Fin g → ℂ => v k) y (Pi.single j 1)) =
-        fun _ => (Pi.single j (1 : ℂ) : Fin g → ℂ) k := by
-      funext y
-      exact congrArg (fun T : (Fin g → ℂ) →L[ℂ] ℂ => T (Pi.single j 1))
-        (ContinuousLinearMap.proj (R := ℂ) (φ := fun _ : Fin g => ℂ) k).fderiv
-    rw [List.concat_eq_append, List.foldr_append, List.foldr_append]
-    simp only [List.foldr_cons, List.foldr_nil]
-    rw [TM.pderiv_tay hθ, hd, TM.tay_const, MvPowerSeries.pderiv_X]
-    congr 2
-    by_cases h : k = j
-    · subst h; simp
-    · simp [h, Ne.symm h, Pi.single_apply]
+  apply GlobalTheory.JetLinSub.tay_coord <;> assumption
 
 
 theorem psJet_X {κ : Type} [Fintype κ] [DecidableEq κ] (m : ℕ) (s : κ) :

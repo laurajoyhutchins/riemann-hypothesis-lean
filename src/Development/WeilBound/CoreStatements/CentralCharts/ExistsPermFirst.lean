@@ -1,5 +1,6 @@
 module
 
+import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.SatakeMat
 public import Development.WeilBound.CoreStatements.CentralCharts.PshAt0
 public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals
 public import ReciprocityTheory.AnalyticForms.LeviForms.IsRegFamilyInhabitStatement
@@ -90,24 +91,7 @@ def NChart (A : FinHolAtlas n X) (U : Set X) (L : LocPot X) (s : X → X → ℂ
 
 theorem exists_perm_first (S : Finset (Fin n)) :
     ∃ σ : Equiv.Perm (Fin n), ∀ i, i ∈ S ↔ ((σ i : Fin n) : ℕ) < S.card := by
-  classical
-  have hle : S.card ≤ n := by simpa using S.card_le_univ
-  have hcard : Fintype.card {i : Fin n // i ∈ S} = Fintype.card {i : Fin n // (i : ℕ) < S.card} := by
-    rw [Fintype.card_coe, ← Fintype.card_congr (Fin.castLEquiv hle), Fintype.card_fin]
-  have hcard' : Fintype.card {i : Fin n // ¬ i ∈ S} = Fintype.card {i : Fin n // ¬ (i : ℕ) < S.card} := by
-    rw [Fintype.card_subtype_compl, Fintype.card_subtype_compl, hcard]
-  let e := Fintype.equivOfCardEq hcard
-  let f := Fintype.equivOfCardEq hcard'
-  refine ⟨Equiv.subtypeCongr e f, fun i => ?_⟩
-  by_cases hi : i ∈ S
-  · have h1 : Equiv.subtypeCongr e f i = e ⟨i, hi⟩ := by
-      simp [Equiv.subtypeCongr, Equiv.sumCompl_symm_apply_of_pos hi]
-    rw [h1]
-    exact ⟨fun _ => (e ⟨i, hi⟩).2, fun _ => hi⟩
-  · have h1 : Equiv.subtypeCongr e f i = f ⟨i, hi⟩ := by
-      simp [Equiv.subtypeCongr, Equiv.sumCompl_symm_apply_of_neg hi]
-    rw [h1]
-    exact ⟨fun h => absurd h hi, fun h => absurd h (f ⟨i, hi⟩).2⟩
+  apply Formalism.UG.P.satake_exists_perm <;> assumption
 
 def scalePerm (δ : ℝ) (hδ : 0 < δ) (σ : Equiv.Perm (Fin n)) : (Fin n → ℂ) ≃L[ℂ] (Fin n → ℂ) :=
   LinearEquiv.toContinuousLinearEquiv

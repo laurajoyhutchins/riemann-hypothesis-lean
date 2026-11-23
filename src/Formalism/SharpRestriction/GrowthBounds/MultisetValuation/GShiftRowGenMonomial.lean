@@ -48,6 +48,7 @@ import Mathlib.Tactic.Polynomial.Basic
 import Mathlib.Tactic.ReduceModChar
 import Mathlib.Tactic.TypeStar
 import Mathlib.Topology.Sheaves.Init
+import Formalism.LocalToGlobal.GroupLattices.FockModels.OperatorsPreserveLattices
 
 @[expose] public section
 
@@ -380,49 +381,8 @@ theorem dl_P (O Kf : Type) [CommRing O] [IsDomain O] [Field Kf] [Algebra O Kf] (
     (w : O) (hw : algebraMap O Kf w ≠ 0) (g : Matrix (Fin (m + 1)) (Fin (m + 1)) Kf)
     (F : MvPolynomial (Fin (m + 1) × Fin (m + 1)) Kf) (hF : F ∈ deltaLTw O Kf m lam g) :
     (algebraMap O Kf w ^ (∑ i : Fin (m + 1) with i.val < r, lam i)) • F ∈
-      deltaLTw O Kf m lam (g * lb_D (m + 1) r (algebraMap O Kf w)) := by
-  classical
-  set c : Kf := algebraMap O Kf w with hc
-  set ν : Fin (m + 1) → ℕ := nuOf lam with hν
-  set e : ℤ := lam (Fin.last m) with he
-  have hνa : Antitone ν := by
-    intro x y hxy
-    simp only [hν, nuOf]
-    exact Int.toNat_le_toNat (sub_le_sub_right (hlam hxy) _)
-  obtain ⟨F0, hF0, rfl⟩ := hF
-  obtain ⟨f, hf, hfe⟩ := mem_deltaL.1 hF0
-  set Nν : ℕ := ∑ t : Fin (m + 1) with t.val < r, ν t with hNν
-  set A : ℤ := ∑ i : Fin (m + 1) with i.val < r, lam i with hA
-  obtain ⟨f1, hf1, hf1e⟩ := weyl_diag O Kf (m + 1) r ν hνa w hw f hf
-  refine ⟨c ^ Nν • F0, mem_deltaL.2 ⟨f1, hf1, ?_⟩, ?_⟩
-  · have h5 := rowActMul Kf (m + 1) (m + 1) (lb_D (m + 1) r c) g
-    have h6 : rowAct Kf (g * lb_D (m + 1) r c) F0 = rowAct Kf (lb_D (m + 1) r c) (rowAct Kf g F0) := by
-      rw [← h5]
-      rfl
-    rw [map_smul, h6, ← hfe]
-    exact hf1e
-  · show (g * lb_D (m + 1) r c).det ^ (-e) • (c ^ Nν • F0) = c ^ A • (g.det ^ (-e) • F0)
-    rw [smul_smul, smul_smul]
-    congr 1
-    set ρ : ℕ := (Finset.univ.filter fun a : Fin (m + 1) => a.val < r).card with hρ
-    have h1 : (g * lb_D (m + 1) r c).det = g.det * (c⁻¹) ^ ρ := by
-      rw [Matrix.det_mul, lb_D, Matrix.det_diagonal, Finset.prod_ite, Finset.prod_const,
-        Finset.prod_const_one, mul_one]
-    have h3 : A = (Nν : ℤ) + ρ * e := by
-      rw [hA, hNν, hρ]
-      push_cast
-      rw [Finset.card_eq_sum_ones]
-      push_cast
-      rw [Finset.sum_mul, ← Finset.sum_add_distrib]
-      apply Finset.sum_congr rfl
-      intro a _
-      have : 0 ≤ lam a - lam (Fin.last m) := sub_nonneg.2 (hlam (Fin.le_last a))
-      simp only [hν, nuOf, Int.toNat_of_nonneg this, he]
-      ring
-    have h5 : ((c⁻¹) ^ ρ) ^ (-e) = c ^ ((ρ : ℤ) * e) := by
-      rw [inv_pow, inv_zpow, zpow_neg, inv_inv, ← zpow_natCast c ρ, ← zpow_mul]
-    rw [h1, h3, mul_zpow, h5, zpow_add₀ hw, zpow_natCast]
-    ring
+      deltaLTw O Kf m lam (g * lb_D (m + 1) r (algebraMap O Kf w)) :=
+  Formalism.L2.G.Model.dl_P O Kf m r lam hlam w hw g F hF
 
 theorem dl_indep (O Kf : Type) [CommRing O] [IsDomain O] [Field Kf] [Algebra O Kf]
     (hinj : Function.Injective (algebraMap O Kf)) (m : ℕ) (lam : Fin (m + 1) → ℤ)

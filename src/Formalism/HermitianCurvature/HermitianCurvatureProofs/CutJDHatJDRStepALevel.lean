@@ -144,9 +144,6 @@ private theorem skip1_skip1_val_eq_skip2_min_max {t : ℕ} (s : Fin (t + 1)) (w 
     rcases _root_.le_total (skip1 s w) s with h | h
     · rw [_root_.max_eq_right h, _root_.max_eq_right (Fin.le_def.mp h)]
     · rw [_root_.max_eq_left h, _root_.max_eq_left (Fin.le_def.mp h)]
-  have hj := j.isLt
-  have hw := w.isLt
-  have hs := s.isLt
   rw [skip2_val_eq_ite, hmin, hmax, skip1_val_eq_ite s (skip1 w j), skip1_val_eq_ite s w, skip1_val_eq_ite w j]
   simp only [Nat.min_def, Nat.max_def]
   split_ifs <;> omega

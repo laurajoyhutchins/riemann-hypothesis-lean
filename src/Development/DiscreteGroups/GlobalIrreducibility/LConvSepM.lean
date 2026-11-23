@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsOpenAdditiveCharacterKernel
 public import Development.DiscreteGroups.GlobalIrreducibility.LConvCut
 public import GroundTheory.AutomorphicForms.GLnLocal
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlgebraMapIntertwiningMapBijectiveOfIsSmooth
@@ -180,31 +181,7 @@ def Good (K : Subgroup (GL (Fin m) k)) : Prop :=
     ∀ u ∈ unipB k (Fin m), u ∈ K → ψ (superDiag u) = 1
 
 theorem circle_eq_one {z : Circle} (h : ∀ n : ℕ, 0 < ((z ^ n : Circle) : ℂ).re) : z = 1 := by
-  by_contra hz
-  have h1 : (z : ℂ) ≠ 1 := fun e => hz (Subtype.ext e)
-  have hb : ∀ n : ℕ, ‖∑ i ∈ Finset.range n, (z : ℂ) ^ i‖ ≤ 2 / ‖(z : ℂ) - 1‖ := fun n => by
-    rw [geom_sum_eq h1, norm_div]
-    refine div_le_div_of_nonneg_right ((norm_sub_le _ _).trans ?_) (norm_nonneg _)
-    rw [norm_pow, Circle.norm_coe, one_pow, norm_one]
-    norm_num
-  have hq : ∀ n : ℕ, (1 / 2 : ℝ) ≤ ((z : ℂ) ^ n).re := fun n => by
-    have h2 := h (2 * n)
-    have h0 := h n
-    have hn : ((z : ℂ) ^ n).re ^ 2 + ((z : ℂ) ^ n).im ^ 2 = 1 := by
-      have : Complex.normSq ((z : ℂ) ^ n) = 1 := by
-        rw [map_pow, Circle.normSq_coe, one_pow]
-      rw [Complex.normSq_apply] at this
-      nlinarith
-    rw [Circle.coe_pow] at h0
-    rw [Circle.coe_pow, mul_comm, pow_mul, sq, Complex.mul_re] at h2
-    nlinarith
-  obtain ⟨n, hn⟩ := exists_nat_gt (2 * (2 / ‖(z : ℂ) - 1‖))
-  have h3 : (n : ℝ) * (1 / 2) ≤ (∑ i ∈ Finset.range n, (z : ℂ) ^ i).re := by
-    rw [Complex.re_sum]
-    calc (n : ℝ) * (1 / 2) = ∑ _i ∈ Finset.range n, (1 / 2 : ℝ) := by simp
-      _ ≤ _ := Finset.sum_le_sum fun i _ => hq i
-  have h4 := (Complex.re_le_norm _).trans (hb n)
-  linarith
+  apply GlobalTheory.CompanionTheory.LocalFieldChar.circle_eq_one_of_forall_re_pow_pos <;> assumption
 
 theorem exists_good (hψ : Continuous ψ) {U : Set (GL (Fin m) k)} (hU : U ∈ 𝓝 (1 : GL (Fin m) k)) :
     ∃ K : Subgroup (GL (Fin m) k), Good ψ K ∧ (K : Set (GL (Fin m) k)) ⊆ U := by

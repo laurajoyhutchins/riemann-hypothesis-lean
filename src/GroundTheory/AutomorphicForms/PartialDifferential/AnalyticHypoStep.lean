@@ -69,8 +69,6 @@ theorem powMul_bound_le {B L : ℝ} (hB : 0 ≤ B) (hL : 1 ≤ L) {p q i : ℕ} 
   have h2 : (p : ℝ) ^ i * (p : ℝ) ^ q ≤ (p : ℝ) ^ p := by
     rw [← pow_add]; exact pow_le_pow_right₀ hp' (by omega)
   have h3 : L ^ q ≤ L ^ (p - 1) := pow_le_pow_right₀ hL (by omega)
-  have hpi : 0 ≤ (p : ℝ) ^ i := by positivity
-  have hqq : 0 ≤ (q : ℝ) ^ q := by positivity
   calc (p : ℝ) ^ i * (B * L ^ q * (q : ℝ) ^ q) = B * L ^ q * ((p : ℝ) ^ i * (q : ℝ) ^ q) := by ring
     _ ≤ B * L ^ (p - 1) * ((p : ℝ) ^ i * (p : ℝ) ^ q) := by gcongr
     _ ≤ B * L ^ (p - 1) * (p : ℝ) ^ p := by gcongr
@@ -79,7 +77,6 @@ theorem coefTerm_le {B L Ma : ℝ} (hB : 0 ≤ B) (hL : 1 ≤ L) (hMa : 0 ≤ Ma
     (hp : 1 ≤ p) (hk : k ≤ p) (hqi : q + i ≤ p) :
     (k.choose i : ℝ) * (Ma ^ i * i.factorial) * (B * L ^ q * (q : ℝ) ^ q) ≤
       B * L ^ p * (p : ℝ) ^ p * (Ma / L) ^ i := by
-  have hL0 : 0 < L := by linarith
   have hp' : (1 : ℝ) ≤ p := by exact_mod_cast hp
   have hc : (k.choose i : ℝ) * i.factorial ≤ (p : ℝ) ^ i := by
     have : k.choose i * i.factorial ≤ p ^ i := by
@@ -95,12 +92,7 @@ theorem coefTerm_le {B L Ma : ℝ} (hB : 0 ≤ B) (hL : 1 ≤ L) (hMa : 0 ≤ Ma
     rw [← pow_add]; exact pow_le_pow_right₀ hp' (by omega)
   have h3 : L ^ q ≤ L ^ (p - i) := pow_le_pow_right₀ hL (by omega)
   have hLp : L ^ p = L ^ (p - i) * L ^ i := by rw [← pow_add, Nat.sub_add_cancel hiq]
-  have hLi : 0 < L ^ i := by positivity
   rw [div_pow, hLp]
-  have hqq : 0 ≤ (q : ℝ) ^ q := by positivity
-  have hMi : 0 ≤ Ma ^ i := by positivity
-  have hfac : 0 ≤ (i.factorial : ℝ) := by positivity
-  have hch : 0 ≤ (k.choose i : ℝ) := by positivity
   calc (k.choose i : ℝ) * (Ma ^ i * i.factorial) * (B * L ^ q * (q : ℝ) ^ q)
       = Ma ^ i * B * L ^ q * (((k.choose i : ℝ) * i.factorial) * (q : ℝ) ^ q) := by ring
     _ ≤ Ma ^ i * B * L ^ (p - i) * ((p : ℝ) ^ i * (p : ℝ) ^ q) := by gcongr
@@ -632,15 +624,11 @@ theorem sum_choose_weight_le {j P k : ℕ} {S : Finset (ℕ × ℕ)} (hS : S ⊆
     (hidx : ∀ ij ∈ S, ij.2 + k + 1 ≤ P ∧ ij.2 + k + ij.1 ≤ P) :
     ∑ ij ∈ S, (j.choose ij.1 : ℝ) * (K * (P : ℝ) ^ ij.1) * w (ij.2 + k) ≤
       2 ^ j * K * (B * L ^ (P - 1) * (P : ℝ) ^ P) := by
-  have hT : 0 ≤ B * L ^ (P - 1) * (P : ℝ) ^ P := by
-    have : (0 : ℝ) ≤ L := by linarith
-    positivity
   calc ∑ ij ∈ S, (j.choose ij.1 : ℝ) * (K * (P : ℝ) ^ ij.1) * w (ij.2 + k)
       ≤ ∑ ij ∈ S, (j.choose ij.1 : ℝ) * K * (B * L ^ (P - 1) * (P : ℝ) ^ P) := by
         refine Finset.sum_le_sum fun ij hij ↦ ?_
         obtain ⟨h1, h2⟩ := hidx ij hij
         have hb := powMul_bound_le hB0 hL1 (p := P) (q := ij.2 + k) (i := ij.1) hP1 h1 h2
-        have hPi : 0 ≤ (P : ℝ) ^ ij.1 := by positivity
         calc (j.choose ij.1 : ℝ) * (K * (P : ℝ) ^ ij.1) * w (ij.2 + k)
             ≤ (j.choose ij.1 : ℝ) * (K * (P : ℝ) ^ ij.1) *
                 (B * L ^ (ij.2 + k) * ((ij.2 + k : ℕ) : ℝ) ^ (ij.2 + k)) := by
@@ -665,7 +653,6 @@ theorem sum_coef_weight_le {k P d : ℕ} (hP1 : 1 ≤ P) (hdk : d + k ≤ P) {Ca
   have hL0 : 0 < L := by linarith
   have hr0 : 0 ≤ Ma / L := div_nonneg hMa hL0.le
   have hr : Ma / L ≤ 1 / 2 := by rw [div_le_iff₀ hL0]; linarith
-  have hT : 0 ≤ B * L ^ P * (P : ℝ) ^ P := by positivity
   calc ∑ ij ∈ (antidiagonal k).filter (fun ij ↦ 0 < ij.1),
         (k.choose ij.1 : ℝ) * (Ca * Ma ^ ij.1 * ij.1.factorial) * w (d + ij.2)
       ≤ ∑ ij ∈ (antidiagonal k).filter (fun ij ↦ 0 < ij.1),

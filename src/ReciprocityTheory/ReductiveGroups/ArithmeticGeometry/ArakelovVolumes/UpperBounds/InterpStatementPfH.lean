@@ -209,7 +209,6 @@ theorem gram_cpt_cd (x0 : Frame X.Ψ r) (τ : X.Ψ) (a b : Fin r) :
     intro a b
     first
     | exact Complex.conjCLE.contDiff.comp (hc a b)
-    | simpa [Function.comp_def] using Complex.conjCLE.contDiff.comp (hc a b)
   simp only [gram, hermC, col, Matrix.of_apply, mat]
   refine ContDiff.sum (fun k _ => ContDiff.sum (fun l _ => ?_))
   exact ((hc k a).mul contDiff_const).mul (hcj l b)
@@ -293,7 +292,6 @@ theorem nmat_zero (τ : X.Ψ) : mat (nmat X (0 : V (nd X))) τ = 1 := by
   · simp [mat, nmat, Matrix.one_apply, h, h.ne']
     first
     | exact V_zero_app _
-    | rfl
   · simp [mat, nmat, Matrix.one_apply, h]
 
 theorem cpt_zero (x0 : Frame X.Ψ r) : cpt X x0 0 = x0 := by
@@ -357,15 +355,10 @@ private theorem leviV_sub_sub_const_mul_of_eventuallyEq {n : ℕ} (f f1 f2 f3 : 
   have hle1 : (1 : WithTop ℕ∞) ≤ ∞ := by
     first
     | exact mod_cast le_top
-    | simp
   have hle2 : (1 : WithTop ℕ∞) + 1 ≤ ∞ := by
     rw [one_add_one_eq_two]
     first
     | exact WithTop.coe_le_coe.mpr le_top
-    | exact (WithTop.coe_le_coe.mpr (le_top : ((2 : ℕ) : ℕ∞) ≤ ⊤))
-    | exact mod_cast le_top
-    | simp
-    | decide
   have hn0 : (∞ : WithTop ℕ∞) ≠ 0 := (lt_of_lt_of_le zero_lt_one hle1).ne'
   have hD : ∀ᶠ w in 𝓝 z, fderiv ℝ f w = fderiv ℝ f1 w - fderiv ℝ f2 w - c • fderiv ℝ f3 w := by
     filter_upwards [hev.eventuallyEq_nhds, h1, h2, h3] with w hw hw1 hw2 hw3
@@ -424,7 +417,6 @@ theorem leviM_comb (x0 : Frame X.Ψ r) (ho : IsOrth X x0) {z : V (nd X)} (hz : z
   · first
     | (simp only [Complex.sub_re, Complex.mul_re, Complex.natCast_re, Complex.natCast_im, zero_mul,
         sub_zero]; done)
-    | simp
   · filter_upwards [hev] with w hw
     have hw' : cpt X x0 w ∈ X.dom := hw
     try dsimp only

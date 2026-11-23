@@ -74,9 +74,6 @@ theorem sqrt_nsq_eq_norm' (x : Fin n → ℝ) :
     | (rw [EuclideanSpace.norm_eq]
        congr 1
        simp [nsq, dot, Real.norm_eq_abs, sq])
-    | (rw [EuclideanSpace.norm_eq]
-       congr 1
-       simp only [nsq, dot, PiLp.toLp_apply, Real.norm_eq_abs, sq_abs, sq])
 
 theorem nsq_nonneg' (x : Fin n → ℝ) : 0 ≤ nsq x := by
   unfold nsq dot
@@ -98,7 +95,6 @@ theorem exists_weight_bound (hU : IsInfUnitary ε E) (hVf : FiniteDimensional �
     have hf : {μ : ℂ | Module.End.HasEigenvalue ((E a a).restrict (hVK a a rfl)) μ}.Finite := by
       first
         | exact Module.End.finite_hasEigenvalue _
-        | exact (Module.End.finite_spectrum _).subset fun μ h => h.mem_spectrum
     exact hf.preimage Complex.ofReal_injective.injOn
   have hW := Set.Finite.pi hT
   obtain ⟨B, hB⟩ := (hW.image fun ν => √(nsq (ν + rhoC ε))).bddAbove
@@ -113,15 +109,12 @@ theorem exists_weight_bound (hU : IsInfUnitary ε E) (hVf : FiniteDimensional �
     first
       | exact Module.End.hasEigenvalue_of_hasEigenvector
           (Module.End.hasEigenvector_iff.2 ⟨Module.End.mem_eigenspace_iff.2 hx, hx0⟩)
-      | exact Module.End.hasEigenvalue_of_hasEigenvector ⟨Module.End.mem_eigenspace_iff.2 hx, hx0⟩
   exact (hB ⟨ν, hmem, rfl⟩).trans (le_max_left _ _)
 
 theorem sqrt_nsq_add_le (x y : Fin n → ℝ) : √(nsq (x + y)) ≤ √(nsq x) + √(nsq y) := by
   rw [sqrt_nsq_eq_norm', sqrt_nsq_eq_norm', sqrt_nsq_eq_norm']
   first
     | (rw [WithLp.toLp_add]; exact norm_add_le _ _)
-    | (have h := norm_add_le (WithLp.toLp 2 x : EuclideanSpace ℝ (Fin n)) (WithLp.toLp 2 y)
-       rwa [← WithLp.toLp_add] at h)
 
 theorem sqrt_nsq_sum_le {ι : Type*} (s : Finset ι) (f : ι → Fin n → ℝ) :
     √(nsq (∑ i ∈ s, f i)) ≤ ∑ i ∈ s, √(nsq (f i)) := by
@@ -229,8 +222,6 @@ theorem exists_re_inner_casimirK_layer_le (hE : IsGlRep E) (hU : IsInfUnitary ε
     rw [← Real.sq_sqrt h0]
     first
       | exact pow_le_pow_left₀ (Real.sqrt_nonneg _) h 2
-      | exact pow_le_pow_left (Real.sqrt_nonneg _) h 2
-      | gcongr
   linarith
 
 end Unitary

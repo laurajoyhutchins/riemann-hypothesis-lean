@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.MeasurableIndicatorOfContOn
 public import Formalism.LocalToGlobal.ProjectiveLattices.NrmTieDef
 public import Formalism.LocalToGlobal.ProjectiveLattices.CompSplitPfB
 import Mathlib.Algebra.Order.Floor.Extended
@@ -110,24 +111,7 @@ theorem dmin_ne_of_dom (X : Data E r) {x : Frame X.Ψ r} (hx : x ∈ X.dom) (τ 
 
 theorem continuousOn_pnorm (X : Data E r) (la : Wt X.Ψ r) {P : Frame X.Ψ r → ℂ} (hP : ContinuousOn P X.dom) :
     ContinuousOn (X.pnorm la P) X.dom := by
-  have hd : ∀ (τ : X.Ψ) (i : Fin (r + 1)), Continuous fun x : Frame X.Ψ r => dmin X.Gm x τ i := by
-    intro τ i
-    simp only [dmin, lminor, gram, hermC, col, mat, Matrix.det_apply, Matrix.submatrix_apply,
-      Matrix.of_apply, starRingEnd_apply, Units.smul_def, zsmul_eq_mul]
-    first | fun_prop | continuity
-  have hterm : ∀ (τ : X.Ψ) (i : Fin r), ContinuousOn
-      (fun x => ‖dmin X.Gm x τ i.succ / dmin X.Gm x τ i.castSucc‖ ^ (-(la τ i : ℝ) / 2)) X.dom := by
-    intro τ i
-    refine ContinuousOn.rpow_const ?_ ?_
-    · exact (((hd τ i.succ).continuousOn).div (hd τ i.castSucc).continuousOn
-        fun x hx => dmin_ne_of_dom X hx τ _).norm
-    · intro x hx
-      exact Or.inl (norm_ne_zero_iff.2 (div_ne_zero (dmin_ne_of_dom X hx τ _) (dmin_ne_of_dom X hx τ _)))
-  unfold Data.pnorm
-  refine ContinuousOn.mul hP.norm ?_
-  first
-    | exact continuousOn_finset_prod _ fun τ _ => continuousOn_finset_prod _ fun i _ => hterm τ i
-    | fun_prop
+  apply GlobalTheory.KronOff.pnorm_contOn <;> assumption
 
 end FD
 

@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.ThetaLifts.TowerModels.PlaneIso
 public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -59,21 +60,7 @@ theorem sig_sig {σ : E →ₐ[F] E} (h : IsCMExt F E σ) (x : E) : σ (σ x) = 
   rw [h.2.2.2, h.2.2.2, star_star]
 
 theorem exists_anti {σ : E →ₐ[F] E} (h : IsCMExt F E σ) : ∃ δ : E, δ ≠ 0 ∧ σ δ = -δ := by
-  obtain ⟨τ⟩ : Nonempty (E →+* ℂ) := inferInstance
-  by_cases hx : ∃ x, σ x ≠ x
-  · obtain ⟨x, hx⟩ := hx
-    refine ⟨x - σ x, sub_ne_zero.2 (Ne.symm hx), ?_⟩
-    rw [map_sub, sig_sig h]; ring
-  · push_neg at hx
-    exfalso
-    have hr : ComplexEmbedding.IsReal τ := by
-      rw [ComplexEmbedding.isReal_iff]
-      ext x
-      rw [ComplexEmbedding.conjugate_coe_eq]
-      have := h.2.2.2 τ x
-      rw [hx x] at this
-      exact this.symm
-    exact InfinitePlace.isComplex_mk_iff.1 (h.2.1.isComplex _) hr
+  apply PositivityTheory.ThKG.Tow.Pln.exists_skew <;> assumption
 
 theorem cA_inclR (σ : E →ₐ[F] E) (e : E) : cA σ (inclR (F := F) (AF F) e) = inclR (F := F) (AF F) (σ e) := by
   simp [cA, inclR]

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.RunScalarsNeZeroAndLogBounded
 public import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.GlobalFamilyData
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -122,21 +123,7 @@ theorem deepPacketP (large₂ : SizeData₂ D) (X : PJ D B P j)
   exact this
 
 theorem n_le_sizeW (ka : WeightFamilies.Wt D j) : (ka.n : ℝ) ≤ ka.size := by
-  have hf : 2 ≤ D.R.f := by
-    have : 0 < D.R.ord := D.R.ord_pos
-    unfold Ranks.f Ranks.n; omega
-  have hr : 6 ≤ D.R.r := by
-    have h1 := D.R.two_le_m
-    have h2 := D.R.m_add_three_le_k
-    unfold Ranks.r; omega
-  have h1 : 0 ≤ ∑ τ, ((∑ i, (ka.aP τ i : ℝ)) + ∑ i, (ka.aM τ i : ℝ)) := by positivity
-  have h2 : 1 ≤ D.R.f * max (D.R.sigW j).2 1 * D.R.r :=
-    Nat.mul_pos (Nat.mul_pos (by omega) (lt_of_lt_of_le Nat.one_pos (le_max_right _ _))) (by omega)
-  have h3 : (1 : ℝ) ≤ (D.R.f : ℝ) * ((max (D.R.sigW j).2 1 : ℕ) : ℝ) * (D.R.r : ℝ) := by exact_mod_cast h2
-  have h4 : (ka.n : ℝ) ≤ (D.R.f : ℝ) * ((max (D.R.sigW j).2 1 : ℕ) : ℝ) * (D.R.r : ℝ) * (ka.n : ℝ) :=
-    le_mul_of_one_le_left (Nat.cast_nonneg _) h3
-  unfold WeightFamilies.Wt.size
-  linarith
+  apply GlobalTheory.RunIn.ScalSize.n_le_size <;> assumption
 
 theorem vanishingOrder_le_weight_size (ka : WeightFamilies.Wt D j) (T nP nW : ℕ) (hk : ka.n = nP + T * nW) (hW : 0 < nW) :
     (a0 D j T : ℝ) ≤ ka.size := by

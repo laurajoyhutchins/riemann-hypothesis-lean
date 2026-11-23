@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.OccDAdj
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.OccDAdjB
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.OccCExistsPs
 import Mathlib.Algebra.Order.Floor.Extended
@@ -76,39 +77,7 @@ theorem adjB_K (dual : Bool) (hσ : IsURepOn (UJset ε) σ) {M : Submodule ℂ D
     {u : Fin n → D} (h : adjR ε M ps x u) {f' : Fin n → D} (hf' : f' ∈ tensSub M)
     (hff : (fun c => ((f' c : D) : H)) = kDiag dual σ k (fun c => ((u c : D) : H))) :
     adjR ε M ps x'' f' := by
-  classical
-  refine ⟨hf', fun c y hy => ?_⟩
-  have hkh := adjB_star_Kset hk
-  obtain ⟨y', hy'M, hy'⟩ := hMK kᴴ hkh y hy
-  have hL : inner ℂ (f' c) y = ∑ d, (starRingEnd ℂ) (cond dual (star (k c d)) (k c d)) * inner ℂ (u d) y' := by
-    rw [Submodule.coe_inner, show ((f' c : D) : H) = kDiag dual σ k (fun c => ((u c : D) : H)) c from congrFun hff c]
-    simp only [kDiag, sum_inner, inner_smul_left]
-    refine Finset.sum_congr rfl fun d _ => ?_
-    rw [adjB_inner hσ hk, ← hy', ← Submodule.coe_inner]
-  set g : Fin n → D := fun d => (starRingEnd ℂ) (cond dual (star (k c d)) (k c d)) • y'
-  have hg : g ∈ tensSub M := tset_mem.2 fun d => M.smul_mem _ hy'M
-  have hgk : (fun d => ((g d : D) : H)) =
-      kDiag dual σ kᴴ (fun d => (((Pi.single c y : Fin n → D) d : D) : H)) := by
-    funext d
-    simp only [kDiag, g, Submodule.coe_smul]
-    rw [Finset.sum_eq_single c (fun e _ he => by simp [he]) (by simp)]
-    simp only [Pi.single_eq_same, hy']
-    congr 1
-    cases dual <;> simp [Matrix.conjTranspose_apply]
-  have hps := hps3 kᴴ hkh _ (adjA_single_mem c hy) g hg hgk
-  have hgsum : g = ∑ d, (starRingEnd ℂ) (cond dual (star (k c d)) (k c d)) • (Pi.single d y' : Fin n → D) := by
-    funext e
-    simp [g, Finset.sum_apply, Pi.single_apply]
-  have hR : inner ℂ x'' (ps (Pi.single c y)) =
-      ∑ d, (starRingEnd ℂ) (cond dual (star (k c d)) (k c d)) * (adjSg ε d * inner ℂ (u d) y') := by
-
-    rw [Submodule.coe_inner, hxx, adjB_inner hσ hk, ← hps, ← Submodule.coe_inner, hgsum, map_sum, inner_sum]
-    refine Finset.sum_congr rfl fun d _ => ?_
-    rw [map_smul, inner_smul_right, adjR_inv h d hy'M]
-  rw [hL, hR, Finset.mul_sum]
-  refine Finset.sum_congr rfl fun d _ => ?_
-  have := adjB_sgn hk dual c d
-  linear_combination (-inner ℂ (u d) y') * this
+  apply ReciprocityTheory.ChartRestriction.DS.adjB_K <;> assumption
 
 theorem adjB_emb (dual : Bool) (hσ : IsURepOn (UJset ε) σ) (hD : IsDerivedOn ε σ D E)
     {lam lam' : Fin n → ℝ} {V V' : Submodule ℂ D} (hgap : StdGap ε lam) (hV : IsKIrrHW ε E (lowK ε lam) V)

@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.PlurisubharmonicCones.EmbEquivSymmApply
 public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsEigFrames
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.RiemannLatticeEigenProjectionStatement
 import Mathlib.Algebra.Order.Floor.Extended
@@ -149,21 +150,7 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {g : ℕ} {Λ : Type
 
 theorem linearIndependent_periods (R : RiemLat E g Λ) {ι : Type} [Fintype ι] (b : Module.Basis ι ℤ Λ) :
     LinearIndependent ℝ fun i => R.P (b i) := by
-  have hspan : Submodule.span ℝ (Set.range R.P) = ⊤ := (GlobalTheory.T.riemann_lattice_eigen_projection E g Λ Unit R).2.1
-  have htop : ⊤ ≤ Submodule.span ℝ (Set.range fun i => R.P (b i)) := by
-    rw [← hspan, Submodule.span_le]
-    rintro _ ⟨v, rfl⟩
-
-    rw [← b.sum_repr v, map_sum]
-    refine Submodule.sum_mem _ fun i _ => ?_
-    rw [map_zsmul, ← Int.cast_smul_eq_zsmul ℝ]
-    exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, rfl⟩)
-  refine linearIndependent_of_top_le_span_of_card_eq_finrank htop ?_
-  have h1 : Fintype.card ι = 2 * g := by
-    rw [← R.rank, Module.finrank_eq_card_basis b]
-  have h2 : Module.finrank ℝ (Fin g → ℂ) = 2 * g := by
-    simp [Module.finrank_pi_fintype, Complex.finrank_real_complex, mul_comm]
-  rw [h1, h2]
+  apply LevelTowerAlt.basis_indep <;> assumption
 
 def comb (R : RiemLat E g Λ) {ι : Type} [Fintype ι] (b : ι → Λ) (a : ι → ℝ) : Fin g → ℂ :=
   ∑ i, ((a i : ℝ) : ℂ) • R.P (b i)

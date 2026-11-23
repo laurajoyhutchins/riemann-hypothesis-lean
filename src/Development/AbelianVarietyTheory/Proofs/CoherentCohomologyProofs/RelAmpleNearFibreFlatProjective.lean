@@ -52,6 +52,7 @@ import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
 public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.ExistsSecNonzeroLocusEqOfLbIso
 public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.IsAmpleLBOfRelAmpleOfIsAffine
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsVeryAmpleH1Zero
 
 @[expose] public section
 
@@ -198,29 +199,7 @@ theorem rel_on {H : LB X} (hH : H.IsLB) (i k i' k' : H.ι) {W : X.Opens} (hi : W
     cocycle_on hH i i' k' hi hi' hk']
 
 theorem lbIso_tw {H : LB X} (hH : H.IsLB) (t : ℤ) : LBIso (AbLaw.pw H (t + 1)) (tw H H t) := by
-  refine ⟨⟨fun p => res (le_inf (inf_le_left.trans inf_le_left) inf_le_right :
-      H.U p.1.1 ⊓ H.U p.1.2 ⊓ H.U p.2 ≤ H.U p.1.1 ⊓ H.U p.2) (H.g p.1.1 p.2) *
-    res (le_inf (inf_le_left.trans inf_le_right) inf_le_right :
-      H.U p.1.1 ⊓ H.U p.1.2 ⊓ H.U p.2 ≤ H.U p.1.2 ⊓ H.U p.2) (H.g p.1.2 p.2) ^ t⟩, ?_⟩
-  rintro ⟨⟨i, j : H.ι⟩, k : H.ι⟩ ⟨⟨i', j' : H.ι⟩, k' : H.ι⟩
-  let W : X.Opens := H.U i ⊓ H.U j ⊓ H.U k ⊓ (H.U i' ⊓ H.U j' ⊓ H.U k')
-  have hi : W ≤ H.U i := inf_le_left.trans (inf_le_left.trans inf_le_left)
-  have hj : W ≤ H.U j := inf_le_left.trans (inf_le_left.trans inf_le_right)
-  have hk : W ≤ H.U k := inf_le_left.trans inf_le_right
-  have hi' : W ≤ H.U i' := inf_le_right.trans (inf_le_left.trans inf_le_left)
-  have hj' : W ≤ H.U j' := inf_le_right.trans (inf_le_left.trans inf_le_right)
-  have hk' : W ≤ H.U k' := inf_le_right.trans inf_le_right
-  change res (inf_le_left : W ≤ H.U i ⊓ H.U j ⊓ H.U k) (res _ (H.g i k) * res _ (H.g j k) ^ t) =
-    (res (V := W) (U := H.U i ⊓ H.U j ⊓ (H.U i' ⊓ H.U j')) _
-        (res (V := H.U i ⊓ H.U j ⊓ (H.U i' ⊓ H.U j')) _ (H.g i i') *
-          (res (V := H.U i ⊓ H.U j ⊓ (H.U i' ⊓ H.U j')) _ (H.g j j' ^ (-t)))⁻¹) *
-      (res (V := W) _ (H.g k k' ^ (t + 1)))⁻¹) *
-    res (inf_le_right : W ≤ H.U i' ⊓ H.U j' ⊓ H.U k') (res _ (H.g i' k') * res _ (H.g j' k') ^ t)
-  simp only [map_mul, map_inv, map_zpow, res_res]
-  erw [res_res, res_res]
-  rw [rel_on hH i k i' k' hi hk hi' hk', rel_on hH j k j' k' hj hk hj' hk']
-  simp only [zpow_neg, inv_inv, mul_zpow, inv_zpow, zpow_add_one, mul_inv]
-  ac_rfl
+  apply _root_.GlobalTheory.Algebraise.lbIso_tw <;> assumption
 
 theorem exists_pw_h1Zero (R : Type) [CommRing R] [IsNoetherianRing R]
     (B : Over (Spec (CommRingCat.of R))) (L : LB B.left) (hL : L.IsLB) (h : RelAmple B L) :

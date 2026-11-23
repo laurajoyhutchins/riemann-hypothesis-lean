@@ -77,7 +77,6 @@ theorem wordContraction_apply (k : ℕ) (F : Big n k M) :
   first
   | simp only [phi, LinearMap.coeFn_sum, Finset.sum_apply, LinearMap.comp_apply, coord_apply']
   | (rw [phi, LinearMap.sum_apply]; rfl)
-  | simp [phi, coord_apply']
 
 theorem mAct_apply' (k : ℕ) (a b : Fin n) (F : Big n k M) (κ : Fin k → Fin n × Fin n) :
     mAct E k a b F κ = E a b (F κ) := rfl
@@ -90,21 +89,15 @@ theorem factorAd_apply' (k : ℕ) (i : Fin k) (a b : Fin n) (F : Big n k M)
   first
   | (simp only [factorAd, ofCoords_apply', LinearMap.sub_apply]
      split_ifs <;> simp [coord_apply'])
-  | (show ((if (κ i).1 = a then coord k (Function.update κ i (b, (κ i).2)) else 0) -
-        (if (κ i).2 = b then coord k (Function.update κ i ((κ i).1, a)) else 0) :
-        Big n k M →ₗ[ℂ] M) F = _
-     split_ifs <;> simp [coord_apply'])
 
 theorem rootWordProduct_zero (κ : Fin 0 → Fin n × Fin n) : word E κ = 1 := by
   first
   | rfl
-  | simp [word]
 
 theorem rootWordProduct_cons {k : ℕ} (p : Fin n × Fin n) (κ : Fin k → Fin n × Fin n) :
     word E (Fin.cons p κ : Fin (k + 1) → Fin n × Fin n) = E p.1 p.2 * word E κ := by
   first
   | simp only [word, List.ofFn_succ, List.prod_cons, Fin.cons_zero, Fin.cons_succ]
-  | simp [word, List.ofFn_succ]
 
 theorem commutator_rootWordProduct (hE : IsGlRep E) (a b : Fin n) : ∀ {k : ℕ} (κ : Fin k → Fin n × Fin n),
     E a b * word E κ - word E κ * E a b =
@@ -192,11 +185,8 @@ theorem wordContraction_tensorAction (hE : IsGlRep E) (k : ℕ) (a b : Fin n) (F
     first
     | simp only [LinearMap.sub_apply, Module.End.mul_apply, LinearMap.sum_apply,
         ite_linearMap_zero_apply] at h
-    | simp only [LinearMap.sub_apply, Module.End.mul_apply, LinearMap.coe_sum, Finset.sum_apply,
-        ite_linearMap_zero_apply] at h
     first
     | exact sub_eq_iff_eq_add'.mp h
-    | (rw [← h]; abel)
 
   rw [wordContraction_apply, wordContraction_apply, map_sum]
 
@@ -238,7 +228,6 @@ theorem mem_noncompactPositionSubmodule_iff' {k : ℕ} {F : Big n k M} :
     F ∈ ncV ε V k ↔ ∀ κ, F κ ∈ (if ∀ i, ε (κ i).1 ≠ ε (κ i).2 then V else ⊥) := by
   first
   | (rw [ncV, Submodule.mem_iInf]; rfl)
-  | simp only [ncV, Submodule.mem_iInf, Submodule.mem_comap, coord_apply']
 
 theorem wordContraction_mem_noncompactLayer' {k : ℕ} {F : Big n k M} (hF : F ∈ ncV ε V k) :
     phi E k F ∈ layer ε E V k := by

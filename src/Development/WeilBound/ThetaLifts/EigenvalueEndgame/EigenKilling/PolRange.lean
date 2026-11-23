@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockPolynomialSpaceEqFockImageOfArchLaws
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsArchimedeanAdeleCMPrescribedEmbeddingValue
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FockHeisenbergOperatorISignatureConjApplyOne
@@ -136,72 +137,6 @@ theorem sumPl_twist_one {ι : Type} [Fintype ι] [DecidableEq ι] {P Q R S : ℕ
   exact (PiTensorProduct.tprod ℂ).map_update_smul _ w Complex.I _
 
 theorem polRange_of (hL : ActsLaws) (_hD : DerEx) (hV : VacLine) : PolRange := by
-  intro F E _ _ _ _ _ σ n d P Q R S X W M ψ τ A C Φ hcm hψ hfr hθX hθW hΦ
-  have hz : ∀ (u : Matrix (Fin n) (Fin d) (AE F E)) (t : ℝ), M.co.rho ψ (realAd F t • u) 0 = 0 := by
-    intro u t; funext x; simp [Darboux.rho, schr]
-  have toD : ∀ u (f f₁ : SInf F (Fin n × Fin d)), SD (fun t => M.co.rho ψ (realAd F t • u)) f f₁ →
-      ActsD (evI F) (M.heisLine ψ u) f f₁ := fun u f f₁ h => (hL F (Fin n × Fin d) f f₁ f₁).1 _ (hz u) h
-  have uniq : ∀ u (f f₁ f₂ : SInf F (Fin n × Fin d)), ActsD (evI F) (M.heisLine ψ u) f f₁ →
-      ActsD (evI F) (M.heisLine ψ u) f f₂ → f₁ = f₂ := fun u f f₁ f₂ h1 h2 => (hL F _ f f₁ f₂).2.2.1 _ h1 h2
-  choose A' hA' using fun w => (hfr.2.1 w).2
-  choose C' hC' using fun w => (hfr.2.2 w).2
-  have decomp : ∀ (u : Matrix (Fin n) (Fin d) (AE F E)) w,
-      u.map (piInf (τ w)) = A w * (A' w * u.map (piInf (τ w)) * (C' w)ᵀ) * (C w)ᵀ := by
-    intro u w
-    rw [show A w * (A' w * u.map (piInf (τ w)) * (C' w)ᵀ) * (C w)ᵀ =
-        (A w * A' w) * u.map (piInf (τ w)) * ((C w) * (C' w))ᵀ by
-          rw [Matrix.transpose_mul]; simp only [Matrix.mul_assoc], hA', hC']
-    simp
-  have der : ∀ u, At (evI F) u → ∀ c : InfinitePlace F → Matrix (Ix P Q) (Ix R S) ℂ,
-      (∀ w, u.map (piInf (τ w)) = A w * c w * (C w)ᵀ) → ∀ T,
-      ActsD (evI F) (M.heisLine ψ u) (Φ T) (Φ (sumPl (fun w => heisOp (c w)) T)) :=
-    fun u hu c hc T => toD _ _ _ (hΦ.2 u hu c hc T)
-  have tw : ∀ w (c : Matrix (Ix P Q) (Ix R S) ℂ) (e : ℂ),
-      A w * (e • (Jm P Q * c * Jm R S)) * (C w)ᵀ = e • (X.θ w * (A w * c * (C w)ᵀ) * (W.θ w)ᵀ) := by
-    intro w c e
-    have h2 : (C w)ᵀ * (W.θ w)ᵀ = Jm R S * (C w)ᵀ := by
-      rw [← Matrix.transpose_mul, hθW w, Matrix.transpose_mul, Jm_transpose']
-    calc A w * (e • (Jm P Q * c * Jm R S)) * (C w)ᵀ = e • ((A w * Jm P Q) * c * (Jm R S * (C w)ᵀ)) := by
-          simp only [Matrix.mul_smul, Matrix.smul_mul, Matrix.mul_assoc]
-      _ = _ := by rw [← hθX w, ← h2]; simp only [Matrix.mul_assoc]
-  have gauss1 : M.IsGauss ψ τ (Φ (PiTensorProduct.tprod ℂ (fun _ => (1 : Formalism.BasicNotions.TH.Pol P Q R S)))) := by
-    refine ⟨fun _ => 1, fun u u' hu hu' hrel f f' hf hf' => ?_⟩
-    have hc : ∀ w, u.map (piInf (τ w)) = A w * (A' w * u.map (piInf (τ w)) * (C' w)ᵀ) * (C w)ᵀ := decomp u
-    have hc' : ∀ w, u'.map (piInf (τ w)) =
-        A w * (Complex.I • (Jm P Q * (A' w * u.map (piInf (τ w)) * (C' w)ᵀ) * Jm R S)) * (C w)ᵀ := by
-      intro w; rw [hrel w, tw, ← hc w]; simp
-    rw [uniq u _ _ _ hf (der u hu _ hc _), uniq u' _ _ _ hf' (der u' hu' _ hc' _), sumPl_twist_one, map_smul]
-  have gauss_mem : ∀ f₀, M.IsGauss ψ τ f₀ → f₀ ∈ M.Pol ψ τ := fun f₀ h => by
-    unfold Model.Pol
-    exact Submodule.mem_sInf.2 fun N hN => hN.1 f₀ h
-  have pol_der : ∀ u, At (evI F) u → ∀ f ∈ M.Pol ψ τ, ∀ f₁ : SInf F (Fin n × Fin d), ActsD (evI F) (M.heisLine ψ u) f f₁ → f₁ ∈ M.Pol ψ τ := by
-    intro u hu f hf f₁ h1
-    unfold Model.Pol at hf ⊢
-    exact Submodule.mem_sInf.2 fun N hN => hN.2 u hu f (Submodule.mem_sInf.1 hf N hN) f₁ h1
-  apply le_antisymm
-  · rintro _ ⟨T, rfl⟩
-    have htop : (M.Pol ψ τ).comap Φ = ⊤ := by
-      refine tens_top_heis _ (gauss_mem _ gauss1) fun w c T hT => ?_
-      obtain ⟨u, hu, hu'⟩ := exists_mat_at hcm τ
-        (fun w' => A w' * Function.update (0 : InfinitePlace F → Matrix (Ix P Q) (Ix R S) ℂ) w c w' * (C w')ᵀ)
-      have hs : sumPl (fun w' => heisOp (Function.update (0 : InfinitePlace F → Matrix (Ix P Q) (Ix R S) ℂ) w c w')) T =
-          atPl w (heisOp c) T := by
-        rw [sumPl, LinearMap.sum_apply, Finset.sum_eq_single w]
-        · simp
-        · intro b _ hb; simp [Function.update_of_ne hb, heisOp_zero, atPl_zero']
-        · simp
-      have := pol_der u hu _ hT _ (der u hu _ hu' T)
-      rwa [hs] at this
-    have : T ∈ (M.Pol ψ τ).comap Φ := htop ▸ Submodule.mem_top
-    exact this
-  · unfold Model.Pol
-    refine sInf_le ⟨fun f₀ hf₀ => ?_, fun u hu f hf f₁ h1 => ?_⟩
-    · obtain ⟨ε, hε⟩ := hf₀
-      obtain ⟨z, hz⟩ := hV F E σ (Fin n) (Fin d) (Fin n × Fin d) P Q R S ψ τ (incM F X.J) (incM F W.J) M.co 1
-        Complex.I A C Φ hcm hψ hfr hΦ f₀ ε (fun u u' hu hu' c hc hc' f f' hf hf' =>
-          hε u u' hu hu' (fun w => by rw [hc' w, tw, ← hc w]) f f' (toD _ _ _ hf) (toD _ _ _ hf'))
-      exact ⟨z • PiTensorProduct.tprod ℂ (fun _ => (1 : Formalism.BasicNotions.TH.Pol P Q R S)), by rw [map_smul, hz]⟩
-    · obtain ⟨T, rfl⟩ := hf
-      exact ⟨_, (uniq u _ _ _ (der u hu _ (decomp u) T) h1)⟩
+  apply GlobalTheory.RealLift.PolRangePf.polRange_of <;> assumption
 
 end PositivityTheory.ThKEnd.Comp.PR

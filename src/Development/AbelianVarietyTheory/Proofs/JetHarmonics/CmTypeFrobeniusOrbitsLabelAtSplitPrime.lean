@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.RealPlaceLabellingInertFrobeniusNotConj
 public import Development.AbelianVarietyTheory.Definitions.Jets.IsSelfOf
 public import Development.AbelianVarietyTheory.Definitions.Jets.DepthNumbersThresholdEq
 public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.CmEmbeddingsIntegralAndDistinctModMaximal
@@ -100,34 +101,7 @@ theorem rt_sq_field : (H.rt : E) ^ 2 = -(H.d : E) := by
   simpa using this
 
 theorem inPsi_conj_iff (τ : E →+* ℂ) : InPsi H (ComplexEmbedding.conjugate τ) ↔ ¬ InPsi H τ := by
-  have hd : (0 : ℝ) < H.d := by exact_mod_cast H.d_prime.pos
-  have h1 : τ (H.rt : E) ^ 2 = H.rt0 ^ 2 := by
-    rw [H.sqrt_neg_disc_sq, ← map_pow, rt_sq_field]; simp
-  have h2 : starRingEnd ℂ H.rt0 = -H.rt0 := by
-    have h := H.sqrt_neg_disc_sq
-    have hre := congrArg Complex.re h
-    have him := congrArg Complex.im h
-    simp [pow_two] at hre him
-    have : H.rt0.re = 0 := by
-      by_contra hne
-      have : H.rt0.im = 0 := by
-        have : H.rt0.re * H.rt0.im = 0 := by linarith
-        exact (mul_eq_zero.1 this).resolve_left hne
-      rw [this] at hre
-      nlinarith [mul_self_nonneg H.rt0.re]
-    apply Complex.ext <;> simp [this]
-  have h0 : -H.rt0 ≠ H.rt0 := by
-    intro h
-    have h3 : H.rt0 = 0 := by linear_combination -h / 2
-    have h4 := H.sqrt_neg_disc_sq
-    rw [h3] at h4
-    have : (H.d : ℂ) = 0 := by linear_combination h4
-    exact H.d_prime.ne_zero (by exact_mod_cast this)
-  unfold InPsi
-  rw [ComplexEmbedding.conjugate_coe_eq]
-  rcases sq_eq_sq_iff_eq_or_eq_neg.1 h1 with h | h
-  · rw [h, h2]; simp [h0]
-  · rw [h, map_neg, h2]; simp [h0]
+  apply GlobalTheory.InertLabelling.inPsi_conj_iff <;> assumption
 
 theorem not_MM_neg_sub_pow {C : Type} [Field C] (V : VF C) (d : ℕ) (r : C) (hr : r ^ 2 = -(d : C)) (hi : V.Ge 0 r)
     (h2 : V.l ≠ 2) (hj : jacobiSym (-(d : ℤ)) V.l = 1) : ¬ V.MM (-r - r ^ V.l) := by

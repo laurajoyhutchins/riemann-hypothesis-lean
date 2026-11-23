@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.VolumeEquality.Pieces
 public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.GroupDict
 public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.BallAutomorphismInverseExists
@@ -184,39 +185,7 @@ section Ball
 open scoped ComplexOrder in
 theorem isPreconnected_ballDom {Ψ : Type} [Fintype Ψ] {j j' n : ℕ} (q : Ψ × Fin j × Fin j' ≃ Fin n) :
     IsPreconnected (ballDom q) := by
-  have h0 : (0 : Fin n → ℂ) ∈ ballDom q := by
-    intro τ
-    have : ballMat q (0 : Fin n → ℂ) τ = 0 := by ext a b; simp [ballMat]
-    simp [this, Matrix.PosDef.one]
-  have hs : StarConvex ℝ (0 : Fin n → ℂ) (ballDom q) := by
-    intro t ht a b ha hb hab
-    rw [smul_zero, zero_add]
-    intro τ
-    have hZ : ballMat q (b • t) τ = (b : ℂ) • ballMat q t τ := by
-      ext x y
-      simp [ballMat]
-    have hb1 : b ≤ 1 := by linarith
-    have hP := ht τ
-    set Z := ballMat q t τ
-    have e : 1 - (ballMat q (b • t) τ)ᴴ * ballMat q (b • t) τ =
-        ((1 - b ^ 2 : ℝ) : ℂ) • (1 : Matrix (Fin j') (Fin j') ℂ) + ((b ^ 2 : ℝ) : ℂ) • (1 - Zᴴ * Z) := by
-      rw [hZ, Matrix.conjTranspose_smul, Matrix.smul_mul, Matrix.mul_smul, smul_sub, smul_smul]
-      simp only [Complex.star_def, Complex.conj_ofReal]
-      push_cast
-      rw [sub_smul, one_smul, pow_two]
-      abel
-    rw [e]
-    rcases eq_or_lt_of_le hb1 with h1 | h1
-    · subst h1
-      simpa using hP
-    · have hc : (0 : ℂ) < ((1 - b ^ 2 : ℝ) : ℂ) := by
-        have : (0 : ℝ) < 1 - b ^ 2 := by nlinarith
-        exact_mod_cast this
-      have hd : (0 : ℂ) ≤ ((b ^ 2 : ℝ) : ℂ) := by
-        have : (0 : ℝ) ≤ b ^ 2 := by positivity
-        exact_mod_cast this
-      exact (Matrix.PosDef.one.smul hc).add_posSemidef (hP.posSemidef.smul hd)
-  exact (hs.isPathConnected h0).isConnected.isPreconnected
+  apply SheetDecomposition.ballDom_preconnected <;> assumption
 
 theorem measurable_ballDens {Ψ : Type} [Fintype Ψ] {j j' n : ℕ} (q : Ψ × Fin j × Fin j' ≃ Fin n) :
     Measurable (ballDens q) := by

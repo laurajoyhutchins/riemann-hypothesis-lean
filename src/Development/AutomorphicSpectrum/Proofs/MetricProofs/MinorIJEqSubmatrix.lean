@@ -448,9 +448,6 @@ theorem steps {N j : ℕ} {a b ca cb : Fin N} (hj : j ≤ N) (hb : (b : ℕ) = a
       (∀ c : Fin N, c ∈ stepCols N j b ↔ lo ≤ c ∧ (c : ℕ) ≤ cb) ∧
       (∀ i : Fin N, (i : ℕ) + 1 = a → (i : ℕ) + 1 ≠ j → ∀ c : Fin N, c ∈ stepCols N j i ↔ lo ≤ c ∧ (c : ℕ) < ca) ∧
       ((a : ℕ) = 0 ∨ (a : ℕ) = j → (ca : ℕ) = lo) ∧ lo ≤ ca := by
-  have h1 := a.2
-  have h2 := b.2
-  have h3 := cb.2
   unfold lastCol at hca
   rcases hcase with h | h
   · rw [if_pos (by omega)] at hca
@@ -486,8 +483,6 @@ namespace GlobalTheory.CompanionTheory.Ar.PB
 open SchurCalc in
 theorem norm_three_steps : ∀ (N j : ℕ) (a b ca cb : Fin N) (G h : Matrix (Fin N) (Fin N) ℂ), j ≤ N → (b : ℕ) = a + 1 → ((b : ℕ) < j ∨ j ≤ (a : ℕ)) → (ca : ℕ) = lastCol N j a → (cb : ℕ) = ca + 1 → IsBlockDiag j G → G.PosDef → IsBlockDiag j h → h.det ≠ 0 → ∃ G₂ : Matrix (Fin 2) (Fin 2) ℂ, G₂.PosDef ∧ (∀ r s : Fin 2, G₂ r s = minorIJ (hᴴ * G * h) (insert (![ca, cb] r) ((stepCols N j a).erase ca)) (insert (![ca, cb] s) ((stepCols N j a).erase ca)) / minorIJ (hᴴ * G * h) ((stepCols N j a).erase ca) ((stepCols N j a).erase ca)) ∧ ∀ t : ℂ, (∑ i : Fin N, (xiCoef () a ((), i) : ℝ) * (blockPot j i G (h * (1 + Matrix.single cb ca t)) + if IsProperStep N j i then 0 else Real.log ‖if (i : ℕ) + 1 = j then (if (a : ℕ) < j then minorIJ h (wIdx N j) (wIdx N j) else 1) else minorIJ h (omIdx N j) (omIdx N j)‖)) = xiPot G₂ t := by
   intro N j a b ca cb G h hj hb hcase hca hcb hG hGp hh hdet
-  have ha2 := a.2
-  have hb2 := b.2
   obtain ⟨lo, m1, m2, m3, m4, m5⟩ := steps hj hb hcase hca hcb
   obtain ⟨C, hCdef⟩ : ∃ C, C = (stepCols N j a).erase ca := ⟨_, rfl⟩
   rw [← hCdef]
@@ -526,11 +521,6 @@ theorem norm_three_steps : ∀ (N j : ℕ) (a b ca cb : Fin N) (G h : Matrix (Fi
   obtain ⟨g, hgdef⟩ : ∃ g : ℂ, g = if j ≤ (a : ℕ) then minorIJ G (wIdx N j) (wIdx N j) else 1 := ⟨_, rfl⟩
   have hmw : 0 < minorIJ G (wIdx N j) (wIdx N j) := minor_pos hGp _
   have hmo : 0 < minorIJ G (omIdx N j) (omIdx N j) := minor_pos hGp _
-  have gpos : 0 < g := by
-    rw [hgdef]
-    split_ifs
-    · exact hmw
-    · exact one_pos
   have hdf : ∀ i : Fin N, (j ≤ (i : ℕ) + 1 ↔ j ≤ (a : ℕ)) → (i : ℕ) + 1 ≠ N → detFac j i G = g := fun i h1 h2 => by
     unfold detFac
     rw [if_neg h2, mul_one, hgdef]

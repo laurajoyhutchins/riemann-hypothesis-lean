@@ -98,7 +98,6 @@ theorem nfLeibBd_term (Bs : B.RealPlaceData k r Wp Wq) {nf : ℕ} (fib : Fin nf 
   set cw : ℝ := (T'.word.map P.BetaSesquilinearity.nz).prod with hcw
   have hcw0 : 0 ≤ cw := List.prod_nonneg fun x hx => by
     obtain ⟨X, _, rfl⟩ := List.mem_map.1 hx; exact (P.BetaSesquilinearity.nz_pos X).le
-  have hεj : 0 ≤ (ε⁻¹) ^ j := by positivity
   refine ⟨CP * ε⁻¹ ^ j * Cc * cw, by positivity, fun F A b hF g hg hgε => ?_⟩
   have hgS : g ∈ S := ⟨hg, hgε⟩
   have hgp := P.BetaSesquilinearity.gN_pos hg
@@ -139,7 +138,6 @@ theorem nfLeibBd_term (Bs : B.RealPlaceData k r Wp Wq) {nf : ℕ} (fib : Fin nf 
   have hfo' : fo ≤ o := by omega
   have hwo : T.word.length ≤ o := by omega
   rw [hco' g hgd, ContinuousLinearMap.smul_apply, norm_smul, norm_mul]
-  have hX : 0 ≤ B.gN g := hgp.le
   calc ‖Pc g‖ * ‖(((Gf k r Bs.z Bs.z' g : ℝ) : ℂ))⁻¹ ^ j‖ * ‖T.coef g (B.Rw T'.word F g)‖
       ≤ (CP * B.gN g ^ D) * ε⁻¹ ^ j * (‖T.coef g‖ * ‖B.Rw T'.word F g‖) := by
         gcongr

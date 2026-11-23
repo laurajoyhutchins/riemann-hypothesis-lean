@@ -66,7 +66,6 @@ variable {C : Type} [Field C] {σ : Type}
 theorem mfact_eq_prod [Fintype σ] (α : σ →₀ ℕ) : (mfact α : C) = ∏ s, ((α s).factorial : C) := by
   first
   | exact Finsupp.prod_fintype α _ (fun _ => by simp)
-  | (unfold mfact; rw [Finsupp.prod_fintype]; intro; simp)
 
 theorem mfact_add_single [Fintype σ] (α : σ →₀ ℕ) (l : σ) :
     (mfact (α + Finsupp.single l 1) : C) = mfact α * ((α l : C) + 1) := by
@@ -93,44 +92,35 @@ theorem derivAt0_monomial (α : σ →₀ ℕ) (a : C) (S : MvPowerSeries σ C) 
   first
   | (rw [derivAt0_eq_sum_of_subset _ _ MvPolynomial.support_monomial_subset, Finset.sum_singleton,
       MvPolynomial.coeff_monomial, if_pos rfl]; done)
-  | (by_cases ha : a = 0 <;> simp [derivAt0, ha, MvPolynomial.support_monomial]; done)
 
 private lemma hasSubst_lemma {ι τ : Type} [Finite ι] {a : ι → MvPowerSeries τ C}
     (ha : ∀ i, constantCoeff (a i) = 0) : HasSubst a := by
   first
   | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' ha
   | exact MvPowerSeries.hasSubst_of_constantCoeff_zero ha
-  | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [ha]; exact IsNilpotent.zero)
 
 private lemma cc_subst_lemma_2 {σ τ : Type} [Finite σ] {a : σ → MvPowerSeries τ C}
     (ha : ∀ s, constantCoeff (a s) = 0) {f : MvPowerSeries σ C} (hf : constantCoeff f = 0) :
     constantCoeff (subst a f) = 0 := by
   first
   | exact constantCoeff_subst_eq_zero (hasSubst_lemma ha) ha hf
-  | exact MvPowerSeries.constantCoeff_subst_eq_zero (hasSubst_lemma ha) ha hf
-  | exact MvPowerSeries.constantCoeff_subst_eq_zero (hasSubst_lemma ha) hf
 
 private lemma subst_zero_lemma_3 {σ τ : Type} {a : σ → MvPowerSeries τ C} (ha : HasSubst a) :
     subst a (0 : MvPowerSeries σ C) = 0 := by
   first
   | (rw [← MvPowerSeries.coe_substAlgHom ha]; exact map_zero _)
-  | simp
 
 private lemma subst_C_eq_C' {σ τ : Type} {a : σ → MvPowerSeries τ C} (ha : HasSubst a) (r : C) :
     subst a (MvPowerSeries.C r : MvPowerSeries σ C) = MvPowerSeries.C r := by
   first
   | (rw [← MvPowerSeries.coe_substAlgHom ha, MvPowerSeries.c_eq_algebraMap, AlgHom.commutes,
       MvPowerSeries.c_eq_algebraMap])
-  | (rw [← MvPowerSeries.coe_substAlgHom ha]; exact AlgHom.commutes _ r)
-  | simp [ha]
 
 private lemma subst_subst_eq_subst_comp {σ τ ρ : Type} {a : σ → MvPowerSeries τ C} {b : τ → MvPowerSeries ρ C}
     (ha : HasSubst a) (hb : HasSubst b) (f : MvPowerSeries σ C) :
     subst b (subst a f) = subst (fun s => subst b (a s)) f := by
   first
   | exact MvPowerSeries.subst_comp_subst_apply ha hb f
-  | exact (MvPowerSeries.subst_comp_subst_apply ha hb f).symm
-  | exact congrFun (MvPowerSeries.subst_comp_subst ha hb) f
 
 private lemma pderiv_inr_subst_twoVars {d : ℕ} (f : MvPowerSeries (Fin 2 × Fin d) C) (k : Fin d) :
     pderiv (Sum.inr k) (subst (GlobalTheory.LawLog.twoVars C d) f) =
@@ -158,8 +148,6 @@ theorem derivAt0_pderiv [Fintype σ] (Q : MvPolynomial σ C) (l : σ) (S : MvPow
      simp only [addRightEmbedding_apply, MvPolynomial.coeff_mul_X, mfact_add_single]
      first
      | (rw [MvPowerSeries.coeff_pderiv]; ring)
-     | (simp [MvPowerSeries.coeff_pderiv]; ring)
-     | (simp [MvPowerSeries.coeff_pderiv])
      done)
 
 end Deriv
@@ -206,22 +194,14 @@ def psi : Fin n × Fin d → MvPowerSeries Λ C :=
 theorem cc_lin (j : Fin n) (e : Fin d) : constantCoeff (lin β w j e) = 0 := by
   first
   | (simp [lin, MvPowerSeries.smul_eq_C_mul]; done)
-  | (unfold lin
-
-     rw [map_sum]
-     refine Finset.sum_eq_zero fun l _ => ?_
-     rw [MvPowerSeries.smul_eq_C_mul, map_mul, MvPowerSeries.constantCoeff_X, mul_zero])
 
 theorem cc_psi (q : Fin n × Fin d) : constantCoeff (psi L β w q) = 0 := by
   have hs : MvPowerSeries.HasSubst (lin β w q.1) := by
     first
     | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' (cc_lin β w q.1)
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero (cc_lin β w q.1)
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [cc_lin]; exact IsNilpotent.zero)
   first
   | exact constantCoeff_subst_eq_zero hs (cc_lin β w q.1) ((isExp_expOf L).1 q.2)
-  | exact MvPowerSeries.constantCoeff_subst_eq_zero hs (cc_lin β w q.1) ((isExp_expOf L).1 q.2)
-  | exact MvPowerSeries.constantCoeff_subst_eq_zero hs ((isExp_expOf L).1 q.2)
 
 theorem pderiv_lin (l : Λ) (j : Fin n) (e : Fin d) :
     pderiv l (lin β w j e) = MvPowerSeries.C (β l j * w l e) := by
@@ -230,7 +210,6 @@ theorem pderiv_lin (l : Λ) (j : Fin n) (e : Fin d) :
   | (simp only [lin, map_sum, Derivation.map_smul, MvPowerSeries.pderiv_X]
      simp [Pi.single_apply, MvPowerSeries.smul_eq_C_mul]
      done)
-  | (simp [lin, MvPowerSeries.pderiv_X, Pi.single_apply, MvPowerSeries.smul_eq_C_mul]; done)
 
 theorem pderiv_subst_psi (G : FGLaw C d) (hL : ∀ a, L.F a = subst (twoVars C d) (G.F a)) (l : Λ) (g : PS C n d) :
     pderiv l (subst (psi L β w) g) =

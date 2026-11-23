@@ -75,7 +75,6 @@ theorem lenI_posT (hB : KB.IsLeadingFormSetting Cb Cc S p f χ A₀) (hS : 0 < S
   obtain ⟨-, -, -, -, -, -, -, -, -, -, hG, -⟩ := hB
   obtain ⟨hlen, -⟩ := hG ⟨0, hS⟩
   rw [len_eq_lenI'] at hlen
-  have hN : (0 : ℝ) ≤ S.Ntop := Nat.cast_nonneg _
   have hN1 : (1 : ℝ) ≤ S.Ntop := by
     have : 1 ≤ S.Ntop := by unfold C.HidaSetting.Ntop C.Kst; omega
     exact_mod_cast this
@@ -99,7 +98,6 @@ theorem lamTop_thr (hC : 28 * Real.exp 1 ≤ Cc) (hB : KB.IsLeadingFormSetting C
     (hC.trans hCA) hsA).2 (S.G.r + 2 - s) (Real.exp 1) ((28 * S.G.N / S.G.lenI) ^ (2 * (S.G.r + 2 - s - 1)))
     (by omega) (Real.exp_pos 1).le le_rfl (pow_nonneg (div_nonneg (by unfold Sz.Glob.N; positivity) hlen.le) _) le_rfl
   unfold lamTop
-  have e : ((S.G.r : ℤ) + 2 - ((S.G.r + 2 - s : ℕ) : ℤ)) = ((S.G.r : ℤ) + 2 - ((S.G.r + 2 - s : ℕ) : ℤ)) := rfl
   linarith [hFT]
 
 end thr

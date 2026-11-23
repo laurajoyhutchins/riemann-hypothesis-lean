@@ -151,39 +151,7 @@ theorem coords (h𝔭 : 𝔭.IsPrime) (hL : IsLatIn X L) {x : V} (hx : x ∈ X) 
 
 theorem mem_B_iff (h𝔭 : 𝔭.IsPrime) (hL : IsLatIn X L) (x : V) :
     x ∈ locF 𝔭 L ↔ x ∈ X ∧ ∀ i, h (b i) x / jK (ι (a i)) ∈ HU.SP K 𝔭 := by
-  haveI := h𝔭
-  have hdiag' : ∀ i, h (b i) (b i) = jK (ι (a i)) := fun i => by
-    rw [hdiag i]; exact (coe_iota_eq_algebraMap_coe (a i)).symm
-  have key : ∀ w ∈ Submodule.span (𝓞 K) (Set.range b), ∀ i,
-      h (b i) w / jK (ι (a i)) ∈ (1 : Submodule (𝓞 K) K) := by
-    intro w hw i
-    obtain ⟨z, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun (𝓞 K)).mp hw
-    have e : (∑ j, z j • b j) = ∑ j, jK (z j) • b j :=
-      Finset.sum_congr rfl fun j _ => smul_eq_jK _ _
-    rw [e, h_sum horth hdiag' _ i, mul_div_cancel_right₀ _ (jK_iota_ne_zero (ha i))]
-    exact Submodule.mem_one.mpr ⟨z i, rfl⟩
-  rw [← hloc]
-  constructor
-  · intro hx
-    have hxs := locF_le_spanK h𝔭 hx
-    obtain ⟨s, hs, hsx⟩ := hx
-    refine ⟨Submodule.span_le.mpr ?_ hxs, fun i => ?_⟩
-    · rintro _ ⟨j, rfl⟩
-      exact hbX j
-    · rw [HU.mem_SP_iff_locF]
-      refine Exists.intro s ⟨hs, ?_⟩
-      have e : s • (h (b i) x / jK (ι (a i))) = h (b i) (s • x) / jK (ι (a i)) := by
-        rw [smul_eq_jK s x, map_smul, smul_eq_mul, Algebra.smul_def, mul_div_assoc]
-      rw [e]
-      exact key _ hsx i
-  · rintro ⟨hxX, hc⟩
-    rw [coords hbX hloc horth hdiag ha h𝔭 hL hxX]
-    refine Submodule.sum_mem _ fun i _ => ?_
-    obtain ⟨s, hs, hsc⟩ := (HU.mem_SP_iff_locF).mp (hc i)
-    obtain ⟨y, hy⟩ := Submodule.mem_one.mp hsc
-    refine Exists.intro s ⟨hs, ?_⟩
-    rw [← smul_assoc, ← hy, ← smul_eq_jK]
-    exact Submodule.smul_mem _ y (Submodule.subset_span ⟨i, rfl⟩)
+  apply Formalism.L2.SG.Pf.G2.mem_B_iff <;> assumption
 
 end
 

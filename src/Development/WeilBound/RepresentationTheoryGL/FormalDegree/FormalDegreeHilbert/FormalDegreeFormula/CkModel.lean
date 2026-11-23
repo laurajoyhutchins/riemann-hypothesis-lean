@@ -1,5 +1,6 @@
 module
 
+import CompanionTheory.RealGroups.FormalDegrees.ArchimedeanFormalDegrees.FormalDegreeFormula.CkModel
 public import Development.WeilBound.RepresentationTheoryGL.FormalDegree.FormalDegreeHilbert.FormalDegreeFormula.ModelFunctionsMultiply
 import Aesop.Frontend.Tactic
 import Aesop.Main
@@ -154,40 +155,7 @@ theorem exp_Eaa (a : Fin n) (t : ℝ) :
 
 theorem ev_dTau_Eaa {ε : Fin n → Bool} {m : Fin n → ℤ} (hm : NonnegDom ε m) (a : Fin n) (f : MV ε m) :
     ev ε m (dTau ε m (single a a 1) f) = ((m a : ℤ) : ℂ) * ev ε m f := by
-  rw [ev_apply, ev_apply, dTau_fn]
-  unfold rdc
-  rw [cpart1_Eaa, cpart2_Eaa]
-  have hX : inK ε ((-Complex.I) • single a a (1 : ℂ)) := by
-    rw [← cpart2_Eaa ε a]; exact inK_cpart2_bdPart ε _
-  have hX0 : inK ε (0 : Matrix (Fin n) (Fin n) ℂ) := by
-    rw [← cpart1_Eaa ε a]; exact inK_cpart1_bdPart ε _
-  have h0 : ∀ t, kcurve ε (0 : Matrix (Fin n) (Fin n) ℂ) t = 1 := by
-    intro t
-    apply onep_KG_ext
-    rw [(kcurve_spec ε hX0).2.1 t]
-    simp
-    rfl
-  have hc : ∀ t : ℝ, f.fn (1 * kcurve ε ((-Complex.I) • single a a (1 : ℂ)) t) =
-      Complex.exp (-(Complex.I * t)) ^ (m a).toNat * f.fn 1 := by
-    intro t
-    rw [← mul_one (1 * kcurve ε _ t), one_mul]
-    rw [vsp_diag hm f.mem _ _ (by rw [(kcurve_spec ε hX).2.1 t, exp_Eaa]) 1]
-    congr 1
-    rw [Finset.prod_eq_single a (fun c _ hc => by simp [hc]) (by simp)]
-    simp
-  simp_rw [h0, mul_one, hc]
-  rw [deriv_const, zero_add]
-  have hd : HasDerivAt (fun t : ℝ => Complex.exp (-(Complex.I * t)) ^ (m a).toNat * f.fn 1)
-      (((m a).toNat : ℂ) * (-Complex.I) * f.fn 1) 0 := by
-    have h0 : HasDerivAt (fun t : ℝ => (t : ℂ)) 1 0 := by simpa using (hasDerivAt_id (0 : ℝ)).ofReal_comp
-    have h1 := (((h0.const_mul Complex.I).neg.cexp).pow (m a).toNat).mul_const (f.fn 1)
-    refine h1.congr_deriv ?_
-    simp
-  rw [hd.deriv]
-  have hma : (((m a).toNat : ℕ) : ℂ) = ((m a : ℤ) : ℂ) := by
-    rw [← Int.cast_natCast, Int.toNat_of_nonneg (hm.2 a)]
-  rw [hma]
-  linear_combination (-((m a : ℤ) : ℂ) * f.fn 1) * Complex.I_sq
+  apply CompanionTheory.RgFd.CkM.ev_dTau_Eaa <;> assumption
 
 theorem model_op {ε : Fin n → Bool} {m : Fin n → ℤ} (hm : NonnegDom ε m) (k : KG ε) :
     (modelKType ε hm).op k = tauC ε m k := rfl
@@ -215,69 +183,11 @@ theorem uEv_wt {ε : Fin n → Bool} {m : Fin n → ℤ} (hm : NonnegDom ε m) (
 
 theorem not_cone_neg_root {a b : Fin n} (hab : a < b) (c : Fin n → Fin n → ℕ) (hc : ∀ a' b', c a' b' ≠ 0 → a' < b')
     (h : Pi.single b (1 : ℝ) - Pi.single a 1 = ∑ a', ∑ b', (c a' b' : ℝ) • root a' b') : False := by
-  have key := congrArg (fun v : Fin n → ℝ => ∑ i : Fin n, ((i : ℕ) : ℝ) * v i) h
-  have hl : ∑ i : Fin n, ((i : ℕ) : ℝ) * (Pi.single b (1 : ℝ) - Pi.single a 1 : Fin n → ℝ) i = (b : ℕ) - (a : ℕ) := by
-    simp [mul_sub, Finset.sum_sub_distrib, Pi.single_apply]
-  have hr : ∑ i : Fin n, ((i : ℕ) : ℝ) * (∑ a', ∑ b', (c a' b' : ℝ) • root a' b' : Fin n → ℝ) i =
-      ∑ a', ∑ b', (c a' b' : ℝ) * (((a' : ℕ) : ℝ) - (b' : ℕ)) := by
-    simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, root, Pi.sub_apply, Finset.mul_sum]
-    rw [Finset.sum_comm]
-    refine Finset.sum_congr rfl fun a' _ => ?_
-    rw [Finset.sum_comm]
-    refine Finset.sum_congr rfl fun b' _ => ?_
-    simp [Pi.single_apply, mul_sub, Finset.sum_sub_distrib, ← Finset.mul_sum]
-    ring
-  rw [hl, hr] at key
-  have hneg : ∑ a', ∑ b', (c a' b' : ℝ) * (((a' : ℕ) : ℝ) - (b' : ℕ)) ≤ 0 := by
-    refine Finset.sum_nonpos fun a' _ => Finset.sum_nonpos fun b' _ => ?_
-    by_cases h0 : c a' b' = 0
-    · simp [h0]
-    · have : ((a' : ℕ) : ℝ) < (b' : ℕ) := by exact_mod_cast hc a' b' h0
-      exact mul_nonpos_of_nonneg_of_nonpos (Nat.cast_nonneg _) (by linarith)
-  have : ((a : ℕ) : ℝ) < (b : ℕ) := by exact_mod_cast hab
-  linarith
+  apply CompanionTheory.RgFd.CkM.not_cone_neg_root <;> assumption
 
 theorem uEv_hw {ε : Fin n → Bool} {m : Fin n → ℤ} (hm : NonnegDom ε m) {a b : Fin n} (hab : a < b) (he : ε a = ε b) :
     dTau ε m (single a b 1) (uEv ε m) = 0 := by
-  set T := modelKType ε hm
-  let u : T.V := uEv ε m
-  have hwt0 : ∀ c, T.dτ (single c c 1) u = (((m c : ℤ) : ℝ) : ℂ) • u := fun c => uEv_wt hm c
-  change T.dτ (single a b 1) u = 0
-  by_contra hv
-  have hR := KType.kRel T
-  set μ : Fin n → ℝ := fun i => ((m i : ℤ) : ℝ) + ((Pi.single a (1 : ℝ) - Pi.single b (1 : ℝ) : Fin n → ℝ) i) with hμ
-  have hab' : a ≠ b := hab.ne
-  have hwt : ∀ c, T.dτ (single c c 1) (T.dτ (single a b 1) u) = ((μ c : ℝ) : ℂ) • T.dτ (single a b 1) u := by
-    intro c
-    have h := congrArg (fun F : Module.End ℂ T.V => F u) (hR c c a b rfl he)
-    simp only [kunits, LinearMap.sub_apply, Module.End.mul_apply, ContinuousLinearMap.coe_coe] at h
-    rw [hwt0 c, map_smul] at h
-    have h' := sub_eq_iff_eq_add.mp h
-    refine h'.trans ?_
-    by_cases hca : c = a
-    · have hcb : c ≠ b := hca ▸ hab'
-      rw [if_pos hca, if_neg (Ne.symm hcb)]
-      subst hca
-      simp only [hμ, Pi.sub_apply, Pi.single_apply, if_true, if_neg hcb, ContinuousLinearMap.coe_coe,
-        LinearMap.zero_apply, sub_zero]
-      push_cast
-      module
-    · by_cases hcb : c = b
-      · rw [if_neg hca, if_pos hcb.symm]
-        subst hcb
-        simp only [hμ, Pi.sub_apply, Pi.single_apply, if_true, if_neg hca, ContinuousLinearMap.coe_coe,
-          LinearMap.zero_apply, zero_sub]
-        push_cast
-        module
-      · rw [if_neg hca, if_neg (Ne.symm hcb)]
-        simp only [hμ, Pi.sub_apply, Pi.single_apply, if_neg hca, if_neg hcb, LinearMap.zero_apply, sub_zero]
-        push_cast
-        module
-  obtain ⟨c, hc, hΛ⟩ := HW.KType.weight_le T hv hwt
-  apply not_cone_neg_root hab c (fun a' b' h => (hc a' b' h).1)
-  rw [← hΛ]
-  funext i
-  simp [hμ]
+  apply CompanionTheory.RgFd.CkM.uEv_hw <;> assumption
 
 theorem evaluation_longest_weyl_one {ε : Fin n → Bool} {m : Fin n → ℤ} : ev ε m (w0 ε m) = 1 := by
   rw [ev_apply]; exact highest_weight_fn_K_one ε m

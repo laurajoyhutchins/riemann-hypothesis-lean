@@ -354,8 +354,6 @@ theorem scale_field [MeasurableSpace (A F)] [BorelSpace (A F)] (lf : Measure (A 
       have hmulR : ((Algebra.norm ℚ c : ℚ) : ℝ) * ((Algebra.norm ℤ y : ℤ) : ℝ) =
           ((Algebra.norm ℤ x : ℤ) : ℝ) := by
         exact_mod_cast congrArg (fun q : ℚ => (q : ℝ)) hmul
-      have hYp : (0 : ℝ) < ((Algebra.norm ℤ y).natAbs : ℝ) := by
-        exact_mod_cast Nat.pos_of_ne_zero hny
       have hXp : (0 : ℝ) < ((Algebra.norm ℤ x).natAbs : ℝ) := by
         exact_mod_cast Nat.pos_of_ne_zero hnx
       have habs : |((Algebra.norm ℚ c : ℚ) : ℝ)| * ((Algebra.norm ℤ y).natAbs : ℝ) =

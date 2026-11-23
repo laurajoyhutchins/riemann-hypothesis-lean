@@ -41,6 +41,7 @@ import Mathlib.Tactic.NormNum.Ordinal
 import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsUniqueJet
 
 @[expose] public section
 
@@ -148,26 +149,7 @@ theorem eq_of_forall_mk (I : Ideal R) [IsHausdorff I R] {x y : R}
 theorem exists_lim (I : Ideal R) [IsPrecomplete I R] (x : ∀ e : ℕ, R ⧸ I ^ (e + 1))
     (hx : ∀ e, Ideal.Quotient.factor (Ideal.pow_le_pow_right (Nat.le_succ (e + 1))) (x (e + 1)) = x e) :
     ∃ y : R, ∀ e, Ideal.Quotient.mk (I ^ (e + 1)) y = x e := by
-  choose a ha using fun e => Ideal.Quotient.mk_surjective (x e)
-  have step : ∀ e, a e - a (e + 1) ∈ I ^ (e + 1) := fun e => by
-    refine Ideal.Quotient.eq.1 ?_
-    rw [ha, ← hx e, ← ha (e + 1), Ideal.Quotient.factor_mk]
-  have cau : ∀ m n, m ≤ n → a m - a n ∈ I ^ (m + 1) := fun m n hmn => by
-    induction n, hmn using Nat.le_induction with
-    | base => rw [sub_self]; exact zero_mem _
-    | succ n hmn ih =>
-      have := add_mem ih (Ideal.pow_le_pow_right (Nat.succ_le_succ hmn) (step n))
-      rwa [sub_add_sub_cancel] at this
-  obtain ⟨L, hL⟩ := IsPrecomplete.prec' (I := I) a (fun {m n} hmn => by
-    rw [SModEq.sub_mem, smul_eq_mul, Ideal.mul_top]
-    exact Ideal.pow_le_pow_right (Nat.le_succ m) (cau m n hmn))
-  refine ⟨L, fun e => ?_⟩
-  have := hL (e + 1)
-  rw [SModEq.sub_mem, smul_eq_mul, Ideal.mul_top] at this
-  have h₂ := add_mem (step e) this
-  rw [sub_add_sub_cancel] at h₂
-  rw [← ha e]
-  exact (Ideal.Quotient.eq.2 h₂).symm
+  apply _root_.GlobalTheory.SeriesValue.exists_lim <;> assumption
 
 theorem existsUnique_sec : ∀ (R : Type) [CommRing R] [IsDomain R] (I : Ideal R), IsAdicComplete I R → ∀ (Y : Over (Spec (CommRingCat.of R))), Smooth Y.hom → IsProjBy Y.hom → ∀ N : LB Y.left, N.IsLB → ∀ f : ∀ e, LB.Sec (N.pull (fstG I e Y).left), (∀ e z J, Good N z J → sval (f (e + 1)) (thickMap R I e Y) z J = sval (f e) (𝟙 _) z J) → ∃! s : LB.Sec (N.pull (𝟙 Y.left)), ∀ e z J, Good N z J → sval s (fstG I e Y).left z J = sval (f e) (𝟙 _) z J := by
   intro R _ _ I hI Y hs hp N hN f hf

@@ -48,6 +48,7 @@ import Mathlib.Tactic.Polynomial.Basic
 import Mathlib.Tactic.ReduceModChar
 import Mathlib.Topology.Sheaves.Init
 import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LinearFormsBoundedRepresentatives
 
 @[expose] public section
 
@@ -92,65 +93,14 @@ theorem exists_smul_mem {E W : Type} [Field E] [NumberField E] [AddCommGroup W] 
 variable {E : Type} [Field E] [NumberField E] [StarRing E]
 
 theorem exists_vec (S : HSpace E) (φ : S.V →ₗ[E] E) : ∃ w, ∀ x, φ x = S.hT w x := by
-  let G : S.V →ₗ[E] (Fin S.rank → E) := LinearMap.pi fun i => S.hT (S.frame i)
-  have hG : Function.Injective G := by
-    rw [← LinearMap.ker_eq_bot, LinearMap.ker_eq_bot']
-    intro y hy
-    apply S.nondeg.2 y
-    intro x
-    have : S.hT.flip y = 0 := S.frame.ext fun i => congrFun hy i
-    exact LinearMap.congr_fun this x
-  have hs : Function.Surjective G :=
-    (LinearMap.injective_iff_surjective_of_finrank_eq_finrank (by simp [S.rank_eq])).1 hG
-  obtain ⟨w, hw⟩ := hs fun i => star (φ (S.frame i))
-  refine ⟨w, fun x => LinearMap.congr_fun (S.frame.ext fun i => ?_ : φ = S.hT w) x⟩
-  have h1 : S.hT (S.frame i) w = star (φ (S.frame i)) := congrFun hw i
-  have h2 : star (S.hT (S.frame i) w) = S.hT w (S.frame i) := S.herm.eq _ _
-  rw [← h2, h1, star_star]
+  apply _root_.GlobalTheory.LoopC.FunIdx.exists_vec <;> assumption
 
 
 theorem span_eq_top_of_unimodular {S : HSpace E} (L : Submodule (𝓞 E) S.V)
     (hL : Submodule.IsLattice E L)
     (hU : Formalism.HermitianLatticesTheory.IsUnimodular S.hT L) :
     Submodule.span E (L : Set S.V) = ⊤ := by
-  by_contra hspan
-  obtain ⟨φ, hφ₀, hφ⟩ := Submodule.exists_le_ker_of_lt_top _ (lt_top_iff_ne_top.mpr hspan)
-  obtain ⟨μ, hμ⟩ := exists_vec S φ
-  have hμ₀ : μ ≠ 0 := by
-    intro h
-    apply hφ₀
-    ext y
-    simpa [h] using hμ y
-  have hline (a : E) : a • μ ∈ L := by
-    rw [← hU]
-    change a • μ ∈ Formalism.E.hdual S.hT L
-    simp only [Formalism.E.hdual, Submodule.mem_iInf, Submodule.mem_comap,
-      LinearMap.restrictScalars_apply]
-    intro y hy
-    have hy₀ := LinearMap.mem_ker.mp (hφ (Submodule.subset_span hy))
-    simp [← S.herm.eq (a • μ) y, LinearMap.map_smulₛₗ, ← hμ, hy₀]
-  obtain ⟨ψ, hψ, -⟩ := Submodule.exists_le_ker_of_notMem
-    (show μ ∉ (⊥ : Submodule E S.V) by simpa using hμ₀)
-  let f := ψ.restrictScalars (𝓞 E)
-  have hmap (x : E) : x ∈ L.map f := by
-    refine ⟨(x / ψ μ) • μ, hline _, ?_⟩
-    change ψ ((x / ψ μ) • μ) = x
-    rw [map_smul, smul_eq_mul, div_mul_cancel₀ _ hψ]
-  obtain ⟨d, hd₀, hd⟩ := FractionalIdeal.isFractional_of_fg
-    (S := nonZeroDivisors (𝓞 E)) (hL.fg.map f)
-  have hinj := IsFractionRing.injective (𝓞 E) E
-  have hne {a : 𝓞 E} (ha : a ≠ 0) : algebraMap (𝓞 E) E a ≠ 0 :=
-    fun h => ha (hinj (h.trans (map_zero _).symm))
-  have hinteger (x : E) : IsLocalization.IsInteger (𝓞 E) x := by
-    have hx := hd _ (hmap ((algebraMap (𝓞 E) E d)⁻¹ * x))
-    rwa [Algebra.smul_def, ← mul_assoc, mul_inv_cancel₀ (hne (nonZeroDivisors.ne_zero hd₀)),
-      one_mul] at hx
-  apply RingOfIntegers.not_isField E
-  refine ⟨⟨0, 1, zero_ne_one⟩, mul_comm, ?_⟩
-  intro a ha
-  obtain ⟨b, hb⟩ := hinteger ((algebraMap (𝓞 E) E a)⁻¹)
-  refine ⟨b, hinj ?_⟩
-  rw [map_mul, hb, map_one, mul_inv_cancel₀ (hne ha)]
+  apply _root_.GlobalTheory.LoopC.FunIdx.span_eq_top_of_unimodular <;> assumption
 
 
 theorem mem_perpE (D : D7) (P : LatW D) (v : (D.sp.X 0).V) :

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsBasisOfIsExtension
 public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsExtensionOfIsPushout
 public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
 public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
@@ -95,27 +96,7 @@ variable {V W V' W' : Type} [AddCommGroup V] [Module K V] [AddCommGroup W] [Modu
 
 theorem IsExtension.exists_basis {a : V →ₛₗ[algebraMap K F] V'} (h : IsExtension a) {ι : Type}
     (v : Module.Basis ι K V) : ∃ v' : Module.Basis ι F V', ∀ i, v' i = a (v i) := by
-  have li : LinearIndependent F (fun i => a (v i)) := by
-    rw [linearIndependent_iff']
-    intro s g hg i hi
-    refine (Module.forall_dual_apply_eq_zero_iff K (g i)).1 fun ℓ => ?_
-    obtain ⟨Λ, hΛ⟩ := h.coord ℓ
-    have := congrArg Λ hg
-
-    rw [map_sum, map_zero] at this
-    simp only [hΛ _ _] at this
-    exact linearIndependent_iff'.1 v.linearIndependent s (fun j => ℓ (g j)) this i hi
-  have sp : ⊤ ≤ Submodule.span F (Set.range fun i => a (v i)) := by
-    rw [← h.span, Submodule.span_le]
-    rintro _ ⟨x, rfl⟩
-    have hx : x ∈ Submodule.span K (Set.range v) := v.span_eq ▸ Submodule.mem_top
-    show a x ∈ Submodule.span F _
-    induction hx using Submodule.span_induction with
-    | mem y hy => obtain ⟨i, rfl⟩ := hy; exact Submodule.subset_span ⟨i, rfl⟩
-    | zero => simp
-    | add y z _ _ hy hz => rw [map_add]; exact add_mem hy hz
-    | smul d y _ hy => rw [map_smulₛₗ]; exact Submodule.smul_mem _ _ hy
-  exact ⟨Module.Basis.mk li sp, fun i => by simp⟩
+  apply GlobalTheory.ConstFam.exists_basis_of_isExtension <;> assumption
 
 theorem IsCoord.map_algebraMap_smul {a : V →ₛₗ[algebraMap K F] V'}
     (h : Submodule.span F (Set.range a) = ⊤) {ℓ : F →ₗ[K] K} {Λ : V' →+ V} (hΛ : IsCoord a ℓ Λ)

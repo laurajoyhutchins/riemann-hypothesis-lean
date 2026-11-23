@@ -211,11 +211,6 @@ theorem qcoreGlobal_holds : QCoreGlobalStatement := by
 
   have hsum : (∑ᶠ la : HeightOneSpectrum (𝓞 K), nnFun (K := K) D s la * logN la) =
       (∑ᶠ w, F w * logN w) / (Module.finrank K K₁ : ℝ) := by
-    have hfin2 : (Function.support fun la : HeightOneSpectrum (𝓞 K) =>
-        (∑ᶠ w : {w // LiesOver w la}, (w.1.asIdeal.inertiaDeg (𝓞 K) : ℝ) * F w.1) * logN la).Finite :=
-      hfinsupp.subset fun la hla => by
-        rw [Function.mem_support] at hla ⊢
-        intro h; apply hla; rw [h, zero_mul]
     rw [← hregroup, div_eq_mul_inv, finsum_mul]
     refine finsum_congr fun la => ?_
     rw [hnn]; ring

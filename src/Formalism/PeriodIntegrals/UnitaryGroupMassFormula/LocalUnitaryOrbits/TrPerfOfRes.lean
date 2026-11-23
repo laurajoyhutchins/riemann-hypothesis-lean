@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.LocDensIdxC
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.TraceEqAdd
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.OBas1OfUnitV
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.NormOneUnitFixedPoints
@@ -58,22 +59,7 @@ variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algeb
   (v : HeightOneSpectrum (𝓞 F))
 
 theorem sig_nt (hcm : IsCMExt F E σ) : ∃ x, σ x ≠ x := by
-  obtain ⟨-, htc, -, hst⟩ := hcm
-  have hne : Nonempty (E →+* ℂ) := by
-    rw [← Fintype.card_pos_iff, NumberField.Embeddings.card]
-    exact Module.finrank_pos
-  obtain ⟨φ⟩ := hne
-  have hc := htc.isComplex (NumberField.InfinitePlace.mk φ)
-  rw [NumberField.InfinitePlace.isComplex_mk_iff, NumberField.ComplexEmbedding.isReal_iff] at hc
-  by_contra h
-  push_neg at h
-  apply hc
-  ext x
-  simp only [NumberField.ComplexEmbedding.conjugate_coe_eq]
-  have hx := hst φ x
-  rw [h x] at hx
-  rw [starRingEnd_apply]
-  exact hx.symm
+  apply PI.VolStabS.IdxHW.sigma_ne_id <;> assumption
 
 private theorem sc_of_isUnif_of_mem_integers {ϖ r : Fv F v} (hϖ : IsUnif v ϖ)
     (hr : r ∈ v.adicCompletionIntegers F) (hn : sc (E := E) v r ∉ PO (E := E) v ϖ) :

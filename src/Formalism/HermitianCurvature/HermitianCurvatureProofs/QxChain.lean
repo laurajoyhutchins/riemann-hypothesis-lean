@@ -881,7 +881,6 @@ theorem isBorder0 : IsBorder (e0 k l) (es0 k l) (v0 k l) := by
     (simp only [v0, e0] at h') <;> omega
   · intro j h
     have h' := congrArg Fin.val h
-    have hj := j.isLt
     (simp only [v0, es0] at h') <;> omega
 
 theorem val_bS (y : Fin (mdim k r l.succ + 1)) : (bS (v0 k l) (es0 k l) y).val = y.val + 1 := by

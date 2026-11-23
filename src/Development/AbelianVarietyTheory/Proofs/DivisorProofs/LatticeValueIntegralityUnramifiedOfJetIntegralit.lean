@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LatticeValueIntegralityRamifiedOfExpansion
 public import Development.AbelianVarietyTheory.Definitions.Divisors.JetAnalytic
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PowerIntegralValuationLowerBoundIffForallEmbeddiStatement
 public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.NotDvdDiscrIffRamificationIdx
@@ -182,53 +183,11 @@ theorem ne_d_of_c_eq_zero {E : Type} [Field E] [NumberField E] {I : Type} [Finty
 
 theorem card_eq_finrank {E : Type} [Field E] [NumberField E] [IsCMField E] {I : Type} [Fintype I]
     {φ : I → E →+* ℂ} (h : IsCMType φ) : Fintype.card I = Module.finrank ℚ (maximalRealSubfield E) := by
-  have hreal : ∀ i j, φ i ≠ ComplexEmbedding.conjugate (φ j) := by
-    intro i j hij
-    obtain ⟨k, -, hk⟩ := h (φ i)
-    have e : i = j := (hk i (Or.inl rfl)).trans (hk j (Or.inr hij)).symm
-    subst e
-    have hr : ComplexEmbedding.IsReal (φ i) := ComplexEmbedding.isReal_iff.mpr hij.symm
-    exact InfinitePlace.not_isReal_iff_isComplex.mpr (IsTotallyComplex.isComplex (InfinitePlace.mk (φ i)))
-      (InfinitePlace.isReal_mk_iff.mpr hr)
-  have hbij : Function.Bijective (Sum.elim φ (fun i => ComplexEmbedding.conjugate (φ i))) := by
-    refine ⟨?_, ?_⟩
-    · rintro (i | i) (j | j) hij
-      · simp only [Sum.elim_inl] at hij
-        obtain ⟨k, -, hk⟩ := h (φ i)
-        rw [hk i (Or.inl rfl), hk j (Or.inl hij)]
-      · exact absurd hij (hreal i j)
-      · exact absurd hij.symm (hreal j i)
-      · simp only [Sum.elim_inr] at hij
-        have hij' : φ i = φ j := by
-          simpa using congrArg ComplexEmbedding.conjugate hij
-        obtain ⟨k, -, hk⟩ := h (φ i)
-        rw [hk i (Or.inl rfl), hk j (Or.inl hij')]
-    · intro σ
-      obtain ⟨k, hk, -⟩ := h σ
-      rcases hk with hk | hk
-      · exact ⟨Sum.inl k, hk.symm⟩
-      · exact ⟨Sum.inr k, hk.symm⟩
-  have h1 := Fintype.card_of_bijective hbij
-  rw [Fintype.card_sum, NumberField.Embeddings.card E ℂ] at h1
-  have h3 : Module.finrank ℚ E = 2 * Module.finrank ℚ (maximalRealSubfield E) := by
-    rw [← (letI : Module.Free (maximalRealSubfield E) E := Module.Free.of_divisionRing _ _; Module.finrank_mul_finrank ℚ (maximalRealSubfield E) E),
-      Algebra.IsQuadraticExtension.finrank_eq_two (maximalRealSubfield E) E, mul_comm]
-  omega
+  apply GlobalTheory.LatValRam.card_eq_finrank <;> assumption
 
 theorem gamma_nat_add (k n : ℕ) (hk : 1 ≤ k) :
     Real.Gamma ((k : ℝ) + n) = ((k - 1).factorial : ℝ) * ∏ j ∈ Finset.range n, ((k : ℝ) + j) := by
-  induction n with
-  | zero =>
-    have : (k : ℝ) = ((k - 1 : ℕ) : ℝ) + 1 := by
-      rw [Nat.cast_sub hk]; ring
-    simp only [Nat.cast_zero, add_zero, Finset.range_zero, Finset.prod_empty, mul_one]
-    rw [this, Real.Gamma_nat_eq_factorial]
-  | succ n ih =>
-    have hpos : (k : ℝ) + n ≠ 0 := by
-      have : (1 : ℝ) ≤ k := by exact_mod_cast hk
-      positivity
-    rw [Finset.prod_range_succ, Nat.cast_succ, ← add_assoc, Real.Gamma_add_one hpos, ih]
-    ring
+  apply GlobalTheory.LatValRam.gamma_nat_add <;> assumption
 
 theorem exists_list_count {I : Type} [Fintype I] [DecidableEq I] (κ : I → ℕ) :
     ∃ u : List I, ∀ i, u.count i = κ i := by

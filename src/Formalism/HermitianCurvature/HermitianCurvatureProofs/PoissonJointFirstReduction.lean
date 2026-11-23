@@ -85,7 +85,6 @@ theorem frame_product_identities : Formalism.FourierDecayAlt.J.FrameProducts := 
   obtain ⟨t, rfl⟩ : ∃ t, s = t + 1 := ⟨s - 1, by omega⟩
   have hrd0 : rd ≠ 0 := hrd.ne'
   have hg0 : g ≠ 0 := hg.ne'
-  have hpi : (2 * Real.pi) ≠ 0 := by positivity
   have e1 : 2 * r + 2 - 1 = 2 * r + 1 := by omega
   constructor
   · have hz : rd ^ (S6.nuBlock (r : ℤ) ((n + 1 : ℕ) : ℤ) ((t + 1 : ℕ) : ℤ) + 1) =

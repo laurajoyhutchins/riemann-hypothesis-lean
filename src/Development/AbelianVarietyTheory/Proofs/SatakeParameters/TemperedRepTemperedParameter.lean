@@ -65,40 +65,7 @@ namespace TemperedRec
 theorem tempered_lpSum : ∀ (E Ω : Type) [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] (A : ValuationSubring Ω) (w : HeightOneSpectrum (𝓞 E)) (h : IsPlaceOver A w) (x y : WD h), x.tempered → y.tempered → (x.lpSum y).tempered := GlobalTheory.T.tempered_direct_sum
 
 theorem tempered_lpChar_lpSp : ∀ (E Ω : Type) [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] (A : ValuationSubring Ω) (w : HeightOneSpectrum (𝓞 E)) (h : IsPlaceOver A w) (x : WD h), x.mono0 → (∀ φ : Weil h, deg φ = 1 → ∀ α ∈ x.eig φ, ‖α‖ = 1) → ∀ l : ℕ, (x.lpChar (WD.lpSp (h := h) l)).tempered := by
-  intro E Ω _ _ _ _ _ A w h x
-  induction x using WD.ind with
-  | hP n a =>
-    intro hx heig l
-    have hN : a.N = 0 := (WD.monodromyZero_ofWeilDeligneRepClass_iff a).mp hx
-    rw [WD.lpSp, WD.lpChar_mk, WD.tempered_mk]
-    intro φ hφ
-    have hroots : ∀ α ∈ (a.ρ φ).charpoly.roots, ‖α‖ = 1 := fun α hα =>
-      heig φ hφ α (by rwa [WD.eig_mk])
-    have hq : (1 : ℝ) < ((normV w : ℕ) : ℝ) := by exact_mod_cast one_lt_normV w
-    have hp := isPurePair_scaledDiag_vecShift hq (a.semisimple φ) hroots
-      (fun i => (WDRep.spEig w l i : ℂ)) (fun i => by rw [WDRep.spEig, norm_qPow])
-    let e := TensorProduct.piScalarRight ℂ ℂ (Fin n → ℂ) (Fin l)
-    have hρ : ∀ t, e ((a.tensor (WDRep.sp (h := h) l)).ρ φ t) =
-        scaledDiag (a.ρ φ) (fun i => (WDRep.spEig w l i : ℂ)) (e t) := by
-      intro t
-      induction t using TensorProduct.inductionOn with
-      | tmul x y =>
-        ext1 i
-        simp [e, TensorProduct.piScalarRightHom_tmul, scaledDiag_apply, hφ, smul_smul]
-      | add x y hx hy => simp only [map_add (f := _), hx, hy]
-    have hshift : ∀ t, e ((a.tensor (WDRep.sp (h := h) l)).N t) = vecShift l (e t) := by
-      intro t
-      induction t using TensorProduct.inductionOn with
-      | tmul x y =>
-        ext1 i
-        by_cases hi : 1 ≤ (i : ℕ) <;>
-          simp [e, TensorProduct.piScalarRightHom_tmul, vecShift_apply, shiftEnd_apply, hN, hi]
-      | add x y hx hy => simp only [map_add (f := _), hx, hy]
-    refine hp.of_equiv e.symm (fun v => ?_) (fun v => ?_)
-    · obtain ⟨t, rfl⟩ := e.surjective v
-      rw [← hρ, e.symm_apply_apply, e.symm_apply_apply]
-    · obtain ⟨t, rfl⟩ := e.surjective v
-      rw [← hshift, e.symm_apply_apply, e.symm_apply_apply]
+  apply GlobalTheory.WeilDeligne.WD.tempered_lpChar_lpSp_of_mono0 <;> assumption
 
 theorem norm_eig_eq_of_isIrrWD : ∀ (E Ω : Type) [Field E] [NumberField E] [Field Ω] [Algebra E Ω] [IsAlgClosure E Ω] (A : ValuationSubring Ω) (w : HeightOneSpectrum (𝓞 E)) (h : IsPlaceOver A w) (x : WD h), IsIrrWD x → ∀ φ : Weil h, deg φ = 1 → ∀ α ∈ x.eig φ, ∀ β ∈ x.eig φ, ‖α‖ = ‖β‖ := GlobalTheory.T.irreducible_wd_eigen_equal_norm
 

@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.RepresentationTheoryGL.EisensteinSeries.SiegelEisensteinHalfPlane.SchwartzBruhatMajorants.ExistsSchwartzBruhatPiMajorant
 public import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.HeisenbergTheta.HeisenbergThetaConstant.ThetaC
 public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ContinuousSetIntegralOfContinuousUncurry
 public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsSummableMajorantLatticeSumStatement
@@ -52,22 +53,7 @@ namespace GlobalTheory.CompanionTheory.EpsteinThetaC
 variable {k : Type} [Field k] [NumberField k] {ι : Type} [Fintype ι] [DecidableEq ι]
 
 theorem continuous_scalC : Continuous (scalC : IdeleGroup k → GL ι 𝔸[k]) := by
-  have hinv : Continuous fun a : IdeleGroup k ↦ ((a⁻¹ : IdeleGroup k) : 𝔸[k]) :=
-    Units.continuous_val.comp continuous_inv
-  refine Units.continuous_iff.2 ⟨?_, ?_⟩
-  · refine continuous_matrix fun i j ↦ ?_
-    by_cases hij : i = j
-    · subst hij
-      simpa [Function.comp_def, scalC, Matrix.scalar_apply] using
-        (Units.continuous_val : Continuous fun a : IdeleGroup k ↦ (a : 𝔸[k]))
-    · simpa [Function.comp_def, scalC, Matrix.scalar_apply, Matrix.diagonal_apply_ne _ hij]
-        using continuous_const
-  · refine continuous_matrix fun i j ↦ ?_
-    by_cases hij : i = j
-    · subst hij
-      simpa [Function.comp_def, scalC, Matrix.scalar_apply] using hinv
-    · simpa [Function.comp_def, scalC, Matrix.scalar_apply, Matrix.diagonal_apply_ne _ hij]
-        using continuous_const
+  apply GlobalTheory.CompanionTheory.EpsteinUnfold.Hd.continuous_scalC <;> assumption
 
 theorem thetaC_ltr (A h : GL ι 𝔸[k]) (F : (ι → 𝔸[k]) → ℂ) :
     thetaC (ltr A F) h = thetaC F (A * h) := by

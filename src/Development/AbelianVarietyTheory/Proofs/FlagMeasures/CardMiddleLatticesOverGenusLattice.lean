@@ -64,36 +64,11 @@ theorem jz_apply (z : (VS D).V) (p : (D.sp.X 0).V × D.host.E) :
 
 theorem mem_Wb (v : (hS D).V) : v ∈ Wb D ↔
     (∀ a, (hS D).hT (D.sp.hypE a) v = 0) ∧ ∀ a, (hS D).hT (D.sp.hypF a) v = 0 := by
-  unfold Wb
-  rw [Formalism.MainNotions.mem_orth_iff]
-  constructor
-  · intro h
-    exact ⟨fun a => h _ (Submodule.subset_span (Or.inl ⟨a, rfl⟩)),
-      fun a => h _ (Submodule.subset_span (Or.inr ⟨a, rfl⟩))⟩
-  · rintro ⟨h1, h2⟩ x hx
-    have : Submodule.span D.host.E (Set.range D.sp.hypE ∪ Set.range D.sp.hypF) ≤
-        LinearMap.ker ((hS D).hT.flip v) := by
-      refine Submodule.span_le.2 ?_
-      rintro _ (⟨a, rfl⟩ | ⟨a, rfl⟩)
-      · exact h1 a
-      · exact h2 a
-    exact this hx
+  apply _root_.GlobalTheory.LoopC.GlueCount.mem_Wb <;> assumption
 
 theorem eq_zero_of_mem_X {T : D.host.E} (F0 : FlagG (VS D) D.R.rS T) (he : F0.e = D.sp.hypE)
     {x : (hS D).V} (hx : x ∈ F0.X) (hw : x ∈ Wb D) : x = 0 := by
-  unfold FlagG.X at hx
-  rw [he] at hx
-  obtain ⟨c, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun _).1 hx
-  have h2 := ((mem_Wb D _).1 hw).2
-  have hc : ∀ b, c b = 0 := by
-    intro b
-    have h := Formalism.MainNotions.hT_swap_zero (h2 b)
-
-    simp only [map_sum, LinearMap.sum_apply, map_smulₛₗ, LinearMap.smul_apply, D.sp.hyp_ef,
-    smul_eq_mul, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ,
-    if_true] at h
-    simpa using h
-  simp [hc]
+  apply _root_.GlobalTheory.LoopC.GlueCount.eq_zero_of_mem_X <;> assumption
 
 theorem iXY_mem_Wb (w : (D.sp.X 0).V) : D.sp.iXY 0 w ∈ Wb D :=
   (mem_Wb D _).2 ⟨fun a => Formalism.MainNotions.hT_swap_zero (D.sp.hyp_orthX a w).1,

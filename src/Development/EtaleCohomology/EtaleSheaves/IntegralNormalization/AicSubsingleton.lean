@@ -1,5 +1,6 @@
 module
 
+import Development.EtaleCohomology.EtaleSheaves.NormACPf
 public import Development.EtaleCohomology.EtaleSheaves.IntegralNormalization.NormAICOf
 import Development.EtaleCohomology.EtaleSheaves.IntegralNormalization.OpenPf
 import Mathlib.Algebra.Order.Floor.Extended
@@ -59,24 +60,7 @@ namespace LateralTheory.E.NormPf.AffPf
 
 theorem aic_intClosure {A B : Type} [CommRing A] [CommRing B] [Algebra A B] (h : GlobalTheory.EtC.AIC B) :
     GlobalTheory.EtC.AIC (integralClosure A B) := by
-  intro p hp hd
-  obtain ⟨a, ha⟩ := h (p.map (algebraMap (integralClosure A B) B)) (hp.map _)
-    (by rwa [natDegree_map_eq_of_injective Subtype.val_injective])
-  have hint : IsIntegral (integralClosure A B) a := ⟨p, hp, by rwa [eval₂_eq_eval_map]⟩
-  have hA : IsIntegral A a := by
-    first
-    | exact hint.trans
-    | exact isIntegral_trans a hint
-    | exact IsIntegral.tower_top hint
-  have hm : a ∈ integralClosure A B := hA
-  refine ⟨⟨a, hm⟩, ?_⟩
-  apply Subtype.val_injective
-  have e : ((eval (⟨a, hm⟩ : integralClosure A B) p : integralClosure A B) : B) =
-      eval a (p.map (algebraMap (integralClosure A B) B)) := by
-    rw [Polynomial.eval_map]
-    exact (Polynomial.eval₂_hom (algebraMap (integralClosure A B) B) (⟨a, hm⟩ : integralClosure A B)).symm
-  rw [e, ha]
-  rfl
+  apply LateralTheory.E.NormACPf.aic_integralClosure <;> assumption
 
 theorem aic_field (K : Type) [Field K] [IsAlgClosed K] : GlobalTheory.EtC.AIC K := by
   intro p _ hd

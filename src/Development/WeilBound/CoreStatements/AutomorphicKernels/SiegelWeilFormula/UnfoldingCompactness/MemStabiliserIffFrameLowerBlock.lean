@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.SiegelWeilActions.MemStabiliserIffFrameLowerBlock
 public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.DefsPlus
 public import Development.WeilBound.CoreStatements.AutomorphicKernels.SiegelWeilFormula.UnfoldingCompactness.IncMTranspose
 import Development.WeilBound.CoreStatements.AutomorphicKernels.EisensteinSeriesG2.AdelicHomeomorphisms.IsTopologicalGroupG2
@@ -76,31 +77,7 @@ theorem incM_GL_inv_mul (t₀ : GL (Fin n) E) : incM F (t₀⁻¹).1 * incM F t�
   rw [← incM_mul', Units.inv_mul]; ext i j; simp [incM, Matrix.one_apply]
 
 theorem mem_stabiliser_iff_frame_lower_block (hb : IsFrame2 σ Y b) (p : G2 σ Y) : p ∈ par2 σ Y ↔ (inFrame b p).toBlocks₂₁ = 0 := by
-  obtain ⟨-, t₀, ht₀⟩ := hb
-  constructor
-  · intro h
-    obtain ⟨t, ht⟩ := mem_parabolic_GL2_iff.1 h
-    exact ((isPar_frame ht₀ p t).1 ht).1
-  · intro h
-    set P := inFrame b p
-    set P' := inFrame b p⁻¹
-    have hPP : P' * P = 1 := GlobalTheory.EisBL.DoubledParabolic.inFrame_inv_mul b p
-    have h1 : P'.toBlocks₁₁ * P.toBlocks₁₁ = 1 := by
-      have := congrArg Matrix.toBlocks₁₁ hPP
-      rw [toBlocks₁₁_mul', h, Matrix.mul_zero, add_zero] at this
-      rw [this]; ext i j; simp [Matrix.toBlocks₁₁, Matrix.one_apply]
-    have h2 : P.toBlocks₁₁ * P'.toBlocks₁₁ = 1 := mul_eq_one_comm.1 h1
-    set T0 := incM F t₀.1
-    set Ti := incM F (t₀⁻¹).1
-    have hT : T0 * Ti = 1 := incM_GL_mul_inv t₀
-    let t : GL (Fin n) (AE F E) := ⟨T0 * P.toBlocks₁₁ * Ti, T0 * P'.toBlocks₁₁ * Ti, by
-        calc T0 * P.toBlocks₁₁ * Ti * (T0 * P'.toBlocks₁₁ * Ti)
-            = T0 * (P.toBlocks₁₁ * (Ti * T0) * P'.toBlocks₁₁) * Ti := by simp only [Matrix.mul_assoc]
-          _ = 1 := by rw [incM_GL_inv_mul, Matrix.mul_one, h2, Matrix.mul_one, hT], by
-        calc T0 * P'.toBlocks₁₁ * Ti * (T0 * P.toBlocks₁₁ * Ti)
-            = T0 * (P'.toBlocks₁₁ * (Ti * T0) * P.toBlocks₁₁) * Ti := by simp only [Matrix.mul_assoc]
-          _ = 1 := by rw [incM_GL_inv_mul, Matrix.mul_one, h1, Matrix.mul_one, hT]⟩
-    exact mem_parabolic_GL2_iff.2 ⟨t, (isPar_frame ht₀ p t).2 ⟨h, rfl⟩⟩
+  apply PositivityTheory.SiegelWeilFormula.Act.ComplexParameterFamilyContinuity.mem_stabiliser_iff_frame_lower_block <;> assumption
 
 theorem big_inj' (hb : IsFrame2 σ Y b) {ε : ℤˣ} {w : G2 σ Y}
     (hw : inFrame b w = Matrix.fromBlocks 0 1 (((ε : ℤ) : AE F E) • 1) 0) (hnb : IsNMap b nb) {ν ν' : nA σ Y b}

@@ -1,5 +1,6 @@
 module
 
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactlySupportedBanachModel
 public import Formalism.HermitianCurvature.StatementU
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.DilationUnipotentWeylMeasure
 public import Mathlib.LinearAlgebra.Matrix.Permutation
@@ -436,56 +437,7 @@ lemma kap_mem {Y : Mat k r} (hY : inLie k r Y) (hu : IsUnit (1 - Y).det) : kap Y
 
 lemma iot_facts {h : Mat k r} (hh : h ∈ GV k r) (hu : IsUnit (h + 1).det) :
     inLie k r (iot h) ∧ IsUnit (1 - iot h).det ∧ kap (iot h) = h := by
-  have hh' : hᴴ * Hpk k r * h = Hpk k r := hh
-  set D := h + 1 with hD
-  set C := h - 1 with hC
-  have hDD : D⁻¹ * D = 1 := Matrix.nonsing_inv_mul _ hu
-  have hDD' : D * D⁻¹ = 1 := Matrix.mul_nonsing_inv _ hu
-  have hZD : iot h * D = C := by
-    unfold iot; rw [Matrix.mul_assoc, hDD, Matrix.mul_one]
-
-  have h1Z : 1 - iot h = (2 : ℂ) • D⁻¹ := by
-    have : (1 - iot h) * D = (2 : ℂ) • (1 : Mat k r) := by
-      rw [Matrix.sub_mul, Matrix.one_mul, hZD, hD, hC]
-      rw [two_smul]; abel
-    calc 1 - iot h = (1 - iot h) * D * D⁻¹ := by rw [Matrix.mul_assoc, hDD', Matrix.mul_one]
-      _ = (2 : ℂ) • D⁻¹ := by rw [this, Matrix.smul_mul, Matrix.one_mul]
-  have hu1 : IsUnit (1 - iot h).det := by
-    rw [h1Z, Matrix.det_smul]
-    exact (IsUnit.pow _ (isUnit_iff_ne_zero.2 two_ne_zero)).mul (Matrix.isUnit_nonsing_inv_det _ hu)
-  refine ⟨?_, hu1, ?_⟩
-  ·
-    have hDu : IsUnit (Dᴴ).det := by rw [det_conjTranspose]; exact hu.star
-    have e1 : Cᴴ * Hpk k r * D = hᴴ * Hpk k r - Hpk k r * h := by
-      rw [hC, hD, conjTranspose_sub, conjTranspose_one]
-      calc (hᴴ - 1) * Hpk k r * (h + 1) = hᴴ * Hpk k r * h + hᴴ * Hpk k r - Hpk k r * h - Hpk k r := by
-            noncomm_ring
-        _ = hᴴ * Hpk k r - Hpk k r * h := by rw [hh']; abel
-    have e2 : Dᴴ * Hpk k r * C = -(hᴴ * Hpk k r - Hpk k r * h) := by
-      rw [hC, hD, conjTranspose_add, conjTranspose_one]
-      calc (hᴴ + 1) * Hpk k r * (h - 1) = hᴴ * Hpk k r * h - hᴴ * Hpk k r + Hpk k r * h - Hpk k r := by
-            noncomm_ring
-        _ = -(hᴴ * Hpk k r - Hpk k r * h) := by rw [hh']; abel
-    have e3 : Dᴴ * ((iot h)ᴴ * Hpk k r + Hpk k r * iot h) * D = 0 := by
-      have : Dᴴ * ((iot h)ᴴ * Hpk k r + Hpk k r * iot h) * D
-          = (iot h * D)ᴴ * Hpk k r * D + Dᴴ * Hpk k r * (iot h * D) := by
-        rw [conjTranspose_mul]; simp only [Matrix.mul_add, Matrix.add_mul, Matrix.mul_assoc]
-      rw [this, hZD, e1, e2, add_neg_cancel]
-    have hDH : (Dᴴ)⁻¹ * Dᴴ = 1 := Matrix.nonsing_inv_mul _ hDu
-    show (iot h)ᴴ * Hpk k r + Hpk k r * iot h = 0
-    calc (iot h)ᴴ * Hpk k r + Hpk k r * iot h
-        = (Dᴴ)⁻¹ * (Dᴴ * ((iot h)ᴴ * Hpk k r + Hpk k r * iot h) * D) * D⁻¹ := by
-          simp only [← Matrix.mul_assoc, hDH, Matrix.one_mul]
-          rw [Matrix.mul_assoc, hDD', Matrix.mul_one]
-      _ = 0 := by rw [e3, Matrix.mul_zero, Matrix.zero_mul]
-  ·
-    have hp : (1 + iot h) * D = h * ((1 - iot h) * D) := by
-      rw [Matrix.add_mul, Matrix.sub_mul, Matrix.one_mul, hZD, hD, hC]; noncomm_ring
-    have hq : 1 + iot h = h * (1 - iot h) := by
-      calc 1 + iot h = (1 + iot h) * D * D⁻¹ := by rw [Matrix.mul_assoc, hDD', Matrix.mul_one]
-        _ = h * (1 - iot h) := by rw [hp, ← Matrix.mul_assoc, Matrix.mul_assoc _ D, hDD', Matrix.mul_one]
-    unfold kap
-    rw [hq, Matrix.mul_assoc, Matrix.mul_nonsing_inv _ hu1, Matrix.mul_one]
+  apply Formalism.FourierDecayAlt.P.Ux1.iot_facts <;> assumption
 
 section smooth2
 
@@ -636,48 +588,7 @@ lemma cT_apply (A : Mat k r) : cT k r A = Aᴴ := rfl
 
 lemma tangent {g0 : Mat k r} (hg0 : g0 ∈ GV k r) {Y : J k r → ℝ} (hY : Y ∈ Dom k r) (W : J k r → ℝ) :
     inLie k r (-(fderiv ℝ (chart g0) Y W) * (chart g0 Y)⁻¹) := by
-  set c := chart g0 Y with hc
-  set T := fderiv ℝ (chart g0) Y W with hT
-  have hcG : c ∈ GV k r := chart_mem hg0 hY
-  have hcu : IsUnit c.det := Formalism.QuantumDeterminants.WeylGroupFacts.isUnit_of_uh hcG
-  set γ : ℝ → Mat k r := fun t => chart g0 (Y + t • W) with hγ
-  have hline : HasDerivAt (fun t : ℝ => Y + t • W) W 0 := by
-    have h := ((hasDerivAt_id (0:ℝ)).smul_const W).const_add Y
-    rw [one_smul] at h
-    exact h
-  have hγd : HasDerivAt γ T 0 :=
-    (chart_diff g0 hY).hasFDerivAt.comp_hasDerivAt_of_eq (0 : ℝ) hline (by simp)
-  have hγ0 : γ 0 = c := by simp [hγ, hc]
-  have h1 : HasDerivAt (fun t => cT k r (γ t)) (cT k r T) 0 :=
-    (cT k r).hasFDerivAt.comp_hasDerivAt 0 hγd
-  have h2 : HasDerivAt (fun t => mulB k r (cT k r (γ t)) (Hpk k r))
-      (mulB k r (cT k r (γ 0)) 0 + mulB k r (cT k r T) (Hpk k r)) 0 :=
-    ContinuousLinearMap.hasDerivAt_of_bilinear (fun _ => h1) (fun _ => hasDerivAt_const _ _)
-  have h3 : HasDerivAt (fun t => mulB k r (mulB k r (cT k r (γ t)) (Hpk k r)) (γ t))
-      (mulB k r (mulB k r (cT k r (γ 0)) (Hpk k r)) T +
-        mulB k r (mulB k r (cT k r (γ 0)) 0 + mulB k r (cT k r T) (Hpk k r)) (γ 0)) 0 :=
-    ContinuousLinearMap.hasDerivAt_of_bilinear (fun _ => h2) (fun _ => hγd)
-  have hev : ∀ᶠ t in 𝓝 (0:ℝ), Y + t • W ∈ Dom k r :=
-    ((continuous_const.add (continuous_id.smul continuous_const)).continuousAt (x := (0:ℝ))).preimage_mem_nhds
-      (dom_open.mem_nhds (by simpa using hY))
-  have h4 : HasDerivAt (fun t => mulB k r (mulB k r (cT k r (γ t)) (Hpk k r)) (γ t)) 0 0 := by
-    refine (hasDerivAt_const (0:ℝ) (Hpk k r)).congr_of_eventuallyEq ?_
-    filter_upwards [hev] with t ht
-    have hm : γ t ∈ GV k r := chart_mem hg0 ht
-    exact hm
-  have hz := h3.unique h4
-  simp only [mulB_apply, cT_apply, hγ0, Matrix.mul_zero, zero_add] at hz
-
-  have hci : c * c⁻¹ = 1 := Matrix.mul_nonsing_inv _ hcu
-  have hci' : (c⁻¹)ᴴ * cᴴ = 1 := by rw [← conjTranspose_mul, hci, conjTranspose_one]
-  show (-T * c⁻¹)ᴴ * Hpk k r + Hpk k r * (-T * c⁻¹) = 0
-  have : (-T * c⁻¹)ᴴ * Hpk k r + Hpk k r * (-T * c⁻¹)
-      = -((c⁻¹)ᴴ * (cᴴ * Hpk k r * T + Tᴴ * Hpk k r * c) * c⁻¹) := by
-    rw [conjTranspose_mul, conjTranspose_neg]
-    simp only [Matrix.mul_add, Matrix.add_mul, Matrix.neg_mul, Matrix.mul_neg, ← Matrix.mul_assoc, hci']
-    simp only [Matrix.mul_assoc, hci, Matrix.mul_one, Matrix.one_mul]
-    abel
-  rw [this, hz, Matrix.mul_zero, Matrix.zero_mul, neg_zero]
+  apply Formalism.FourierDecayAlt.P.Ux1.tangent <;> assumption
 
 def ebv (b : J k r) : J k r → ℝ := fun j => if b = j then 1 else 0
 
@@ -721,38 +632,7 @@ lemma hasFDeriv_chart {g0 : Mat k r} (hg0 : g0 ∈ GV k r) {H : Mat k r → E}
     (hH : CkOn ((1 : ℕ) : ℕ∞) (GV k r) H) {Y : J k r → ℝ} (hY : Y ∈ Dom k r) :
     HasFDerivAt (fun Y' => H (chart g0 Y'))
       (∑ i, (aC g0 i Y).smulRight (op true (Lt i) H (chart g0 Y))) Y := by
-  set c := chart g0 Y with hc
-  have hcG : c ∈ GV k r := chart_mem hg0 hY
-  have hcu : IsUnit c.det := Formalism.QuantumDeterminants.WeylGroupFacts.isUnit_of_uh hcG
-  obtain ⟨U, h', hU, hcU, hcd, hff⟩ := hH c hcG
-  have hdiff : DifferentiableAt ℝ h' c :=
-    (hcd.differentiableOn (cast_ne_zero 0)).differentiableAt (hU.mem_nhds hcU)
-  have hchd := chart_diff g0 hY
-  have hcomp : HasFDerivAt (fun Y' => h' (chart g0 Y'))
-      ((fderiv ℝ h' c).comp (fderiv ℝ (chart g0) Y)) Y :=
-    hdiff.hasFDerivAt.comp Y hchd.hasFDerivAt
-  have heq : (fun Y' => H (chart g0 Y')) =ᶠ[𝓝 Y] (fun Y' => h' (chart g0 Y')) := by
-    filter_upwards [hchd.continuousAt.preimage_mem_nhds (hU.mem_nhds hcU), dom_open.mem_nhds hY]
-      with Y' h1 h2
-    exact hff _ h1 (chart_mem hg0 h2)
-  refine (hcomp.congr_of_eventuallyEq heq).congr_fderiv ?_
-  ext1 W
-  rw [ContinuousLinearMap.comp_apply, _root_.sum_apply]
-  simp only [ContinuousLinearMap.smulRight_apply]
-  have hop : ∀ i, op true (Lt i) H c = fderiv ℝ h' c (-(Lt i * c)) := fun i =>
-    op_eq_op' 0 true hU hcd hff (Lt_unit i).1 c hcU hcG
-
-  simp_rw [hop, ← map_smul, ← map_sum]
-  congr 1
-  set Xv := -(fderiv ℝ (chart g0) Y W) * c⁻¹ with hXv
-  have hXl : inLie k r Xv := tangent hg0 hY W
-  have hA : ∀ i, aC g0 i Y W = kc i Xv := fun i => aC_apply g0 i Y W
-  have hXc : Xv * c = -(fderiv ℝ (chart g0) Y W) := by
-    rw [hXv, Matrix.mul_assoc, Matrix.nonsing_inv_mul _ hcu, Matrix.mul_one]
-  calc fderiv ℝ (chart g0) Y W = -(Xv * c) := by rw [hXc, neg_neg]
-    _ = -((∑ i, kc i Xv • Lt i) * c) := by rw [← expandL hXl]
-    _ = ∑ i, aC g0 i Y W • -(Lt i * c) := by
-        simp only [hA, Finset.sum_mul, Matrix.smul_mul, smul_neg, Finset.sum_neg_distrib]
+  apply Formalism.FourierDecayAlt.P.Ux1.hasFDeriv_chart <;> assumption
 
 lemma cont_chart {g0 : Mat k r} (hg0 : g0 ∈ GV k r) {H : Mat k r → E}
     (hH : CkOn ((0 : ℕ) : ℕ∞) (GV k r) H) : ContinuousOn (fun Y => H (chart g0 Y)) (Dom k r) := by

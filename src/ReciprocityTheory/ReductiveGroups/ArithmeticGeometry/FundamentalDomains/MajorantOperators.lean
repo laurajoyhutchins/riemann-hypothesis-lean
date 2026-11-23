@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.EqZeroOfSumSq
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.LminorSubmatrixCastSucc
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -232,36 +233,7 @@ theorem gI_self {z : Frame X.Ψ r} (hz : z ∈ X.dom) (u : X.Ψ → Fin r → �
 
 theorem trace_eq_sum (a : E) :
     ((Algebra.trace ℚ E a : ℚ) : ℝ) = ∑ τ : X.Ψ, 2 * (τ.1 a).re := by
-  classical
-
-  have h1 : ((Algebra.trace ℚ E a : ℚ) : ℂ) = ∑ σ : E →+* ℂ, σ a := by
-    rw [show ((Algebra.trace ℚ E a : ℚ) : ℂ) = algebraMap ℚ ℂ (Algebra.trace ℚ E a) from (eq_ratCast _ _).symm,
-      trace_eq_sum_embeddings ℂ]
-    exact Fintype.sum_equiv (RingHom.equivRatAlgHom E ℂ).symm _ _ (fun σ => rfl)
-
-  have h2 : ∑ σ ∈ X.Ψᶜ, σ a = ∑ σ ∈ X.Ψ, conj (σ a) := by
-    refine Finset.sum_nbij' ComplexEmbedding.conjugate ComplexEmbedding.conjugate ?_ ?_ ?_ ?_ ?_
-    · intro σ hσ
-      rw [Finset.mem_compl] at hσ
-      rw [X.cmType, ComplexEmbedding.involutive_conjugate E σ]
-      exact hσ
-    · intro σ hσ
-      rw [Finset.mem_compl]
-      exact (X.cmType σ).mp hσ
-    · intro σ _
-      exact ComplexEmbedding.involutive_conjugate E σ
-    · intro σ _
-      exact ComplexEmbedding.involutive_conjugate E σ
-    · intro σ _
-      rw [ComplexEmbedding.conjugate_coe_eq, Complex.conj_conj]
-  apply Complex.ofReal_injective
-  push_cast
-  rw [h1, ← Finset.sum_add_sum_compl X.Ψ (fun σ => σ a), h2, ← Finset.sum_add_distrib,
-    ← Finset.sum_coe_sort X.Ψ]
-  refine Finset.sum_congr rfl fun τ _ => ?_
-  rw [Complex.add_conj]
-  push_cast
-  ring
+  apply GlobalTheory.ArcQ.IsoTime.trace_cm <;> assumption
 
 private theorem hermC_ucomp_ucomp_of_herm_eq_zero {z : Frame X.Ψ r} {ξ : Fin r → E} (hξξ : herm X.Gm ξ ξ = 0)
     {μ ν : Fin r → E} (hμ : herm X.Gm μ ξ = 0) (hν : herm X.Gm ν ξ = 0) (τ : X.Ψ) :

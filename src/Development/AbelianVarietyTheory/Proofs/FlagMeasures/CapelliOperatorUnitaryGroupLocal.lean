@@ -1,5 +1,6 @@
 module
 
+import CompanionTheory.AutomorphicTheory.ZuckermanCommutation.CapelliEigenvalues.Transport
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CapelliEigenvalues.SmRight
 public import Formalism.FormalDegreeBessel.FormalDegreeRatio.CapelliHighestWeightConjugated
 import Mathlib.Algebra.Order.Floor.Extended
@@ -125,36 +126,7 @@ lemma foldr_congr (H : Matrix (Fin n) (Fin n) ℂ) (hKH : H⁻¹ * H = 1) (hHK :
       rdV_congr H H⁻¹ _ hKH hHK (hpart2_mem H _ hKH hHK hH) ih hx]
 
 theorem capelliH_local : PI.UnitaryGroupMassFormula.CapelliEig.Loc := by
-  intro n ε E _ _ H P Q F₁ F₂ u g hQP hPQ hH hF hg
-  have hinv := ioh_Hinv ε H P Q hQP hPQ hH
-  have hc : Pᴴ * Qᴴ = 1 := by rw [← Matrix.conjTranspose_mul, hQP, Matrix.conjTranspose_one]
-  have hHK : H * H⁻¹ = 1 := by
-    rw [hinv]
-    calc H * (Q * Jm ε * Qᴴ) = Pᴴ * (Jm ε * ((P * Q) * (Jm ε * Qᴴ))) := by
-          rw [hH]; simp only [Matrix.mul_assoc]
-      _ = Pᴴ * Qᴴ := by
-          rw [hPQ, Matrix.one_mul, ← Matrix.mul_assoc (Jm ε), Jm_mul_self, Matrix.one_mul]
-      _ = 1 := hc
-  have hKH : H⁻¹ * H = 1 := mul_eq_one_comm.mp hHK
-  have hJ : (Jm ε)ᴴ = Jm ε := by
-    unfold Jm
-    rw [Matrix.diagonal_conjTranspose]
-    congr 1
-    funext i
-    by_cases h : ε i <;> simp [h]
-  have hHh : Hᴴ = H := by
-    rw [hH]
-    simp only [Matrix.conjTranspose_mul, hJ, Matrix.conjTranspose_conjTranspose, Matrix.mul_assoc]
-  unfold capelliH qdetOp qminorOp
-  simp only [Finset.sum_apply, Pi.smul_apply]
-  refine Finset.sum_congr rfl fun σ _ => ?_
-  congr 1
-  have e1 : (List.ofFn fun k : Fin n => Formalism.QuantumDeterminants.Top (E := E) (EabH H) (u - ((k : ℕ) : ℂ)) (id (σ k)) (id k)) =
-        (List.ofFn fun k : Fin n => (u - ((k : ℕ) : ℂ), σ k, k)).map
-          fun p => Formalism.QuantumDeterminants.Top (EabH H) p.1 p.2.1 p.2.2 := by
-    rw [List.map_ofFn]; rfl
-  rw [e1]
-  exact foldr_congr H hKH hHK hHh _ hF g hg
+  apply CompanionTheory.CapEig.capelli_localization <;> assumption
 
 end GlobalTheory.CapelliLocality
 

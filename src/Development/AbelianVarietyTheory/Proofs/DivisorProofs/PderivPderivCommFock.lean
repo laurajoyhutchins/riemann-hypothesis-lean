@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CasimirFockAct1SubCasimirFockAct2
 public import Formalism.LocalRingCardinality.DataTheta
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -48,22 +49,7 @@ namespace GlobalTheory
 
 theorem pderiv_pderiv_comm_fock {σ : Type} (i j : σ) (P : MvPolynomial σ ℂ) :
     pderiv i (pderiv j P) = pderiv j (pderiv i P) := by
-  classical
-  have hc : ∀ (a b k : σ), pderiv a (pderiv b (X k : MvPolynomial σ ℂ)) = 0 := by
-    intro a b k
-    rw [pderiv_X, Pi.single_apply]
-    split_ifs
-    · exact pderiv_one
-    · exact map_zero _
-  refine MvPolynomial.induction_on (motive := fun P => pderiv i (pderiv j P) = pderiv j (pderiv i P)) P ?_ ?_ ?_
-  · intro a
-    simp
-  · intro p q hp hq
-    rw [map_add (f := _), map_add (f := _), map_add (f := _), map_add (f := _), hp, hq]
-  · intro p k hp
-    simp only [pderiv_mul, map_add (f := _), hc, mul_zero, add_zero]
-    rw [hp]
-    ring
+  apply GlobalTheory.FockCasimir.pderiv_pderiv_comm <;> assumption
 
 theorem fock_letters_ccr (p q r s : ℕ) (l m : Ln p q r s) :
     (lowB l * raiB m - raiB m * lowB l = if l = m then (1 : Module.End ℂ (Pol p q r s)) else 0) ∧

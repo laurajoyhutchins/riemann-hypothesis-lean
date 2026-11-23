@@ -108,10 +108,6 @@ theorem vol_lt_one (lam : Measure (Fv F v)) (h : IsStdV v lam) :
   have hO : lam.real (v.adicCompletionIntegers F : Set (Fv F v)) = 1 := by
     simp [measureReal_def, h.2]
   rw [hO] at key
-  have hfin : lam {t | Valued.v t < 1} ≠ ⊤ := by
-    refine ne_top_of_le_ne_top (b := lam (v.adicCompletionIntegers F : Set (Fv F v))) ?_ ?_
-    · rw [h.2]; exact ENNReal.one_ne_top
-    · exact measure_mono fun t (ht : Valued.v t < 1) => (le_of_lt ht : Valued.v t ≤ 1)
   refine ENNReal.eq_inv_of_mul_eq_one_left ?_
   refine (ENNReal.toReal_eq_one_iff _).1 ?_
   rw [ENNReal.toReal_mul, ENNReal.toReal_natCast]

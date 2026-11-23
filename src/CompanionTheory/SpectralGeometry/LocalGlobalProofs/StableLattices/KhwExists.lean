@@ -91,7 +91,6 @@ theorem reorder (n : ℕ) (ε : Fin n → Bool) (γ : Fin n → ℤ) (hγ : ∀ 
   · by_contra h
     have := hm (not_lt.1 h)
     simp only [Function.comp, Equiv.apply_symm_apply, f, he] at this
-    have h' : (c : ℕ) < d := hcd
     split_ifs at this <;> omega
   · have h := hm hij
     simp only [Function.comp, f] at h

@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DetOneAddOfSq
 public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.QuotientVanishing.LocalQuotientIntegrals.OneVanish
 import Mathlib.Algebra.Module.StablyFree.Basic
 import Mathlib.Algebra.Order.Floor.Extended
@@ -132,17 +133,7 @@ theorem exists_ginv {K : Type} [Field K] {r m : ℕ} (A : Matrix (Fin r) (Fin m)
 
 theorem exists_left (v : InfinitePlace E) (W : Submodule E (Fin n → E)) :
     ∃ L : Matrix (Fin (Module.finrank E W)) (Fin n) ℂ, L * (basisMat W).map v.embedding = 1 := by
-  obtain ⟨B, hB⟩ := exists_ginv (basisMat W)
-  have hinj : Function.Injective (basisMat W).mulVec := by
-    refine Matrix.mulVec_injective_iff.2 ?_
-    exact (Module.finBasis E W).linearIndependent.map' W.subtype (Submodule.ker_subtype W)
-  have hBM : B * basisMat W = 1 := by
-    apply Matrix.mulVec_injective
-    funext c
-    apply hinj
-    rw [Matrix.one_mulVec, Matrix.mulVec_mulVec, ← Matrix.mul_assoc, hB]
-  refine ⟨B.map v.embedding, ?_⟩
-  rw [← Matrix.map_mul, hBM, Matrix.map_one _ (map_zero _) (map_one _)]
+  apply _root_.GlobalTheory.CompanionTheory.LocFlagPf.exists_left <;> assumption
 
 theorem gram_re_pos {r : ℕ} (B : Matrix (Fin n) (Fin r) ℂ) (L : Matrix (Fin r) (Fin n) ℂ) (hL : L * B = 1) :
     0 < (Bᴴ * B).det.re := by

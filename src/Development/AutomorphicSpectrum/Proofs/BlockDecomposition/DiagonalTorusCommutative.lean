@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.MonomialOfConjTorus
 public import Development.WeilBound.RepresentationTheoryGL.TwistedFactors.LocalBaseChange.ElementaryCosets.CosetMap
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -70,24 +71,7 @@ theorem stdBlocks_ones_eq (N : ℕ) (a : Fin N) (i : Fin (ones N a)) :
 
 theorem offDiag_of_mem {N : ℕ} {x : GL (Fin N) k} (hx : x ∈ Tor k N) {i j : Fin N} (hij : i ≠ j) :
     (x : Matrix (Fin N) (Fin N) k) i j = 0 := by
-  rw [Tor, MonoidHom.mem_range] at hx
-  obtain ⟨s, rfl⟩ := hx
-  obtain ⟨⟨a, p⟩, rfl⟩ := (stdBlocks (ones N) (sum_ones N)).surjective i
-  obtain ⟨⟨b, q⟩, rfl⟩ := (stdBlocks (ones N) (sum_ones N)).surjective j
-  have hab : a ≠ b := by
-    rintro rfl
-    apply hij
-    have hp : (p : ℕ) = 0 := by
-      have := p.isLt
-      simp only [ones] at this
-      omega
-    have hq : (q : ℕ) = 0 := by
-      have := q.isLt
-      simp only [ones] at this
-      omega
-    have hpq : p = q := Fin.ext (hp.trans hq.symm)
-    rw [hpq]
-  simp [leviEmb, Matrix.blockDiagonal'_apply, hab]
+  apply GlobalTheory.CompanionTheory.LbElem.ConjMonomial.tor_offDiag <;> assumption
 
 theorem diag_ne_zero {N : ℕ} (x : GL (Fin N) k)
     (h : ∀ i j : Fin N, i ≠ j → (x : Matrix (Fin N) (Fin N) k) i j = 0) (i : Fin N) :
@@ -106,29 +90,7 @@ theorem diag_ne_zero {N : ℕ} (x : GL (Fin N) k)
 
 theorem mem_of_offDiag {N : ℕ} (x : GL (Fin N) k)
     (h : ∀ i j : Fin N, i ≠ j → (x : Matrix (Fin N) (Fin N) k) i j = 0) : x ∈ Tor k N := by
-  rw [Tor, MonoidHom.mem_range]
-  refine ⟨(fun a => Matrix.GeneralLinearGroup.scalar _
-    (Units.mk0 ((x : Matrix (Fin N) (Fin N) k) a a) (diag_ne_zero x h a)) : Levi k (Bl (ones N))), ?_⟩
-  apply Units.ext
-  ext i j
-  obtain ⟨⟨a, p⟩, rfl⟩ := (stdBlocks (ones N) (sum_ones N)).surjective i
-  obtain ⟨⟨b, q⟩, rfl⟩ := (stdBlocks (ones N) (sum_ones N)).surjective j
-  by_cases hab : a = b
-  · subst hab
-    have hpq : p = q := by
-      apply Fin.ext
-      have hp := p.isLt
-      have hq := q.isLt
-      simp only [ones] at hp hq
-      omega
-    subst hpq
-    have hs : ((stdBlocks (ones N) (sum_ones N)).symm a).fst = a := by
-      have hh := stdBlocks_ones_eq N ((stdBlocks (ones N) (sum_ones N)).symm a).fst
-        ((stdBlocks (ones N) (sum_ones N)).symm a).snd
-      simpa using hh.symm
-    simp [leviEmb, stdBlocks_ones_eq, Matrix.GeneralLinearGroup.scalar, hs]
-  · rw [h _ _ (fun heq => hab (congrArg Sigma.fst ((stdBlocks (ones N) (sum_ones N)).injective heq)))]
-    simp [leviEmb, Matrix.blockDiagonal'_apply, hab]
+  apply GlobalTheory.CompanionTheory.LbElem.ConjMonomial.mem_tor_of_offDiag <;> assumption
 
 theorem eq_diagonal {N : ℕ} (M : Matrix (Fin N) (Fin N) k)
     (h : ∀ i j : Fin N, i ≠ j → M i j = 0) : M = Matrix.diagonal fun i => M i i := by

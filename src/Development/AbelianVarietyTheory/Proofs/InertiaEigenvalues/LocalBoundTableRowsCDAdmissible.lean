@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RowBoundsOfAllLettersThick
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.BoundAtTwoThreeFamily
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocalBoundTableFromDataRowBRowEntries
 import Mathlib.Algebra.Order.Floor.Extended
@@ -70,21 +71,7 @@ theorem etaP_nonneg {D : D7} (L : SizeData₂ D) : 0 ≤ TwistedPlaces.eta₃ L 
   positivity
 
 theorem placeWeight_nonneg {D : D7} (L : SizeData₂ D) : 0 ≤ TwistedPlaces.wP L := by
-  have hb : 0 < L.sc.b' := by
-    unfold Scale.b' Scale.a Scale.X'
-    have := RowBSize.x_pos' L
-    have := RowBSize.one_le_b' L
-    positivity
-  have h1 : 0 ≤ L.sc.w'' D.R.n := by
-    unfold Scale.w''
-    have := RowBSize.x_pos' L
-    positivity
-  unfold TwistedPlaces.wP TwistedPlaces.wB
-  have h2 := L.etaSz_pos
-  have h4 : L.sc.w'' D.R.n + L.etaSz ≤ max (L.sc.w'' D.R.n + L.etaSz)
-      ((⨆ t : D.host.TT, (L.bT t : ℝ)) + L.sc.b' / L.sc.x + L.etaSz) := le_max_left _ _
-  have h5 : (0:ℝ) ≤ D.R.t := by positivity
-  linarith
+  apply GlobalTheory.RowsThick.placeWeight_nonneg <;> assumption
 
 theorem coreE_nonneg {D : D7} (L : SizeData₂ D) (l : ℕ) : 0 ≤ coreE L l := by
   unfold coreE

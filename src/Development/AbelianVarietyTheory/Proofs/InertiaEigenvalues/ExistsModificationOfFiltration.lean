@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LatticeBasisFrobeniusEquationDisc
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsStratHom
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.AcrisTorsionFreeComplete
 import Development.AbelianVarietyTheory.CrystallinePeriods.RingBasics
@@ -72,24 +73,7 @@ theorem mulFil {l : ℕ} [Fact l.Prime]
 theorem mul_comm_of_scalar {R : Type} [CommRing R] [IsDomain R] {d : ℕ} (X X' : Matrix (Fin d) (Fin d) R)
     (a : R) (ha : a ≠ 0) (h : X * X' = a • (1 : Matrix (Fin d) (Fin d) R)) :
     X' * X = a • (1 : Matrix (Fin d) (Fin d) R) := by
-  have hdet : X.det ≠ 0 := by
-    intro h0
-    have := congrArg Matrix.det h
-    rw [Matrix.det_mul, h0, zero_mul, Matrix.det_smul, Matrix.det_one, mul_one] at this
-    exact pow_ne_zero _ ha this.symm
-  have h1 : X * (X' * X - a • 1) = 0 := by
-    rw [Matrix.mul_sub, ← Matrix.mul_assoc, h, Matrix.smul_mul, Matrix.mul_smul, Matrix.one_mul, Matrix.mul_one,
-      sub_self]
-  have h2 : X.det • (X' * X - a • 1) = 0 := by
-    have : X.det • (X' * X - a • 1) = (X.adjugate * X) * (X' * X - a • 1) := by
-      rw [Matrix.adjugate_mul, Matrix.smul_mul, Matrix.one_mul]
-    rw [this, Matrix.mul_assoc, h1, Matrix.mul_zero]
-  have h3 : X' * X - a • 1 = 0 := by
-    ext i j
-    have := congrFun (congrFun h2 i) j
-    simp only [Matrix.smul_apply, smul_eq_mul, Matrix.zero_apply] at this
-    simpa using (mul_eq_zero.1 this).resolve_left hdet
-  exact sub_eq_zero.1 h3
+  apply GlobalTheory.BSP.mul_eq_smul_one_comm <;> assumption
 
 theorem map_smul_ringHom {R S : Type} [CommRing R] [CommRing S] {p q : Type} (f : R →+* S) (a : R)
     (M : Matrix p q R) : (a • M).map f = f a • M.map f := by

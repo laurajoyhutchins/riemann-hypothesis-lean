@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.ThetaLifts.LatticeBasics.RealInvL
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
 public import Development.WeilBound.ThetaLifts.SchwartzMoments.NormIterComp
 public import Development.WeilBound.ThetaLifts.SchwartzMoments.SchwartzDqTendsto
@@ -78,25 +79,7 @@ theorem dop_apply (a : V) (L : V →L[ℝ] ℝ) (f : 𝓢(V, ℂ)) (x : V) :
 
 theorem hasDerivAt_hl (a : V) (L : V →L[ℝ] ℝ) (f : 𝓢(V, ℂ)) (x : V) :
     HasDerivAt (fun t : ℝ => hl a L t f x) (dop a L f x) 0 := by
-  have h1 : HasDerivAt (fun t : ℝ => t * L x + t ^ 2 * (L a / 2)) (L x) 0 := by
-    have a1 : HasDerivAt (fun t : ℝ => t * L x) (L x) 0 := by simpa using (hasDerivAt_id (0 : ℝ)).mul_const (L x)
-    have a2 : HasDerivAt (fun t : ℝ => t ^ 2 * (L a / 2)) 0 0 := by
-      simpa using ((hasDerivAt_id (0 : ℝ)).pow 2).mul_const (L a / 2)
-    simpa using a1.fun_add a2
-  have h2 : HasDerivAt (fun t : ℝ => Complex.exp (-(2 * Real.pi * Complex.I) * ((t * L x + t ^ 2 * (L a / 2) : ℝ) : ℂ)))
-      (-(2 * Real.pi * Complex.I) * (L x : ℂ)) 0 := by
-    have := ((h1.ofReal_comp).const_mul (-(2 * Real.pi * Complex.I))).cexp
-    simpa using this
-  have h3 : HasDerivAt (fun t : ℝ => x + t • a) a 0 := by
-    simpa using ((hasDerivAt_id (0 : ℝ)).smul_const a).const_add x
-  have h4 : HasDerivAt (fun t : ℝ => f (x + t • a)) (fderiv ℝ f x a) 0 := by
-    have hf : HasFDerivAt f (fderiv ℝ f x) (x + (0 : ℝ) • a) := by
-      simpa using f.hasFDerivAt x
-    exact hf.comp_hasDerivAt (0 : ℝ) h3
-  refine (h2.fun_mul h4).congr_deriv ?_
-  rw [dop_apply]
-  simp
-  ring
+  apply GlobalTheory.ThK.Dbl.Dense.hasDerivAt_hl <;> assumption
 end Line
 
 
@@ -154,59 +137,7 @@ theorem hl_schwartz (a : V) (L : V →L[ℝ] ℝ) (f : 𝓢(V, ℂ)) (t : ℝ) :
 theorem hl_line_deriv (a : V) (L : V →L[ℝ] ℝ) (f : 𝓢(V, ℂ)) :
     ∃ G : ℝ → 𝓢(V, ℂ), (∀ t x, G t x = hl a L t f x) ∧
       (a ≠ 0 → ∀ T : 𝓢(V, ℂ) →L[ℂ] ℂ, HasDerivAt (fun t => T (G t)) (T (dop a L f)) 0) := by
-  choose G hG using hl_schwartz a L f
-  refine ⟨G, hG, fun ha T => ?_⟩
-  have hna : ‖a‖ ≠ 0 := norm_ne_zero_iff.2 ha
-  obtain ⟨g₀, -, hg₀⟩ := exists_dual_vector ℝ a hna
-  set lam : V →L[ℝ] ℝ := ‖a‖⁻¹ • g₀ with hlam
-  have hla : lam a = 1 := by
-    simp only [hlam, ContinuousLinearMap.smul_apply, hg₀, smul_eq_mul]
-    simpa using inv_mul_cancel₀ hna
-  set q : V → ℝ := fun x => lam x * L x + (-(L a / 2)) * (lam x * lam x) with hq
-  have hqt : q.HasTemperateGrowth :=
-    (lam.hasTemperateGrowth.mul L.hasTemperateGrowth).add
-      ((Function.HasTemperateGrowth.const _).mul (lam.hasTemperateGrowth.mul lam.hasTemperateGrowth))
-  have hdiff : ∀ (x : V) (t : ℝ), q (x + t • a) - q x = t * L x + t ^ 2 * (L a / 2) := fun x t => by
-    simp only [hq, map_add (f := _), map_smul, hla, smul_eq_mul]
-    ring
-  have t1 := chirp_tg 1 hqt
-  have t2 := chirp_tg (-1) hqt
-  set P := SchwartzMap.smulLeftCLM ℂ (chirp 1 q) with hP
-  set Pi := SchwartzMap.smulLeftCLM ℂ (chirp (-1) q) with hPi
-  set g : 𝓢(V, ℂ) := P f with hg
-  have hGe : ∀ t, G t = Pi (SchwartzMap.compSubConstCLM ℂ (-(t • a)) g) := fun t => by
-    ext x
-    rw [hG, hPi, SchwartzMap.smulLeftCLM_apply_apply t2, SchwartzMap.compSubConstCLM_apply, sub_neg_eq_add, hg, hP,
-      SchwartzMap.smulLeftCLM_apply_apply t1, hl, ← hdiff]
-    simp only [smul_eq_mul]
-    rw [← mul_assoc, mul_comm (chirp (-1) q x), chirp_mul]
-  have hf : Pi g = f := by
-    ext x
-    rw [hPi, SchwartzMap.smulLeftCLM_apply_apply t2, hg, hP, SchwartzMap.smulLeftCLM_apply_apply t1]
-    simp only [smul_eq_mul]
-    rw [← mul_assoc, chirp_one, one_mul]
-  have hG0 : G 0 = f := by
-    ext x
-    rw [hG]
-    simp [hl]
-  have hder : ∀ T₁ : 𝓢(V, ℂ) →L[ℂ] ℂ, HasDerivAt (fun t => T₁ (G t)) (T₁ (Pi (∂_{a} g))) 0 := fun T₁ => by
-    rw [hasDerivAt_iff_tendsto_slope_zero]
-    have h := PositivityTheory.ThKOwn.schwartz_dq_tendsto g a
-    have h2 := (((T₁.comp Pi).restrictScalars ℝ).continuous.tendsto _).comp h
-    refine h2.congr fun t => ?_
-    simp only [Function.comp, map_smul, map_sub, ContinuousLinearMap.coe_restrictScalars', ContinuousLinearMap.comp_apply,
-      zero_add, hG0, hGe, hf]
-  have hid : Pi (∂_{a} g) = dop a L f := by
-    ext x
-    have h1 := hder (BoundedContinuousFunction.evalCLM ℂ x ∘L SchwartzMap.toBoundedContinuousFunctionCLM ℂ V ℂ)
-    have e : (fun t => (BoundedContinuousFunction.evalCLM ℂ x ∘L SchwartzMap.toBoundedContinuousFunctionCLM ℂ V ℂ) (G t)) =
-        fun t => hl a L t f x := by
-      funext t
-      exact hG t x
-    rw [e] at h1
-    exact h1.unique (hasDerivAt_hl a L f x)
-  rw [← hid]
-  exact hder T
+  apply GlobalTheory.ThK.Dbl.Dense.hl_line_deriv <;> assumption
 
 theorem exists_bump : ∃ φ : 𝓢(ℝ, ℂ), ∀ᶠ t in 𝓝 (0 : ℝ), φ t = 1 := by
   let b : ContDiffBump (0 : ℝ) := default

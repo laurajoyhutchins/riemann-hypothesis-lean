@@ -241,10 +241,6 @@ theorem sum_adD_eq_LX {X : Matrix (Fin n) (Fin n) ℂ} (hX : Xᴴ = -X) (w : Fin
   rw [LX_apply]
   obtain ⟨x1, x2⟩ := x
   unfold adD IsPhys
-  have hst : ∀ c d : Fin n, star ((1 : Matrix (Fin n) (Fin n) ℂ) c d) = (1 : Matrix (Fin n) (Fin n) ℂ) c d := by
-    intro c d
-    rw [Matrix.one_apply]
-    split_ifs <;> simp
   by_cases hx : ε x1 = true ∧ ε x2 = false
   · simp only [hx, true_and, if_true]
     rw [Fintype.sum_prod_type]

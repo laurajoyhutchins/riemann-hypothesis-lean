@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ThetaLevelAbelianSchemeConstOverDualNumbers
 public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsGaloisCover
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.EigLatBasis
 public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.FormallyUnramifiedOfTangentMapInjective
@@ -71,21 +72,7 @@ namespace GlobalTheory.LevelQuotUnram
 open GlobalTheory.TangentCrit (dualPt dualBase dualPt_dualBase dualPt_dualBase_assoc)
 
 lemma subsingleton_sp_dual (k : Type) [Field k] : Subsingleton (Sp (DualNumber k)) := by
-  refine ⟨fun a b => ?_⟩
-  have key : ∀ a : PrimeSpectrum (DualNumber k), a.asIdeal = RingHom.ker (TrivSqZeroExt.fstHom k k k).toRingHom := by
-    intro a
-    ext d
-    constructor
-    · intro hd
-      by_contra h
-      exact a.isPrime.ne_top (Ideal.eq_top_of_isUnit_mem _ hd
-        (TrivSqZeroExt.isUnit_iff_isUnit_fst.mpr (IsUnit.mk0 _ h)))
-    · intro hd
-      have h : d.fst = 0 := hd
-      refine a.isPrime.mem_of_pow_mem 2 ?_
-      have : d ^ 2 = 0 := by ext1 <;> simp [pow_two, h]
-      rw [this]; exact a.asIdeal.zero_mem
-  exact PrimeSpectrum.ext ((key a).trans (key b).symm)
+  apply GlobalTheory.ConstTheta.subsingleton_sp <;> assumption
 
 lemma dualMap_cancel {k K : Type} [Field k] [Field K] (f : k →+* K) {X : Scheme.{0}}
     {g g' : Sp (DualNumber k) ⟶ X} (h : spMap (Chart.dualMapR f) ≫ g = spMap (Chart.dualMapR f) ≫ g') : g = g' := by

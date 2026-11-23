@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.CoefBTensSubKStable
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.HidaSetting
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.CoefAInnerEqZero
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.StdGap
@@ -182,13 +183,7 @@ theorem coefB_sum_ite_right (a : Fin n) (x : D) (v : Fin n → D) :
 
 theorem coefB_isKUnitary (dual : Bool) {ε : Fin n → Bool} {E : Fin n → Fin n → Module.End ℂ D}
     (hU : IsKUnitary ε E) : IsKUnitary ε (fun a b => coefTr (tensF dual E a b)) := by
-  intro a b hab u v
-  simp only [coefTr_apply, PiLp.inner_apply, PiLp.toLp_apply]
-  cases dual
-  · simp only [tensF, cond_false, tensV_coord, inner_add_left, inner_add_right,
-      Finset.sum_add_distrib, hU a b hab, coefB_sum_ite_left, coefB_sum_ite_right]
-  · simp only [tensF, cond_true, tensVd_coord, inner_sub_left, inner_sub_right,
-      Finset.sum_sub_distrib, hU a b hab, coefB_sum_ite_left, coefB_sum_ite_right]
+  apply ReciprocityTheory.ChartRestriction.DS.coefB_isKUnitary <;> assumption
 
 end Tr
 
@@ -200,20 +195,7 @@ variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] {ε : Fin 
 
 theorem coefB_tensSub_kStable (dual : Bool) {S : Submodule ℂ D} (hS : IsKStableSub ε E S) :
     IsKStableSub ε (tensF dual E) (tensSub S) := by
-  intro a b hab u hu
-  have hu' : ∀ c, u c ∈ S := fun c => (Submodule.mem_pi.1 hu) c (Set.mem_univ c)
-  refine Submodule.mem_pi.2 fun c _ => ?_
-  cases dual
-  · simp only [tensF, cond_false, tensV_coord]
-    refine S.add_mem (hS a b hab _ (hu' c)) ?_
-    split_ifs
-    · exact hu' b
-    · exact S.zero_mem
-  · simp only [tensF, cond_true, tensVd_coord]
-    refine S.sub_mem (hS a b hab _ (hu' c)) ?_
-    split_ifs
-    · exact hu' a
-    · exact S.zero_mem
+  apply ReciprocityTheory.ChartRestriction.DS.coefB_tensSub_kStable <;> assumption
 
 theorem coefB_casimirK_mem {X : Type*} [AddCommGroup X] [Module ℂ X]
     {A : Fin n → Fin n → Module.End ℂ X} {S : Submodule ℂ X} (hS : IsKStableSub ε A S) {x : X}

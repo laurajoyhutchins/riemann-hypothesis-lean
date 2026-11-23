@@ -1,5 +1,6 @@
 module
 
+import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.OrderReduction.IsomorphismTransport
 public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.DivisorReduction.AmbientBlowupSequence
 public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.CanonicalPrincipalization
 public import Development.ResolutionOfSingularities.EmbeddedResolution.IdealPrincipalization.DivisorReduction.DivisorFamilyCenters
@@ -70,22 +71,7 @@ theorem isPushforwardSequenceOfBlowups_of_length_eq_zero {S X : Scheme.{u}} (ι 
     [IsClosedImmersion ι] (BS : SequenceOfBlowups S) (B : SequenceOfBlowups X)
     (hlenZero : BS.length = 0) (hB : B.length = 0) :
     IsPushforwardBlowupSeq ι BS B := by
-  have key : ∀ i : ℕ, i ≤ BS.length → i = 0 := by
-    intro i hi
-    omega
-  unfold IsPushforwardBlowupSeq
-  refine ⟨by omega, fun i hi =>
-      eqToHom (congrArg BS.schemeAt (key i hi)) ≫ BS.isoZero.hom ≫ ι ≫ B.isoZero.inv ≫
-        eqToHom (congrArg B.schemeAt (key i hi)).symm, ?_, ?_, ?_, ?_, ?_⟩
-  · intro i _
-    infer_instance
-  · simp
-  · intro i hi
-    exact absurd hi (by omega)
-  · intro i hi
-    exact absurd hi (by omega)
-  · intro i hi
-    exact absurd hi (by omega)
+  apply FunctorialResolution.EmbeddedResolution.IsPushforwardBlowupSeq.of_length_eq_zero <;> assumption
 
 theorem isPushforwardBlowupSeq_toSequenceOfBlowups_of_ofMarkedSequence (T : MarkedIdealWithBoundary.{u}) (s : T.SequenceOfBlowups)
     {Y : Scheme.{u}} (ι : T.scheme ⟶ Y) [IsClosedImmersion ι] (B : SequenceOfBlowups Y)

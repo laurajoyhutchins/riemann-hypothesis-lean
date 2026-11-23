@@ -247,7 +247,6 @@ theorem measure_quad [SecondCountableTopology K] [IsTopologicalRing K] (lam : Me
     lam {t | Valued.v t < 1 ∧ a * t + c * t ^ 2 ∈ A} = lam (A ∩ {s | Valued.v s < 1}) := by
   have hMo : IsOpen {s : K | Valued.v s < 1} :=
     isOpen_ball_of_isRadius ⟨1, by rw [Units.val_one, map_one]⟩
-  have hM : MeasurableSet {s : K | Valued.v s < 1} := hMo.measurableSet
   have hf : Measurable (fun t : K => a * t + c * t ^ 2) := by
     apply Continuous.measurable
     fun_prop

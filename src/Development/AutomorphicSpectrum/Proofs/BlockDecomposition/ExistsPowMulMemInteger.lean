@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ValuationLtOneOfDiv
 public import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaBound.FormQuasiInvariantMirabolic
 import GroundTheory.LocalFields.LocalFourierHaar
 import Mathlib.Algebra.Order.Floor.Extended
@@ -59,24 +60,7 @@ variable {F : Type} [Field F] [ValuativeRel F] [TopologicalSpace F] [IsNonarchim
 open GroundTheory.Automorphic.GLnLocal in
 theorem exists_pow_mul_mem_integer (a : F) :
     ∃ M : ℕ, (uniformizer F : F) ^ M * a ∈ 𝒪[F] := by
-  by_cases ha : a ∈ 𝒪[F]
-  · exact ⟨0, by simpa using ha⟩
-  · have ha0 : a ≠ 0 := fun h => ha (h ▸ zero_mem _)
-    have hinv : a⁻¹ ∈ 𝒪[F] := by
-      rw [Valuation.mem_integer_iff] at ha ⊢
-      rw [map_inv₀]
-      exact inv_le_one_of_one_le₀ (le_of_lt (not_le.mp ha))
-    have hne : (⟨a⁻¹, hinv⟩ : 𝒪[F]) ≠ 0 := fun h => inv_ne_zero ha0 (congrArg Subtype.val h)
-    obtain ⟨n, u, hu⟩ := IsDiscreteValuationRing.eq_unit_mul_pow_irreducible hne (irreducible_uniformizer F)
-    refine ⟨n, ?_⟩
-    have hu' : ((u⁻¹ : (𝒪[F])ˣ) : 𝒪[F]) * (⟨a⁻¹, hinv⟩ : 𝒪[F]) = uniformizer F ^ n := by
-      rw [hu, ← mul_assoc, Units.inv_mul, one_mul]
-    have h2 := congrArg Subtype.val hu'
-    push_cast at h2
-    have key : (uniformizer F : F) ^ n * a = (((u⁻¹ : (𝒪[F])ˣ) : 𝒪[F]) : F) := by
-      rw [← h2, mul_assoc, inv_mul_cancel₀ ha0, mul_one]
-    rw [key]
-    exact SetLike.coe_mem _
+  apply GlobalTheory.CompanionTheory.SatakeBound.LargeLattice.exists_pow_mul_mem <;> assumption
 
 
 open GroundTheory.Automorphic.GLnLocal in

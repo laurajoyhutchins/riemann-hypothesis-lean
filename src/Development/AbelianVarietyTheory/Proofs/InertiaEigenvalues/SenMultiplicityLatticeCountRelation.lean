@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GmultEqZeroOfInj
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.PowerSeriesOneAddConstMulXMulInv
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GenEigenMultiplicityQuotientAdditiveChain
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NabBijectiveWindow
@@ -130,23 +131,7 @@ theorem exists_le_sup_sh {N : Submodule k⟦X⟧ V} (hN : IsLat N) (m : ℕ) :
 theorem graded_inj {l : ℕ} (R : RingPG k l) {g : V →ₗ[k] V} (hg : Semi R.γ g) {N : Submodule k⟦X⟧ V}
     (hN : N.FG) (hC : CondC g N) (b : ℤ) (x : k) (h : sen g N (x + b) = 0) :
     ∀ y ∈ sh b N, nab g y - x • y ∈ sh (b + 1) N → y ∈ sh (b + 1) N := by
-  haveI := Window.finite_quot hN
-  obtain ⟨h1, -⟩ := Window.bij_of_gmult_zero (nab g) (N.restrictScalars k) ((sh 1 N).restrictScalars k)
-    (fun p hp => Window.nab_mem hC hp) (fun p hp => Window.nab_mem_sh R hg hC 1 hp) (x + b) h
-  have hv : vv k ≠ 0 := vv_ne_zero k
-  intro y hx hx'
-  obtain ⟨n, hn, rfl⟩ := mem_sh_iff_exists.mp hx
-  obtain ⟨n', hn', e⟩ := Window.nab_shift R hg hC b hn
-  obtain ⟨t, ht, e'⟩ := mem_sh_iff_exists.mp hx'
-  have hc : x • vv k ^ b • n = vv k ^ b • x • n := by
-    rw [← smul_assoc, const_smul_eq, mul_comm, mul_smul, ← mul_one (algebraMap k k⸨X⸩ x), ← const_smul_eq,
-      smul_assoc, one_smul]
-  rw [e, hc, zpow_add_one₀ hv, mul_smul, ← smul_sub] at e'
-  have e2 := smul_right_injective V (zpow_ne_zero b hv) e'
-  have : n ∈ sh 1 N := h1 n hn (mem_sh_iff_exists.mpr ⟨t - n', N.sub_mem ht hn', by
-    rw [zpow_one, smul_sub, e2, add_smul]; abel⟩)
-  obtain ⟨r, hr, rfl⟩ := mem_sh_iff_exists.mp this
-  exact mem_sh_iff_exists.mpr ⟨r, hr, by rw [zpow_add₀ hv, mul_smul]⟩
+  apply GlobalTheory.PhiGam.Compare.graded_inj <;> assumption
 
 theorem window_inj {l : ℕ} (R : RingPG k l) {g : V →ₗ[k] V} (hg : Semi R.γ g) {N : Submodule k⟦X⟧ V}
     (hN : N.FG) (hC : CondC g N) (x : k) (s : ℕ) (h : ∀ j : ℕ, 1 ≤ j → j ≤ s → sen g N (x - j) = 0) :

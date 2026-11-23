@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsValueAtJetPointCmFrameSection
 public import Development.AbelianVarietyTheory.Definitions.ThetaValues.ThConst
 public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DifferentiableOnOfTendstoLocallyUniformlyOn
 public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.FderivEqOfJetOf
@@ -61,27 +62,7 @@ namespace GlobalTheory.AnVal.JetCorr
 
 theorem jet_point_eq {K : Type} [Field K] {J : Type} {m : ℕ} (p : PrimeSpectrum (Jet K J m)) :
     p = IsLocalRing.closedPoint (Jet K J m) := by
-  apply PrimeSpectrum.ext
-  refine le_antisymm (IsLocalRing.le_maximalIdeal p.isPrime.ne_top) fun a ha => ?_
-  have hn : IsNilpotent a := by
-    obtain ⟨q, rfl⟩ := Ideal.Quotient.mk_surjective a
-    have hn := jet_nilpotent_of_orig K J m (sub_const_mem_orig (R := K) q)
-    have h0 : MvPolynomial.constantCoeff q = 0 := by
-      by_contra hne
-      refine (IsLocalRing.mem_maximalIdeal _).mp ha ?_
-      have e : algebraMap K (Jet K J m) (MvPolynomial.constantCoeff q) =
-          Ideal.Quotient.mk (orig K J ^ (m + 1)) (MvPolynomial.C (MvPolynomial.constantCoeff q)) := by
-        rw [← MvPolynomial.algebraMap_eq]; rfl
-      have hsplit : Ideal.Quotient.mk (orig K J ^ (m + 1)) q =
-          algebraMap K (Jet K J m) (MvPolynomial.constantCoeff q) +
-            Ideal.Quotient.mk (orig K J ^ (m + 1)) (q - MvPolynomial.C (MvPolynomial.constantCoeff q)) := by
-        rw [map_sub, e, add_sub_cancel]
-      rw [hsplit]
-      exact IsNilpotent.isUnit_add_left_of_commute hn
-        ((isUnit_iff_ne_zero.mpr hne).map (algebraMap K (Jet K J m))) (Commute.all _ _)
-    rwa [h0, map_zero, sub_zero] at hn
-  obtain ⟨n, hn⟩ := hn
-  exact p.isPrime.mem_of_pow_mem n (hn ▸ p.asIdeal.zero_mem)
+  apply GlobalTheory.JetVal.jet_pt_eq <;> assumption
 
 section JetOf
 

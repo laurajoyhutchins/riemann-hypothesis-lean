@@ -73,13 +73,6 @@ private theorem evalV_singleV_self' {F : Type} [Field F] [NumberField F]
       (RestrictedProduct.single (fun w => HeightOneSpectrum.adicCompletionIntegers F w) v c) = c
      simp
      done)
-  | (change (RestrictedProduct.single (fun w => HeightOneSpectrum.adicCompletionIntegers F w) v c) v = c
-     simp
-     done)
-  | (change (RestrictedProduct.single (fun w => HeightOneSpectrum.adicCompletionIntegers F w) v c) v = c
-     exact RestrictedProduct.single_eq_same _ v c)
-  | (change (RestrictedProduct.single (fun w => HeightOneSpectrum.adicCompletionIntegers F w) v c) v = c
-     rfl)
 
 private theorem evalV_singleV_of_ne {F : Type} [Field F] [NumberField F]
     {v w : HeightOneSpectrum (𝓞 F)} (hw : w ≠ v) (c : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.Fv F v) :
@@ -95,13 +88,6 @@ private theorem evalV_singleV_of_ne {F : Type} [Field F] [NumberField F]
       (RestrictedProduct.single (fun u => HeightOneSpectrum.adicCompletionIntegers F u) v c) = 0
      simp [hw]
      done)
-  | (change (RestrictedProduct.single (fun u => HeightOneSpectrum.adicCompletionIntegers F u) v c) w = 0
-     simp [hw]
-     done)
-  | (change (RestrictedProduct.single (fun u => HeightOneSpectrum.adicCompletionIntegers F u) v c) w = 0
-     exact RestrictedProduct.single_eq_of_ne _ c hw)
-  | (change (RestrictedProduct.single (fun u => HeightOneSpectrum.adicCompletionIntegers F u) v c) w = 0
-     exact Pi.single_eq_of_ne hw c)
 
 private theorem psiV_liftOne_self (I : AutInst) (v : HeightOneSpectrum (𝓞 I.F))
     (y : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.Fv I.F v ⊗[I.F] I.E) :
@@ -166,8 +152,6 @@ private theorem equivFinsuppOfBasisRight_psiV_eq_evalV (I : AutInst) (w : Height
       TensorProduct.equivFinsuppOfBasisLeft_apply_tmul, Finsupp.mapRange_apply]
     first
     | exact (map_smul (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.evalV I.F w) _ a).symm
-    | exact (AlgHom.map_smul_of_tower (Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.evalV I.F w) _ a).symm
-    | simp
   | add x y hx hy => simp only [map_add (f := _), Finsupp.add_apply, hx, hy]
 
 private theorem eq_of_forall_psiV_eq (I : AutInst) {x y : I.E ⊗[I.F] Af I.F}
@@ -262,7 +246,6 @@ theorem liftMat_unitary (I : AutInst) (v : HeightOneSpectrum (𝓞 I.F))
       rw [liftMat_map_same]
       first
       | exact hg
-      | simpa [Uv, Formalism.UG.UJ] using hg
     · rw [liftMat_map_ne I hw, Formalism.UG.cT_one, Matrix.one_mul, Matrix.mul_one]
   ext i j
   apply eq_of_forall_psiV_eq I
@@ -276,12 +259,10 @@ theorem lift_unitary' : LiftU := by
   · apply Units.ext
     first
     | exact liftMat_map_same I v g.val
-    | simpa [matV, Formalism.UG.bc, liftGL] using liftMat_map_same I v g.val
   · intro w hw
     apply Units.ext
     first
     | exact liftMat_map_ne I hw g.val
-    | simpa [matV, Formalism.UG.bc, liftGL] using liftMat_map_ne I hw g.val
 
 end PI.UnitaryGroupMassFormula.AdIndexEq
 

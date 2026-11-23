@@ -223,7 +223,6 @@ theorem vol_crude (hE : UJEmb) (hV : VolGrowth) (hC : UHConj) (hP : IsUnit P.det
   have hm := phi_measurable (ε := ε) hE hP
   set M : ℝ := 1 + hs P * hs P⁻¹ with hM
   have hM0 : 0 ≤ hs P * hs P⁻¹ := mul_nonneg (hs_nonneg' _) (hs_nonneg' _)
-  have hM1 : 1 ≤ M := by linarith
   refine ⟨c * (C * M ^ (2 * (2 * r + k + 1) ^ 2)), fun R hR => ?_⟩
   have hms : MeasurableSet {g : Mt k r | gN (Matrix.of g) ≤ R} := by
     have : Measurable fun g : Mt k r => gN (Matrix.of g) := by

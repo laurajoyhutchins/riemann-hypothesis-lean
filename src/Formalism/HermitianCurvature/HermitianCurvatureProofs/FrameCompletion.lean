@@ -1,5 +1,6 @@
 module
 
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ExistsFrameTwo
 public import Formalism.HermitianCurvature.FrameExists2
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.AnisotropicColumnSums
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.LemmaDDeterminantIdentity
@@ -107,60 +108,7 @@ theorem sum_mdim {X : Type*} [AddCommMonoid X] (F : ℕ → X) :
 theorem complete {x : Fin (2 * r + k + 1) → ℂ} {Bs : Fin k → Fin (2 * r + k + 1) → ℂ} (hx : inWb k r x)
     (hxx : herm (Hpk k r) x x ≠ 0) (hB : IsFrameOf k r [x] Bs) {v : Fin (2 * r + k + 1) → ℂ} (hv : inWb k r v) :
     v = ∑ a, herm (Hpk k r) v (Bs a) • Bs a + (herm (Hpk k r) v x * (herm (Hpk k r) x x)⁻¹) • x := by
-  set P : Matrix (Fin (mdim k r (Fin.last r))) (Fin (mdim k r (Fin.last r))) ℂ :=
-    Matrix.of fun c j => AnisotropicColumnSums.bcol k r x Bs j (posL k r (Fin.last r) c) with hP
-  set Q : Matrix (Fin (mdim k r (Fin.last r))) (Fin (mdim k r (Fin.last r))) ℂ :=
-    Matrix.of fun j d => herm (Hpk k r) (bvec (posL k r (Fin.last r) d)) (AnisotropicColumnSums.bcol k r x Bs j) * AnisotropicColumnSums.nrm k r x j
-    with hQ
-  have hQP : Q * P = 1 := by
-    ext j j'
-    rw [Matrix.mul_apply, Matrix.one_apply, ← AnisotropicColumnSums.gram hxx hB j j', ← AnisotropicColumnSums.sum_last (AnisotropicColumnSums.bcol_inWb hx hB j'),
-      Finset.sum_mul]
-    apply Finset.sum_congr rfl
-    intro d _
-    simp only [hP, hQ, Matrix.of_apply]
-    ring
-  have hPQ : P * Q = 1 := mul_eq_one_comm.1 hQP
-  have key : v = ∑ j : Fin (mdim k r (Fin.last r)),
-      (herm (Hpk k r) v (AnisotropicColumnSums.bcol k r x Bs j) * AnisotropicColumnSums.nrm k r x j) • AnisotropicColumnSums.bcol k r x Bs j := by
-    funext p
-    by_cases hp : p.val < r ∨ r + k < p.val
-    · rw [hv p hp, inWb_sum _ _ _ (AnisotropicColumnSums.bcol_inWb hx hB) p hp]
-    · obtain ⟨c, rfl⟩ : ∃ c, posL k r (Fin.last r) c = p := by
-        refine ⟨⟨p.val - r, by rw [AnisotropicColumnSums.mdim_last]; omega⟩, Fin.ext ?_⟩
-        simp only [posL, Fin.val_last]
-        omega
-      have h1 : ((P * Q) *ᵥ fun d => v (posL k r (Fin.last r) d)) c = v (posL k r (Fin.last r) c) := by
-        rw [hPQ, Matrix.one_mulVec]
-      rw [← h1, ← Matrix.mulVec_mulVec, Finset.sum_apply]
-      show ∑ j, P c j * (Q *ᵥ fun d => v (posL k r (Fin.last r) d)) j = _
-      apply Finset.sum_congr rfl
-      intro j _
-      have h2 : (Q *ᵥ fun d => v (posL k r (Fin.last r) d)) j =
-          herm (Hpk k r) v (AnisotropicColumnSums.bcol k r x Bs j) * AnisotropicColumnSums.nrm k r x j := by
-        rw [← AnisotropicColumnSums.sum_last hv, Finset.sum_mul]
-        show ∑ d, Q j d * v (posL k r (Fin.last r) d) = _
-        apply Finset.sum_congr rfl
-        intro d _
-        simp only [hQ, Matrix.of_apply]
-        ring
-      rw [h2]
-      simp only [hP, Matrix.of_apply, Pi.smul_apply, smul_eq_mul]
-      ring
-  have h3 := sum_mdim (k := k) (r := r) (fun i : ℕ =>
-    if h : i < k then herm (Hpk k r) v (Bs ⟨i, h⟩) • Bs ⟨i, h⟩
-    else (herm (Hpk k r) v x * (herm (Hpk k r) x x)⁻¹) • x)
-  have h4 : ∀ j : Fin (mdim k r (Fin.last r)),
-      (herm (Hpk k r) v (AnisotropicColumnSums.bcol k r x Bs j) * AnisotropicColumnSums.nrm k r x j) • AnisotropicColumnSums.bcol k r x Bs j =
-      if h : j.val < k then herm (Hpk k r) v (Bs ⟨j.val, h⟩) • Bs ⟨j.val, h⟩
-      else (herm (Hpk k r) v x * (herm (Hpk k r) x x)⁻¹) • x := by
-    intro j
-    unfold AnisotropicColumnSums.bcol AnisotropicColumnSums.nrm
-    split_ifs with h
-    · rw [mul_one]
-    · rfl
-  rw [Finset.sum_congr rfl fun j _ => h4 j, h3] at key
-  simpa using key
+  apply Formalism.FourierDecayAlt.P.SkewHermitianParts.complete <;> assumption
 
 theorem complete0 {x : Fin (2 * r + k + 1) → ℂ} {Bs : Fin k → Fin (2 * r + k + 1) → ℂ} (hx : inWb k r x)
     (hxx : herm (Hpk k r) x x ≠ 0) (hB : IsFrameOf k r [x] Bs) {v : Fin (2 * r + k + 1) → ℂ} (hv : inWb k r v)

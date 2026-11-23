@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLLines
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ContinuousUnitaryOneParameterRealPlaceComponentStatement
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MatrixOneParameterGroupEqExpOfContinuousStatement
@@ -122,66 +123,6 @@ theorem mem_upq_of {R S : ℕ} (Y : Mat R S)
   exact h5
 
 theorem genEx : GlobalTheory.RealLift.GenEx := by
-  intro F E _ _ _ _ _ σ β _ _ R S τ J b C hcm hC γ hγ
-  choose A' hA' using fun w => (hC w).2
-  set K : InfinitePlace F → Matrix β β ℂ := fun w => b • J.map (piInf (τ w)) with hK
-  have hF : ∀ w, (C w)ᵀ * K w * (C w).map star = Jm R S := fun w => (hC w).1
-  have hAC : ∀ w, A' w * C w = 1 := by
-    intro w
-    have h1 : (Jm R S * (C w)ᵀ * K w) * (C w).map star = 1 := by
-      rw [Matrix.mul_assoc (Jm R S), Matrix.mul_assoc (Jm R S), hF, Jm_mul_Jm]
-    have h2 : (Jm R S * (C w)ᵀ * K w).map star * C w = 1 := by
-      have := congrArg (fun X => X.map star) h1
-      rw [map_star_mul, map_star_star] at this
-      rw [this]; ext i j; simp [Matrix.one_apply]
-    calc A' w * C w = ((Jm R S * (C w)ᵀ * K w).map star * C w) * A' w * C w := by rw [h2, Matrix.one_mul]
-      _ = (Jm R S * (C w)ᵀ * K w).map star * C w := by rw [Matrix.mul_assoc _ (C w), hA', Matrix.mul_one]
-      _ = 1 := h2
-  set M : InfinitePlace F → ℝ → Matrix β β ℂ :=
-    fun w t => ((γ (Multiplicative.ofAdd t)).1 : Matrix β β (AE F E)).map (piInf (τ w)) with hM
-  have hMm : ∀ w s t, M w (s + t) = M w s * M w t := by
-    intro w s t
-    simp only [hM, ofAdd_add, map_mul, Subgroup.coe_mul, Units.val_mul]
-    exact Matrix.map_mul
-  have hM0 : ∀ w, M w 0 = 1 := by
-    intro w
-    simp only [hM, ofAdd_zero, map_one, OneMemClass.coe_one, Units.val_one]
-    exact Matrix.map_one _ (map_zero _) (map_one _)
-  have hMu : ∀ w t, (M w t)ᵀ * K w * (M w t).map star = K w := by
-    intro w t
-    have hg := (γ (Multiplicative.ofAdd t)).2
-    change (((γ (Multiplicative.ofAdd t)).1 : Matrix β β (AE F E)))ᵀ * J *
-      (((γ (Multiplicative.ofAdd t)).1 : Matrix β β (AE F E))).map (cA σ) = J at hg
-    have h2 := congrArg (fun X => X.map (piInf (τ w))) hg
-    simp only [Matrix.map_mul, Matrix.map_map] at h2
-    have h3 : (piInf (τ w)) ∘ (cA σ) = star ∘ (piInf (τ w)) := funext fun x => piInf_cA hcm (τ w) x
-    rw [h3, ← Matrix.map_map] at h2
-    have h4 : (M w t)ᵀ * J.map (piInf (τ w)) * (M w t).map star = J.map (piInf (τ w)) := by
-      simp only [hM]; rw [← Matrix.transpose_map]; exact h2
-    simp only [hK, Matrix.mul_smul, Matrix.smul_mul]
-    rw [h4]
-  set N : InfinitePlace F → ℝ → Mat R S := fun w t => A' w * M w t * C w with hN
-  have hCN : ∀ w t, C w * N w t = M w t * C w := by
-    intro w t; simp only [hN, ← Matrix.mul_assoc, hA', Matrix.one_mul]
-  have hNc : ∀ w, Continuous (N w) := fun w =>
-    (continuous_const.matrix_mul (cont_map γ hγ.1 w (τ w))).matrix_mul continuous_const
-  have hN0 : ∀ w, N w 0 = 1 := by intro w; simp only [hN, hM0, Matrix.mul_one, hAC]
-  have hNm : ∀ w s t, N w (s + t) = N w s * N w t := by
-    intro w s t
-    simp only [hN, hMm]
-    calc A' w * (M w s * M w t) * C w = A' w * M w s * (C w * A' w) * M w t * C w := by
-          rw [hA', Matrix.mul_one]; simp only [Matrix.mul_assoc]
-      _ = _ := by simp only [Matrix.mul_assoc]
-  choose Y hY using fun w => gen_of_cont (N w) (hNc w) (hN0 w) (hNm w)
-  refine ⟨Y, fun w => mem_upq_of (Y w) fun t => ?_, fun t w => ?_⟩
-  · rw [← hY w t, ← hF w]
-    calc (N w t)ᵀ * ((C w)ᵀ * K w * (C w).map star) * (N w t).map star
-        = (C w * N w t)ᵀ * K w * (C w * N w t).map star := by
-          simp only [Matrix.transpose_mul, map_star_mul, Matrix.mul_assoc]
-      _ = (C w)ᵀ * ((M w t)ᵀ * K w * (M w t).map star) * (C w).map star := by
-          simp only [hCN, Matrix.transpose_mul, map_star_mul, Matrix.mul_assoc]
-      _ = _ := by rw [hMu]
-  · show M w t * C w = _
-    rw [← hCN, hY]
+  apply PositivityTheory.RL.genEx <;> assumption
 
 end GlobalTheory.RealLiftGen

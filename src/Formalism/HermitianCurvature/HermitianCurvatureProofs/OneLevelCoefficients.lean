@@ -92,8 +92,6 @@ theorem oneLevel_of_steps : OneLevelOfSteps := by
   have hwc : D.cnt w ≤ 4 * D.K * (D.r + 1 - i) := (Finset.mem_filter.1 hw).2
   have hwt : 0 < D.wt w := hW w
   have he : 0 ≤ D.e i := (hA13 i 1 le_rfl hi1 hi).1.1
-  have ha0 : 0 ≤ 3 ^ D.f * ep := by positivity
-  have hb0 : 0 ≤ 2 ^ D.f * ep := by positivity
 
   have hS : ∀ s, 1 ≤ s → s ≤ i → ∀ M : ℝ,
       (∀ w' ∈ D.Wb (D.cnt w + D.K), D.Dg T ε i s w' ≤ M) →
@@ -199,9 +197,7 @@ lemma coef (D : Data E W) (Θ C₄ C₀ a e : ℝ) (hΘ : 1 ≤ Θ) (h4 : 1 ≤ 
     (i s : ℕ) (hs : 2 ≤ s) (hsi : s ≤ i) (hi : i ≤ D.r + 1) :
     √((1 + a) * (1 + e) * C₄ ^ (D.f * s) * ∏ s' ∈ Ico 1 s, D.vol (i - s + 1) s') ≤
       ((C₀ / Θ) ^ D.f) ^ (s - 1) := by
-  have hΘ0 : 0 < Θ := by linarith
   set q : ℝ := (Θ ^ D.f)⁻¹ with hq
-  have hq0 : 0 ≤ q := by positivity
   have hC0 : 0 ≤ C₀ := by linarith
   have hP : ∏ s' ∈ Ico 1 s, D.vol (i - s + 1) s' ≤ (q ^ 2) ^ (s - 1) := by
     calc ∏ s' ∈ Ico 1 s, D.vol (i - s + 1) s' ≤ ∏ _s' ∈ Ico 1 s, q ^ 2 := by

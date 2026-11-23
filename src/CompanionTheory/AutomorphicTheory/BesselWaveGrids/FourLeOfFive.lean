@@ -77,7 +77,6 @@ theorem gridΛ_le (P : M.Par) (b CT : ℝ) (N : ℕ) (hN : N ≤ 3 * (P.r + 1)) 
     gridΛ P b N ≤ b ^ ((6 + CT) * ((2 * P.r + 2 : ℕ) : ℝ)) := by
   have hb0 : 0 < b := by linarith
   have hb1 : 1 ≤ b := by linarith
-  have hr0 : (0 : ℝ) ≤ P.r := Nat.cast_nonneg _
   have hm' : (((2 * P.r + 2 : ℕ) : ℝ)) = 2 * (P.r : ℝ) + 2 := by push_cast; ring
   set m : ℝ := (((2 * P.r + 2 : ℕ) : ℝ)) with hm
   have hm0 : 0 ≤ m := by rw [hm']; linarith

@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.LeftEquivariantFunctions.GLMatrixDerivatives.InvContDiffOn
 public import Development.WeilBound.RepresentationTheoryGL.ArchimedeanBaseChange.ArchimedeanBaseChangeProof.ArchimedeanGelfandKernels.IsMultZero
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -78,22 +79,6 @@ end Norm
 attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace
 
 theorem contDiffOn_inv : ∀ {n : ℕ}, ContDiffOn ℝ ∞ (fun x : Mat n => x⁻¹) (GLs n) := by
-  intro n
-  let A : PositivityTheory.RgTw.Mat n →ₗ[ℝ] (Fin n → Fin n → ℂ) :=
-    (Matrix.ofLinearEquiv ℝ).symm.toLinearMap
-  let B : (Fin n → Fin n → ℂ) →ₗ[ℝ] PositivityTheory.RgTw.Mat n :=
-    (Matrix.ofLinearEquiv ℝ).toLinearMap
-  have hA : ContDiff ℝ ∞ A := (LinearMap.toContinuousLinearMap A).contDiff
-  have hB : ContDiff ℝ ∞ B := (LinearMap.toContinuousLinearMap B).contDiff
-  have key : (fun x : PositivityTheory.RgTw.Mat n => x⁻¹) =
-      fun x => B ((GlobalTheory.CompanionTheory.MatInv.chart n).symm (Ring.inverse (GlobalTheory.CompanionTheory.MatInv.chart n (A x)))) := by
-    funext x
-    rw [Matrix.nonsing_inv_eq_ringInverse]
-    rfl
-  rw [key]
-  refine hB.comp_contDiffOn ((GlobalTheory.CompanionTheory.MatInv.contDiffOn_chartInv n).comp hA.contDiffOn ?_)
-  intro x hx
-  change IsUnit (x : Matrix (Fin n) (Fin n) ℂ)
-  exact (Matrix.isUnit_iff_isUnit_det x).2 (isUnit_iff_ne_zero.2 hx)
+  apply PositivityTheory.RgBcC.LfSt.Kchain.KcInv.inv_contDiffOn <;> assumption
 
 end GlobalTheory.CompanionTheory.MatInv

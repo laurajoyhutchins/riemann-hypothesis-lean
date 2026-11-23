@@ -1,5 +1,6 @@
 module
 
+import Formalism.LocalToGlobal.GlobalTheory.GL6.ComplementSmulLocalExtensionMatrix
 public import Formalism.LocalToGlobal.GlobalTheory.GL6.DiagonalSlopes.AdelicFunctionRightTranslateDiamond
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -117,16 +118,7 @@ theorem proj_local_extension_other_place (v w : HeightOneSpectrum (𝓞 F)) (h :
 
 theorem local_extension_tensor_mul (v : HeightOneSpectrum (𝓞 F)) (t t' : E ⊗[F] v.adicCompletion F) :
     localExtensionTensor v (t * t') = localExtensionTensor v t * localExtensionTensor v t' := by
-  induction t using TensorProduct.induction_on with
-  | zero => simp
-  | tmul x y =>
-    induction t' using TensorProduct.induction_on with
-    | zero => simp
-    | tmul x' y' =>
-      rw [Algebra.TensorProduct.tmul_mul_tmul, local_extension_tensor_tmul, local_extension_tensor_tmul, local_extension_tensor_tmul, Algebra.TensorProduct.tmul_mul_tmul,
-        local_adele_single_mul]
-    | add a b ha hb => rw [mul_add, map_add (f := _), map_add (f := _), ha, hb, mul_add]
-  | add a b ha hb => rw [add_mul, map_add (f := _), map_add (f := _), ha, hb, add_mul]
+  apply Formalism.L2.GlobalTheoryTheory.LocalLatticeBases.local_extension_tensor_mul <;> assumption
 
 theorem local_extension_mul_incl (v : HeightOneSpectrum (𝓞 F)) (t : E ⊗[F] v.adicCompletion F) (j : E) :
     localExtensionTensor v (t * inclE (F := F) (v.adicCompletion F) j) = localExtensionTensor v t * inclE (F := F) (FiniteAdeleRing (𝓞 F) F) j := by
@@ -254,15 +246,7 @@ theorem local_diag_matrix_conj_transpose (M : Matrix (Fin n) (Fin n) (E ⊗[F] v
 
 theorem local_extension_GL_mem_unitary (J : Matrix (Fin n) (Fin n) E) (M : GL (Fin n) (E ⊗[F] v.adicCompletion F))
     (hM : M ∈ UPts σ J (v.adicCompletion F)) : localExtensionGL v M ∈ UPts σ J (FiniteAdeleRing (𝓞 F) F) := by
-  have h : cT (sigR σ (v.adicCompletion F)) (M : Matrix (Fin n) (Fin n) _) * J.map (inclE (F := F) (v.adicCompletion F)) *
-      (M : Matrix (Fin n) (Fin n) _) = J.map (inclE (F := F) (v.adicCompletion F)) := hM
-  show cT (sigR σ (FiniteAdeleRing (𝓞 F) F)) (localDiagMatrix v (M : Matrix (Fin n) (Fin n) _)) *
-      J.map (inclE (F := F) (FiniteAdeleRing (𝓞 F) F)) * localDiagMatrix v (M : Matrix (Fin n) (Fin n) _) =
-    J.map (inclE (F := F) (FiniteAdeleRing (𝓞 F) F))
-  rw [local_diag_matrix_conj_transpose]
-  simp only [localDiagMatrix, add_mul, mul_add, Matrix.smul_mul, Matrix.mul_smul, Matrix.one_mul, Matrix.mul_one, local_extension_matrix_mul_gram, gram_mul_local_extension_matrix,
-    local_extension_matrix_mul, smul_smul, complement_local_idempotent_idem, complement_smul_local_extension_matrix, add_zero, zero_add]
-  rw [h, local_extension_matrix_map_gram, ← add_smul, sub_add_cancel, one_smul]
+  apply Formalism.L2.GlobalTheoryTheory.LocalLatticeBases.local_extension_GL_mem_unitary <;> assumption
 
 end Unit
 
@@ -279,18 +263,7 @@ def IsLocalDiamond (S : Formalism.L2.Forms.StepLevel F E σ J T f bad) (v : Heig
 
 theorem is_diamond_of_local_diamond (S : Formalism.L2.Forms.StepLevel F E σ J T f bad) (v : HeightOneSpectrum (𝓞 F))
     (hv : (T : 𝓞 F) ∈ v.asIdeal) (k : ℤ) (h : IsLocalDiamond S v hv k) : ∃ δ, Formalism.L2.Forms.IsDia S v hv k δ := by
-  obtain ⟨M, hM, hg, hf⟩ := h
-  have hU : M ∈ UPts σ J (v.adicCompletion F) := (Subgroup.mem_inf.1 hM).1
-  refine ⟨⟨localExtensionGL v M, local_extension_GL_mem_unitary v σ J M hU⟩, fun v' hv' => local_extension_GL_other_place v v' hv' M, ?_, ?_⟩
-  · dsimp only
-    rw [local_extension_GL_same_place]; exact hM
-  · dsimp only
-    have e := local_extension_GL_same_place v M
-    refine ⟨by rw [e]; exact hg, fun x => ?_⟩
-    rw [← hf x]
-    congr 2
-    exact Subtype.ext (congrArg (fun N : GL (Fin n) (E ⊗[F] v.adicCompletion F) =>
-      (N : Matrix (Fin n) (Fin n) _) *ᵥ x.1) e)
+  apply Formalism.L2.GlobalTheoryTheory.LocalLatticeBases.is_diamond_of_local_diamond <;> assumption
 
 end Assemble
 

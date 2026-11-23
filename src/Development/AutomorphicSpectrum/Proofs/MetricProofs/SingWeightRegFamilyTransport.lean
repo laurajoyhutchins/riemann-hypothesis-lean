@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.PluriharmonicCharts.XCGradAtlas
 public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsTwiceDifferentiableAt
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -65,34 +66,7 @@ variable {e : ℕ} {X : Type} [TopologicalSpace X]
 
 theorem isOpen_compl_bdry (A : FinHolAtlas e X) (L : LocPot X) (s : X → X → ℂ)
     (hs : IsSection A L s) : IsOpen (bdry s)ᶜ := by
-  rw [isOpen_iff_mem_nhds]
-  intro y hy
-  obtain ⟨j, hj⟩ := A.cover y
-  have hyt : A.chart j y ∈ (A.chart j).target := (A.chart j).map_source hj
-  have hsy : (A.chart j).symm (A.chart j y) = y := (A.chart j).left_inv hj
-  have han : AnalyticAt ℂ (s y ∘ (A.chart j).symm) (A.chart j y) :=
-    hs.1 y j (A.chart j y) ⟨hyt, by
-      show (A.chart j).symm (A.chart j y) ∈ L.U y
-      rw [hsy]; exact L.mem_U y⟩
-  have hcy : ContinuousAt (fun z => (s y ∘ (A.chart j).symm) (A.chart j z)) y :=
-    ContinuousAt.comp (f := A.chart j) han.continuousAt ((A.chart j).continuousAt hj)
-  have hne : (s y ∘ (A.chart j).symm) (A.chart j y) ≠ 0 := by
-    show s y ((A.chart j).symm (A.chart j y)) ≠ 0
-    rw [hsy]; exact hy
-  have h1 : ∀ᶠ z in 𝓝 y, (s y ∘ (A.chart j).symm) (A.chart j z) ≠ 0 := hcy.eventually_ne hne
-  filter_upwards [h1, (A.chart j).open_source.mem_nhds hj,
-    (L.isOpen_U y).mem_nhds (L.mem_U y)] with z h1 h2 h3
-  have h1' : s y z ≠ 0 := by
-    have : s y ((A.chart j).symm (A.chart j z)) ≠ 0 := h1
-    rwa [(A.chart j).left_inv h2] at this
-  intro hz
-  have hz' : s z z = 0 := hz
-  have hg := hs.2 y z z ⟨h3, L.mem_U z⟩
-  rw [hz'] at hg
-  simp only [norm_zero, zero_mul] at hg
-  have hpos : 0 < ‖s y z‖ * Real.exp (-L.φ y z) :=
-    mul_pos (norm_pos_iff.2 h1') (Real.exp_pos _)
-  exact hpos.ne' hg
+  apply PositivityTheory.Xgp.c_grad_atlas.isOpen_compl_bdry <;> assumption
 
 theorem contDiffAt_two {A : FinHolAtlas e X} {U : Set X} {f : X → ℝ} (h : A.SmoothOn U f)
     (hU : IsOpen U) (j : Fin A.n) {y : Fin e → ℂ} (hy : y ∈ (A.chart j).target)

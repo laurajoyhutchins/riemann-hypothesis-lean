@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LatticeCoveringOfTraceDualLowerBound
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsLatMeasurableConst
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MeasurableSetDetNormPos
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CoeSmulMem
@@ -92,34 +93,7 @@ theorem sum_re_embedding (hE : IsTotallyComplex E) (e : E) :
 
 theorem eq_zero_of_sum_re (hE : IsTotallyComplex E) (c : InfinitePlace E → ℂ)
     (h : ∀ e : E, ∑ w : InfinitePlace E, (w.embedding e * c w).re = 0) : c = 0 := by
-  classical
-  have hli : LinearIndependent ℂ (fun φ : E →+* ℂ => (φ : E → ℂ)) :=
-    (linearIndependent_monoidHom E ℂ).comp (fun φ : E →+* ℂ => φ.toMonoidHom)
-      (fun a b hab => by ext x; exact DFunLike.congr_fun hab x)
-  let d : (E →+* ℂ) → ℂ := fun φ =>
-    if φ = (InfinitePlace.mk φ).embedding then c (InfinitePlace.mk φ)
-    else (starRingEnd ℂ) (c (InfinitePlace.mk φ))
-  have hd1 : ∀ w : InfinitePlace E, d w.embedding = c w := by
-    intro w; simp [d]
-  have hd2 : ∀ w : InfinitePlace E,
-      d (ComplexEmbedding.conjugate w.embedding) = (starRingEnd ℂ) (c w) := by
-    intro w
-    have hc := IsTotallyComplex.isComplex (K := E) w
-    rw [InfinitePlace.isComplex_iff, ComplexEmbedding.isReal_iff] at hc
-    simp [d, InfinitePlace.mk_conjugate_eq, hc]
-  have hz := Fintype.linearIndependent_iff.1 hli d (by
-    funext e
-    simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Pi.zero_apply]
-    rw [sum_embeddings_pairs hE (fun φ => d φ * φ e)]
-    have : ∀ w : InfinitePlace E, d w.embedding * w.embedding e +
-        d (ComplexEmbedding.conjugate w.embedding) * ComplexEmbedding.conjugate w.embedding e
-        = ((2 * (w.embedding e * c w).re : ℝ) : ℂ) := by
-      intro w
-      rw [hd1, hd2, ComplexEmbedding.conjugate_coe_eq, ← map_mul, Complex.add_conj, mul_comm (c w)]
-    simp only [this]
-    rw [← Complex.ofReal_sum, ← Finset.mul_sum, h e]; simp)
-  funext w
-  rw [← hd1 w]; exact hz _
+  apply GlobalTheory.TraceCover.eq_zero_of_sum_re <;> assumption
 
 theorem exists_int_smul_mem {j : ℕ} (Λ : Submodule (𝓞 E) (Fin j → E))
     (hΛ : Submodule.IsFullLattice E Λ) (x : Fin j → E) : ∃ n : ℤ, n ≠ 0 ∧ (n : E) • x ∈ Λ := by

@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.RepresentationTheoryGL.FormalDegree.FormalDegreeHilbert.PositiveDefiniteConjugates.DzSubMuNextNonneg
 public import CompanionTheory.RealGroups.FormalDegrees.ArchimedeanFormalDegrees.HlamStable
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -72,28 +73,7 @@ theorem inP_entry_zero {ε : Fin n → Bool} {X : Matrix (Fin n) (Fin n) ℂ} (h
 
 theorem exists_pmat {ε : Fin n → Bool} {X : Matrix (Fin n) (Fin n) ℂ} (hX : inP ε X) :
     ∃ z : PCoord ε → ℂ, pmat z = X := by
-  refine ⟨fun ab => X ab.1.1 ab.1.2, ?_⟩
-  have hH := isHermitian_of_mem_noncompactPart' hX
-  ext a b
-  simp only [pmat]
-  by_cases h1 : b < a ∧ ε a ≠ ε b
-  · rw [dite_eq_left h1]
-  · rw [dite_eq_right h1]
-    by_cases h2 : a < b ∧ ε b ≠ ε a
-    · rw [dite_eq_left h2]
-      have := congrFun (congrFun hH a) b
-      simp only [Matrix.conjTranspose_apply] at this
-      exact this
-    · rw [dite_eq_right h2]
-      by_cases he : ε a = ε b
-      · exact (inP_entry_zero hX he).symm
-      · have hab : a = b := by
-          by_contra hne
-          rcases lt_or_gt_of_ne hne with h | h
-          · exact h2 ⟨h, Ne.symm he⟩
-          · exact h1 ⟨h, he⟩
-        subst hab
-        exact absurd rfl he
+  apply PositivityTheory.RgFd.exists_pmat <;> assumption
 
 theorem one_le_lead_exp {ε : Fin n → Bool} {X : Matrix (Fin n) (Fin n) ℂ} (hX : inP ε X) (i : ℕ) (hi : i ≤ n) :
     1 ≤ (lead i (NormedSpace.exp X)).re := by

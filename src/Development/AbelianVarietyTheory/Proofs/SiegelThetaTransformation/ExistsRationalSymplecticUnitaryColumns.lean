@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.DoubledRowTestFunctionProperties
 public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IntMIffInt
 public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsStabForm
 public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.DifferentiableOnDetHMat
@@ -85,22 +86,7 @@ theorem blk_mulVec (A : Matrix (Fin g) (Fin g) ℂ) (w : Fin n × Fin g → ℂ)
 
 theorem blk_mem_siegel {τ : Matrix (Fin g) (Fin g) ℂ} (h : τ ∈ Siegel (Fin g)) :
     blk n τ ∈ Siegel (Fin n × Fin g) := by
-  refine ⟨?_, ?_⟩
-  · show (blk n τ)ᵀ = blk n τ
-    ext p q
-    simp only [transpose_apply, blk, of_apply]
-    by_cases e : p.1 = q.1
-    · rw [if_pos e.symm, if_pos e]
-      exact congrFun (congrFun h.1 p.2) q.2
-    · rw [if_neg (Ne.symm e), if_neg e]
-  · have e : (blk n τ).map Complex.im = (1 : Matrix (Fin n) (Fin n) ℝ) ⊗ₖ τ.map Complex.im := by
-      ext p q
-      change Complex.im (if p.1 = q.1 then τ p.2 q.2 else 0) =
-        (1 : Matrix (Fin n) (Fin n) ℝ) p.1 q.1 * Complex.im (τ p.2 q.2)
-      rw [Matrix.one_apply]
-      split_ifs <;> simp
-    rw [e]
-    exact PosDef.one.kronecker h.2
+  apply GlobalTheory.Phase.Doubling.blk_siegel <;> assumption
 
 private theorem sum_herm_eq_trace_mul_ccT {E : Type} [Field E] [NumberField E] [IsCMField E] {r : ℕ}
     (G : Matrix (Fin r) (Fin r) E) (y y' : Matrix (Fin n) (Fin r) E) :

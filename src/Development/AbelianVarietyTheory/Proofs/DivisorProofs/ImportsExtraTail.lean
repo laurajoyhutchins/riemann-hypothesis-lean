@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LiftFinite
 public import Mathlib.AlgebraicGeometry.Morphisms.Finite
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
 import Mathlib.Algebra.Order.Floor.Extended
@@ -53,25 +54,7 @@ namespace GlobalTheory.FactorAndSection
 theorem exists_factor {R K A : Type} [CommRing R] [IsDomain R] [IsIntegrallyClosed R] [Field K] [Algebra R K]
     [IsFractionRing R K] [CommRing A] (φ : R →+* A) (hφ : φ.IsIntegral) (ψ : A →+* K)
     (h : ψ.comp φ = algebraMap R K) : ∃ χ : A →+* R, (algebraMap R K).comp χ = ψ ∧ χ.comp φ = RingHom.id R := by
-  have hinj : Function.Injective (algebraMap R K) := IsFractionRing.injective R K
-  have hmem : ∀ a : A, ψ a ∈ (algebraMap R K).range := by
-    intro a
-    have h1 : (ψ.comp φ).IsIntegralElem (ψ a) := (hφ a).map ψ
-    rw [h] at h1
-    exact (IsIntegrallyClosed.isIntegral_iff (R := R) (K := K)).1 h1
-  let e : R ≃+* (algebraMap R K).range := RingEquiv.ofBijective (algebraMap R K).rangeRestrict
-    ⟨fun a b hab => hinj (congrArg Subtype.val hab), (algebraMap R K).rangeRestrict_surjective⟩
-  have he : ∀ z : (algebraMap R K).range, algebraMap R K (e.symm z) = z.1 := fun z =>
-    congrArg Subtype.val (e.apply_symm_apply z)
-  have h1 : (algebraMap R K).comp (e.symm.toRingHom.comp (ψ.codRestrict _ hmem)) = ψ := by
-    ext a
-    exact he _
-  refine ⟨e.symm.toRingHom.comp (ψ.codRestrict _ hmem), h1, ?_⟩
-  ext r
-  apply hinj
-  have h2 := congrArg (fun f : A →+* K => f (φ r)) h1
-  have h3 := congrArg (fun f : R →+* K => f r) h
-  exact h2.trans h3
+  apply GlobalTheory.RetractionLiftSection.exists_retraction <;> assumption
 
 theorem exists_section {R K : Type} [CommRing R] [IsDomain R] [IsIntegrallyClosed R] [Field K] [Algebra R K]
     [IsFractionRing R K] {Z : Scheme.{0}} (p : Z ⟶ ReciprocityTheory.ChartRestriction.G.Geo.Tor.Sp R) [IsFinite p]

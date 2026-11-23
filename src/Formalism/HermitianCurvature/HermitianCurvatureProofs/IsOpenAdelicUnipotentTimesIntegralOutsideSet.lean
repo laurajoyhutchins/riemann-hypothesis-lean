@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeylConjugationFixedColumn.ReflectionScalarDualIsotropic
 public import Formalism.HermitianCurvature.StatementQ
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.UnipotentHeisenbergDecomposition
 import Formalism.FormalDegreeBessel.FinalG
@@ -416,21 +417,7 @@ lemma w1_mulVec_bvec_esI (c : ℂ) : w1 k r l c *ᵥ 𝐬 = (conj c)⁻¹ • �
   simp
 
 lemma weyl_cell_mem_level_group {c : ℂ} (hc : c ≠ 0) : w1 k r l c ∈ Glev k r l.castSucc := by
-  have hc' : conj c ≠ 0 := (map_ne_zero _).2 hc
-  refine ⟨?_, fun a ha => ?_⟩
-  · apply B2x8.mem_UH_of
-    intro u w
-    have h1 : ⟪𝐞, w⟫ = conj ⟪w, 𝐞⟫ := (h_conj _ Hh _ _).symm
-    have h2 : ⟪𝐬, w⟫ = conj ⟪w, 𝐬⟫ := (h_conj _ Hh _ _).symm
-    rw [weyl_cell_mulVec, weyl_cell_mulVec]
-    simp only [h_add_left, h_add_right, h_smul_left, h_smul_right, h_e_e, h_es_es, h_e_es, h_es_e, if_true, h1, h2,
-      map_sub, map_mul, map_inv₀, Complex.conj_conj]
-    field_simp
-    ring
-  · have hne : a ≠ l := ne_of_val_lt (by simpa using ha)
-    constructor
-    · rw [weyl_cell_mulVec, h_e_e, h_e_es, if_neg hne]; simp
-    · rw [weyl_cell_mulVec, h_es_e, h_es_es, if_neg hne]; simp
+  apply PI.IsotropicReflections.reflection_mem_Glev_castSucc <;> assumption
 
 lemma w1_commute_of_mem_Glev (c : ℂ) {g : Mx k r} (hg : g ∈ Glev k r l.succ) : w1 k r l c * g = g * w1 k r l c := by
   obtain ⟨hg0, h1, h2⟩ := (glev_succ_iff l g).1 hg

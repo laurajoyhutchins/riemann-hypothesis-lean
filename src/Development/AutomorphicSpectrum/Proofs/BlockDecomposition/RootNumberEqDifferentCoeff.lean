@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ConductorEqTopOfStandardOpen
 public import GroundTheory.GlobalFields.TateThesis.HeckeTheoremFE
 public import GroundTheory.GlobalFields.IdeleGroups.LocalConditionIndex
 import GroundTheory.GlobalFields.TateThesis.EulerFactorsInverse
@@ -60,22 +61,7 @@ noncomputable section
 variable {F : Type} [Field F] [NumberField F] {χ : HeckeCharacter F}
 
 theorem conductor_eq_top (h : standardOpenSubgroup F ≤ χ.toIdele.ker) : χ.conductor = ⊤ := by
-  have hd : χ.conductor ∣ ⊤ := by
-    refine (χ.map_idealLevel_le_ker_iff (𝔪 := ⊤) top_ne_bot).1 ?_
-    rintro _ ⟨x, hx, rfl⟩
-    refine h ((mem_standardOpenSubgroup_iff_toFinite_mem _).2 ?_)
-    rw [toFinite_ofFinite]
-    have hx' : x ∈ idealLevel (⊤ : Ideal (𝓞 F)) := hx
-    rw [idealLevel, mem_finiteLevel] at hx'
-    rw [mem_finiteLevel]
-    intro v
-    have hv := hx' v
-    have h0 : multiplicity v.asIdeal (⊤ : Ideal (𝓞 F)) = 0 :=
-      multiplicity_eq_zero_of_not_dvd fun hdv ↦ v.isPrime.ne_top (by
-        rwa [Ideal.dvd_iff_le, top_le_iff] at hdv)
-    rw [h0] at hv
-    exact hv
-  rwa [Ideal.dvd_iff_le, top_le_iff] at hd
+  apply GlobalTheory.CompanionTheory.PartialZeta.conductor_eq_top_of_standardOpen <;> assumption
 
 theorem infiniteWeight_eq_zero (h : standardOpenSubgroup F ≤ χ.toIdele.ker)
     (w : InfinitePlace F) : χ.infiniteWeight w = 0 := by

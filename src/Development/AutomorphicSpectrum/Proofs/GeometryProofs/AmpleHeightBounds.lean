@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LocalRatioProductFormula
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ArchBetween
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ArchimedeanValueBoundStatement
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HeightLowerBoundChartNormStatement
@@ -106,35 +107,7 @@ lemma log_support {x : L} (hx : x ≠ 0) : (Function.support fun v : FinitePlace
 
 lemma product_formula {x : L} (hx : x ≠ 0) :
     (∑ᶠ v : FinitePlace L, Real.log (v x)) + ∑ σ : L →+* ℂ, Real.log ‖σ x‖ = 0 := by
-  classical
-  have h := prod_abs_eq_one hx
-  rw [InfinitePlace.prod_eq_abs_norm] at h
-  rw [ReciprocityTheory.MultiplicativeHeights.sum_log_norm_embedding_eq x hx]
-  have hf : (Function.mulSupport fun v : FinitePlace L => v x).Finite := FinitePlace.hasFiniteMulSupport hx
-  have hpos : ∀ v : FinitePlace L, v x ≠ 0 := fun v => by
-    simpa using hx
-  have e : (∑ᶠ v : FinitePlace L, Real.log (v x)) = Real.log (∏ᶠ v : FinitePlace L, v x) := by
-    rw [finprod_eq_prod_of_mulSupport_subset (s := hf.toFinset) _ (by simp),
-      finsum_eq_sum_of_support_subset (s := hf.toFinset) _ ?_, Real.log_prod fun v _ => hpos v]
-    intro v hv
-    simp only [Set.Finite.coe_toFinset, Function.mem_mulSupport]
-    intro h1
-    apply hv
-    simp only [h1, Real.log_one]
-  have hP : (∏ᶠ v : FinitePlace L, v x) ≠ 0 := by
-    intro h0
-    rw [h0, mul_zero] at h
-    exact zero_ne_one h
-  have hN : ((Algebra.norm ℚ x : ℚ) : ℝ) ≠ 0 := by
-    exact_mod_cast (Algebra.norm_ne_zero_iff.2 hx)
-  rw [e, Real.log_abs]
-  have h2 : |((Algebra.norm ℚ x : ℚ) : ℝ)| * ∏ᶠ v : FinitePlace L, v x = 1 := by
-    rw [← h]
-    push_cast
-    rfl
-  have h3 := congrArg Real.log h2
-  rw [Real.log_mul (abs_ne_zero.2 hN) hP, Real.log_abs, Real.log_one] at h3
-  linarith
+  apply GlobalTheory.CompanionTheory.Ar.RootHt.RatioSum.finsum_log_add_sum_log <;> assumption
 
 lemma finsum_le_of_le {α : Type} {f g : α → ℝ} (hf : (Function.support f).Finite) (hg : (Function.support g).Finite)
     (h : ∀ a, f a ≤ g a) : ∑ᶠ a, f a ≤ ∑ᶠ a, g a := by

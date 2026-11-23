@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.ThetaLifts.TowerModels.TwistedSums.StandardAddCharSymplecticLocalLatticeEqOne
 public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.WeilTensorModels
 public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.AddCharTrivialIntegralFiniteAdeleMul
 public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.SumEmbeddingsEqRealAddComplex
@@ -63,27 +64,7 @@ theorem trace_mixedEmbedding (y : F) :
 theorem psi_fin_rat {ψ : AddChar (AF F) ℂ} (hψ : IsStd ψ) (x : F) :
     ψ (pairA F 0 (algebraMap F (Af F) x)) =
       Complex.exp (2 * Real.pi * Complex.I * ((Algebra.trace ℚ F x : ℚ) : ℂ)) := by
-  have e : pairA F 0 (algebraMap F (Af F) x) =
-      algebraMap F (AF F) x + pairA F (algebraMap F (Ainf F) (-x)) 0 := by
-    refine Prod.ext ?_ (add_zero _).symm
-    show (0 : Ainf F) = algebraMap F (Ainf F) x + algebraMap F (Ainf F) (-x)
-    rw [map_neg, add_neg_cancel]
-  have hat : At (evI F) (pairA F (algebraMap F (Ainf F) (-x)) 0) := by
-    intro u hu
-    have h1 : u.1 = 0 := (InfiniteAdeleRing.ringEquiv_mixedSpace F).injective (by rw [map_zero]; exact hu)
-    refine Prod.ext ?_ ?_
-    · change u.1 * _ = 0
-      rw [h1, zero_mul]
-    · change u.2 * 0 = 0
-      rw [mul_zero]
-  rw [e, AddChar.map_add_eq_mul, hψ.2.1, one_mul, hψ.2.2 _ hat]
-  have h2 : evI F (pairA F (algebraMap F (Ainf F) (-x)) 0) = mixedEmbedding F (-x) := by
-    show InfiniteAdeleRing.ringEquiv_mixedSpace F (algebraMap F (Ainf F) (-x)) = _
-    rw [InfiniteAdeleRing.mixedEmbedding_eq_algebraMap_comp]
-  rw [h2, trace_mixedEmbedding, map_neg]
-  congr 1
-  push_cast
-  ring
+  apply Tw.LatVacArith.psi_fin_rat <;> assumption
 
 theorem psi_int {ψ : AddChar (AF F) ℂ} (hψ : IsStd ψ) (t : F)
     (ht : ∀ a : 𝓞 F, ∃ k : ℤ, Algebra.trace ℚ F ((a : F) * t) = k) (α : Af F) (hα : ∀ v, α v ∈ v.adicCompletionIntegers F) :

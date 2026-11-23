@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ShearOrbitFinite
 public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ShearGL
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -62,17 +63,7 @@ namespace GlobalTheory.CompanionTheory.MirPair
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
 theorem continuous_leviMir (m : ℕ) : Continuous (levi k m) := by
-  have hmat : Continuous (GlobalTheory.BZMir.glEmbHom k m) := by
-    apply continuous_matrix
-    intro i j
-    induction i using Fin.lastCases <;> induction j using Fin.lastCases <;>
-      simp [GlobalTheory.BZMir.glEmbHom, GlobalTheory.BZMir.glEmbMat] <;>
-      first
-        | exact continuous_const
-        | exact continuous_id.matrix_elem _ _
-        | fun_prop
-  have hGL : Continuous (GlobalTheory.BZMir.glEmb k m) := Continuous.units_map _ hmat
-  exact continuous_induced_rng.2 hGL
+  apply _root_.GlobalTheory.CompanionTheory.MirPair.ShearOrbit.continuous_levi <;> assumption
 
 theorem tendsto_shearGL_zero (n : ℕ) :
     Filter.Tendsto (shearGL (k := k) n) (𝓝 0) (𝓝 1) := by

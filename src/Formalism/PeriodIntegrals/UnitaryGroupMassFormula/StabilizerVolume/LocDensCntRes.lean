@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.EventuallyLocalDensityStandardLatticeBound
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.UnifVSpec
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -222,21 +223,7 @@ theorem ev_int (x : F) : ∀ᶠ v in cofinite,
 
 theorem ev_unit {x : F} (hx : x ≠ 0) : ∀ᶠ v in cofinite,
     Valued.v (algebraMap F (Fv F v) x) = 1 := by
-  have h1 := IsDedekindDomain.HeightOneSpectrum.Support.finite (𝓞 F) x
-  have h2 := IsDedekindDomain.HeightOneSpectrum.Support.finite (𝓞 F) x⁻¹
-  refine Filter.eventually_cofinite.mpr ((h1.union h2).subset ?_)
-  intro w hw
-  simp only [Set.mem_setOf_eq] at hw
-  rw [vcoe] at hw
-  rcases lt_or_gt_of_ne hw with h | h
-  · right
-    show 1 < w.valuation F x⁻¹
-    rw [map_inv₀]
-    exact one_lt_inv_iff₀.mpr ⟨by
-      rw [zero_lt_iff]
-      exact (Valuation.ne_zero_iff _).mpr hx, h⟩
-  · left
-    exact h
+  apply GlobalTheory.GaugeDensity.eventually_valued_eq_one <;> assumption
 
 end Res
 

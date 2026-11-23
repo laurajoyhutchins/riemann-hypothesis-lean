@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsNilpotentOfIsNilDP
 public import Development.AbelianVarietyTheory.Definitions.Divisors.RatBasisLinearIndependentInt
 public import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DividedPowerAlgebras.CompF
 public import Mathlib.AlgebraicGeometry.Morphisms.Smooth
@@ -103,85 +104,7 @@ theorem fe_of_etale {t : P →+* A} (ht : t.Etale) : t.FormallyEtale := by
   infer_instance
 
 theorem isNilpotent_of_isNilDP {J : Ideal B} {δ : DividedPowers J} (h : IsNilDP δ) : IsNilpotent J := by
-  obtain ⟨N, hN⟩ := h.exists_dpow_eq_zero
-  have hexp : ∀ xs : List B, (∀ x ∈ xs, x ∈ J) → ∀ y ∈ J, ∀ n, N ≤ n →
-      PowerSeries.coeff n ((xs.map fun x => δ.exp x - 1).prod * δ.exp y) = 0 := by
-    intro xs
-    induction xs with
-    | nil =>
-      intro _ y _ n hn
-      simp [DividedPowers.exp, PowerSeries.coeff_mk, hN n hn]
-    | cons x xs ih =>
-      intro hxs y hy n hn
-      have hx : x ∈ J := hxs x (by simp)
-      have hxs' : ∀ z ∈ xs, z ∈ J := fun z hz => hxs z (by simp [hz])
-      have e : (List.map (fun x => δ.exp x - 1) (x :: xs)).prod * δ.exp y
-          = (xs.map fun x => δ.exp x - 1).prod * δ.exp (x + y)
-            - (xs.map fun x => δ.exp x - 1).prod * δ.exp y := by
-        rw [δ.exp_add hx hy, List.map_cons, List.prod_cons]
-        ring
-      rw [e, map_sub, ih hxs' (x + y) (J.add_mem hx hy) n hn, ih hxs' y hy n hn, sub_zero]
-  have hone : δ.exp 0 = 1 := by
-    ext n
-    rcases Nat.eq_zero_or_pos n with rfl | hn
-    · simp [DividedPowers.exp, δ.dpow_zero J.zero_mem]
-    · simp [DividedPowers.exp, PowerSeries.coeff_one, δ.dpow_eval_zero hn.ne', hn.ne']
-  have hfac : ∀ xs : List B, (∀ x ∈ xs, x ∈ J) → ∃ G : PowerSeries B,
-      (xs.map fun x => δ.exp x - 1).prod = PowerSeries.X ^ xs.length * G ∧
-        PowerSeries.constantCoeff G = xs.prod := by
-    intro xs
-    induction xs with
-    | nil => exact fun _ => ⟨1, by simp, by simp⟩
-    | cons x xs ih =>
-      intro hxs
-      have hx : x ∈ J := hxs x (by simp)
-      obtain ⟨G, hG, hG0⟩ := ih (fun z hz => hxs z (by simp [hz]))
-      refine ⟨PowerSeries.mk (fun n => δ.dpow (n + 1) x) * G, ?_, ?_⟩
-      · have ex : δ.exp x - 1 = PowerSeries.X * PowerSeries.mk (fun n => δ.dpow (n + 1) x) := by
-          ext n
-          rcases n with _ | n
-          · simp [DividedPowers.exp, δ.dpow_zero hx]
-          · rw [PowerSeries.coeff_succ_X_mul]
-            simp [DividedPowers.exp, PowerSeries.coeff_one]
-        rw [List.map_cons, List.prod_cons, hG, ex, List.length_cons, pow_succ]
-        ring
-      · rw [map_mul, hG0, List.prod_cons, ← PowerSeries.coeff_zero_eq_constantCoeff_apply,
-          PowerSeries.coeff_mk, zero_add, δ.dpow_one hx]
-  have hprod : ∀ xs : List B, (∀ x ∈ xs, x ∈ J) → N ≤ xs.length → xs.prod = 0 := by
-    intro xs hxs hlen
-    obtain ⟨G, hG, hG0⟩ := hfac xs hxs
-    have := hexp xs hxs 0 J.zero_mem xs.length hlen
-    rw [hone, mul_one, hG] at this
-    have e2 := PowerSeries.coeff_X_pow_mul G xs.length 0
-    rw [zero_add] at e2
-    rw [e2, PowerSeries.coeff_zero_eq_constantCoeff_apply, hG0] at this
-    exact this
-  have key : ∀ n, ∀ z ∈ J ^ n, ∀ xs : List B, (∀ x ∈ xs, x ∈ J) → N ≤ n + xs.length →
-      z * xs.prod = 0 := by
-    intro n
-    induction n with
-    | zero =>
-      intro z _ xs hxs hlen
-      rw [hprod xs hxs (by simpa using hlen), mul_zero]
-    | succ n ih =>
-      intro z hz xs hxs hlen
-      rw [pow_succ'] at hz
-      refine Submodule.mul_induction_on hz ?_ ?_
-      · intro a ha b hb
-        have := ih b hb (a :: xs) (fun x hx' => by
-          rcases List.mem_cons.1 hx' with rfl | hx'
-          · exact ha
-          · exact hxs x hx') (by simp; omega)
-        rw [List.prod_cons] at this
-        rw [← this]
-        ring
-      · intro u v hu hv
-        rw [add_mul, hu, hv, add_zero]
-  refine ⟨N, ?_⟩
-  rw [Ideal.zero_eq_bot, eq_bot_iff]
-  intro z hz
-  have := key N z hz [] (by simp) (by simp)
-  simpa using this
+  apply GlobalTheory.AnPer.TaylorCore.isNilpotent_of_isNilDP <;> assumption
 
 end Rings
 

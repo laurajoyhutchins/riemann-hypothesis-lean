@@ -1,5 +1,6 @@
 module
 
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CommuteLevelZeroElement
 public import Formalism.HermitianCurvature.StatementFr
 public import Mathlib.CategoryTheory.Category.Basic
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.QuasiDeterminantFromEntries
@@ -240,22 +241,7 @@ lemma cancel2 {B : Type} [Ring B] {P Pi Q Qi X Y : B} (h1 : Pi * P = 1) (h2 : Q 
 
 lemma hat_herm (hf : IsFrame L f) {Z : ℂ} (hZ : Z ∈ f.reg) (hr : star Z = Z) (i j : Fin 2) :
     star (f.d L * f.hatT Z i j) = f.d L * f.hatT Z j i := by
-  have h0 := hf.module.herm Z hZ hr
-  have hh : ∀ i j, star (f.RR * f.TT Z i j) = f.RR * f.TT Z j i := by
-    intro i j
-    have := congrFun (congrFun h0 j) i
-    simpa [d0, Matrix.conjTranspose_apply, Matrix.diagonal_mul] using this
-  have hF : ∀ i j, f.RR * f.TT Z i j = star f.F * (f.d L * f.hatT Z i j) * f.F := by
-    intro i j
-    rw [hat_apply hZ, hf.form]
-    calc star f.F * f.d L * f.F * f.TT Z i j
-        = star f.F * f.d L * f.F * f.TT Z i j * (f.Fi * f.F) := by rw [hf.Fi_F, mul_one]
-      _ = _ := by simp only [mul_assoc]
-  have sF : star f.Fi * star f.F = 1 := by rw [← star_mul, hf.F_Fi, star_one]
-  refine cancel2 sF hf.F_Fi ?_
-  have := hh i j
-  rw [hF i j, hF j i, star_mul, star_mul, star_star, ← mul_assoc] at this
-  exact this
+  apply Formalism.FourierDecayAlt.P.Fr9.hat_herm <;> assumption
 
 end Frame
 

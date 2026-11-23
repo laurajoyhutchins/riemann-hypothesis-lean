@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsIsoWindowsOfMatrixCongrModTau
 public import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
 public import Development.AbelianVarietyTheory.BlockTheory.DivisorBase.EpsilonPairingZeta
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ApproxStep
@@ -79,23 +80,7 @@ theorem frobenius_mu (p : ℕ) [Fact p.Prime] (O : Type) [CommRing O] [Fact ¬Is
 theorem σ_τ {p : ℕ} [Fact p.Prime] {O : Type} [CommRing O] [Fact ¬IsUnit (p : O)]
     [IsAdicComplete (Ideal.span {(p : O)}) O] {ε : PreTilt O p} (F : BFrame ε) :
     F.σ F.τ = p * F.τ := by
-  have tf : ∀ x : F.B, (p : F.B) * x = 0 → x = 0 := by
-    intro x hx
-    have h1 : (p : F.Q) * algebraMap F.B F.Q x = 0 := by
-      rw [← map_natCast (algebraMap F.B F.Q), ← map_mul, hx, map_zero]
-    have h2 := (F.frame.unit_p.mul_right_eq_zero).1 h1
-    exact F.frame.inj (by rw [h2, map_zero])
-  apply sub_eq_zero.1
-  apply tf
-  have e1 : (p : F.B) * F.σ F.τ = F.a (WittVector.frobenius (Sandwich.mu ε)) := by
-    rw [← F.σ_a, ← F.p_τ, map_mul, map_natCast]
-  have e2 : F.a (WittVector.frobenius (Sandwich.mu ε)) = p * (p * F.τ) := by
-    have hsq : (p * F.τ) * (p * F.τ) = 0 := by
-      rw [show (p : F.B) * F.τ * (p * F.τ) = p * p * (F.τ * F.τ) by ring, F.τ_sq, mul_zero]
-    rw [frobenius_mu, map_sub, map_pow, map_add (f := _), map_one, ← F.p_τ, add_comm,
-      one_add_pow_of_sq _ hsq]
-    ring
-  rw [mul_sub, e1, e2, sub_self]
+  apply GlobalTheory.WindowIso.σ_τ <;> assumption
 
 end GlobalTheory.FLam
 

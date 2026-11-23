@@ -1,5 +1,6 @@
 module
 
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PBlockComplexGramMetricChange
 public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsComplexGramMetricChange
 public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsPullFSExtension
 public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsResolutionMetricPair
@@ -113,40 +114,11 @@ theorem pair_smul (m : ConeMetric ℂ (Ix κ)) {z : Ix κ → ℂ} (hz : z ≠ 0
 
 theorem continuous_diff {X : Type} [TopologicalSpace X] {A : FinHolAtlas D X} {L : HolLineBundle A}
     (W₁ W₀ : Weight L) : Continuous (Weight.diff W₁ W₀) := by
-  rw [continuous_iff_continuousAt]
-  intro x
-  have hx : x ∈ (A.chart (chartIdx A x)).source := Classical.choose_spec (A.cover x)
-  set j := chartIdx A x
-  have hT : (A.chart j).target ∩ (A.chart j).symm ⁻¹' (A.chart j).source = (A.chart j).target :=
-    Set.inter_eq_left.2 fun y hy => (A.chart j).map_target hy
-  have h₁ := (W₁.smooth j j).continuousOn
-  have h₀ := (W₀.smooth j j).continuousOn
-  rw [hT] at h₁ h₀
-  have hg := (h₁.sub h₀).continuousAt ((A.chart j).open_target.mem_nhds ((A.chart j).map_source hx))
-  refine (hg.comp ((A.chart j).continuousAt hx)).congr ?_
-  filter_upwards [(A.chart j).open_source.mem_nhds hx] with y hy
-  simp only [Pi.sub_apply, Function.comp_apply, (A.chart j).left_inv hy]
-  exact (Weight.diff_eq W₁ W₀ j hy).symm
+  apply GroundTheory.Heights₂.Heights.HilbertSamuel.BlockComplexGramMetricChange.continuous_diff <;> assumption
 
 theorem eventually_pow_le (C ε : ℝ) (hε : 0 < ε) (hD : 1 ≤ D) :
     ∀ᶠ n : ℕ in atTop, C * ((n : ℝ) + 1) ^ (D - 1) ≤ ε * (n : ℝ) ^ D := by
-  obtain ⟨D', rfl⟩ : ∃ D', D = D' + 1 := ⟨D - 1, by omega⟩
-  simp only [Nat.add_sub_cancel]
-  obtain ⟨N, hN⟩ := exists_nat_ge (|C| * 2 ^ D' / ε)
-  filter_upwards [eventually_ge_atTop (max N 1)] with n hn
-  have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast le_of_max_le_right hn
-  have hnN : (N : ℝ) ≤ n := by exact_mod_cast le_of_max_le_left hn
-  have hkey : |C| * 2 ^ D' ≤ ε * n := by
-    have := hN.trans hnN
-    rw [div_le_iff₀ hε] at this
-    linarith
-  calc C * ((n : ℝ) + 1) ^ D' ≤ |C| * ((n : ℝ) + 1) ^ D' :=
-        mul_le_mul_of_nonneg_right (le_abs_self C) (by positivity)
-    _ ≤ |C| * (2 * (n : ℝ)) ^ D' :=
-        mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (by positivity) (by linarith) _) (abs_nonneg C)
-    _ = (|C| * 2 ^ D') * (n : ℝ) ^ D' := by rw [mul_pow]; ring
-    _ ≤ (ε * n) * (n : ℝ) ^ D' := mul_le_mul_of_nonneg_right hkey (by positivity)
-    _ = ε * (n : ℝ) ^ (D' + 1) := by ring
+  apply GroundTheory.Heights₂.Heights.HilbertSamuel.BlockComplexGramMetricChange.eventually_pow_le <;> assumption
 
 end ComplexGramMetricChange
 

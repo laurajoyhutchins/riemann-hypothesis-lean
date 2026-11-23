@@ -536,7 +536,6 @@ lemma edge_ratio_le (c : Cfg) (de de' : ℕ → ℝ) (hc : c.Ok) (hw : IsWord c.
     ∏ i ∈ Icc 2 (c.k - 1), ((c.a - c.u de i) / (c.a - c.u de' i)) ≤ Real.exp (1 / 3) := by
   have hkD := kDel_pos c hc
   have hk : (4 : ℝ) ≤ c.k := by exact_mod_cast hc.hk
-  have hD := hc.hDel
   refine (prod_ratio_le (Icc 2 (c.k - 1)) (fun i => c.a - c.u de i) (fun i => c.a - c.u de' i)
     (1 / (4 * c.k)) (fun i hi => ?_) (fun i hi => ?_) (fun i hi => ?_)).trans ?_
   · have := a_sub_u_pos c de' hc hw' i hi; linarith

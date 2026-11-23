@@ -56,6 +56,7 @@ import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Tactic.Polynomial.Basic
 import Mathlib.Tactic.ReduceModChar
 public import Mathlib.RingTheory.Flat.TorsionFree
+import Development.WeilBound.CoreStatements.HodgeTatePoints.HtatHopfFlat
 
 @[expose] public section
 
@@ -450,9 +451,7 @@ lemma ext_le_btOrder [Finite T] (Γ : QFGroup R T) (Γ' : QFGroup R' T) (F : Γ'
 
 end Sch
 
-theorem btOrder_flat_baseChange : ∀ (R : Type) [CommRing R] [IsDomain R] (T : Type) [CommGroup T] [Finite T] (Γ : QFGroup R T) (R' : Type) [CommRing R'] [IsDomain R'] [Algebra R R'] (Γ' : QFGroup R' T) (F : Γ'.G.left ⟶ Γ.G.left), Γ'.IsBaseChange Γ (algebraMap R R') F → Module.Flat R R' → Γ'.btOrder ⊤ = extOrder (algebraMap R R') (Γ.btOrder ⊤) := by
-  intro R _ _ T _ _ Γ R' _ _ _ Γ' F hbc hflat
-  obtain ⟨κ, hκ⟩ := exists_kappa (flat_inj (R := R) (R' := R'))
-  exact le_antisymm (btOrder_le_ext Γ Γ' F hbc κ hκ) (ext_le_btOrder Γ Γ' F hbc κ hκ)
+theorem btOrder_flat_baseChange : ∀ (R : Type) [CommRing R] [IsDomain R] (T : Type) [CommGroup T] [Finite T] (Γ : QFGroup R T) (R' : Type) [CommRing R'] [IsDomain R'] [Algebra R R'] (Γ' : QFGroup R' T) (F : Γ'.G.left ⟶ Γ.G.left), Γ'.IsBaseChange Γ (algebraMap R R') F → Module.Flat R R' → Γ'.btOrder ⊤ = extOrder (algebraMap R R') (Γ.btOrder ⊤) :=
+  PositivityTheory.HtPt.Htat.ValuationInjectivePi.btOrder_flat_baseChange
 
 end GlobalTheory.CompanionTheory.Ar.BT.FlatBC

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CcSubst
 public import Mathlib.RingTheory.PowerSeries.Derivative
 public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.NewtonPowerSeriesSurjectiveLinearizationSolutionStatement
 public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PowerSeriesTaylorSubstFirstOrderStatement
@@ -101,23 +102,7 @@ lemma dvd_step {m : ℕ} (hm : 1 ≤ m) (y g S S' : PowerSeries k) (y0 c A : k)
     (PowerSeries.X : PowerSeries k) ^ (m + 1) ∣
       (y + PowerSeries.X ^ m * g) * S' - y * S
         - PowerSeries.X ^ m * PowerSeries.C (PowerSeries.constantCoeff g * A + y0 * c) := by
-  obtain ⟨r, hr⟩ := hT
-  have hS' : S' = S + PowerSeries.X ^ m * PowerSeries.C c + PowerSeries.X ^ (m + 1) * r := by
-    linear_combination hr
-  obtain ⟨n, rfl⟩ : ∃ n, m = n + 1 := ⟨m - 1, by omega⟩
-  have heq : (y + PowerSeries.X ^ (n + 1) * g) * S' - y * S
-      - PowerSeries.X ^ (n + 1) * PowerSeries.C (PowerSeries.constantCoeff g * A + y0 * c)
-      = PowerSeries.X ^ (n + 1) * (y * PowerSeries.C c - PowerSeries.C (y0 * c)
-          + (g * S - PowerSeries.C (PowerSeries.constantCoeff g * A)))
-        + PowerSeries.X ^ (n + 1 + 1) * (y * r + PowerSeries.X ^ n *
-          (g * PowerSeries.C c + PowerSeries.X * g * r)) := by
-    rw [hS', map_add (f := _)]; ring
-  rw [heq]
-  refine dvd_add ?_ (dvd_mul_right _ _)
-  rw [pow_succ]
-  refine mul_dvd_mul_left _ ?_
-  rw [PowerSeries.X_dvd_iff]
-  simp [hy, hS]
+  apply GlobalTheory.PicDiv.DeformZerosHasse.dvd_step <;> assumption
 
 end GlobalTheory.DeformZeros
 

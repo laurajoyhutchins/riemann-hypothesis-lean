@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.NonemptyClosureHomTiltField
 public import Formalism.LocalRingCardinality.AdicCompletionLocal.InstIsAdicCompleteOCSpanSingletonSetCast
 public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
 public import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
@@ -58,25 +59,7 @@ namespace GlobalTheory.MemLoc
 
 theorem exists_pow_eq_one_algClosure_coprime (l : ℕ) [Fact l.Prime] (a : AlgebraicClosure (ZMod l))
     (ha : a ≠ 0) : ∃ m : ℕ, 0 < m ∧ ¬ l ∣ m ∧ a ^ m = 1 := by
-  have hint : IsIntegral (ZMod l) a := Algebra.IsIntegral.isIntegral a
-  let K := IntermediateField.adjoin (ZMod l) ({a} : Set (AlgebraicClosure (ZMod l)))
-  haveI : FiniteDimensional (ZMod l) K := IntermediateField.adjoin.finiteDimensional hint
-  haveI : Finite K := Module.finite_of_finite (ZMod l)
-  letI : Fintype K := Fintype.ofFinite K
-  let b : K := ⟨a, IntermediateField.mem_adjoin_simple_self _ a⟩
-  have hb : b ≠ 0 := fun h => ha (congrArg Subtype.val h)
-  have h1 : 1 < Fintype.card K := Fintype.one_lt_card
-  refine ⟨Fintype.card K - 1, by omega, ?_, ?_⟩
-  · intro hd
-    have h0 : ((Fintype.card K - 1 : ℕ) : K) = 0 := by
-      obtain ⟨c, hc⟩ := hd
-      have hl : ((l : ℕ) : K) = 0 := by
-        rw [← map_natCast (algebraMap (ZMod l) K), ZMod.natCast_self, map_zero]
-      rw [hc, Nat.cast_mul, hl, zero_mul]
-    rw [Nat.cast_sub h1.le, FiniteField.cast_card_eq_zero] at h0
-    simp at h0
-  · have := congrArg Subtype.val (FiniteField.pow_card_sub_one_eq_one b hb)
-    simpa [b] using this
+  apply GlobalTheory.Per.exists_pow_eq_one_of_algClosure_zmod <;> assumption
 
 theorem exists_unit_frobenius_eq_mul (l : ℕ) [Fact l.Prime] (k : Type) [Field k] [CharP k l] [IsAlgClosed k]
     (u : WittVector l k) (hu : IsUnit u) :

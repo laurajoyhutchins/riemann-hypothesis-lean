@@ -115,7 +115,6 @@ theorem recT : Formalism.FourierDecayAlt.RecursionText := by
           rw [hM]
           have e1 : lam ^ (k + 1 - t) ≤ lam ^ k := pow_le_pow_right₀ hlam1 (by omega)
           have e2 : Q (k + 1 - t) ≤ Q (k + 1) := hQmono (by omega)
-          have e3 : 0 ≤ lam ^ (k + 1 - t) := pow_nonneg (by linarith) _
           have e4 : 0 ≤ Q (k + 1 - t) := by linarith [hQ1 (k + 1 - t)]
           have e5 : 0 ≤ lam ^ k := pow_nonneg (by linarith) _
           have := mul_le_mul e1 e2 e4 e5
@@ -144,7 +143,6 @@ theorem recT : Formalism.FourierDecayAlt.RecursionText := by
       _ = _ := by ring
   set x := ((r : ℝ) + 1) * a with hxdef
   have hx0 : 0 ≤ x := by positivity
-  have hx32 : x ≤ 3 / 2 := by rw [hxdef]; nlinarith
   have step2 : (lam ^ (r + 1)) ^ 2 ≤ Real.exp (6 * x) := by
     rw [← pow_mul]
     have h1 : lam ≤ Real.exp (ε + 2 * a) := by

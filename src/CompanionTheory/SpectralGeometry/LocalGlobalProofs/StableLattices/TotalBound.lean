@@ -139,7 +139,6 @@ theorem farNum : FarNum := by
   have hC0 : 0 ≤ C' := hC' ▸ abs_nonneg _
   have hK0 : 0 ≤ K' := hK' ▸ abs_nonneg _
   have hM0 : 0 ≤ M := by rw [hMdef, Lc]; positivity
-  have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
   obtain ⟨A, hA⟩ : ∃ A : ℝ, A = 2 * n * M ^ 2 + 2 * n * K' * (M + K') + 2 * (n : ℝ) ^ 2 * (M + K') + (n : ℝ) ^ 3
       + n * C' ^ 2 + K' := ⟨_, rfl⟩
   obtain ⟨Bc, hBc⟩ : ∃ Bc : ℝ, Bc = 2 * n * K' * C' + 2 * (n : ℝ) ^ 2 * C' := ⟨_, rfl⟩
@@ -228,15 +227,11 @@ theorem farNum : FarNum := by
     exact le_refl _
   have hKK : K ≤ K' := hK' ▸ le_abs_self K
   rw [Finset.sum_sub_distrib] at hineq
-  have hup : ∑ a, y a ^ 2 ≤ ∑ a, x a ^ 2 + n * (2 * X * n + (n : ℝ) ^ 2) + n * C' ^ 2 + K' := by
-    rw [hYsum]
-    linarith
   rw [Finset.sum_sub_distrib, Finset.sum_sub_distrib, ← Finset.sum_div] at hlow
   simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul] at hlow
   have hδM : (δ * N / 2) ^ 2 ≤ (δ * N - M) ^ 2 := by
     apply pow_le_pow_left₀ (by positivity)
     linarith
-  have e1 : (δ * N / 2) ^ 2 = (δ * N) ^ 2 / 4 := by ring
   have h5 : (δ * N) ^ 2 / 16 ≤ n * (2 * M ^ 2) + n * (2 * X * K') + n * (2 * X * n + (n : ℝ) ^ 2)
       + n * C' ^ 2 + K' := by
     linarith

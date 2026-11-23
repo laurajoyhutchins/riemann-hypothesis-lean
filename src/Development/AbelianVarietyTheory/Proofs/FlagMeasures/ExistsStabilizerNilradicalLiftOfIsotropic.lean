@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IwasawaDecompositionUnitaryIsotropicFlag
 public import Development.AbelianVarietyTheory.BlockTheory.SiegelWeilLocal.CenteredPerpendicularSets
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -68,29 +69,7 @@ theorem hs_nonneg' (M : Matrix (Fin n) (Fin n) ℂ) : 0 ≤ hs M := by
 
 theorem exists_proj (W : Submodule ℂ (Fin n → ℂ)) :
     ∃ P : Matrix (Fin n) (Fin n) ℂ, Pᴴ = P ∧ (∀ u, P *ᵥ u ∈ W) ∧ ∀ u ∈ W, P *ᵥ u = u := by
-  classical
-  let K : Submodule ℂ (EuclideanSpace ℂ (Fin n)) :=
-    W.comap (WithLp.linearEquiv 2 ℂ (Fin n → ℂ)).toLinearMap
-  let T : EuclideanSpace ℂ (Fin n) →ₗ[ℂ] EuclideanSpace ℂ (Fin n) := K.starProjection
-  have hT : ∀ u, (Matrix.toEuclideanLin.symm T) *ᵥ u = WithLp.ofLp (T (WithLp.toLp 2 u)) := by
-    intro u
-    have h := congrArg (fun f : EuclideanSpace ℂ (Fin n) →ₗ[ℂ] EuclideanSpace ℂ (Fin n) =>
-      WithLp.ofLp (f (WithLp.toLp 2 u))) (LinearEquiv.apply_symm_apply Matrix.toEuclideanLin T)
-    exact h
-  refine ⟨Matrix.toEuclideanLin.symm T, ?_, ?_, ?_⟩
-  · have hH : (Matrix.toEuclideanLin.symm T).IsHermitian := by
-      rw [← Matrix.isSymmetric_toEuclideanLin_iff, LinearEquiv.apply_symm_apply]
-      exact K.starProjection_isSymmetric
-    exact hH
-  · intro u
-    rw [hT]
-    have hm : T (WithLp.toLp 2 u) ∈ K := K.starProjection_apply_mem _
-    exact hm
-  · intro u hu
-    rw [hT]
-    have hm : WithLp.toLp 2 u ∈ K := hu
-    have h2 : T (WithLp.toLp 2 u) = WithLp.toLp 2 u := K.starProjection_eq_self_iff.mpr hm
-    rw [h2]
+  apply GlobalTheory.RealIwasawa.exists_proj <;> assumption
 
 theorem hs_mul_le (D Q : Matrix (Fin n) (Fin n) ℂ) (h1 : Qᴴ = Q) (h2 : Q * Q = Q) :
     hs (D * (1 - Q)) ≤ hs D := by

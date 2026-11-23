@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.LocIdFr
 public import Formalism.LocalRingCardinality.DataLevel
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -62,25 +63,6 @@ theorem splitting_fst_mem_integers : ∀ {F E : Type} [Field F] [NumberField F] 
     (v : HeightOneSpectrum (𝓞 F)) (spl : E ⊗[F] v.adicCompletion F ≃+* v.adicCompletion F × v.adicCompletion F),
     (∀ a : v.adicCompletion F, spl ((1 : E) ⊗ₜ[F] a) = (a, a)) →
     ∀ z ∈ Formalism.BasicNotions.intV E v, (spl z).1 ∈ v.adicCompletionIntegers F := by
-  intro F E _ _ _ _ _ v spl h1 z hz
-  let φ : E ⊗[F] v.adicCompletion F →+* v.adicCompletion F := (RingHom.fst _ _).comp spl.toRingHom
-  let ψ : E →+* v.adicCompletion F := φ.comp Algebra.TensorProduct.includeLeftRingHom
-  have key : Formalism.BasicNotions.intV E v ≤ (v.adicCompletionIntegers F).toSubring.comap φ := by
-    show Subring.closure _ ≤ _
-    rw [Subring.closure_le]
-    rintro w (⟨⟨x, hx⟩, rfl⟩ | ⟨⟨y, hy⟩, rfl⟩)
-    · obtain ⟨r, rfl⟩ := hx
-      show ψ (algebraMap (𝓞 E) E r) ∈ v.adicCompletionIntegers F
-      apply adicCompletion_mem_integers_of_isIntegral_int
-      obtain ⟨p, hm, hp⟩ : IsIntegral ℤ (algebraMap (𝓞 E) E r) := RingOfIntegers.isIntegral_coe r
-      refine ⟨p, hm, ?_⟩
-      have h2 := congrArg ψ hp
-      rw [Polynomial.hom_eval₂, map_zero] at h2
-      rw [Polynomial.eval₂_eq_sum_range] at h2 ⊢
-      simpa using h2
-    · show (spl ((1 : E) ⊗ₜ[F] y)).1 ∈ v.adicCompletionIntegers F
-      rw [h1]
-      exact hy
-  exact key hz
+  apply Formalism.MainNotions.Gaps.Loc.fst_int <;> assumption
 
 end GlobalTheory

@@ -73,15 +73,6 @@ theorem kerLow : KerLow := by
     intro i
     have := norm_le_pi_norm x i
     rwa [Int.norm_eq_abs] at this
-  have hn1 : 1 ≤ n := by
-    obtain ⟨i, hi⟩ : ∃ i, x i ≠ 0 := by
-      by_contra h
-      push_neg at h
-      exact hx0 (funext h)
-    have h1 : (1 : ℝ) ≤ |((x i : ℤ) : ℝ)| := by
-      rw [← Int.cast_abs]
-      exact_mod_cast Int.one_le_abs hi
-    exact h1.trans (hxi i)
   set w : ℂ := (x 0 : ℂ) * (z : ℂ) + (x 1 : ℂ) with hw
   have hwle : ‖w‖ ≤ n * (r + 1) := by
     calc ‖w‖ ≤ ‖(x 0 : ℂ)‖ * r + ‖(x 1 : ℂ)‖ := by

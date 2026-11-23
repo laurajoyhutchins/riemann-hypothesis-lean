@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.AbsoluteConvergence.ContinuousEvX
 public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.NullSec
 public import Mathlib.Analysis.CStarAlgebra.Classes
 public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.SquareNormBound
@@ -79,27 +80,7 @@ theorem continuous_evX (P : PX m n) : Continuous fun x : Fin m → Fin n → ℂ
   continuous_iff_continuousAt.2 fun x => (hasFDerivAt_evX P x).continuousAt
 
 theorem evX_bound (P : PX m n) : ∃ K : ℝ, ∃ d : ℕ, 0 ≤ K ∧ ∀ x, ‖evX P x‖ ≤ K * (1 + ‖x‖) ^ d := by
-  induction P using MvPolynomial.induction_on with
-  | C a => exact ⟨‖a‖, 0, norm_nonneg _, fun x => by simp [evX_eq]⟩
-  | add p q hp hq =>
-    obtain ⟨K1, d1, h1, b1⟩ := hp
-    obtain ⟨K2, d2, h2, b2⟩ := hq
-    refine ⟨K1 + K2, max d1 d2, by positivity, fun x => ?_⟩
-    have hx : 1 ≤ 1 + ‖x‖ := by linarith [norm_nonneg x]
-    have e1 : (1 + ‖x‖) ^ d1 ≤ (1 + ‖x‖) ^ max d1 d2 := pow_le_pow_right₀ hx (le_max_left _ _)
-    have e2 : (1 + ‖x‖) ^ d2 ≤ (1 + ‖x‖) ^ max d1 d2 := pow_le_pow_right₀ hx (le_max_right _ _)
-    calc ‖evX (p + q) x‖ ≤ ‖evX p x‖ + ‖evX q x‖ := by simpa [evX_eq] using norm_add_le _ _
-      _ ≤ K1 * (1 + ‖x‖) ^ d1 + K2 * (1 + ‖x‖) ^ d2 := add_le_add (b1 x) (b2 x)
-      _ ≤ K1 * (1 + ‖x‖) ^ max d1 d2 + K2 * (1 + ‖x‖) ^ max d1 d2 :=
-        add_le_add (mul_le_mul_of_nonneg_left e1 h1) (mul_le_mul_of_nonneg_left e2 h2)
-      _ = (K1 + K2) * (1 + ‖x‖) ^ max d1 d2 := by ring
-  | mul_X p k hp =>
-    obtain ⟨K, d, hK, b⟩ := hp
-    refine ⟨K, d + 1, hK, fun x => ?_⟩
-    have hc : ‖crd k x‖ ≤ 1 + ‖x‖ := (norm_crd_le k x).trans (by linarith)
-    calc ‖evX (p * X k) x‖ = ‖evX p x‖ * ‖crd k x‖ := by simp [evX_eq]
-      _ ≤ (K * (1 + ‖x‖) ^ d) * (1 + ‖x‖) := mul_le_mul (b x) hc (norm_nonneg _) (by positivity)
-      _ = K * (1 + ‖x‖) ^ (d + 1) := by ring
+  apply PositivityTheory.Rg.Sw.AbsSt.DF.poly_bound <;> assumption
 
 theorem sq_norm_le (x : Fin m → Fin n → ℂ) : ‖x‖ ^ 2 ≤ ∑ a, ∑ i, ‖x a i‖ ^ 2 :=
   _root_.UpperTheory.Reformulated.B.SquareNormBound.sq_norm_le x

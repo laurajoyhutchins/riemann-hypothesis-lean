@@ -1,5 +1,6 @@
 module
 
+import Mathlib.RingTheory.Spectrum.Prime.RingHom
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ThickTransComp
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
 import Mathlib.Algebra.Order.Floor.Extended
@@ -53,22 +54,14 @@ namespace GlobalTheory.LocalThickGlue
 
 theorem subsingleton_primeSpectrum (R : Type) [CommRing R] [IsLocalRing R] (e : ℕ) :
     Subsingleton (PrimeSpectrum (R ⧸ IsLocalRing.maximalIdeal R ^ (e + 1))) := by
-  have key : ∀ P : PrimeSpectrum (R ⧸ IsLocalRing.maximalIdeal R ^ (e + 1)),
-      P.asIdeal.comap (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R ^ (e + 1))) =
-        IsLocalRing.maximalIdeal R := by
-    intro P
-    have hP : (P.asIdeal.comap (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R ^ (e + 1)))).IsPrime :=
-      Ideal.comap_isPrime _ _
-    have hle : IsLocalRing.maximalIdeal R ^ (e + 1) ≤
-        P.asIdeal.comap (Ideal.Quotient.mk (IsLocalRing.maximalIdeal R ^ (e + 1))) := by
-      intro r hr
-      rw [Ideal.mem_comap, Ideal.Quotient.eq_zero_iff_mem.mpr hr]
-      exact P.asIdeal.zero_mem
-    exact ((IsLocalRing.maximalIdeal.isMaximal R).eq_of_le hP.ne_top (hP.le_of_pow_le hle)).symm
-  constructor
-  intro P Q
-  ext1
-  exact Ideal.comap_injective_of_surjective _ Ideal.Quotient.mk_surjective ((key P).trans (key Q).symm)
+  let q := Ideal.Quotient.mk (IsLocalRing.maximalIdeal R ^ (e + 1))
+  have hq : Function.Surjective q := Ideal.Quotient.mk_surjective
+  have hr := range_comap_of_surjective _ q hq
+  dsimp [q] at hr
+  rw [Ideal.mk_ker, PrimeSpectrum.zeroLocus_pow _ (Nat.succ_ne_zero e),
+    PrimeSpectrum.zeroLocus_eq_singleton] at hr
+  refine ⟨fun P Q => PrimeSpectrum.comap_injective_of_surjective q hq ?_⟩
+  exact Set.subsingleton_singleton (hr ▸ Set.mem_range_self P) (hr ▸ Set.mem_range_self Q)
 
 theorem pow_succ_ne_top (R : Type) [CommRing R] [IsLocalRing R] (e : ℕ) :
     IsLocalRing.maximalIdeal R ^ (e + 1) ≠ ⊤ := fun h =>

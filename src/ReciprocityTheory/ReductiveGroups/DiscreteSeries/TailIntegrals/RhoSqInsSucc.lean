@@ -241,11 +241,6 @@ lemma cont_linF {p m : ℕ} (η η' : Fin p → ℂ) (ζ : Fin m → ℂ) : Cont
   exact (continuous_finsetSum _ fun j _ => by fun_prop).add (continuous_finsetSum _ fun i _ => by fun_prop)
 
 lemma cont_tailPt {p m : ℕ} : Continuous (fun y : Yp p m => tailPt y) := by
-  have hmid : Continuous fun y : Yp p m => (Fin.cons (0 : ℂ) y.2.1 : Fin (p + 1) → ℂ) :=
-    continuous_pi (fun j => by
-      induction j using Fin.cases with
-      | zero => simp only [Fin.cons_zero]; exact continuous_const
-      | succ k => simp only [Fin.cons_succ]; fun_prop)
   unfold ReciprocityTheory.ChartRestriction.DS.Xi.tailPt
   fun_prop
 

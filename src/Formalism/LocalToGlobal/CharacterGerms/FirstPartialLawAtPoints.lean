@@ -110,7 +110,6 @@ theorem hAt_zero_left {c : Fin dd → MvPowerSeries τ C} (hc : ∀ i, MvPowerSe
       | exact ⟨fun q => by rw [hc q.2]; exact IsNilpotent.zero,
           by first
             | exact fun d => Set.toFinite _
-            | (simp only [Set.finite_coe_iff]; intro d; exact Set.toFinite _)
             | (simp; intro d; exact Set.toFinite _)⟩
   have h1 : MvPowerSeries.subst (P2 (0 : Pt C 1 dd) (pt C dd 0)) Y.h = 0 := by
     rw [← eval_two_points_eq_subst (m := 2) _ _ _ rfl]
@@ -125,14 +124,11 @@ theorem hAt_zero_left {c : Fin dd → MvPowerSeries τ C} (hc : ∀ i, MvPowerSe
       · funext i
         first
           | simp [pt, MvPowerSeries.subst_X hA]
-          | (unfold pt; simp [MvPowerSeries.subst_X hA])
-          | rfl
     all_goals first
       | exact hA
       | (intro i; simp [pt])
       | (intro i; rfl)
       | simp_all
-      | skip
   rw [h3, h1, ← MvPowerSeries.coe_substAlgHom hA, map_zero]
 
 theorem hAt_zero_right {c : Fin dd → MvPowerSeries τ C} (hc : ∀ i, MvPowerSeries.constantCoeff (c i) = 0) :
@@ -145,7 +141,6 @@ theorem hAt_zero_right {c : Fin dd → MvPowerSeries τ C} (hc : ∀ i, MvPowerS
       | exact ⟨fun q => by rw [hc q.2]; exact IsNilpotent.zero,
           by first
             | exact fun d => Set.toFinite _
-            | (simp only [Set.finite_coe_iff]; intro d; exact Set.toFinite _)
             | (simp; intro d; exact Set.toFinite _)⟩
   have h1 : MvPowerSeries.subst (P2 (pt C dd 0) (0 : Pt C 1 dd)) Y.h = 0 := by
     rw [← eval_two_points_eq_subst (m := 2) _ _ _ rfl]
@@ -158,8 +153,6 @@ theorem hAt_zero_right {c : Fin dd → MvPowerSeries τ C} (hc : ∀ i, MvPowerS
       · funext i
         first
           | simp [pt, MvPowerSeries.subst_X hA]
-          | (unfold pt; simp [MvPowerSeries.subst_X hA])
-          | rfl
       · funext i
         rw [Pi.zero_apply, ← MvPowerSeries.coe_substAlgHom hA, map_zero]
     all_goals first
@@ -167,7 +160,6 @@ theorem hAt_zero_right {c : Fin dd → MvPowerSeries τ C} (hc : ∀ i, MvPowerS
       | (intro i; simp [pt])
       | (intro i; rfl)
       | simp_all
-      | skip
   rw [h3, h1, ← MvPowerSeries.coe_substAlgHom hA, map_zero]
 
 def GoodPt (V : VF C) (a : Fin dd → MvPowerSeries τ C) : Prop :=
@@ -178,8 +170,6 @@ private theorem intS_subst_of_intS {σ : Type} [Finite σ] {a : σ → MvPowerSe
     (hf : IntS V f) : IntS V (MvPowerSeries.subst a f) := by
   first
     | exact IntS.subst ha0 ha hf
-    | exact PartialDerivEval.intS_subst ha0 ha hf
-    | exact AltInv.intS_subst ha0 ha hf
 
 theorem GoodPt.add {a b : Fin dd → MvPowerSeries τ C} (ha : GoodPt V a) (hb : GoodPt V b) : GoodPt V (addAt Y a b) := by
   have h0 : ∀ q, MvPowerSeries.constantCoeff (P2 a b q) = 0 := by
@@ -206,8 +196,6 @@ theorem GoodPt.zero : GoodPt V (fun _ : Fin dd => (0 : MvPowerSeries τ C)) := b
   unfold VF.Ge
   first
     | simp
-    | exact le_top
-    | (simp [VF.v]; done)
 
 theorem GoodPt.act (x : O) {a : Fin dd → MvPowerSeries τ C} (ha : GoodPt V a) : GoodPt V (actAt Y x a) := by
   refine ⟨fun i => cc_actAt Y x ha.1 i, fun i => ?_⟩
@@ -235,9 +223,6 @@ theorem isIU_of_exp {U f : MvPowerSeries τ C} (hi : IntS V U) (he : U = mvExp f
   rw [h1]
   first
     | simp
-    | exact map_one _
-    | rfl
-    | (simp [VF.v]; done)
 
 theorem biadd_left {c : Fin dd → MvPowerSeries τ C} (hc : GoodPt V c) :
     ∀ l : List (Fin dd → MvPowerSeries τ C), (∀ a ∈ l, GoodPt V a) →

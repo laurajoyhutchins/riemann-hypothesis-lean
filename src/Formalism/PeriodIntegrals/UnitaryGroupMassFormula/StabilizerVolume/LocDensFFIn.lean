@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.LocDensFFIn
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.LocDensFF
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.LocDensFFHS
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.LocDensFFCnt
@@ -193,125 +194,12 @@ private theorem mem_range_algebraMap_of_pow_card_eq (d : K) (hd : d ^ Fintype.ca
 
 theorem frob_of_ne (σ : K ≃ₐ[k] K) (h2 : finrank k K = 2) (hne : σ ≠ AlgEquiv.refl) :
     ∀ x, σ x = x ^ Fintype.card k := by
-  have hK := card_eq_card_sq_of_finrank_two (k := k) (K := K) h2
-  have hqq : ∀ y : K, (y ^ Fintype.card k) ^ Fintype.card k = y := fun y => by
-    rw [← pow_mul, ← sq, ← hK, FiniteField.pow_card]
-  have hfix : ∀ c : K, c ^ Fintype.card k = c → σ c = c := by
-    intro c hc
-    obtain ⟨d0, rfl⟩ := mem_range_algebraMap_of_pow_card_eq c hc
-    exact σ.commutes d0
-  have hdich : ∀ x : K, σ x = x ∨ σ x = x ^ Fintype.card k := by
-    intro x
-    have hs : σ x + σ x ^ Fintype.card k = x + x ^ Fintype.card k := by
-      rw [← map_pow, ← map_add (f := _)]
-      exact hfix _ (by rw [add_pow_card_eq_add_pow_card, hqq, add_comm])
-    have hm : σ x * σ x ^ Fintype.card k = x * x ^ Fintype.card k := by
-      rw [← map_pow, ← map_mul]
-      exact hfix _ (by rw [mul_pow, hqq, mul_comm])
-    have h0 : (σ x - x) * (σ x - x ^ Fintype.card k) = 0 := by
-      linear_combination σ x * hs - hm
-    rcases mul_eq_zero.mp h0 with h | h
-    · exact Or.inl (sub_eq_zero.mp h)
-    · exact Or.inr (sub_eq_zero.mp h)
-  intro x
-  by_contra ha
-  have hq0 : Fintype.card k ≠ 0 := Fintype.card_ne_zero
-  have hax : σ x = x := (hdich x).resolve_right ha
-  obtain ⟨b, hb⟩ : ∃ b, σ b ≠ b := by
-    by_contra hcon
-    push_neg at hcon
-    exact hne (AlgEquiv.ext fun y => by simpa using hcon y)
-  have hbq : σ b = b ^ Fintype.card k := (hdich b).resolve_left hb
-  have hx0 : x ≠ 0 := by
-    rintro rfl
-    exact ha (by rw [map_zero, zero_pow hq0])
-  have hb0 : b ≠ 0 := by
-    rintro rfl
-    exact hb (map_zero σ)
-  rcases hdich (x * b) with h | h
-  · rw [map_mul, hax, hbq] at h
-    exact hb (hbq.trans (mul_left_cancel₀ hx0 h))
-  · rw [map_mul, hax, hbq, mul_pow] at h
-    exact ha (hax.trans (mul_right_cancel₀ (pow_ne_zero _ hb0) h))
+  apply PI.VolStabSW.FFHS.frob_of_ne <;> assumption
 
 theorem card_norm_fiber (σ : K ≃ₐ[k] K) (hfrob : ∀ x, σ x = x ^ Fintype.card k)
     (h2 : finrank k K = 2) (d : K) (hd : σ d = d) :
     Nat.card {t : K // t * σ t = d} = if d = 0 then 1 else Fintype.card k + 1 := by
-  by_cases hd0 : d = 0
-  · subst hd0
-    rw [if_pos rfl, Nat.card_eq_one_iff_exists]
-    refine ⟨⟨0, by simp⟩, fun y => Subtype.ext ?_⟩
-    rcases mul_eq_zero.mp y.2 with h | h
-    · exact h
-    · exact (map_eq_zero σ).mp h
-  rw [if_neg hd0]
-  have hK := card_eq_card_sq_of_finrank_two (k := k) (K := K) h2
-  have hqq : ∀ y : K, (y ^ Fintype.card k) ^ Fintype.card k = y := fun y => by
-    rw [← pow_mul, ← sq, ← hK, FiniteField.pow_card]
-  have hN : ∀ t : K, t * σ t = t ^ (Fintype.card k + 1) := fun t => by
-    rw [hfrob, pow_succ']
-  have hfixset : Finset.univ.filter (fun e : K => σ e = e) =
-      Finset.univ.image (algebraMap k K) := by
-    ext e
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_image]
-    constructor
-    · intro he
-      exact mem_range_algebraMap_of_pow_card_eq e ((hfrob e).symm.trans he)
-    · rintro ⟨y, rfl⟩
-      exact σ.commutes y
-  have hfixcard : (Finset.univ.filter (fun e : K => σ e = e)).card = Fintype.card k := by
-    rw [hfixset, Finset.card_image_of_injective _ (algebraMap k K).injective, Finset.card_univ]
-  have hD : (Finset.univ.filter (fun e : K => σ e = e ∧ e ≠ 0)).card + 1 = Fintype.card k := by
-    have hset : Finset.univ.filter (fun e : K => σ e = e ∧ e ≠ 0) =
-        (Finset.univ.filter (fun e : K => σ e = e)).erase 0 := by
-      ext e
-      simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_erase]
-      exact and_comm
-    rw [hset, Finset.card_erase_add_one (by simp), hfixcard]
-  have hS : (Finset.univ.filter (fun t : K => t ≠ 0)).card + 1 = Fintype.card k ^ 2 := by
-    rw [Finset.filter_ne', Finset.card_erase_add_one (Finset.mem_univ _), Finset.card_univ, hK]
-  have hmaps : ∀ t ∈ Finset.univ.filter (fun t : K => t ≠ 0),
-      t * σ t ∈ Finset.univ.filter (fun e : K => σ e = e ∧ e ≠ 0) := by
-    intro t ht
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at ht ⊢
-    refine ⟨?_, mul_ne_zero ht ((map_ne_zero σ).mpr ht)⟩
-    rw [map_mul, hfrob (σ t), hfrob t, hqq, mul_comm]
-  have hsum := Finset.card_eq_sum_card_fiberwise hmaps
-  have hbound : ∀ e : K, ((Finset.univ.filter (fun t : K => t ≠ 0)).filter
-      (fun t => t * σ t = e)).card ≤ Fintype.card k + 1 := by
-    intro e
-    calc _ ≤ (nthRoots (Fintype.card k + 1) e).toFinset.card := by
-          apply Finset.card_le_card
-          intro t ht
-          simp only [Finset.mem_filter, Finset.mem_univ, true_and] at ht
-          rw [Multiset.mem_toFinset, mem_nthRoots (Nat.succ_pos _), ← hN]
-          exact ht.2
-      _ ≤ Multiset.card (nthRoots (Fintype.card k + 1) e) := Multiset.toFinset_card_le _
-      _ ≤ Fintype.card k + 1 := card_nthRoots _ _
-  have htarget : Nat.card {t : K // t * σ t = d} =
-      ((Finset.univ.filter (fun t : K => t ≠ 0)).filter (fun t => t * σ t = d)).card := by
-    rw [Nat.card_eq_fintype_card, Fintype.card_subtype]
-    congr 1
-    ext t
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
-    constructor
-    · intro ht
-      refine ⟨?_, ht⟩
-      rintro rfl
-      exact hd0 (by simpa using ht.symm)
-    · exact fun ht => ht.2
-  rw [htarget]
-  refine le_antisymm (hbound d) (not_lt.mp fun hlt => ?_)
-  have hdD : d ∈ Finset.univ.filter (fun e : K => σ e = e ∧ e ≠ 0) := by
-    simp [hd, hd0]
-  have hlt2 : (Finset.univ.filter (fun t : K => t ≠ 0)).card <
-      (Finset.univ.filter (fun e : K => σ e = e ∧ e ≠ 0)).card * (Fintype.card k + 1) := by
-    calc (Finset.univ.filter (fun t : K => t ≠ 0)).card = _ := hsum
-      _ < ∑ e ∈ Finset.univ.filter (fun e : K => σ e = e ∧ e ≠ 0), (Fintype.card k + 1) :=
-          Finset.sum_lt_sum (fun e _ => hbound e) ⟨d, hdD, hlt⟩
-      _ = _ := by rw [Finset.sum_const, smul_eq_mul]
-  rw [← hD] at hS hlt2
-  nlinarith [hS, hlt2]
+  apply PI.VolStabSW.FFHS.card_norm_fiber <;> assumption
 
 end field
 

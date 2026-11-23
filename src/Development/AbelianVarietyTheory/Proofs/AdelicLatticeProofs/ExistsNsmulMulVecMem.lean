@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicUnimodularity.ExistsNatSmulMem
 public import Mathlib.NumberTheory.NumberField.Basic
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -70,29 +71,7 @@ theorem exists_nsmul_mem {E : Type} [Field E] [NumberField E] {n : ℕ}
     (L : Submodule (RingOfIntegers E) (Fin n → E))
     (hL : Submodule.span E (↑L : Set (Fin n → E)) = ⊤) (w : Fin n → E) :
     ∃ N : ℕ, 0 < N ∧ N • w ∈ L := by
-  have hw : w ∈ Submodule.span E (↑L : Set (Fin n → E)) := by rw [hL]; trivial
-  induction hw using Submodule.span_induction with
-  | mem x hx => exact ⟨1, one_pos, by simpa using hx⟩
-  | zero => exact ⟨1, one_pos, by simp⟩
-  | add x y _ _ hx hy =>
-    obtain ⟨a, ha, hxa⟩ := hx
-    obtain ⟨b, hb, hyb⟩ := hy
-    refine ⟨a * b, Nat.mul_pos ha hb, ?_⟩
-    rw [smul_add]
-    refine L.add_mem ?_ ?_
-    · rw [mul_comm, mul_smul]; exact nsmul_mem hxa b
-    · rw [mul_smul]; exact nsmul_mem hyb a
-  | smul c x _ hx =>
-    obtain ⟨a, ha, hxa⟩ := hx
-    obtain ⟨K, hK, hint⟩ := exists_nat_mul_integral c
-    refine ⟨K * a, Nat.mul_pos hK ha, ?_⟩
-    have h := L.smul_mem (⟨(K : E) * c, hint⟩ : RingOfIntegers E) hxa
-    convert h using 1
-    ext i
-    change _ = ((K : E) * c) * (a • x i)
-    simp only [Pi.smul_apply, nsmul_eq_mul, smul_eq_mul]
-    push_cast
-    ring
+  apply PI.WAU.exists_nat_smul_mem <;> assumption
 
 theorem exists_nsmul_mulVec_mem {E : Type} [Field E] [NumberField E] {n : ℕ}
     (L : Submodule (RingOfIntegers E) (Fin n → E)) (hfg : L.FG)

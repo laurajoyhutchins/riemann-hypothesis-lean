@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.FibGlue
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.FibFour
 public import Mathlib.MeasureTheory.Integral.RieszMarkovKakutani.Real
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.DensGen
@@ -136,21 +137,7 @@ theorem dens_unique {g1 g2 : X → ℝ} (h1 : Continuous g1) (h2 : Continuous g2
 
 theorem dens_nonneg {g : X → ℝ} (hg : Continuous g)
     (h : ∀ S, IsCompact S → 0 ≤ ∫ b in S, g b ∂ν) (b0 : X) : 0 ≤ g b0 := by
-  by_contra hneg
-  have hneg' : 0 < -g b0 := by linarith
-  have hev : ∀ᶠ b in 𝓝 b0, -g b0 / 2 < -g b :=
-    (hg.neg.continuousAt (x := b0)).eventually (lt_mem_nhds (by simp only [Pi.neg_apply]; linarith))
-  obtain ⟨S, hSn, hSsub, hSc⟩ := local_compact_nhds hev
-  have hSm : MeasurableSet S := hSc.isClosed.measurableSet
-  have hlt : ν S ≠ ⊤ := hSc.measure_lt_top.ne
-  have hpos' : 0 < ν.real S := by
-    rw [measureReal_def]
-    exact ENNReal.toReal_pos (ν.measure_pos_of_mem_nhds hSn).ne' hlt
-  have hge := setIntegral_ge_of_const_le_real (c := -g b0 / 2) hSm hlt
-    (fun b hb => (hSsub hb).le) (hg.neg.continuousOn.integrableOn_compact hSc)
-  simp only [Pi.neg_apply, integral_neg] at hge
-  have := h S hSc
-  nlinarith
+  apply (config := { allowSynthFailures := true }) PI.VolStabSW.Glue.dens_nonneg <;> assumption
 
 variable [IsFiniteMeasureOnCompacts μ] [OpensMeasurableSpace V]
 

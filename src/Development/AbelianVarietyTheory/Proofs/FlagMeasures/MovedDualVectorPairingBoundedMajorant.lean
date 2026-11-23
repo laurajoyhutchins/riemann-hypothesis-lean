@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerPairs.IsUnitDetOfMemGV
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsNormalFormStabilizerMeasure
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.GramSchmidtLengths
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicLeviEmbeddingHomomorphismProperties
@@ -90,43 +91,11 @@ lemma herm_symm (k r : ℕ) (v w : Fin (2 * r + k + 1) → ℂ) :
 
 lemma herm_e (k r : ℕ) (v : Fin (2 * r + k + 1) → ℂ) (a : Fin r) :
     herm (Hpk k r) v (bvec (eI k r a)) = v (esI k r a) := by
-  unfold herm bvec
-  have : star (Pi.single (eI k r a) (1 : ℂ) : Fin (2 * r + k + 1) → ℂ) = Pi.single (eI k r a) 1 := by
-    rw [Pi.star_single]; simp
-  rw [this, single_dotProduct, one_mul, Matrix.mulVec, dotProduct, Finset.sum_eq_single (esI k r a)]
-  · have := a.2
-    have h : Hpk k r (eI k r a) (esI k r a) = 1 := by
-      unfold Hpk eI esI
-      rw [if_pos]; constructor <;> simp; omega
-    rw [h, one_mul]
-  · intro i _ hi
-    have := a.2
-    have hi' : i.val ≠ 2 * r + k - a.val := fun h => hi (Fin.ext h)
-    have h : Hpk k r (eI k r a) i = 0 := by
-      unfold Hpk eI
-      rw [if_neg, if_neg, if_neg] <;> simp <;> omega
-    rw [h, zero_mul]
-  · simp
+  apply PI.StabPairsW.herm_e <;> assumption
 
 lemma herm_es (k r : ℕ) (v : Fin (2 * r + k + 1) → ℂ) (a : Fin r) :
     herm (Hpk k r) v (bvec (esI k r a)) = v (eI k r a) := by
-  unfold herm bvec
-  have : star (Pi.single (esI k r a) (1 : ℂ) : Fin (2 * r + k + 1) → ℂ) = Pi.single (esI k r a) 1 := by
-    rw [Pi.star_single]; simp
-  rw [this, single_dotProduct, one_mul, Matrix.mulVec, dotProduct, Finset.sum_eq_single (eI k r a)]
-  · have := a.2
-    have h : Hpk k r (esI k r a) (eI k r a) = 1 := by
-      unfold Hpk eI esI
-      rw [if_neg, if_pos] <;> simp <;> omega
-    rw [h, one_mul]
-  · intro i _ hi
-    have := a.2
-    have hi' : i.val ≠ a.val := fun h => hi (Fin.ext h)
-    have h : Hpk k r (esI k r a) i = 0 := by
-      unfold Hpk esI
-      rw [if_neg, if_neg, if_neg] <;> simp <;> omega
-    rw [h, zero_mul]
-  · simp
+  apply PI.StabPairsW.herm_es <;> assumption
 
 lemma herm_smul_left {n : ℕ} (H : Matrix (Fin n) (Fin n) ℂ) (c : ℂ) (v w : Fin n → ℂ) :
     herm H (c • v) w = c * herm H v w := by

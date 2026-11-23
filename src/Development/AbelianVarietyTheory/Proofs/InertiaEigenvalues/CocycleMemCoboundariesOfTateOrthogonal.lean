@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsCyclotomicIntegralLattice
 public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
 public import Formalism.GaloisCohomology.LocalTateDualityK
 public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
@@ -65,35 +66,7 @@ theorem exists_unitLattice {l : ℕ} [Fact l.Prime] (P : LocPrime l) (K : FinExt
     (hO : GoodO (Qp := ℚ_[l]) LL O) :
     ∃ L1 : Lattice (O := O) (charRep (cycLL (P.PD K) LL)),
       L1.T = LinearMap.range (Algebra.linearMap O LL) := by
-  have hχ : ∀ g, ∃ b : O, ((cycLL (P.PD K) LL g : LLˣ) : LL) = algebraMap O LL b := by
-    intro g
-    refine Formalism.MainNotions.BlochKatoDuality.Br.zl_int hO _ ?_
-    rw [P.PD_χ K g]
-    obtain ⟨a, ha, _⟩ := P.χQ_cyc (g : GQ l) 0 1 (one_pow _)
-    have h1 : ((P.χQ (g : GQ l) : ℚ_[l]ˣ) : ℚ_[l]) =
-        (((P.χQ (g : GQ l) : ℚ_[l]ˣ) : ℚ_[l]) - (a : ℚ_[l])) + (a : ℚ_[l]) := by
-      ring
-    rw [h1]
-    refine (Padic.nonarchimedean _ _).trans (max_le ?_ ?_)
-    · simpa using ha
-    · exact_mod_cast Padic.norm_int_le_one (a : ℤ)
-  obtain ⟨⟨hD, hV, hF⟩, _⟩ := id hO
-  refine ⟨⟨LinearMap.range (Algebra.linearMap O LL), ?_, ?_, ?_, ?_⟩, rfl⟩
-  · rintro g _ ⟨x, rfl⟩
-    obtain ⟨b, hb⟩ := hχ g
-    refine ⟨b * x, ?_⟩
-    show algebraMap O LL (b * x) = ((cycLL (P.PD K) LL g : LLˣ) : LL) • algebraMap O LL x
-    rw [map_mul, hb, smul_eq_mul]
-  · rw [← Submodule.map_top]
-    exact Submodule.FG.map _ Module.Finite.fg_top
-  · exact Module.Free.of_equiv
-      (LinearEquiv.ofInjective (Algebra.linearMap O LL) (IsFractionRing.injective O LL))
-  · rw [eq_top_iff]
-    intro x _
-    have h1 : (1 : LL) ∈ Submodule.span LL
-        ((LinearMap.range (Algebra.linearMap O LL) : Submodule O LL) : Set LL) :=
-      Submodule.subset_span ⟨1, by simp⟩
-    simpa using Submodule.smul_mem _ x h1
+  apply GlobalTheory.CycIntegral.cyc_lattice <;> assumption
 
 theorem cocycle_mem_coboundaries_of_tate_orthogonal' : Formalism.GaloisCohomology.LocalTateDualityK → ∀ (l : ℕ) [Fact l.Prime] (P : LocPrime l) (K : FinExt l) (LL : Type) [Field LL] [Algebra ℚ_[l] LL] [TopologicalSpace LL] (O : Type) [CommRing O] [Algebra O LL], GoodO (Qp := ℚ_[l]) LL O → ∀ (A A' : GRep ↥(GK K) ℚ_[l] LL O) (m : A.V →ₗ[LL] A'.V →ₗ[LL] LL), IsDual1 (P.PD K) A.ρ A'.ρ m → ∀ b ∈ continuousCocycles A'.ρ, (∀ a ∈ continuousCocycles A.ρ, CobL (P.PD K) (cupL A'.ρ m a b)) → b ∈ B1 A'.ρ := by
   intro hT l _ P K LL _ _ _ O _ _ hO A A' m hm b hb horth

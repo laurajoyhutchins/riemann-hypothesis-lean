@@ -84,7 +84,6 @@ theorem continuousOn_integral_of_bounded {V X P : Type}
   obtain ⟨c, hc⟩ := hbd C D hC hDc hDB
   refine Metric.tendsto_nhds.2 fun ε hε => ?_
   set δ : ℝ := ε / (2 * ((c : ℝ) + 1)) with hδ
-  have hc0 : (0 : ℝ) ≤ c := c.2
   have hδ0 : 0 < δ := by positivity
 
   have htube : ∀ᶠ p in 𝓝 p₀, ∀ v ∈ C, |Φ p v - Φ p₀ v| < δ := by

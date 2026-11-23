@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.ExistsNatSmulMem
 public import Mathlib.NumberTheory.NumberField.Basic
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -64,32 +65,7 @@ theorem exists_nat_smul_mem {E : Type} [Field E] [NumberField E] {n : ℕ}
     (L' : Submodule (RingOfIntegers E) (Fin n → E))
     (h : Submodule.span E (↑L' : Set (Fin n → E)) = ⊤) (x : Fin n → E) :
     ∃ c : ℕ, 0 < c ∧ (c : E) • x ∈ L' := by
-  have key : ∀ x ∈ Submodule.span E (↑L' : Set (Fin n → E)), ∃ c : ℕ, 0 < c ∧ (c : E) • x ∈ L' := by
-    intro x hx
-    induction hx using Submodule.span_induction with
-    | mem x hx => exact ⟨1, one_pos, by simpa using hx⟩
-    | zero => exact ⟨1, one_pos, by simp⟩
-    | add x y _ _ hx hy =>
-      obtain ⟨c, hc, hcx⟩ := hx
-      obtain ⟨d, hd, hdy⟩ := hy
-      refine ⟨c * d, Nat.mul_pos hc hd, ?_⟩
-      have e : ((c * d : ℕ) : E) • (x + y) = d • ((c : E) • x) + c • ((d : E) • y) := by
-        rw [smul_add, ← Nat.cast_smul_eq_nsmul E d, ← Nat.cast_smul_eq_nsmul E c, smul_smul, smul_smul,
-          Nat.cast_mul, mul_comm (d : E)]
-      rw [e]
-      exact L'.add_mem (L'.nsmul_mem hcx d) (L'.nsmul_mem hdy c)
-    | smul e x _ hx =>
-      obtain ⟨c, hc, hcx⟩ := hx
-      obtain ⟨m, hm, b, hb⟩ := exists_nat_mul_integral e
-      refine ⟨m * c, Nat.mul_pos hm hc, ?_⟩
-      have e' : ((m * c : ℕ) : E) • (e • x) = (b : E) • ((c : E) • x) := by
-        rw [hb, smul_smul, smul_smul, Nat.cast_mul]
-        congr 1
-        ring
-      have hb' : (b : E) • ((c : E) • x) = b • ((c : E) • x) := algebraMap_smul E b _
-      rw [e', hb']
-      exact L'.smul_mem b hcx
-  exact key x (h ▸ Submodule.mem_top)
+  apply GlobalTheory.PrincLat.exists_nat_smul_mem <;> assumption
 
 theorem exists_nat_smul_le {E : Type} [inst : Field E] [NumberField E] {n : ℕ}
     (L L' : Submodule (NumberField.RingOfIntegers E) (Fin n → E)) (hL : Submodule.FG L)

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.UnipotentRadicalInterConjugateClosedUnimodular
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsNormalFormStabilizerMeasure
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ExistsIsFolnerUWset
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MapConjLebesgueCommonStabilizerNormalFormStatement
@@ -158,19 +159,7 @@ theorem haar_smul {S : Set (Mat k r)} {μ : Measure (Mt k r)} (h : IsHaarOn S μ
   · rw [Measure.map_smul _ measurable_invM.aemeasurable, h6]
 
 theorem isClosedSub_Rset {γ : Mat k r} (hγ : γ ∈ GG k r) : IsClosedSub k r (Rset k r γ) := by
-  obtain ⟨n1, n2, n3, n4, n5⟩ := isClosedSub_Nset (k := k) (r := r)
-  have hu := isUnit_det_of_mem_GG hγ
-  refine ⟨fun x hx => n1 hx.1, ?_, ⟨n3, ?_⟩, fun a ha b hb => ⟨n4 _ ha.1 _ hb.1, ?_⟩, fun a ha => ⟨n5 _ ha.1, ?_⟩⟩
-  · have hc : Continuous fun x : Mat k r => γ * x * γ⁻¹ :=
-      (continuous_const.matrix_mul continuous_id).matrix_mul continuous_const
-    have := n2.inter (n2.preimage hc)
-    exact this
-  · rwa [Matrix.mul_one, Matrix.mul_nonsing_inv _ hu]
-  · convert n4 _ ha.2 _ hb.2 using 1
-    simp only [Matrix.mul_assoc]
-    rw [Matrix.nonsing_inv_mul_cancel_left _ _ hu]
-  · convert n5 _ ha.2 using 1
-    rw [Matrix.mul_inv_rev, Matrix.mul_inv_rev, Matrix.nonsing_inv_nonsing_inv _ hu, Matrix.mul_assoc]
+  apply _root_.GlobalTheory.UnipUnimod.isClosedSub_Rset <;> assumption
 
 theorem conj_mem_Nset {n : Mat k r} (hn : n ∈ Nset k r) (x : Mat k r) : n * x * n⁻¹ ∈ Nset k r ↔ x ∈ Nset k r := by
   obtain ⟨n1, -, -, n4, n5⟩ := isClosedSub_Nset (k := k) (r := r)

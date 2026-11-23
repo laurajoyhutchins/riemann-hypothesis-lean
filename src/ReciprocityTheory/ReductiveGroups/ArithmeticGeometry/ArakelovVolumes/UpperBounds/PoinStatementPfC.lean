@@ -94,8 +94,6 @@ theorem cont_cpt' (X : Data E r) (x0 : Frame X.Ψ r) : Continuous (cpt X x0) := 
     split_ifs
     · first
         | fun_prop
-        | exact (EuclideanSpace.proj _).continuous
-        | exact PiLp.continuous_apply _ _ _
         | continuity
     · exact continuous_const
     · exact continuous_const
@@ -111,7 +109,6 @@ private theorem gram_continuous_comp {α : Type*} [TopologicalSpace α] (τ : E 
   refine ((hf.matrix_elem k a).mul continuous_const).mul ?_
   first
     | exact Complex.continuous_conj.comp (hf.matrix_elem l b)
-    | exact (hf.matrix_elem l b).star
     | fun_prop
 
 theorem isOpen_Bset (X : Data E r) (x : Frame X.Ψ r) (ρ : ℝ) : IsOpen (Bset X x ρ) := by
@@ -188,8 +185,6 @@ private theorem apply_cc_eq_starRingEnd_apply (τ : E →+* ℂ) (z : E) : τ (c
   first
     | exact NumberField.IsCMField.complexEmbedding_complexConj τ z
     | exact NumberField.IsCMField.complexEmbedding_complexConj E τ z
-    | exact NumberField.IsCMField.complexEmbedding_complexConj (K := E) τ z
-    | simp
 
 private theorem gram_eq_transpose_mul_mul_map_conj (τ : E →+* ℂ) (G : Matrix (Fin r) (Fin r) E) (M : Matrix (Fin r) (Fin r) ℂ) :
     ReciprocityTheory.ChartRestriction.G.FD.gram τ G M = M.transpose * G.map τ * M.map (starRingEnd ℂ) := by
@@ -324,7 +319,6 @@ theorem key_int (X : Data E r) (la : Wt X.Ψ r) (W : Frame X.Ψ r → ℝ≥0∞
         _ ≤ supR X la W ρ x ^ 2 := by
           first
             | exact pow_le_pow_left' h1 2
-            | exact pow_le_pow_left₀ (zero_le _) h1 2
             | gcongr
     have he : e ≤ supR X la W ρ x ^ 2 * W (cpt X x w) := by
       calc e = e / W (cpt X x w) * W (cpt X x w) := (ENNReal.div_mul_cancel hW0 hWT).symm
@@ -402,8 +396,6 @@ theorem ball_of (hA : SubMeanStatement (E := E)) (hS : SumBallStatement (E := E)
       ≤ ∑' γ : X.Γ, CA ^ (1 / 2 : ℝ) * supR X la W ρ x * (∫⁻ w in Bset X x ρ0, ‖P (lact γ.1 (cpt X x w))‖ₑ ^ 2 * W (lact γ.1 (cpt X x w))) ^ (1 / 2 : ℝ) := by
         first
           | exact ENNReal.tsum_le_tsum hpt
-          | exact ENNReal.tsum_mono hpt
-          | exact tsum_mono ENNReal.summable ENNReal.summable hpt
     _ = CA ^ (1 / 2 : ℝ) * supR X la W ρ x * ∑' γ : X.Γ, (∫⁻ w in Bset X x ρ0, ‖P (lact γ.1 (cpt X x w))‖ₑ ^ 2 * W (lact γ.1 (cpt X x w))) ^ (1 / 2 : ℝ) :=
         ENNReal.tsum_mul_left
     _ ≤ CA ^ (1 / 2 : ℝ) * supR X la W ρ x * CS := by

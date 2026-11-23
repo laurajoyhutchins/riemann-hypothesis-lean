@@ -81,21 +81,7 @@ theorem idx_cases (i : Fin (2 * r + k + 1)) :
 
 theorem sum_three (f : Fin (2 * r + k + 1) → ℂ) :
     ∑ i, f i = ∑ a, f (eI k r a) + ∑ j, f (wI k r j) + ∑ a, f (esI k r a) := by
-  let e : Fin r ⊕ Fin (k + 1) ⊕ Fin r → Fin (2 * r + k + 1) :=
-    Sum.elim (eI k r) (Sum.elim (wI k r) (esI k r))
-  have hbij : Function.Bijective e := by
-    constructor
-    · rintro (a | a | a) (b | b | b) h <;>
-        simp only [e, Sum.elim_inl, Sum.elim_inr, Fin.ext_iff, eI_val_flag_measures, wI_val_flag_measures, esI_val_flag_measures,
-          Sum.inl.injEq, Sum.inr.injEq, reduceCtorEq] at h ⊢ <;>
-        (have := a.2; have := b.2; omega)
-    · intro i
-      rcases idx_cases i with ⟨a, rfl⟩ | ⟨a, rfl⟩ | ⟨a, rfl⟩
-      · exact ⟨Sum.inl a, rfl⟩
-      · exact ⟨Sum.inr (Sum.inl a), rfl⟩
-      · exact ⟨Sum.inr (Sum.inr a), rfl⟩
-  rw [← hbij.sum_comp f, Fintype.sum_sum_type, Fintype.sum_sum_type, add_assoc]
-  rfl
+  apply GlobalTheory.Amp.Rad.sum3 <;> assumption
 
 theorem H_e (v : Fin (2 * r + k + 1) → ℂ) (a : Fin r) : (Hpk k r *ᵥ v) (eI k r a) = v (esI k r a) := by
   simp only [mulVec, dotProduct]

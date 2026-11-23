@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.SumEqOfIsHomogeneous
 public import Development.AbelianVarietyTheory.Definitions.TeichmullerDepth.HasTeich
 public import Development.AbelianVarietyTheory.BlockTheory.JetGauges.LogExpAdaptedGauge
 public import Formalism.LocalToGlobal.CharacterGerms.RowTieFB
@@ -137,21 +138,7 @@ theorem germComp1_eq_subst {dd n : ℕ} (e : Pt C 1 dd) (a : Pt C n dd) (i : Fin
 
 theorem subst_exp_eq_mvExp [CharZero C] {σ : Type} (f : MvPowerSeries σ C) (hf : MvPowerSeries.constantCoeff f = 0) :
     PowerSeries.subst f (PowerSeries.exp C) = mvExp f := by
-  ext m
-  rw [PowerSeries.coeff_subst (PowerSeries.HasSubst.of_constantCoeff_zero hf),
-    finsum_eq_sum_of_support_subset (s := Finset.range (m.degree + 1))]
-  · refine Finset.sum_congr rfl fun k _ => ?_
-    rw [PowerSeries.coeff_exp, smul_eq_mul]
-    simp [div_eq_inv_mul]
-  · intro k hk
-    by_contra hc
-    apply hk
-    have hlt : m.degree < k := by simpa using hc
-    have : MvPowerSeries.coeff m (f ^ k) = 0 := by
-      apply MvPowerSeries.coeff_of_lt_order
-      refine lt_of_lt_of_le ?_ (MvPowerSeries.le_order_pow_of_constantCoeff_eq_zero k hf)
-      exact_mod_cast hlt
-    simp [this]
+  apply _root_.GlobalTheory.OddBlock.BinomialValue.subst_exp <;> assumption
 
 section Chart
 

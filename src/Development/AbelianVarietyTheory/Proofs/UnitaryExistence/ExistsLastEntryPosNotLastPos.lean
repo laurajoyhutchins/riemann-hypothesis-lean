@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.PlurisubharmonicCones.Rt0ConjNegNeZero
 public import Formalism.LocalToGlobal.ProjectiveLattices.ThProps
 public import Development.AbelianVarietyTheory.BlockTheory.ExistenceTori.JetRangeLevelFactor
 public import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MinorsDisjointColumnsHarmonic
@@ -248,23 +249,7 @@ end Minors
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} {Dw : Datum H} {l : Level H}
 
 theorem rt0_conj_neg_ne_zero (H : Host E) : starRingEnd ℂ H.rt0 = -H.rt0 ∧ H.rt0 ≠ 0 := by
-  have hd : (0 : ℝ) < H.d := by exact_mod_cast H.d_prime.pos
-  have h := H.sqrt_neg_disc_sq
-  have hre := congrArg Complex.re h
-  have him := congrArg Complex.im h
-  simp only [sq, Complex.mul_re, Complex.mul_im, Complex.neg_re, Complex.neg_im, Complex.natCast_re,
-    Complex.natCast_im, neg_zero] at hre him
-  have h0 : H.rt0.re = 0 := by
-    by_contra h0
-    have : H.rt0.im = 0 := by
-      have : H.rt0.re * H.rt0.im = 0 := by linarith
-      exact (mul_eq_zero.1 this).resolve_left h0
-    rw [this] at hre
-    nlinarith [mul_self_nonneg H.rt0.re]
-  refine ⟨Complex.ext (by simp [h0]) (by simp), fun e => ?_⟩
-  rw [e] at hre
-  simp only [Complex.zero_re, Complex.zero_im] at hre
-  linarith
+  apply LevelTowerAlt.rt0_conj_neg_ne_zero <;> assumption
 
 theorem not_inPsi_conjugate {τ : E →+* ℂ} (h : InPsi H τ) : ¬ InPsi H (ComplexEmbedding.conjugate τ) := by
   intro h'

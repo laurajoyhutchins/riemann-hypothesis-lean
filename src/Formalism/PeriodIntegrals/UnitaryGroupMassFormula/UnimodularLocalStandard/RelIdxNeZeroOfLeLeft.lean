@@ -192,18 +192,10 @@ lemma stdLat_smul_idx (L : PeriodPair) (m : Type*) [Fintype m] {N : ℕ} (hN : N
         first
         | exact Int.ediv_add_emod _ _
         | exact EuclideanDomain.div_add_mod _ _
-        | exact Int.mul_ediv_add_emod _ _
-        | (rw [add_comm]; exact Int.emod_add_ediv _ _)
-        | (rw [Int.emod_def]; ring)
-        | (have e := Int.emod_def (p j) (N : ℤ); linarith)
       have d2 : (N : ℤ) * (q j / N) + q j % N = q j := by
         first
         | exact Int.ediv_add_emod _ _
         | exact EuclideanDomain.div_add_mod _ _
-        | exact Int.mul_ediv_add_emod _ _
-        | (rw [add_comm]; exact Int.emod_add_ediv _ _)
-        | (rw [Int.emod_def]; ring)
-        | (have e := Int.emod_def (q j) (N : ℤ); linarith)
       have c1 : (N : ℂ) * ((p j / N : ℤ) : ℂ) + ((p j % N : ℤ) : ℂ) = (p j : ℂ) := by
         exact_mod_cast d1
       have c2 : (N : ℂ) * ((q j / N : ℤ) : ℂ) + ((q j % N : ℤ) : ℂ) = (q j : ℂ) := by
@@ -218,9 +210,6 @@ lemma theta_conj (b : ℤ) (d : ℕ) : conj (cmTheta b d) = b - cmTheta b d := b
   have h2 : (starRingEnd ℂ) (2 : ℂ) = 2 := map_ofNat _ 2
   first
   | (simp only [PI.ULS.cmTheta, map_div₀, map_add (f := _), map_mul, Complex.conj_I, Complex.conj_ofReal, map_intCast, h2]; ring)
-  | (simp [PI.ULS.cmTheta, map_div₀]; ring)
-  | (simp [PI.ULS.cmTheta, map_div₀]; done)
-  | (apply Complex.ext <;> simp [PI.ULS.cmTheta] <;> ring)
 
 lemma theta_norm (h : 4 * (a : ℤ) * c = b ^ 2 + d) :
     cmTheta b d * (b - cmTheta b d) = (a : ℂ) * c := by

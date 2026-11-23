@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.PowerSeriesExpIntegralCanonGaugeAdditiveSecond
 public import Formalism.LocalToGlobal.ProjectiveLattices.CrudeBase
 public import Formalism.LocalToGlobal.ProjectiveLattices.PlaceBelow
 import Mathlib.Algebra.Order.Floor.Extended
@@ -136,24 +137,7 @@ theorem cro_ordGe_lin {t : ℕ} {f : PS k n d} (hf : OrdGe (t + 1) f) (b : Fin n
 
 theorem cro_constCoeff_ev {m : ℕ} (a : Fin m → Pt k n d) (ha : ∀ p i, constantCoeff (a p i) = 0)
     (f : PS k m d) : constantCoeff (ev a f) = constantCoeff f := by
-  have ha' : MvPowerSeries.HasSubst (fun p : Fin m × Fin d => a p.1 p.2) := by
-    first
-      | exact MvPowerSeries.hasSubst_of_constantCoeff_zero (fun p => ha p.1 p.2)
-      | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun p => by rw [ha p.1 p.2]; exact IsNilpotent.zero)
-      | exact MvPowerSeries.hasSubst_of_constantCoeff_nilpotent (fun p => by rw [ha p.1 p.2]; exact IsNilpotent.zero)
-  unfold ev
-  rw [MvPowerSeries.constantCoeff_subst ha', finsum_eq_single _ 0]
-  · simp
-  · intro e he
-    obtain ⟨s, hs⟩ : ∃ s, e s ≠ 0 := by
-      by_contra h
-      push_neg at h
-      exact he (Finsupp.ext h)
-    have h0 : MvPowerSeries.constantCoeff
-        (e.prod fun s j => (fun p : Fin m × Fin d => a p.1 p.2) s ^ j) = 0 := by
-      rw [Finsupp.prod, map_prod]
-      exact Finset.prod_eq_zero (Finsupp.mem_support_iff.mpr hs) (by simp [ha s.1 s.2, zero_pow hs])
-    rw [h0, smul_zero]
+  apply GlobalTheory.FramePull.constantCoeff_ev_eq <;> assumption
 
 theorem cro_constCoeff_expS [Algebra ℚ k] (s : PS k n d) (hs : constantCoeff s = 0) :
     constantCoeff (FB.expS k s) = 1 := by

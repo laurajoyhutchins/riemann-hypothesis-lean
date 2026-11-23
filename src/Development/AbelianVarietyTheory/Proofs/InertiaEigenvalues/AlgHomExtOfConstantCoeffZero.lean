@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.LevelLetterCocycles.RingConditionOfDeltaInvariants
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MemEurOfTeichmullerSeries
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicPowerSeriesAlgHomActionLawsStatement
 import Mathlib.Algebra.Order.Floor.Extended
@@ -54,25 +55,7 @@ namespace GlobalTheory.Cyc
 theorem algHom_ext_of_constantCoeff_zero {O : Type} [CommRing O]
     (f g : PowerSeries O →ₐ[O] PowerSeries O) (h : f PowerSeries.X = g PowerSeries.X)
     (h0 : PowerSeries.constantCoeff (f PowerSeries.X) = 0) : f = g := by
-  have key : ∀ (n : ℕ) (a : PowerSeries O), PowerSeries.X ^ n ∣ f a - g a := by
-    intro n
-    induction n with
-    | zero => intro a; simp
-    | succ n ih =>
-      intro a
-      obtain ⟨b, hb⟩ : PowerSeries.X ∣ a - PowerSeries.C (PowerSeries.constantCoeff a) := by
-        rw [PowerSeries.X_dvd_iff]; simp
-      have ha : a = algebraMap O (PowerSeries O) (PowerSeries.constantCoeff a) + PowerSeries.X * b := by
-        rw [← hb, PowerSeries.algebraMap_eq]; ring
-      have : f a - g a = f PowerSeries.X * (f b - g b) := by
-        conv_lhs => rw [ha]
-        rw [map_add (f := _), map_add (f := _), map_mul, map_mul, f.commutes, g.commutes, ← h]; ring
-      rw [this, pow_succ']
-      exact mul_dvd_mul (PowerSeries.X_dvd_iff.2 h0) (ih b)
-  ext a n
-  have := (PowerSeries.X_pow_dvd_iff.1 (key (n + 1) a)) n (Nat.lt_succ_self n)
-  rw [map_sub] at this
-  exact sub_eq_zero.1 this
+  apply Formalism.MainNotions.WachCoordinates.Br.algHom_ext_X <;> assumption
 
 theorem constantCoeff_algHom {O : Type} [CommRing O]
     (f : PowerSeries O →ₐ[O] PowerSeries O)

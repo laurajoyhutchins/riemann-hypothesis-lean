@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.UnitaryRationalConjIntersectionCardDvdInvariant
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
 public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsIntMulMem
 import Mathlib.Algebra.Order.Floor.Extended
@@ -89,33 +90,7 @@ theorem finite_bounded (Ψ : Finset (E →+* ℂ))
 omit [IsCMField E] in
 theorem exists_common_den {r : ℕ} (Λ : Submodule (𝓞 E) (Fin r → E)) (hΛ : Λ.FG) :
     ∃ k : ℤ, k ≠ 0 ∧ ∀ v ∈ Λ, ∀ a, IsIntegral ℤ ((k : E) * v a) := by
-  classical
-  obtain ⟨S, rfl⟩ := hΛ
-  choose d hd hdi using (exists_int_mul_integral (E := E))
-  refine ⟨∏ p ∈ S ×ˢ (Finset.univ : Finset (Fin r)), d (p.1 p.2),
-    Finset.prod_ne_zero_iff.2 fun p _ => hd _, fun v hv => ?_⟩
-  induction hv using Submodule.span_induction with
-  | mem v hv =>
-    intro a
-    have hm : (v, a) ∈ S ×ˢ (Finset.univ : Finset (Fin r)) :=
-      Finset.mem_product.2 ⟨hv, Finset.mem_univ _⟩
-    obtain ⟨c, hc⟩ := Finset.dvd_prod_of_mem (fun p : (Fin r → E) × Fin r => d (p.1 p.2)) hm
-    rw [hc]
-    have := (hdi (v a)).mul (isIntegral_algebraMap (R := ℤ) (A := E) (x := c))
-    have e : ((d (v a) * c : ℤ) : E) * v a = (d (v a) : E) * v a * algebraMap ℤ E c := by
-      simp only [Int.cast_mul, eq_intCast]
-      ring
-    exact e ▸ this
-  | zero => intro a; simpa using isIntegral_zero
-  | add x y _ _ hx hy =>
-    intro a
-    rw [Pi.add_apply, mul_add]
-    exact (hx a).add (hy a)
-  | smul c x _ hx =>
-    intro a
-    have := (hx a).mul (RingOfIntegers.isIntegral_coe c)
-    rw [Pi.smul_apply, Algebra.smul_def, mul_left_comm, mul_comm]
-    exact this
+  apply GlobalTheory.StabOrder.exists_int_denominator <;> assumption
 
 
 omit [IsCMField E] in

@@ -193,12 +193,6 @@ theorem st_nonpos_piece (hP : PartsStatement) (v θ : X → ℝ) (hv : A.Smooth 
             gradDens (fun i => (Φ i).φ (x0 i) ∘ (A.chart j).symm) (v ∘ (A.chart j).symm)
               (v ∘ (A.chart j).symm) y) +
         mInt A (Fin.cons (LocPot.ofFun fun x => 1 / 2 * (v x * v x)) Φ) θ := by
-  have h1 : (1 : WithTop ℕ∞) ≤ ∞ := by
-    first
-    | exact_mod_cast (le_top : (1 : ℕ∞) ≤ ⊤)
-    | exact WithTop.coe_le_coe.mpr le_top
-    | norm_num
-    | simp
   have hUo : IsOpen ((A.chart j).target ∩ (A.chart j).symm ⁻¹' G) :=
     (A.chart j).isOpen_inter_preimage_symm hGo
   have hUm := hUo.measurableSet

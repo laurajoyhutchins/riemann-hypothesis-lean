@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNoetherianModelOfDivisorOfConstants
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PointAtZero
 public import Mathlib.RingTheory.IntegralClosure.IntegrallyClosed
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FittingDatumBaseChangeLocalEnlargementStatement
@@ -57,21 +58,7 @@ namespace GlobalTheory.KeyOriginRetract
 
 theorem mem_originIdeal {R : Type} [CommRing R] [IsLocalRing R] (p : Polynomial R) :
     p ∈ GlobalTheory.KeyOriginCut.originIdeal R ↔ p.coeff 0 ∈ maximalIdeal R := by
-  unfold GlobalTheory.KeyOriginCut.originIdeal
-  constructor
-  · intro hp
-    obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 hp
-    rw [Polynomial.coeff_add]
-    refine Ideal.add_mem _ ((Ideal.mem_map_C_iff.1 ha) 0) ?_
-    obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton.1 hb
-    simp
-  · intro hp
-    have h1 : Polynomial.C (p.coeff 0) ∈ (maximalIdeal R).map (Polynomial.C : R →+* Polynomial R) :=
-      Ideal.mem_map_of_mem _ hp
-    have h2 : p - Polynomial.C (p.coeff 0) ∈ Ideal.span {(Polynomial.X : Polynomial R)} :=
-      Ideal.mem_span_singleton.2 Polynomial.X_dvd_sub_C
-    have := Submodule.add_mem_sup h1 h2
-    simpa using this
+  apply GlobalTheory.VertUnitsNoeth.mem_originIdeal_iff' <;> assumption
 
 theorem sub_coeff_zero_mem {R B : Type} [CommRing R] [CommRing B] [Algebra R B] [Algebra (Polynomial R) B]
     [IsScalarTower R (Polynomial R) B] (p : Polynomial R) :

@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicArithmetic.AutomorphicVarieties.ModularityArgument.SymmetricPowerTransfer.GlobalUnitaryForms.IntegralStabilizers.FinSLoc
 public import Mathlib.Algebra.Module.Lattice.Full
 public import Mathlib.NumberTheory.NumberField.Basic
 import Mathlib.Algebra.Order.Floor.Extended
@@ -48,24 +49,7 @@ namespace GlobalTheory.NatMultipleInLattice
 
 theorem exists_nat_mul_integral {E : Type} [Field E] [NumberField E] (a : E) :
     ∃ m : ℕ, m ≠ 0 ∧ IsIntegral ℤ ((m : E) * a) := by
-  obtain ⟨y, hy0, hy⟩ := exists_integral_multiples ℤ ℚ (L := E) {a}
-  have h1 := hy a (Finset.mem_singleton_self a)
-  refine ⟨y.natAbs, Int.natAbs_ne_zero.2 hy0, ?_⟩
-  rcases Int.natAbs_eq y with h | h
-  · have e : ((y.natAbs : ℕ) : E) * a = y • a := by
-      rw [zsmul_eq_mul]
-      congr 1
-      conv_rhs => rw [h]
-      simp
-    rw [e]
-    exact h1
-  · have e : ((y.natAbs : ℕ) : E) * a = -(y • a) := by
-      rw [zsmul_eq_mul, ← neg_mul]
-      congr 1
-      conv_rhs => rw [h]
-      simp
-    rw [e]
-    exact h1.neg
+  apply UpperTheory.V.Z.Sym.Glob.exists_nat_mul <;> assumption
 
 theorem exists_nsmul_mem_lattice {E : Type} [Field E] [NumberField E] {n : ℕ}
     (L : Submodule (NumberField.RingOfIntegers E) (Fin n → E)) (hL : Submodule.IsFullLattice E L)

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.OddnessConditionHolds
 public import Formalism.SharpRestriction.GlobalSchurBounds.StandardLatticesGL3
 public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CmFiniteAdeleIntegralSeparatedComplete
 public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsHalfIdem
@@ -85,17 +86,7 @@ def vanish (D : D7) (q : ℕ) (hq : q.Prime) : Ideal (AE D) where
     rwa [mul_comm] at this
 
 theorem eq_zero_of_zeroAt (x : AE D) (h : ∀ q : ℕ, q.Prime → ZeroAt D q x) : x = 0 := by
-  refine (GlobalTheory.IntAdeleComplete.integral_separated_complete D).1 x fun n hn => ?_
-  have : x ∈ (OhE D).toAddSubgroup.map (AddMonoidHom.mulLeft (n : AE D)) := by
-    refine mem_of_local _ x fun q hq => ?_
-    obtain ⟨a, n', hn', rfl⟩ := Nat.exists_eq_pow_mul_and_not_dvd hn.ne' q hq.ne_one
-    obtain ⟨m, -, hc, s, hs, h⟩ := h q hq a
-    refine ⟨m * n', Nat.Coprime.mul_left hc ((Nat.Prime.coprime_iff_not_dvd hq).2 hn').symm, s, hs, ?_⟩
-    simp only [AddMonoidHom.coe_mulLeft, nsmul_eq_mul]
-    push_cast
-    linear_combination -(n' : AE D) * h
-  obtain ⟨w, hw, h⟩ := this
-  exact ⟨w, hw, h.symm⟩
+  apply _root_.GlobalTheory.VacuumScalar.eq_zero_of_zeroAt <;> assumption
 
 theorem zeroAt_det {N q : ℕ} (hq : q.Prime) {g : GL (Fin N) (AE D)} (h : TrivAt D q g) :
     ZeroAt D q (((Matrix.GeneralLinearGroup.det g : (AE D)ˣ) : AE D) - 1) := by

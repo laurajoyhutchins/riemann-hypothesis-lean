@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsFinsetAdelicUnitaryPreservesLatticeAlmostA
 public import Development.AbelianVarietyTheory.Definitions.Foundations.HermitianSpaceBaseLatticeEqFrameLattice
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -55,31 +56,7 @@ theorem exists_int_mul_integral {E : Type} [Field E] [NumberField E] (e : E) :
 
 theorem exists_int_smul_mem {E : Type} [Field E] [NumberField E] {n : ℕ} (L : Submodule (𝓞 E) (Fin n → E))
     [Submodule.IsFullLattice E L] (x : Fin n → E) : ∃ N : ℤ, N ≠ 0 ∧ N • x ∈ L := by
-  have hx : x ∈ Submodule.span E (L : Set (Fin n → E)) := by
-    rw [Submodule.IsFullLattice.span_eq_top]; exact Submodule.mem_top
-  induction hx using Submodule.span_induction with
-  | mem x hx => exact ⟨1, one_ne_zero, by simpa using hx⟩
-  | zero => exact ⟨1, one_ne_zero, by simp⟩
-  | add x y _ _ hx hy =>
-    obtain ⟨N, hN, h1⟩ := hx
-    obtain ⟨M, hM, h2⟩ := hy
-    refine ⟨N * M, mul_ne_zero hN hM, ?_⟩
-    rw [smul_add]
-    refine L.add_mem ?_ ?_
-    · rw [mul_comm, mul_smul]; exact L.toAddSubgroup.zsmul_mem h1 M
-    · rw [mul_smul]; exact L.toAddSubgroup.zsmul_mem h2 N
-  | smul e x _ hx =>
-    obtain ⟨N, hN, h1⟩ := hx
-    obtain ⟨M, hM, r, hr⟩ := exists_int_mul_integral e
-    refine ⟨M * N, mul_ne_zero hM hN, ?_⟩
-    have h2 := L.smul_mem r h1
-    convert h2 using 1
-    funext j
-    have : (r • N • x) j = (r : E) * ((N : E) * x j) := by
-      simp [Algebra.smul_def, zsmul_eq_mul]
-    rw [this, hr]
-    simp only [Pi.smul_apply, zsmul_eq_mul, smul_eq_mul, Int.cast_mul]
-    ring
+  apply GlobalTheory.LatAlmostAll.exists_int_smul_mem <;> assumption
 
 theorem exists_single_mem_latLoc : ∀ {F E : Type} [inst : Field F] [inst_1 : NumberField F] [inst_2 : Field E] [NumberField E] [inst_4 : Algebra F E] {n : ℕ} (L : Submodule (NumberField.RingOfIntegers E) (Fin n → E)) [Submodule.IsFullLattice E L] (v : IsDedekindDomain.HeightOneSpectrum (NumberField.RingOfIntegers F)), ∃ (c : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.Fv F v), c ≠ (0 : Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes.Fv F v) ∧ ∀ (i : Fin n), Pi.single i (c ⊗ₜ[F] (1 : E)) ∈ GlobalTheory.AdelicU.latLoc F L v := by
   intro F E _ _ _ _ _ n L _ v

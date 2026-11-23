@@ -1,5 +1,6 @@
 module
 
+import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.PSerreFree
 public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.StatementsPres
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -94,26 +95,7 @@ theorem smul_mem_piece {M : Type w} [AddCommGroup M] [Module (Poly S N) M] [Modu
     [IsScalarTower S (Poly S N) M] (𝓜 : GradedPMod S N M) {a c : ℤ} {p : Poly S N} {m : M}
     (hp : p ∈ (polyGraded (S := S) (N := N)).piece a) (hm : m ∈ 𝓜.piece c) :
     p • m ∈ 𝓜.piece (c + a) := by
-  change p ∈ weightedHomogeneousSubmodule S (fun _ => (1 : ℤ)) a at hp
-  rw [mem_weightedHomogeneousSubmodule] at hp
-  rcases le_or_gt 0 a with ha | ha
-  · obtain ⟨n, rfl⟩ := Int.eq_ofNat_of_zero_le ha
-    refine 𝓜.smul_mem n c p m ?_ hm
-    intro μ hμ
-    have h := hp hμ
-    simp only [Finsupp.weight_apply, Finsupp.sum, Pi.one_apply, smul_eq_mul, mul_one,
-      nsmul_eq_mul] at h ⊢
-    exact_mod_cast h
-  · have hp0 : p = 0 := by
-      by_contra hne
-      obtain ⟨μ, hμ⟩ := MvPolynomial.ne_zero_iff.mp hne
-      have h := hp hμ
-      simp only [Finsupp.weight_apply, Finsupp.sum, nsmul_eq_mul, mul_one] at h
-      have : (0 : ℤ) ≤ ∑ i ∈ μ.support, (μ i : ℤ) :=
-        Finset.sum_nonneg fun i _ => Int.natCast_nonneg _
-      omega
-    rw [hp0, zero_smul]
-    exact zero_mem _
+  apply GroundTheory.Heights₂.Heights.Kleiman.smul_mem_of_mem_polyGraded <;> assumption
 
 variable {r : ℕ}
 

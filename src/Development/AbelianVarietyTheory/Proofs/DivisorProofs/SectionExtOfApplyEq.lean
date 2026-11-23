@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.TransversalZerosOfJacobianNeZeroDomain
 public import Development.AbelianVarietyTheory.Definitions.Divisors.CompEqOneIffPush
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -59,27 +60,7 @@ namespace GlobalTheory.IwLevel
 theorem section_ext_of_apply_eq {k : Type} [Field k] {X : Scheme.{0}} (h : X ⟶ Sp k) {f g : Sp k ⟶ X}
     (hf : f ≫ h = 𝟙 _) (hg : g ≫ h = 𝟙 _)
     (pt : Sp k) (e : f pt = g pt) : f = g := by
-  obtain ⟨⟨x, φ⟩, rfl⟩ := (Scheme.SpecToEquivOfField k X).symm.surjective f
-  obtain ⟨⟨y, ψ⟩, rfl⟩ := (Scheme.SpecToEquivOfField k X).symm.surjective g
-  simp only [Scheme.SpecToEquivOfField_symm_apply] at hf hg e ⊢
-  rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply, Scheme.fromSpecResidueField_apply,
-    Scheme.fromSpecResidueField_apply] at e
-  subst e
-  set ρ := Spec.preimage (X.fromSpecResidueField x ≫ h) with hρ
-  have hr : X.fromSpecResidueField x ≫ h = Spec.map ρ := (Spec.map_preimage _).symm
-  rw [Category.assoc, hr, ← Spec.map_comp, ← Spec.map_id] at hf hg
-  have hφ := Spec.map_injective hf
-  have hψ := Spec.map_injective hg
-  suffices hfg : φ = ψ by rw [hfg]
-  ext u
-  have h1 : ∀ t : k, φ.hom (ρ.hom t) = t := fun t => by
-    have := congrArg (fun m => m.hom t) hφ
-    simpa using this
-  have h2 : ∀ t : k, ψ.hom (ρ.hom t) = t := fun t => by
-    have := congrArg (fun m => m.hom t) hψ
-    simpa using this
-  have hu : ρ.hom (φ.hom u) = u := φ.hom.injective (h1 _)
-  rw [← hu, h2, h1]
+  apply GlobalTheory.KeyKa.section_ext_of_apply_eq <;> assumption
 
 theorem finite_points_ker : ∀ (k : Type) [Field k] (A B : Over (Sp k)) [GrpObj B] (π : A ⟶ B) (d : ℕ),
     IsIsogDeg π d → Set.Finite {a : 𝟙_ (Over (Sp k)) ⟶ A | a ≫ π = 1} := by

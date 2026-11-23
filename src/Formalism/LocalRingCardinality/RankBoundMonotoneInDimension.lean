@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.AdmissibleParameterJoins.SumLogPrimeFactorsLe
 public import Formalism.LocalRingCardinality.DataParams₂
 public import Formalism.SharpRestriction.RamificationFrobenius.TotientGaloisClasses.FrameCyclicGenerator
 public import Formalism.GradedWeylDivisibility.StatementE
@@ -1131,37 +1132,12 @@ theorem bridge_unit_rule_holds : bridge_unit_rule := by
 theorem sum_e_f (p : ℕ) (hp : p.Prime) (S : Finset (HeightOneSpectrum (𝓞 K)))
     (hS : ∀ w, w ∈ S ↔ (p : 𝓞 K) ∈ w.asIdeal) :
     ∑ w ∈ S, eWL K w * w.asIdeal.inertiaDeg ℤ = Module.finrank ℚ K := by
-  have := span_prime_isMaximal p hp
-  have hP0 : Ideal.span {(p : ℤ)} ≠ ⊥ := by simp [hp.ne_zero]
-  have h := Ideal.sum_ramification_inertia_eq_finrank (Ideal.span {(p : ℤ)}) (𝓞 K)
-  rw [NumberField.RingOfIntegers.rank] at h
-  rw [← h]
-  refine Finset.sum_bij' (fun w hw => ⟨w.asIdeal, w.isPrime, liesOver_of_mem p hp w ((hS w).mp hw)⟩)
-    (fun q _ => ⟨q.1, q.2.1, Ideal.ne_bot_of_liesOver_of_ne_bot hP0 q.1⟩)
-    (fun _ _ => Finset.mem_univ _) (fun q _ => ?_) (fun _ _ => rfl) (fun _ _ => rfl)
-    (fun _ _ => rfl)
-  rw [hS]
-  have := q.2.2
-  exact mem_of_liesOver p q.1
+  apply Formalism.MainNotions.J.sum_e_f <;> assumption
 
 theorem sum_lw_e (p : ℕ) (hp : p.Prime) (S : Finset (HeightOneSpectrum (𝓞 K)))
     (hS : ∀ w, w ∈ S ↔ (p : 𝓞 K) ∈ w.asIdeal) :
     ∑ w ∈ S, lw K w * (eWL K w : ℝ) = Real.log p := by
-  have hn : (0 : ℝ) < Module.finrank ℚ K := by exact_mod_cast Module.finrank_pos
-  have hterm : ∀ w ∈ S, lw K w * (eWL K w : ℝ) =
-      Real.log p / Module.finrank ℚ K * ((eWL K w * w.asIdeal.inertiaDeg ℤ : ℕ) : ℝ) := by
-    intro w hw
-    have := liesOver_of_mem p hp w ((hS w).mp hw)
-    have hN := Ideal.pow_inertiaDeg p w.asIdeal
-    unfold lw
-    rw [← hN]
-    push_cast
-    rw [Real.log_pow]
-    ring
-  rw [Finset.sum_congr rfl hterm, ← Finset.mul_sum]
-  have := sum_e_f p hp S hS
-  rw [← Nat.cast_sum, this]
-  field_simp
+  apply Formalism.MainNotions.J.sum_lw_e <;> assumption
 
 theorem finite_places_over (p : ℕ) (hp : p.Prime) :
     ∃ S : Finset (HeightOneSpectrum (𝓞 K)), ∀ w, w ∈ S ↔ (p : 𝓞 K) ∈ w.asIdeal := by
@@ -1190,26 +1166,7 @@ theorem factUnitNormalisation : FactUnitNormalisation := by
 
 theorem resChar_mem (D : D7) (w : D.what₂.places.Pl) :
     ((D.what₂.places.resChar w : ℕ) : 𝓞 D.what₂.LL) ∈ (D.plEq w).asIdeal := by
-  have hv := D.what₂.places.val_resChar w
-  have hne : ((D.what₂.places.resChar w : ℕ) : D.what₂.LL) ≠ 0 := by
-    exact_mod_cast (D.what₂.places.resChar_prime w).ne_zero
-  rw [D.val_eq w _ hne] at hv
-  have hv' : vAdd (D.plEq w) ((D.what₂.places.resChar w : ℕ) : D.what₂.LL) =
-      ((D.what₂.places.ramIdx w : ℕ) : ℤ) := by exact_mod_cast hv
-  have hpos := D.what₂.places.ramIdx_pos w
-  have h1 : (D.plEq w).valuation D.what₂.LL (algebraMap (𝓞 D.what₂.LL) D.what₂.LL
-      ((D.what₂.places.resChar w : ℕ) : 𝓞 D.what₂.LL)) < 1 := by
-    have hx : ((D.what₂.places.resChar w : ℕ) : D.what₂.LL) = algebraMap (𝓞 D.what₂.LL) D.what₂.LL
-        ((D.what₂.places.resChar w : ℕ) : 𝓞 D.what₂.LL) := by simp
-    rw [← hx]
-    have hv0 : (D.plEq w).valuation D.what₂.LL ((D.what₂.places.resChar w : ℕ) : D.what₂.LL) ≠ 0 :=
-      (Valuation.ne_zero_iff _).mpr hne
-    unfold vAdd at hv'
-    rw [← WithZero.exp_log hv0, show WithZero.log ((D.plEq w).valuation D.what₂.LL
-      ((D.what₂.places.resChar w : ℕ) : D.what₂.LL)) = -((D.what₂.places.ramIdx w : ℕ) : ℤ) by omega]
-    rw [← WithZero.exp_zero, WithZero.exp_lt_exp]
-    omega
-  exact ((D.plEq w).valuation_lt_one_iff_mem _).mp h1
+  apply Formalism.MainNotions.J.resChar_mem <;> assumption
 
 theorem factEtaMean : FactEtaMean := by
   intro D _ l hl S hS

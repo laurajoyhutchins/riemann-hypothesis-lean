@@ -87,25 +87,7 @@ theorem realize_apply1 (b : Basis ι K V) (X : InfinitePlace K → Matrix ι ι 
 
 theorem realize_injective (b : Basis ι K V) (X : InfinitePlace K → Matrix ι ι ℂ)
     (hX : ∀ v, IsUnit (X v).det) : Function.Injective (Formalism.HermitianLatticesTheory.realize b X) := by
-  set_option backward.isDefEq.respectTransparency.instanceSearchTypes false in rw [injective_iff_map_eq_zero]
-  intro x hx
-  obtain ⟨v⟩ : Nonempty (InfinitePlace K) := inferInstance
-  have hf : ∀ i, Formalism.HermitianLatticesTheory.fcoord b X v x i = 0 := by
-    intro i
-    apply Complex.ext
-    · rw [← realize_apply0, hx]; simp
-    · rw [← realize_apply1, hx]; simp
-  have hvec : Formalism.HermitianLatticesTheory.vecAt b v x = 0 := by
-    have h1 : (X v)⁻¹ *ᵥ Formalism.HermitianLatticesTheory.vecAt b v x = 0 := funext hf
-    have h2 := congrArg (fun w => X v *ᵥ w) h1
-    simp only [Matrix.mulVec_mulVec, Matrix.mulVec_zero] at h2
-    rwa [Matrix.mul_nonsing_inv _ (hX v), Matrix.one_mulVec] at h2
-  have hrep : b.repr x = 0 := by
-    ext i
-    have := congrFun hvec i
-    simp only [Formalism.HermitianLatticesTheory.vecAt, Pi.zero_apply] at this
-    simpa using this
-  simpa using hrep
+  apply Formalism.HN.PlaceLattice.realize_injective <;> assumption
 
 theorem fcoord_smul (b : Basis ι K V) (X : InfinitePlace K → Matrix ι ι ℂ) (v : InfinitePlace K)
     (a : K) (x : V) : Formalism.HermitianLatticesTheory.fcoord b X v (a • x) = v.embedding a • Formalism.HermitianLatticesTheory.fcoord b X v x := by
@@ -309,25 +291,7 @@ theorem zl_span_eq {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     zl ρ (Submodule.span (𝓞 K) (Set.range e)) =
       Submodule.span ℤ (Set.range fun p : Free.ChooseBasisIndex ℤ (𝓞 K) × ι' =>
         ρ (integralBasis K p.1 • e p.2)) := by
-  have hω : ∀ p : Free.ChooseBasisIndex ℤ (𝓞 K) × ι',
-      integralBasis K p.1 • e p.2 = (RingOfIntegers.basis K p.1) • e p.2 := fun p => by
-    rw [integralBasis_apply, algebraMap_smul]
-  have hspan : (Submodule.span (𝓞 K) (Set.range e)).restrictScalars ℤ =
-      Submodule.span ℤ (Set.range fun p : Free.ChooseBasisIndex ℤ (𝓞 K) × ι' =>
-        integralBasis K p.1 • e p.2) := by
-    rw [← Submodule.span_smul_of_span_eq_top (RingOfIntegers.basis K).span_eq (Set.range e),
-      Set.range_smul_range]
-    congr 1
-    ext x
-    simp only [Set.mem_range, hω]
-  have hz : zl ρ (Submodule.span (𝓞 K) (Set.range e)) =
-      ((Submodule.span (𝓞 K) (Set.range e)).restrictScalars ℤ).map ρ.toIntLinearMap := by
-    ext x
-    first
-    | exact Iff.rfl
-    | simp [zl]
-  rw [hz, hspan, Submodule.map_span, ← Set.range_comp]
-  rfl
+  apply Formalism.HN.PlaceLattice.zl_span_eq <;> assumption
 
 theorem linIndep_int {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     [FiniteDimensional ℝ E] (ρ : V →+ E) (hρ : Function.Injective ρ) {ι' : Type} [Fintype ι']

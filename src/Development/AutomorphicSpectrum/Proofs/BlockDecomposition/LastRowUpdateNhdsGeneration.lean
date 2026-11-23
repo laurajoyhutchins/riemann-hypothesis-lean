@@ -84,9 +84,6 @@ theorem lastRowMat_mul_last (r s : Fin (n + 1) → k) (j : Fin (n + 1)) :
   | refine Fin.lastCases ?_ (fun j => ?_) j
     · simp [Fin.castSucc_ne_last]
     · simp [Fin.castSucc_ne_last]
-  | induction j using Fin.lastCases with
-    | last => simp [Fin.castSucc_ne_last]
-    | cast j => simp [Fin.castSucc_ne_last]
 
 theorem lastRowMat_mul_rowInv {r : Fin (n + 1) → k} (hr : r (Fin.last n) ≠ 0) :
     lastRowMat r * lastRowMat (rowInv r) = 1 := by
@@ -98,8 +95,6 @@ theorem lastRowMat_mul_rowInv {r : Fin (n + 1) → k} (hr : r (Fin.last n) ≠ 0
     · subst hj
       first
       | simp [GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.rowInv, hr]
-      | (simp only [GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.rowInv, if_true, ite_true, zero_add, Matrix.one_apply_eq]
-         exact mul_inv_cancel₀ hr)
     · rw [Matrix.one_apply_ne (Ne.symm hj), if_neg hj]
       simp only [GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.rowInv, if_neg hj]
       linear_combination (-r j) * mul_inv_cancel₀ hr
@@ -107,8 +102,6 @@ theorem lastRowMat_mul_rowInv {r : Fin (n + 1) → k} (hr : r (Fin.last n) ≠ 0
     | (rw [Matrix.mul_apply]
        simp only [GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.lastRowMat, Matrix.updateRow_ne hi]
        rw [← Matrix.mul_apply, Matrix.one_mul, Matrix.updateRow_ne hi])
-    | simp [Matrix.mul_apply, GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.lastRowMat, Matrix.updateRow_ne hi, Matrix.one_apply,
-        Matrix.updateRow_apply, hi]
 
 def lastRowGL (r : Fin (n + 1) → k) (hr : r (Fin.last n) ≠ 0) : GL (Fin (n + 1)) k where
   val := lastRowMat r
@@ -130,8 +123,6 @@ theorem vecMul_eLast (x : GL (Fin (n + 1)) k) :
     ext j
     first
     | simp [GlobalTheory.BZMir.eLast, Matrix.single_vecMul, GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.lastRowMat, GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.invRow]
-    | simp [GlobalTheory.BZMir.eLast, Matrix.vecMul, dotProduct, Pi.single_apply,
-        GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.lastRowMat, GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.invRow, Matrix.updateRow_apply]
   rw [← Matrix.vecMul_vecMul, h, Matrix.vecMul_vecMul, Units.inv_mul, Matrix.vecMul_one]
 
 section Top
@@ -145,7 +136,6 @@ theorem continuous_invRow : Continuous (invRow : GL (Fin (n + 1)) k → _) := by
   unfold GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.invRow
   first
   | exact continuous_pi fun j => hc.matrix_elem (Fin.last n) j
-  | exact continuous_pi fun j => (continuous_apply j).comp ((continuous_apply (Fin.last n)).comp hc)
 
 theorem continuous_lastRowMat : Continuous (lastRowMat : (Fin (n + 1) → k) → _) := by
   unfold GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.lastRowMat
@@ -187,13 +177,10 @@ theorem exists_nhd {V : Set (GL (Fin (n + 1)) k)} (hV : V ∈ 𝓝 (1 : GL (Fin 
         (GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.lastRowGL (GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.invRow x) hr * x) = ψ x := fun x hr => by
     first
     | rfl
-    | (rw [Units.embedProduct_apply]; rfl)
   have hfst : ContinuousAt (fun x : GL (Fin (n + 1)) k =>
       GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.lastRowMat (GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.invRow x) * (x : Matrix (Fin (n + 1)) (Fin (n + 1)) k)) 1 := by
     first
     | exact ((GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.continuous_lastRowMat.comp GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.continuous_invRow).mul
-        Units.continuous_val).continuousAt
-    | exact ((GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.continuous_lastRowMat.comp GlobalTheory.CompanionTheory.BZPhiPG.OntoO.RowRep.continuous_invRow).matrix_mul
         Units.continuous_val).continuousAt
   have hsnd : ContinuousAt (fun x : GL (Fin (n + 1)) k =>
       MulOpposite.op (((x⁻¹ : GL (Fin (n + 1)) k) : Matrix (Fin (n + 1)) (Fin (n + 1)) k) *

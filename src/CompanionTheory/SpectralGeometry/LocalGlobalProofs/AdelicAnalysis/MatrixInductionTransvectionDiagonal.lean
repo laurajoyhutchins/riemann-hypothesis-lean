@@ -318,7 +318,6 @@ lemma exists_unit_pivot (hR : ∀ a b : R, IsCoprime a b → ∃ t, IsUnit (a + 
         rcases hij with h | h
         · exact absurd (Finset.mem_insert_self _ _) h
         · exact h
-      have hji : i ≠ j := fun h => hj (h ▸ Finset.mem_insert_self _ _)
       rw [if_pos rfl, hwsum, hF i j (Or.inr hj), Finset.sum_eq_zero, mul_zero, add_zero]
       intro l hl
       have hlj : l ≠ j := fun h => hj (h ▸ Finset.mem_insert_of_mem hl)

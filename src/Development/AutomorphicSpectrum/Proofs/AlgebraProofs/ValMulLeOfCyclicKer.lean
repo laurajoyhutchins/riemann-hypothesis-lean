@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.HodgeTatePoints.RbProj
 public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LieLatticeData
 public import Development.AutomorphicSpectrum.Statements.AlgebraStatements.PolarisedFlagStatement
 public import Mathlib.CategoryTheory.Category.Basic
@@ -169,27 +170,7 @@ theorem inv_mul_self (χ : MulChar F R) (a : Fˣ) : χ⁻¹ (a : F) * χ (a : F)
 
 theorem proj_eig (χ : MulChar F R) {g : N → C} (h0 : g 0 = 0) (a : F) (x : N) :
     proj χ g (a • x) = algebraMap R C (χ a) * proj χ g x := by
-  by_cases ha : a = 0
-  · subst ha
-    have : χ 0 = 0 := χ.map_nonunit not_isUnit_zero
-    simp [proj, this, h0]
-  · let a' : Fˣ := Units.mk0 a ha
-    have e : ∑ b : Fˣ, algebraMap R C (χ⁻¹ (b : F)) * g ((b : F) • a • x) =
-        algebraMap R C (χ a) * ∑ b : Fˣ, algebraMap R C (χ⁻¹ (b : F)) * g ((b : F) • x) := by
-      rw [Finset.mul_sum, ← Equiv.sum_comp (Equiv.mulRight a')
-        (fun b : Fˣ => algebraMap R C (χ a) * (algebraMap R C (χ⁻¹ (b : F)) * g ((b : F) • x)))]
-      refine Finset.sum_congr rfl fun b _ => ?_
-      have h1 : χ⁻¹ (b : F) = χ a * χ⁻¹ ((b * a' : Fˣ) : F) := by
-        have h2 := inv_mul_self χ a'
-        simp only [a', Units.val_mk0] at h2
-        simp only [Units.val_mul, a', Units.val_mk0, map_mul]
-        calc χ⁻¹ (b : F) = χ⁻¹ (b : F) * (χ⁻¹ a * χ a) := by rw [h2, mul_one]
-          _ = _ := by ring
-      simp only [Equiv.coe_mulRight, Units.val_mul, a', Units.val_mk0, mul_smul]
-      rw [h1, map_mul, mul_assoc]
-      simp only [Units.val_mul, a', Units.val_mk0]
-    simp only [proj, e]
-    ring
+  apply PositivityTheory.HtPt.Rb.proj_smul_apply <;> assumption
 
 theorem proj_on (χ : MulChar F R) (hc : (Fintype.card Fˣ : C) ≠ 0) (S : Set N) {g : N → C}
     (hg : ∀ (a : Fˣ), ∀ x ∈ S, g ((a : F) • x) = algebraMap R C (χ a) * g x) {x : N} (hx : x ∈ S) :

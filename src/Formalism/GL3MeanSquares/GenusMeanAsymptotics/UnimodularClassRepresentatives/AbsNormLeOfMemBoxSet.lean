@@ -1,5 +1,6 @@
 module
 
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.AbsNormEqProdOfMem
 public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.LocalDensityRatio
 public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.BoxInterEqEmpty
 public import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.EulerFacMulConjInvSplit
@@ -64,21 +65,7 @@ variable {V : Type} [AddCommGroup V] [Module K V] [FiniteDimensional K V] [Modul
 
 theorem boxSet_finite (hK : Formalism.HermitianLatticesTheory.IsCMUnram K) (hF : IsFixF K F) (T : ℝ) :
     (boxSet K F T).Finite := by
-  refine Set.Finite.of_finite_image (f := fun n : 𝓞 F => algebraMap F K (n : F)) ?_
-    (fun a _ b _ hab => RingOfIntegers.ext ((algebraMap F K).injective hab))
-  refine (NumberField.Embeddings.finite_of_norm_le K ℂ T).subset ?_
-  rintro _ ⟨n, hn, rfl⟩
-  refine ⟨map_isIntegral_int (algebraMap F K) (RingOfIntegers.isIntegral_coe n), fun φ => ?_⟩
-  have hst : star (algebraMap F K (n : F)) = algebraMap F K (n : F) := (hF _).mpr ⟨_, rfl⟩
-  have hc := hK.2.1 φ (algebraMap F K (n : F))
-  rw [hst] at hc
-  obtain ⟨r, hr⟩ := Complex.conj_eq_iff_real.mp hc.symm
-  have h1 := hn φ
-  simp only at h1 ⊢
-  rw [hr] at h1 ⊢
-  rw [Complex.ofReal_re] at h1
-  rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos h1.1]
-  exact h1.2
+  apply Formalism.HermitianLattices.Ext.L3.BoxSum.finite_boxSet <;> assumption
 
 theorem ne_zero_of_mem_boxSet {T : ℝ} {n : 𝓞 F} (hn : n ∈ boxSet K F T) : n ≠ 0 := by
   rintro rfl

@@ -174,7 +174,6 @@ theorem localTwistedLattice : Formalism.FourierDecayAlt.S6.LocTw := by
 theorem scaledIdealNorm : Formalism.FourierDecayAlt.S6.NormIdl := by
   intro E _ _ _ g k ν hg
   have hdeg := degreeFacts_statement E
-  have hgR : (0 : ℝ) < g := by exact_mod_cast hg
   have hD0 : (0 : ℝ) ≤ ((|discr E| : ℤ) : ℝ) := by exact_mod_cast abs_nonneg _
   have hrd : 0 < rd E := by
     unfold rd

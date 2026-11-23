@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsGlobalGenerators
 public import Development.AbelianVarietyTheory.Definitions.Degenerations.ArithBase
 public import Mathlib.Data.FunLike.Fintype
 public import Mathlib.NumberTheory.LegendreSymbol.AddCharacter
@@ -96,30 +97,7 @@ theorem isPrimitiveRoot_root : IsPrimitiveRoot S.ζN S.N :=
 
 theorem sum_proj [IsDomain o] (T : AddSubgroup S.Gam) (hT : S.IsoFree T) [Fintype (T →+ ZMod S.N)] :
     ∑ c, S.proj T c = 1 := by
-  obtain ⟨d, ⟨e⟩⟩ := hT.2
-  have hw := isPrimitiveRoot_root S
-  have hu : IsUnit (Nat.card T : o) := by
-    rw [Nat.card_congr e.toEquiv, Nat.card_fun, Nat.card_zmod, Nat.cast_pow]
-    exact S.unit.pow _
-  have key : ∀ t : T, ∑ c : T →+ ZMod S.N, S.ζN ^ (-(c t)).val • S.ρ t =
-      (∑ c : T →+ ZMod S.N, S.ζN ^ (-(c t)).val) • (1 : Matrix S.J S.J o) := by
-    intro t
-    rw [← Finset.sum_smul]
-    have h := sum_pow_neg_val hw (AddMonoidHom.eval t : (T →+ ZMod S.N) →+ ZMod S.N)
-    simp only [AddMonoidHom.eval_apply_apply] at h
-    split_ifs at h with h0
-    · rw [S.ρ_one]
-      have : S.r • e t = 0 := funext fun i => nsmul_eq_zero_of_cast _ (DFunLike.congr_fun h0
-        ((ZMod.castHom (dvd_mul_left S.N S.r) (ZMod S.N)).toAddMonoidHom.comp
-          ((Pi.evalAddMonoidHom _ i).comp e.toAddMonoidHom)))
-      rw [← map_nsmul, map_eq_zero_iff e e.injective] at this
-      exact congrArg Subtype.val this
-    · rw [h, zero_smul, zero_smul]
-  simp only [ThetaSys.proj, finsum_eq_sum_of_fintype]
-  rw [← Finset.smul_sum, Finset.sum_comm, Finset.sum_congr rfl fun t _ => key t, ← Finset.sum_smul,
-    Finset.sum_comm, Finset.sum_congr rfl fun c _ => sum_pow_neg_val hw c, Finset.sum_ite_eq']
-  simp only [Finset.mem_univ, if_true]
-  rw [← Nat.card_eq_fintype_card, smul_smul, Ring.inverse_mul_cancel _ hu, one_smul]
+  apply GlobalTheory.ZH.GlobalGen.sum_proj <;> assumption
 
 variable (M : RatModel o Ω)
 

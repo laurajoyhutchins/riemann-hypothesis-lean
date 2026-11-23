@@ -312,9 +312,7 @@ theorem ns_phase_bounds (m q : ℕ)
   have hf := (hRel1 D' x hne).1
   set dn : ℝ := ‖dg0 D' x‖
   set F : ℝ := ‖fderiv ℂ (g0 D') x‖
-  have hdn : 0 ≤ dn := norm_nonneg _
   have hF : 0 ≤ F := norm_nonneg _
-  have hcg1 : 0 ≤ 1 + 1 / cg := by positivity
   have h2 : 1 + dn ≤ (1 + 1 / cg) * F := by
     have h3 : 1 ≤ dn / cg := (one_le_div hcg).mpr hg
     calc 1 + dn ≤ dn / cg + dn := by linarith
@@ -344,15 +342,8 @@ theorem ns_arith (m C₉ q ny : ℕ) {ε : ℝ} (hε : 0 < ε)
     ε * (((m + 2) * C₉ + (m + 2) * (C₉ + 1) * q + 2 * (m + 1) + 2 * ny : ℕ) : ℝ) +
       ((m + 2 : ℕ) : ℝ) ≤ (q : ℝ) := by
   have hqc : (q : ℝ) = 4 * (m : ℝ) + 12 := by rw [hq]; push_cast; ring
-  have b1 : ε * (((m : ℝ) + 2) * C₉) ≤ 1 / 2 := by
-    refine le_trans ?_ hkey
-    gcongr
-    linarith
   have b2 : ε * (((m : ℝ) + 2) * ((C₉ : ℝ) + 1)) * q ≤ 1 / 2 * q :=
     mul_le_mul_of_nonneg_right hkey (Nat.cast_nonneg _)
-  have b3 : ε * (2 * ((m : ℝ) + 1)) ≤ 1 := by
-    have : ε * (2 * ((m : ℝ) + 1)) = 2 * (ε * ((m : ℝ) + 2)) - 2 * ε := by ring
-    linarith
   have b4 : ε * (2 * (ny : ℝ)) ≤ (m : ℝ) + 2 := by
     calc ε * (2 * (ny : ℝ)) ≤ ε * (2 * ((m : ℝ) + 2) ^ 2) := by gcongr
       _ = 2 * (ε * ((m : ℝ) + 2)) * ((m : ℝ) + 2) := by ring
@@ -371,8 +362,6 @@ theorem _root_.Formalism.FourierDecayAlt.P.nonstationary_estimate_of_parts : For
   obtain ⟨C₉, hAF⟩ := hAF
   refine ⟨2 * (C₉ + 1), 3, by positivity, ?_⟩
   intro m β hβ Kc hKc h0 δ ε hδ hε hεle
-  have hs : (0 : ℝ) < (m : ℝ) + 2 := by positivity
-  have hC9 : (0 : ℝ) ≤ (C₉ : ℝ) := Nat.cast_nonneg _
   have hkey : ε * (((m : ℝ) + 2) * ((C₉ : ℝ) + 1)) ≤ 1 / 2 := by
     rw [le_div_iff₀ (by positivity)] at hεle
     push_cast at hεle
@@ -426,7 +415,6 @@ theorem _root_.Formalism.FourierDecayAlt.P.nonstationary_estimate_of_parts : For
   obtain ⟨w, hwdef⟩ : ∃ w : ℝ, w = v ^ (m + 2) := ⟨_, rfl⟩
   have hw : 1 ≤ w := hwdef ▸ one_le_pow₀ hv
   have hw0 : 0 < w := by linarith
-  have hv0 : 0 < v := by linarith
   have hrw : ‖t‖ ^ (((m : ℝ) + 2) * ε) = w⁻¹ := by
     rw [hwdef, hvdef, ← Real.rpow_mul_natCast hτ.le, ← Real.rpow_neg hτ.le]
     congr 1; push_cast; ring
@@ -570,8 +558,6 @@ theorem _root_.Formalism.FourierDecayAlt.P.stationary_estimate_of_parts : Formal
   have htt2 : ‖t‖ ≤ t₂ := htt.trans ((min_le_left _ _).trans (min_le_right _ _))
   have htt3 : ‖t‖ ≤ 1 := htt.trans (min_le_right _ _)
   have hK : 0 ≤ K := K_nonneg hD hΦ
-  have hm : (0 : ℝ) ≤ (m : ℝ) := Nat.cast_nonneg m
-  have hE : (0 : ℝ) ≤ (E₁ : ℝ) := Nat.cast_nonneg E₁
   push_cast at hA
   have hEm : 0 ≤ (E₁ : ℝ) * ((m : ℝ) + 2) ^ 2 := by positivity
   have hA0 : 0 ≤ A := by nlinarith
@@ -648,12 +634,10 @@ theorem _root_.Formalism.FourierDecayAlt.P.stationary_estimate_of_parts : Formal
       (psi β (((m : ℂ) + 2) * z / t) * ((‖t‖ ^ (m + 1) * ‖z‖ ^ (m + 1) / ((m : ℝ) + 2) : ℝ) : ℂ)) •
         ampIn β m ε Φ D t (fun _ => z, y)) (muPi β (UT (m + 2))) := hHint.smul _
   rw [hFub, ← integral_smul, ← integral_sub hGint hHs]
-  have hT : 0 ≤ ‖t‖ ^ (m + 2) := by positivity
   calc _ ≤ ∫ y : UT (m + 2) → ℂ, (|C| * |Cst₁| * K * ‖t‖ ^ (m + 2)) *
           ((1 + ‖y‖) ^ (E₁ * (m + 2) ^ 2) * (max 1 ‖y‖) ^ (-A)) ∂(muPi β (UT (m + 2))) := by
         refine norm_integral_le_of_norm_le (hMi.const_mul _) (Filter.Eventually.of_forall fun y => ?_)
         refine (hpt y).trans ?_
-        have hp : 0 ≤ (1 + ‖y‖) ^ (E₁ * (m + 2) ^ 2) * (max 1 ‖y‖) ^ (-A) := by positivity
         have hcc : C * Cst₁ ≤ |C| * |Cst₁| := by rw [← abs_mul]; exact le_abs_self _
         calc C * (Cst₁ * K * (1 + ‖y‖) ^ (E₁ * (m + 2) ^ 2) * (max 1 ‖y‖) ^ (-A)) * ‖t‖ ^ (m + 1 + 1)
             = (C * Cst₁) * (K * ‖t‖ ^ (m + 2) * ((1 + ‖y‖) ^ (E₁ * (m + 2) ^ 2) * (max 1 ‖y‖) ^ (-A))) := by
@@ -747,7 +731,6 @@ theorem _root_.Formalism.FourierDecayAlt.P.germ_rate_of_estimates : Formalism.Fo
   refine ⟨E₁ + E₂ + 3 * (C₀ + 2) + 3, C₂ + 2, ?_⟩
   intro m β hβ Kc hKc h0
   obtain ⟨δ, hδ⟩ := hSD m Kc hKc h0
-  have hm : (0 : ℝ) ≤ (m : ℝ) := Nat.cast_nonneg m
   have hs : (0 : ℝ) < (m : ℝ) + 2 := by positivity
   have hC₀' : (0 : ℝ) < (C₀ : ℝ) := by exact_mod_cast hC₀
   obtain ⟨ε, hεdef⟩ : ∃ ε : ℝ, ε = 1 / (((C₀ : ℝ) + 2) * ((m : ℝ) + 2)) := ⟨_, rfl⟩
@@ -784,7 +767,6 @@ theorem _root_.Formalism.FourierDecayAlt.P.germ_rate_of_estimates : Formalism.Fo
   have hK : 0 ≤ K := K_nonneg hD hΦ
   have hτ : 0 < ‖t‖ := norm_pos_iff.mpr ht
   have hKτ : 0 ≤ K * ‖t‖ := mul_nonneg hK hτ.le
-  have hR0 : 0 ≤ R ^ (m + 1) := by positivity
 
   have hA' : (E₁ : ℝ) * ((m : ℝ) + 2) ^ 2 + (E₂ : ℝ) * ((m : ℝ) + 2) ^ 2 +
       3 * ((C₀ : ℝ) + 2) * ((m : ℝ) + 2) ^ 2 + 3 * ((m : ℝ) + 2) ^ 2 ≤ A := by

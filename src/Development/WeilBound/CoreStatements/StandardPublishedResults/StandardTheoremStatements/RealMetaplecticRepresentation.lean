@@ -1,7 +1,6 @@
 module
 
 public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.RealMetaplecticRepresentation
-public import Development.WeilBound.ThetaLifts.Reductions.MetaplecticDerivatives.RealMetaplecticRepresentationHolds
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
 import Mathlib.Algebra.Order.Interval.Basic
@@ -41,12 +40,13 @@ import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Topology.Sheaves.Init
+import CompanionTheory.ThickeningEstimates.LieGroupReduction.MetaplecticRepresentation.RealMetaplecticRepresentationHolds
 
 @[expose] public section
 
 namespace PositivityTheory.Stage1.PM
 
 theorem realMetaplecticRepresentation : GlobalTheory.Published.RealMetaplecticRepresentation :=
-  PositivityTheory.ThKR.realMetaplecticRepresentation_holds
+  CompanionTheory.ThKR.realMetaplecticRepresentation_holds
 
 end PositivityTheory.Stage1.PM

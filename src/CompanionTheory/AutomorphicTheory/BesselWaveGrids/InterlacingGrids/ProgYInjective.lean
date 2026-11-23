@@ -87,7 +87,6 @@ theorem progY_cut (lo hi : ℝ) (M : ℕ) (hlen : 5 * (M : ℝ) ≤ hi - lo) :
   simp only [progY, mem_image, mem_range] at hy
   obtain ⟨i, hi', rfl⟩ := hy
   have hiM : (i : ℝ) + 1 ≤ M := by exact_mod_cast hi'
-  have hi0 : (0 : ℝ) ≤ i := Nat.cast_nonneg i
   refine ⟨⟨?_, ?_⟩, ?_, ?_⟩ <;> linarith
 
 end GroundTheory.BlockD.FourierDecayAlt.WaveGridLiftGrid

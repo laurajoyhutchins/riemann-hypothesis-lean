@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.SesquilinearFractions.NIdeal
 public import Formalism.SharpRestriction.CuspSpanNormBounds.PsiEDef
 public import Mathlib.NumberTheory.Padics.Complex
 import Mathlib.Algebra.Module.StablyFree.Basic
@@ -92,28 +93,7 @@ theorem tendsto_pow_zero (K : Type) [Field K] [ValuativeRel K] [TopologicalSpace
 
 theorem norm_le_one_of_isIntegral {Ω : Type} [NormedField Ω] [IsUltrametricDist Ω] {x : Ω}
     (hx : IsIntegral ℤ x) : ‖x‖ ≤ 1 := by
-  by_contra h
-  push Not at h
-  obtain ⟨f, hf, hx⟩ := hx
-  rw [Polynomial.eval₂_eq_sum_range, Finset.sum_range_succ] at hx
-  have h1 : f.coeff f.natDegree = 1 := hf
-  rw [h1, map_one, one_mul] at hx
-  have h2 : x ^ f.natDegree = - ∑ i ∈ Finset.range f.natDegree, algebraMap ℤ Ω (f.coeff i) * x ^ i := by
-    linear_combination hx
-  have h3 : ‖∑ i ∈ Finset.range f.natDegree, algebraMap ℤ Ω (f.coeff i) * x ^ i‖ ≤ ‖x‖ ^ f.natDegree / ‖x‖ := by
-    apply IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg (by positivity)
-    intro i hi
-    rw [norm_mul, norm_pow, le_div_iff₀ (by linarith)]
-    have h4 : ‖algebraMap ℤ Ω (f.coeff i)‖ ≤ 1 := by
-      simpa using IsUltrametricDist.norm_intCast_le_one Ω (f.coeff i)
-    have h5 : ‖x‖ ^ (i + 1) ≤ ‖x‖ ^ f.natDegree :=
-      pow_le_pow_right₀ h.le (Finset.mem_range.mp hi)
-    calc _ ≤ 1 * ‖x‖ ^ i * ‖x‖ := by gcongr
-      _ = ‖x‖ ^ (i + 1) := by ring
-      _ ≤ _ := h5
-  rw [← norm_neg, ← h2, norm_pow, le_div_iff₀ (by linarith)] at h3
-  have : 0 < ‖x‖ ^ f.natDegree := by positivity
-  nlinarith
+  apply PositivityTheory.Xgf.NI.norm_le_one_of_isIntegral <;> assumption
 
 theorem exists_int_of_norm_le {l : ℕ} [Fact l.Prime] (q : ℚ) (n : ℕ) (m : ℤ)
     (h : q * (l : ℚ) ^ n = m) (hq : ‖(q : ℚ_[l])‖ ≤ 1) : ∃ c : ℤ, q = c := by

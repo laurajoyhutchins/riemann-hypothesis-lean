@@ -1,5 +1,6 @@
 module
 
+import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.DoubleSumEqZero
 public import GroundTheory.HeightsAndTheta.Heights.KleimanAmpleness.CellPosExact
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -90,39 +91,13 @@ theorem offset_update (I : ∀ k, Finset (ι k)) (k : K) (X : Finset (ι k)) :
 
 theorem sign_swap_same {I : ∀ k, Finset (ι k)} {k : K} {i i' : ι k} (hi : i ∈ I k) (hlt : i < i') :
     faceSign I k i' * faceSign (rem I ⟨k, i'⟩) k i = -(faceSign I k i * faceSign (rem I ⟨k, i⟩) k i') := by
-  have h1 : ((I k).erase i').filter (· < i) = (I k).filter (· < i) := by
-    ext z
-    simp only [Finset.mem_filter, Finset.mem_erase]
-    constructor
-    · rintro ⟨⟨-, hz⟩, hzi⟩; exact ⟨hz, hzi⟩
-    · rintro ⟨hz, hzi⟩; exact ⟨⟨(hzi.trans hlt).ne, hz⟩, hzi⟩
-  have h3 : i ∈ (I k).filter (· < i') := Finset.mem_filter.2 ⟨hi, hlt⟩
-  have h2 : (((I k).erase i).filter (· < i')).card + 1 = ((I k).filter (· < i')).card := by
-    rw [Finset.filter_erase, Finset.card_erase_add_one h3]
-  unfold faceSign rem
-  simp only [Function.update_self, offset_update]
-  rw [h1, ← h2]
-  ring
+  apply GroundTheory.Heights₂.Heights.Kleiman.SectionsOverLocalization.CellDSq.sign_swap_same <;> assumption
 
 theorem sign_swap_lt {I : ∀ k, Finset (ι k)} {k k' : K} (i : ι k) (i' : ι k') (hi : i ∈ I k)
     (hk : k < k') (h2 : 2 ≤ (I k).card) :
     faceSign I k' i' * faceSign (rem I ⟨k', i'⟩) k i =
       -(faceSign I k i * faceSign (rem I ⟨k, i⟩) k' i') := by
-  have hmem : k ∈ Finset.univ.filter (· < k') := Finset.mem_filter.2 ⟨Finset.mem_univ _, hk⟩
-  have hoff : ∑ l ∈ Finset.univ.filter (· < k'), ((Function.update I k ((I k).erase i) l).card - 1) + 1 =
-      ∑ l ∈ Finset.univ.filter (· < k'), ((I l).card - 1) := by
-    rw [← Finset.add_sum_erase _ _ hmem, ← Finset.add_sum_erase _ _ hmem, Function.update_self,
-      Finset.sum_congr rfl fun l hl => by rw [Function.update_of_ne (Finset.ne_of_mem_erase hl)],
-      Finset.card_erase_of_mem hi]
-    omega
-  have hlow : ∑ l ∈ Finset.univ.filter (· < k), ((Function.update I k' ((I k').erase i') l).card - 1) =
-      ∑ l ∈ Finset.univ.filter (· < k), ((I l).card - 1) :=
-    Finset.sum_congr rfl fun l hl => by
-      rw [Function.update_of_ne (ne_of_lt ((Finset.mem_filter.1 hl).2.trans hk))]
-  unfold faceSign rem
-  simp only [Function.update_of_ne hk.ne, Function.update_of_ne hk.ne', hlow]
-  rw [← hoff]
-  ring
+  apply GroundTheory.Heights₂.Heights.Kleiman.SectionsOverLocalization.CellDSq.sign_swap_lt <;> assumption
 
 omit [Fintype K] [LinearOrder K] in
 theorem two_le_card {I : ∀ k, Finset (ι k)} {k : K} {i : ι k} (hi : i ∈ I k)
@@ -135,19 +110,7 @@ theorem sign_swap {I : ∀ k, Finset (ι k)} {p q : Σ k, ι k} (hp : p.2 ∈ I 
     (hne : q ≠ p) (hJ : ∀ l, (rem (rem I p) q l).Nonempty) :
     faceSign I p.1 p.2 * faceSign (rem I p) q.1 q.2 =
       -(faceSign I q.1 q.2 * faceSign (rem I q) p.1 p.2) := by
-  obtain ⟨k, i⟩ := p
-  obtain ⟨k', i'⟩ := q
-  rcases lt_trichotomy k k' with h | rfl | h
-  · have hb := hJ k
-    rw [rem_apply_of_ne _ h.ne, rem_apply_self] at hb
-    rw [sign_swap_lt i i' hp h (two_le_card hp hb), neg_neg]
-  · have hii : i' ≠ i := fun e => hne (by rw [e])
-    rcases lt_or_gt_of_ne hii with h | h
-    · exact sign_swap_same hq h
-    · rw [sign_swap_same hp h, neg_neg]
-  · have hb := hJ k'
-    rw [rem_apply_self, rem_apply_of_ne _ h.ne] at hb
-    exact sign_swap_lt i' i hq h (two_le_card hq hb)
+  apply GroundTheory.Heights₂.Heights.Kleiman.SectionsOverLocalization.CellDSq.sign_swap <;> assumption
 
 theorem faceSign_mul_self (I : ∀ k, Finset (ι k)) (k : K) (i : ι k) :
     faceSign I k i * faceSign I k i = 1 := by

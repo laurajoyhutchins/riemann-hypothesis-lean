@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsTraceZeroAdjustmentOfHermitianLattice
 public import Development.AbelianVarietyTheory.Definitions.AdelicHermitianForms.IsHermForm
 public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsDenominatorPrimesPrescribed
 public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ValuationEqOneOfNormOneOfNotMoved
@@ -64,26 +65,7 @@ open scoped TensorProduct Matrix
 namespace GlobalTheory.UnRep.NormOne
 
 lemma exists_split (N : ℕ) : ∀ M : ℕ, 0 < M → ∃ D₁ D₂ k : ℕ, M = D₁ * D₂ ∧ D₁ ∣ N ^ k ∧ D₂.Coprime N := by
-  intro M
-  induction M using Nat.strong_induction_on with
-  | _ M ih =>
-    intro hM
-    by_cases h : M.Coprime N
-    · exact ⟨1, M, 0, by simp, by simp, h⟩
-    · obtain ⟨M', hM'⟩ := Nat.gcd_dvd_left M N
-      have hg : 0 < Nat.gcd M N := Nat.gcd_pos_of_pos_left N hM
-      have hg1 : Nat.gcd M N ≠ 1 := h
-      have hpos : 0 < M' := by
-        rcases Nat.eq_zero_or_pos M' with h0 | h0
-        · rw [h0, mul_zero] at hM'; omega
-        · exact h0
-      have hlt : M' < M := by
-        have h2 : 2 ≤ Nat.gcd M N := by omega
-        nlinarith
-      obtain ⟨D₁, D₂, k, h1, h2, h3⟩ := ih M' hlt hpos
-      refine ⟨Nat.gcd M N * D₁, D₂, k + 1, by rw [mul_assoc, ← h1]; exact hM', ?_, h3⟩
-      rw [pow_succ']
-      exact Nat.mul_dvd_mul (Nat.gcd_dvd_right M N) h2
+  apply GlobalTheory.TvAdjust.exists_split <;> assumption
 
 variable {E : Type} [Field E] [NumberField E]
 

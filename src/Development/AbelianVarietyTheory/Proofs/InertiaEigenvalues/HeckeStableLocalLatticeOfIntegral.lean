@@ -1,5 +1,6 @@
 module
 
+import Formalism.LocalToGlobal.NormalizedHeckeFactors.CoverStdB
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsWildInertiaCyclotomicElement
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.RowsExhaust
 public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SplitExEveryDatum
@@ -49,22 +50,7 @@ noncomputable section
 namespace GlobalTheory.LatStab
 
 theorem jMt_injective (D : D7) (μ : D.what₂.Tup) (j : ℕ) : Function.Injective (D.what₂.jMt μ j) := by
-  classical
-  let b := Module.Free.chooseBasis D.what₂.LL (D.what₂.MtL μ j)
-  have hli := (D.what₂.jMt_basis μ j b).1
-  refine (injective_iff_map_eq_zero _).2 fun x hx => ?_
-  have hx' : x = ∑ i ∈ (b.repr x).support, b.repr x i • b i := by
-    conv_lhs => rw [← b.linearCombination_repr x]
-    rw [Finsupp.linearCombination_apply]; rfl
-
-  rw [hx', map_sum] at hx
-  simp only [map_smulₛₗ] at hx
-  have h0 := linearIndependent_iff'.1 hli _ _ hx
-  apply b.repr.injective
-  ext i
-  by_cases hi : i ∈ (b.repr x).support
-  · simpa using h0 i hi
-  · simpa using Finsupp.notMem_support_iff.1 hi
+  apply Formalism.L2.jMt_injective <;> assumption
 
 theorem latStable_of_latInt : ∀ (D : D7) (M : MtFam D) (B : NLocBase D M) (j : ℕ) (h1 : 1 ≤ j) (h2 : j ≤ D.R.m)
     (w : D.what₂.places.Pl), LatInt D M (B.Qc j w) j h1 h2 w → LatStable B j w := by

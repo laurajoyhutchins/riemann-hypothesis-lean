@@ -1,5 +1,6 @@
 module
 
+import Formalism.LocalToGlobal.GroupLattices.PendingLemmas.SubstZOfXCoordZA
 public import Formalism.SharpRestriction.GrowthBounds.FormalGroupSystem
 public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.WModel
 import Mathlib.Algebra.Order.Floor.Extended
@@ -69,54 +70,7 @@ theorem sx_dual_even {n' : ℕ} (B : OmBasis p n') (i i' : Fin (n' / 2)) :
 
 theorem sx_dual {n' : ℕ} (B : OmBasis p n') (hev : Even n') (a b : Fin n') (hab : a.val % 2 = b.val % 2) :
     ∑ r, (sigW p)^[a.val] (B.omS r) * (sigW p)^[b.val] (B.om r) = if a = b then 1 else 0 := by
-  classical
-  obtain ⟨k, hk⟩ := hev
-  have ha := a.isLt
-  have hb := b.isLt
-  let i : Fin (n' / 2) := ⟨a.val / 2, by omega⟩
-  let i' : Fin (n' / 2) := ⟨b.val / 2, by omega⟩
-  have hE := sx_dual_even B i i'
-  have hii : (i = i') ↔ (a = b) := by
-    simp only [i, i', Fin.ext_iff]
-    constructor
-    · intro h
-      omega
-    · intro h
-      rw [h]
-  rcases Nat.mod_two_eq_zero_or_one a.val with h0 | h1
-  · have e1 : (sigW p)^[a.val] = (sigW p)^[2 * i.val] := by
-      congr 1
-      show a.val = 2 * (a.val / 2)
-      omega
-    have e2 : (sigW p)^[b.val] = (sigW p)^[2 * i'.val] := by
-      congr 1
-      show b.val = 2 * (b.val / 2)
-      omega
-    rw [e1, e2, hE]
-    by_cases h : a = b
-    · rw [if_pos h, if_pos (hii.mpr h)]
-    · rw [if_neg h, if_neg (fun h' => h (hii.mp h'))]
-  · have e1 : (sigW p)^[a.val] = (sigW p) ∘ (sigW p)^[2 * i.val] := by
-      rw [← Function.iterate_succ']
-      congr 1
-      show a.val = 2 * (a.val / 2) + 1
-      omega
-    have e2 : (sigW p)^[b.val] = (sigW p) ∘ (sigW p)^[2 * i'.val] := by
-      rw [← Function.iterate_succ']
-      congr 1
-      show b.val = 2 * (b.val / 2) + 1
-      omega
-    rw [e1, e2]
-    simp only [Function.comp_apply]
-    have hsig : ∑ r, sigW p ((sigW p)^[2 * i.val] (B.omS r)) * sigW p ((sigW p)^[2 * i'.val] (B.om r)) =
-        sigW p (∑ r, (sigW p)^[2 * i.val] (B.omS r) * (sigW p)^[2 * i'.val] (B.om r)) := by
-
-      rw [map_sum]
-      exact Finset.sum_congr rfl fun r _ => (map_mul _ _ _).symm
-    rw [hsig, hE]
-    by_cases h : a = b
-    · rw [if_pos h, if_pos (hii.mpr h), map_one]
-    · rw [if_neg h, if_neg (fun h' => h (hii.mp h')), map_zero]
+  apply Formalism.L2.G.Pend.dualS <;> assumption
 
 theorem frobenius_congruence_witt (a : WW p) : ∃ y : WW p, sigW p a = a ^ p + p * y := by
   obtain ⟨y, hy⟩ := Formalism.InvariantFactorPaths.G7.WModel.frob_sub_pow p a

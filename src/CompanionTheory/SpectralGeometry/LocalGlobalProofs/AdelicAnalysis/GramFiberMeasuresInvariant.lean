@@ -77,7 +77,6 @@ theorem map_actW_fibre : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [N
       right_inv := fun X => by rw [← hmul, mul_inv_cancel, hone]
       continuous_toFun := hcg h
       continuous_invFun := hcg h⁻¹ }
-  have he : (e : (Fin n → Fin M → R ⊗[F] E) → _) = actW R σ J h := rfl
   let B : Set (HermR R σ n) := {S | IsUnit (S : Matrix (Fin n) (Fin n) (R ⊗[F] E)).det}
   have hB : IsOpen B := by
     have hop := (GlobalTheory.T.units_open_embedding_local_tensor F E σ hσ R hR).isOpen_range

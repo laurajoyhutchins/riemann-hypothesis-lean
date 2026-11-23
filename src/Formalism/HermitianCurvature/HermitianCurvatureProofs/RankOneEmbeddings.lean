@@ -766,7 +766,6 @@ private lemma hpk_sq_lemma : Hpk k r * Hpk k r = 1 := by
   ext i j
   rw [Matrix.mul_apply, Matrix.one_apply]
   have hi := i.isLt
-  have hj := j.isLt
   by_cases hm : r ≤ i.val ∧ i.val ≤ r + k
   · rw [Finset.sum_eq_single i]
     · simp only [Hpk]

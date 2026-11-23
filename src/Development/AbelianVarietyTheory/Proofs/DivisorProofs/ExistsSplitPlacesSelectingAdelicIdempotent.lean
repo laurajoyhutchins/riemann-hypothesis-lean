@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.ExistsIsArchimedeanAdeleChartOfRealChart
 public import Development.AbelianVarietyTheory.Definitions.Divisors.IsUnitaryOnTheta
 public import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsIntegralSplitIdempotentOverTwo
 import Formalism.LocalRingCardinality.ConjSqrtMinusD
@@ -143,26 +144,7 @@ theorem tensor_sq {F A E : Type} [Field F] [CommRing A] [Algebra F A] [Field E] 
 
 theorem field_decomp (D : D7) (x : D.host.E) :
     ∃ u w : D.host.F, x = u • (1 : D.host.E) + w • D.host.sqrtMinusD := by
-  have hδ : D.host.sqrtMinusD ≠ 0 := by
-    intro h
-    have := D.host.sqrtMinusD_sq
-    rw [h] at this
-    apply d_ne_zero D
-    have h2 : (D.host.d : D.host.E) = 0 := by linear_combination this
-    exact_mod_cast h2
-  have h2 : star (2 : D.host.E) = 2 := star_ofNat 2
-  obtain ⟨u, hu⟩ := (D.sp.cm.fixed ((x + star x) / 2)).1 (by
-    change star _ = _
-    rw [star_div₀, star_add, star_star, h2, add_comm])
-  obtain ⟨w, hw⟩ := (D.sp.cm.fixed ((x - star x) / (2 * D.host.sqrtMinusD))).1 (by
-    change star _ = _
-    rw [star_div₀, star_sub, star_star, star_mul', h2, star_delta]
-    field_simp
-    ring)
-  refine ⟨u, w, ?_⟩
-  rw [Algebra.smul_def, Algebra.smul_def, hu, hw]
-  field_simp
-  ring
+  apply GlobalTheory.FockCompare.RealChart.host_span <;> assumption
 
 theorem exists_half_abstract {F T T' : Type} [Field F] [NumberField F] [CommRing T] [CommRing T']
     (j : AF F →+* T) (c : T →+* T) (p : T →+* T') (δ : T) (n : ℕ) (hn0 : n ≠ 0) (hinj : Function.Injective j)

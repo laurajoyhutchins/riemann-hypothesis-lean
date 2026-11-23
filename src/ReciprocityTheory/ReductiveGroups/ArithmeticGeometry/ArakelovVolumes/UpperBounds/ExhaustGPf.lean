@@ -68,22 +68,12 @@ namespace ExG
 theorem two_le_inf : (2 : WithTop ℕ∞) ≤ ∞ := by
   first
     | exact WithTop.coe_le_coe.mpr le_top
-    | exact (WithTop.coe_le_coe.mpr (le_top : (2 : ℕ∞) ≤ ⊤) : ((2 : ℕ∞) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞))
-    | decide
-    | simp
-    | norm_num
 
 variable {r : ℕ} (X : Data E r)
 
 private lemma isOpen_omF (x0 : Frame X.Ψ r) : IsOpen (OmF X x0) := by
   first
   | exact ExF.isOpen_OmF X x0
-  | exact isOpen_OmF X x0
-  | exact ExF.isOpen_Om X x0
-  | exact (X.isOpen_dom).preimage (continuous_cpt X x0)
-  | exact X.isOpen_dom.preimage (by unfold cpt; fun_prop)
-  | exact X.dom_open.preimage (by unfold cpt; fun_prop)
-  | exact X.hdom.preimage (by unfold cpt; fun_prop)
 
 theorem isOpen_Om (x0 : Frame X.Ψ r) (g1 : V (nd X) → ℂ) (hg : DifferentiableOn ℂ g1 (OmF X x0)) :
     IsOpen {z | z ∈ OmF X x0 ∧ g1 z ≠ 0} := by

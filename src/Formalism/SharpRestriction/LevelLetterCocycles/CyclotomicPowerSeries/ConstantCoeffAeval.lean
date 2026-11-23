@@ -64,8 +64,6 @@ theorem algHom_coe_eq_aeval {O T : Type} [CommRing O] [CommRing T] [Algebra O T]
     congr 1
     all_goals first
       | exact ρ.commutes a
-      | simpa using ρ.commutes a
-      | (rw [← ρ.commutes a]; rfl)
 
 theorem constantCoeff_aeval {O S : Type} [CommRing O] [CommRing S] [Algebra O S]
     (x : PowerSeries S) (r : Polynomial O) :
@@ -84,9 +82,6 @@ theorem eq_of_X_mul_eq {S : Type} [CommRing S] {f g : PowerSeries S}
     (h : (X : PowerSeries S) * f = X * g) : f = g := by
   first
   | (ext n; simpa [PowerSeries.coeff_succ_X_mul] using congrArg (PowerSeries.coeff (n + 1)) h)
-  | (ext n; simpa [PowerSeries.coeff_succ_X_mul] using congrArg (PowerSeries.coeff S (n + 1)) h)
-  | exact PowerSeries.X_mul_cancel h
-  | exact mul_left_cancel₀ PowerSeries.X_ne_zero h
 
 private theorem map_coe_eq_X_pow_lemma {O K : Type} [CommRing O] [CommRing K] (I : Ideal O) (f : O →+* K)
     (hf : ∀ c ∈ I, f c = 0) (P : Polynomial O) (hP : P.IsDistinguishedAt I) :
@@ -119,13 +114,9 @@ private theorem exists_weierstrass_div_lemma_2 {O : Type} [CommRing O] [IsLocalR
       P.natDegree := by
     first
       | exact h2
-      | (rw [map_coe_eq_X_pow_lemma _ _ (fun c hc => Ideal.Quotient.eq_zero_iff_mem.2 hc) P hP,
-          PowerSeries.order_X_pow]; rfl)
   refine ⟨q, r, ?_, he⟩
   first
     | (rw [h2'] at hr; exact hr)
-    | (rw [h2] at hr; exact hr)
-    | simpa [h2'] using hr
 
 theorem rhoCompl : RhoComplStatement := by
   intro O LL S _ _ _ _ _ _ _ _ _ _ _ P hP ρ hunit hann

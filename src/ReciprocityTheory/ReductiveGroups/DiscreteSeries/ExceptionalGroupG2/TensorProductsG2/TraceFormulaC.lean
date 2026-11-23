@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.TraceFormulaC
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.TraceFormulaA
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.CoefEmbed
 import Mathlib.Algebra.Order.Floor.Extended
@@ -72,54 +73,17 @@ theorem vectorL2_ext {ε : Fin n → Bool} {v w : tfL2n ε} (h : ∀ c, v c = w 
   exact h c
 
 theorem tfRdiag_isURepOn (ε : Fin n → Bool) : IsURepOn (UJset ε) (tfRdiag ε) := by
-  have hr := rreg_isURepOn ε
-  refine ⟨⟨?_, ?_⟩, ?_, ?_⟩
-  · refine ContinuousLinearMap.ext fun v => vectorL2_ext fun c => ?_
-    rw [tfRdiag_apply, hr.1.1]; rfl
-  · intro a ha b hb
-    refine ContinuousLinearMap.ext fun v => vectorL2_ext fun c => ?_
-    rw [tfRdiag_apply, hr.1.2 a ha b hb, ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
-      tfRdiag_apply, tfRdiag_apply]
-  · intro g hg v
-    have h1 := PiLp.norm_sq_eq_of_L2 (fun _ : Fin n => L2 ε) (tfRdiag ε g v)
-    have h2 := PiLp.norm_sq_eq_of_L2 (fun _ : Fin n => L2 ε) v
-    simp only [tfRdiag_apply, hr.2.1 g hg] at h1
-    rw [← h2] at h1
-    exact (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).1 h1
-  · intro v
-    have e : (fun g => tfRdiag ε g v) =
-        fun g => (PiLp.continuousLinearEquiv 2 ℂ (fun _ : Fin n => L2 ε)).symm (fun c => rreg ε g (v c)) := rfl
-    rw [e]
-    exact (PiLp.continuousLinearEquiv 2 ℂ _).symm.continuous.comp_continuousOn
-      (continuousOn_pi.2 fun c => hr.2.2 _)
+  apply ReciprocityTheory.ChartRestriction.DS.tfRdiag_isURepOn <;> assumption
 
 theorem tfRdiag_smooth {ε : Fin n → Bool} {v : tfL2n ε} (hv : ∀ c, v c ∈ smD ε (rreg ε)) :
     v ∈ smD ε (tfRdiag ε) := by
-  rw [mem_smD_iff]
-  have hc : ∀ c, S7.SmoothOnGV ε (fun g => rreg ε g (v c)) := fun c => (mem_smD_iff ε (rreg ε) _).1 (hv c)
-  intro g₀ hg₀
-  choose U F hU hg hF hEq using fun c => hc c g₀ hg₀
-  refine ⟨⋂ c, U c, fun g => WithLp.toLp 2 (fun c => F c g), isOpen_iInter_of_finite hU,
-    Set.mem_iInter.2 hg, ?_, ?_⟩
-  · exact (PiLp.continuousLinearEquiv 2 ℝ (fun _ : Fin n => L2 ε)).symm.contDiff.comp_contDiffOn
-      (contDiffOn_pi.2 fun c => (hF c).mono (Set.iInter_subset _ c))
-  · intro g hgU hgJ
-    refine vectorL2_ext fun c => ?_
-    exact hEq c g (Set.mem_iInter.1 hgU c) hgJ
+  apply ReciprocityTheory.ChartRestriction.DS.tfRdiag_smooth <;> assumption
 
 theorem tfRdiag_hasDerivAt {ε : Fin n → Bool} {v : tfL2n ε} (hv : ∀ c, v c ∈ smD ε (rreg ε))
     {X : Matrix (Fin n) (Fin n) ℂ} (hX : inG ε X) :
     HasDerivAt (fun t : ℝ => tfRdiag ε (NormedSpace.exp ((t : ℂ) • X)) v)
       (WithLp.toLp 2 (fun c => dS (rreg ε) X (v c))) 0 := by
-  have hd : ∀ c, HasDerivAt (fun t : ℝ => rreg ε (NormedSpace.exp ((t : ℂ) • X)) (v c))
-      (dS (rreg ε) X (v c)) 0 := by
-    intro c
-    have h := (isDerivedOn_smE (rreg_isURepOn ε)).deriv X hX ⟨v c, hv c⟩
-    rw [dS_eq_actM (isDerivedOn_smE (rreg_isURepOn ε)) hX ⟨v c, hv c⟩]
-    exact h
-  have hp : HasDerivAt (fun t : ℝ => fun c => rreg ε (NormedSpace.exp ((t : ℂ) • X)) (v c))
-      (fun c => dS (rreg ε) X (v c)) 0 := hasDerivAt_pi.2 hd
-  exact (PiLp.continuousLinearEquiv 2 ℝ (fun _ : Fin n => L2 ε)).symm.hasFDerivAt.comp_hasDerivAt 0 hp
+  apply ReciprocityTheory.ChartRestriction.DS.tfRdiag_hasDerivAt <;> assumption
 
 theorem tfRdiag_dS {ε : Fin n → Bool} {v : tfL2n ε} (hv : ∀ c, v c ∈ smD ε (rreg ε))
     {X : Matrix (Fin n) (Fin n) ℂ} (hX : inG ε X) (c : Fin n) :
@@ -148,15 +112,7 @@ theorem tfRdiag_tfJ (ε : Fin n → Bool) (g : Matrix (Fin n) (Fin n) ℂ) (v : 
 
 theorem toL2_congr_of_eq_on_UJset {ε : Fin n → Bool} {F F' : Matrix (Fin n) (Fin n) ℂ → ℂ}
     (h : ∀ g ∈ UJset ε, F g = F' g) : toL2 ε F = toL2 ε F' := by
-  have e : (fun g : Formalism.REAL.UJ ε => F (Formalism.MainNotions.S.umat g)) = fun g => F' (Formalism.MainNotions.S.umat g) :=
-    funext fun g => h _ (umat_mem_UJset ε g)
-  unfold toL2
-  simp only [e]
-  split_ifs with h1 h2 h2
-  · rfl
-  · exact absurd (e ▸ h1) h2
-  · exact absurd (e.symm ▸ h2) h1
-  · rfl
+  apply ReciprocityTheory.ChartRestriction.DS.toL2_congr_of_eq_on_UJset <;> assumption
 
 section Ph
 

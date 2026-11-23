@@ -1,5 +1,6 @@
 module
 
+import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AdmissibleSmoothVectors.GardingBump
 public import Formalism.PeriodIntegrals.PhMeasCore
 import Mathlib.Algebra.Order.Archimedean.Real.Hom
 import Mathlib.Algebra.Order.Floor.Extended
@@ -73,21 +74,7 @@ attribute [local instance] Matrix.normedAddCommGroup Matrix.normedSpace
 
 theorem contDiff_matMul {n : ℕ} :
     ContDiff ℝ ∞ (fun p : Matrix (Fin n) (Fin n) ℂ × Matrix (Fin n) (Fin n) ℂ => p.1 * p.2) := by
-  let L : Matrix (Fin n) (Fin n) ℂ →L[ℝ] Matrix (Fin n) (Fin n) ℂ →L[ℝ] Matrix (Fin n) (Fin n) ℂ :=
-    LinearMap.toContinuousLinearMap
-      { toFun := fun a => LinearMap.toContinuousLinearMap
-          { toFun := fun b => a * b
-            map_add' := fun b c => Matrix.mul_add a b c
-            map_smul' := fun r b => by simp }
-        map_add' := fun a b => by
-          ext c : 1
-          simp [Matrix.add_mul]
-        map_smul' := fun r a => by
-          ext c : 1
-          simp }
-  have h : ContDiff ℝ ∞ (fun p : Matrix (Fin n) (Fin n) ℂ × Matrix (Fin n) (Fin n) ℂ => L p.1 p.2) :=
-    L.isBoundedBilinearMap.contDiff
-  exact h
+  apply CompanionTheory.D.gk.admitted.Gard.contDiff_mul <;> assumption
 
 theorem contDiff_mulRight {n : ℕ} (g : Matrix (Fin n) (Fin n) ℂ) :
     ContDiff ℝ ∞ (fun x : Matrix (Fin n) (Fin n) ℂ => x * g) :=

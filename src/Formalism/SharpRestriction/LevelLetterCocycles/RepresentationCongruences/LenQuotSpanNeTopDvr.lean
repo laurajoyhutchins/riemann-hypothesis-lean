@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.LevelLetterCocycles.RamificationTwoAndConjugationAtQAndD
 public import Formalism.SharpRestriction.LevelLetterCocycles.AdmBoundsBOfAdm
 public import Formalism.TruncatedSeriesCounting.TruncatedSeriesProofs.ColTwoStep
 import Mathlib.Algebra.Order.Floor.Extended
@@ -65,36 +66,7 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
 omit [Algebra O LL] in
 theorem len_quot_span_ne_top_dvr [IsDomain O] [IsDiscreteValuationRing O] (t : O) (ht : t ≠ 0) :
     Module.length O (O ⧸ Ideal.span {t}) ≠ ⊤ := by
-  have hI : Ideal.span {t} ≠ ⊥ := by rwa [Ne, Ideal.span_singleton_eq_bot]
-  have hA : IsArtinianRing (O ⧸ Ideal.span {t}) := by
-    rw [isArtinianRing_iff_isNoetherianRing_krullDimLE_zero]
-    refine ⟨inferInstance, ?_⟩
-    rw [Ring.krullDimLE_zero_iff]
-    intro J hJ
-    have hsurj : Function.Surjective (Ideal.Quotient.mk (Ideal.span {t})) :=
-      Ideal.Quotient.mk_surjective
-    have hJ' : (J.comap (Ideal.Quotient.mk (Ideal.span {t}))).IsPrime := Ideal.comap_isPrime _ _
-    have hne : J.comap (Ideal.Quotient.mk (Ideal.span {t})) ≠ ⊥ := by
-      intro h
-      apply hI
-      rw [eq_bot_iff, ← h]
-      intro x hx
-      rw [Ideal.mem_comap, Ideal.Quotient.eq_zero_iff_mem.2 hx]
-      exact J.zero_mem
-    have hmax := hJ'.isMaximal hne
-    refine ⟨⟨hJ.ne_top, fun K hK => ?_⟩⟩
-    by_contra hKtop
-    have hK' : K.comap (Ideal.Quotient.mk (Ideal.span {t})) ≠ ⊤ := fun h => hKtop (by
-      rw [← Ideal.map_comap_of_surjective _ hsurj K, h, Ideal.map_top])
-    have hle : J.comap (Ideal.Quotient.mk (Ideal.span {t})) ≤
-        K.comap (Ideal.Quotient.mk (Ideal.span {t})) := Ideal.comap_mono hK.le
-    have heq := hmax.eq_of_le hK' hle
-    apply hK.ne
-    rw [← Ideal.map_comap_of_surjective _ hsurj K, ← heq, Ideal.map_comap_of_surjective _ hsurj J]
-  rw [Module.length_ne_top_iff, isFiniteLength_iff_isNoetherian_isArtinian]
-  haveI := hA
-  exact ⟨inferInstance, isArtinian_of_surjective_algebraMap (R := O ⧸ Ideal.span {t})
-    Ideal.Quotient.mk_surjective⟩
+  apply Formalism.MainNotions.BlochKatoDuality.Br.length_quot_ne_top <;> assumption
 
 theorem colLeR_of_exponent [IsDomain O] [IsDiscreteValuationRing O] (PD : PeriodData G Qp K₀ K B BdR)
     (hp0 : ((PD.p : ℕ) : O) ≠ 0) {T₁ T₂ : LocLat G Qp LL O} (F : LatHom T₁.L T₂.L) (g₁ e e' : ℕ)

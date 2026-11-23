@@ -73,7 +73,6 @@ theorem hpk_W_row (w p : Fin (2 * r + k + 1)) (hw : r ≤ w.val ∧ w.val ≤ r 
   · subst hpw
     simp
   · rw [if_neg hpw]
-    have hp := p.isLt
     unfold Hpk
     rw [if_neg (by omega), if_neg (by omega), if_neg (fun h => hpw h.2.2.symm)]
 
@@ -83,7 +82,6 @@ theorem hpk_W_col (w p : Fin (2 * r + k + 1)) (hw : r ≤ w.val ∧ w.val ≤ r 
   · subst hpw
     simp
   · rw [if_neg hpw]
-    have hp := p.isLt
     unfold Hpk
     rw [if_neg (by omega), if_neg (by omega), if_neg (fun h => hpw h.2.2)]
 
@@ -218,7 +216,6 @@ theorem dpsi_is_derivation : DpsiDerivation := by
     split_ifs with hp
     · rw [herm_Hpk_bvec_eq_star_mul_diag_of_middle z' p hp]
       have hu := unit_w X hU hr p hp
-      have hsq := hpk_W_sq (k := k) p hp
       rw [star_mul']
       linear_combination (star (z' p)) * hu
         + (X p (esI k r ⟨r - 1, by omega⟩) * star (z' p)) * (hpk_W_sq (k := k) p hp) - (X p (esI k r ⟨r - 1, by omega⟩) * star (z' p)) * (hpk_W_sq (k := k) p hp)

@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.ThetaLifts.TowerModels.PlaneIso
 public import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.GenusMassVolumes
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -59,25 +60,7 @@ open NumberField Formalism.MainNotions.GlobalTheoryTheory.GenusMassVolumes
 variable {F E : Type} [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E]
 
 theorem exists_anti (σ : E →ₐ[F] E) (hCM : IsCMExt F E σ) : ∃ δ : E, δ ≠ 0 ∧ σ δ = -δ := by
-  obtain ⟨_, hE, _, hτ⟩ := hCM
-  let τ : E →+* ℂ := (IsAlgClosed.lift (R := ℚ) (S := E) (M := ℂ)).toRingHom
-  have hinv : ∀ x, σ (σ x) = x := by
-    intro x
-    apply τ.injective
-    rw [hτ, hτ, star_star]
-  have hne : ∃ x, σ x ≠ x := by
-    by_contra hall
-    push_neg at hall
-    haveI := hE
-    have hc := IsTotallyComplex.isComplex (NumberField.InfinitePlace.mk τ)
-    rw [NumberField.InfinitePlace.isComplex_mk_iff, NumberField.ComplexEmbedding.isReal_iff] at hc
-    apply hc
-    ext x
-    rw [NumberField.ComplexEmbedding.conjugate_coe_eq, starRingEnd_apply, ← hτ, hall]
-  obtain ⟨x, hx⟩ := hne
-  refine ⟨x - σ x, sub_ne_zero.mpr (Ne.symm hx), ?_⟩
-  rw [map_sub, hinv]
-  abel
+  apply PositivityTheory.ThKG.Tow.Pln.exists_skew <;> assumption
 
 theorem anti_coeff (σ : E →ₐ[F] E) {δ : E} (hδ0 : δ ≠ 0) (hσδ : σ δ = -δ) (s t : F)
     (h : σ (s • (1 : E) + t • δ) = s • 1 + t • δ) : t = 0 := by

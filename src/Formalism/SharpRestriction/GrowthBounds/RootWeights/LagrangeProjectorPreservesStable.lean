@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.GrowthBounds.RootWeights.ExistsHighestWeightVectorFindim
 public import Formalism.SharpRestriction.GrowthBounds.RootWeights.IsotypicProjectorFixedMem
 public import Formalism.SharpRestriction.GrowthBounds.CovariantDegrees
 public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.IsotypicStableUnderOperators
@@ -303,30 +304,7 @@ end
 theorem isotypic_subspaces_span_top (D : Formalism.BasicNotions.D7) (h2 : adm2 D) (K V : Type) [Field K] [CharZero K] [AddCommGroup V]
     [Module K V] [FiniteDimensional K V] (n : ℕ) (E : GLOps n K V) (hE : IsGLRep E) :
     (⨆ mu : Fin n → ℤ, isoSub E mu) = ⊤ := by
-  obtain ⟨hrel, _, hw⟩ := hE
-  have hst : ∀ a b, ∀ x ∈ (⨆ mu : Fin n → ℤ, isoSub E mu), E a b x ∈ (⨆ mu : Fin n → ℤ, isoSub E mu) := by
-    intro a b x hx
-    refine Submodule.iSup_induction (fun mu => isoSub E mu)
-      (motive := fun x => E a b x ∈ (⨆ mu : Fin n → ℤ, isoSub E mu)) hx ?_ ?_ ?_
-    · intro mu y hy
-      exact Submodule.mem_iSup_of_mem mu (isotypic_stable_under_operators E mu a b hy)
-    · simp
-    · intro y z hy hz
-      rw [map_add (f := _)]; exact Submodule.add_mem _ hy hz
-  obtain ⟨W', hc, hW'⟩ := h2 K V n E ⟨hrel, ‹_›, hw⟩ _ hst
-  obtain ⟨t, ht⟩ := IsCompactElement.exists_finset_of_le_iSup
-    ((Submodule.fg_iff_compact (⊤ : Submodule K V)).1 Module.Finite.fg_top)
-    (fun mu => weightSp E mu) (le_of_eq hw.symm)
-  have hbot : W' = ⊥ := by
-    by_contra hne
-    obtain ⟨mu, x, hxW, hx⟩ := exists_highest_weight_vector E hrel t ht W' hW' hne
-    have h1 : x ∈ (⨆ mu : Fin n → ℤ, isoSub E mu) :=
-      Submodule.mem_iSup_of_mem mu (Submodule.subset_span ⟨1, Submonoid.one_mem _, x, hx, rfl⟩)
-    have h0 : x ∈ (⨆ mu : Fin n → ℤ, isoSub E mu) ⊓ W' := ⟨h1, hxW⟩
-    rw [hc.inf_eq_bot] at h0
-    exact hx.1 (by simpa using h0)
-  have := hc.sup_eq_top
-  rwa [hbot, sup_bot_eq] at this
+  apply Formalism.MainNotions.G.GLWeightTheory.complete_reducibility_findim <;> assumption
 
 theorem isotypic_projector_fixed_mem (D : Formalism.BasicNotions.D7) (h2 : adm2 D) : IsotypicProjectorFixedMem := by
   intro K V _ _ _ _ _ n E hE lam e he Y hY

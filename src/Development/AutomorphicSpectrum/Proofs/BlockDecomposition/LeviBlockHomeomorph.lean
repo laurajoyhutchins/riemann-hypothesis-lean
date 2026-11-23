@@ -106,21 +106,6 @@ theorem leviEquiv : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace 
     rw [Units.val_mul, ← Matrix.submatrix_mul_equiv (x : Matrix (Fin N) (Fin N) k)
       (y : Matrix (Fin N) (Fin N) k) e e e, ← hkey x hx, ← hkey y hy]
     simp only [← Matrix.blockDiagonal'_mul, Matrix.blockDiag'_blockDiagonal']
-  have hcont : ∀ f : Levi k m → Levi k m,
-      (∀ a, Continuous fun g => ((f g a : GL (m a) k) : Matrix (m a) (m a) k)) →
-        Continuous fun g => ((leviEmb k e (f g) : GL (Fin N) k) : Matrix (Fin N) (Fin N) k) := by
-    intro f hf
-    refine continuous_matrix fun i j => ?_
-    obtain ⟨⟨a, i'⟩, rfl⟩ := e.surjective i
-    obtain ⟨⟨b, j'⟩, rfl⟩ := e.surjective j
-    by_cases hab : a = b
-    · subst hab
-      simp only [hent]
-      exact (hf a).matrix_elem i' j'
-    · have h0 : ∀ g, ((leviEmb k e (f g) : GL (Fin N) k) : Matrix (Fin N) (Fin N) k)
-          (e ⟨a, i'⟩) (e ⟨b, j'⟩) = 0 := fun g => hzE _ _ _ (by simpa [blk] using hab)
-      simp only [h0]
-      exact continuous_const
   have hLE : Continuous (leviEmb k e) := continuous_leviEmb k e
   let ψ : levi k N β → Levi k m := fun x => (fun a =>
       ⟨Matrix.blockDiag' (((x : GL (Fin N) k) : Matrix (Fin N) (Fin N) k).submatrix e e) a,

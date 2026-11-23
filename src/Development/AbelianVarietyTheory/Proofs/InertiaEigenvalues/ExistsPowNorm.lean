@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AcrisGaussNormEventuallyMonomial
 public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsCrisP
 public import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AcrisGaussNormEventuallyMonomialStatement
@@ -163,21 +164,7 @@ theorem untilt_zero : (0 : Per.Fl l).untilt = 0 := by
 theorem gauss_l (r : ℝ) (hr : 0 ≤ r) :
     (⨆ n : ℕ, ‖(((((l : ℕ) : Per.Ainf l).coeff n).untilt : Per.OC l) : ℂ_[l])‖ ^
       ((1 : ℝ) / (l : ℝ) ^ n) * r ^ n) = r := by
-  have hl : (0 : ℝ) < l := by exact_mod_cast (Fact.out : l.Prime).pos
-  have hf : ∀ n : ℕ, ‖(((((l : ℕ) : Per.Ainf l).coeff n).untilt : Per.OC l) : ℂ_[l])‖ ^
-      ((1 : ℝ) / (l : ℝ) ^ n) * r ^ n = if n = 1 then r else 0 := by
-    intro n
-    rw [WittVector.coeff_p]
-    split_ifs with h
-    · simp [h]
-    · rw [untilt_zero]
-      have : ((1 : ℝ) / (l : ℝ) ^ n) ≠ 0 := by positivity
-      simp only [ZeroMemClass.coe_zero, norm_zero, Real.zero_rpow this, zero_mul]
-  simp only [hf]
-  have hb : ∀ n : ℕ, (if n = 1 then r else 0) ≤ r := fun n => by split_ifs <;> simp [hr]
-  refine le_antisymm (ciSup_le hb) ?_
-  have := le_ciSup (f := fun n : ℕ => if n = 1 then r else 0) ⟨r, by rintro _ ⟨n, rfl⟩; exact hb n⟩ 1
-  simpa using this
+  apply GlobalTheory.GaussSlope.gauss_l <;> assumption
 
 theorem exp_eq {u v c c' : ℝ} {k k' : ℤ} (hu : 0 < u) (huv : u < v) (hc : 0 < c)
     (h : ∀ r, u < r → r < v → c * r ^ k = c' * r ^ k') : k = k' := by

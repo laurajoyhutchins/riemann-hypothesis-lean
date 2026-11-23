@@ -111,7 +111,6 @@ theorem bwA_val_nat_eq_zero (s : ℕ) (hs : ¬ Pl.resChar w ∣ s) : Pl.val w (s
     have := Pl.ramIdx_pos w
     first
       | exact_mod_cast this
-      | exact WithTop.coe_lt_coe.mpr (by exact_mod_cast this)
   have hA := bwA_val_int_nonneg Pl w (Nat.gcdA (Pl.resChar w) s)
   have hB := bwA_val_int_nonneg Pl w (Nat.gcdB (Pl.resChar w) s)
   have h2 : (0 : WithTop ℤ) < Pl.val w ((Pl.resChar w : LL) * ((Nat.gcdA (Pl.resChar w) s : ℤ) : LL)) := by
@@ -194,7 +193,6 @@ theorem bwA_rowAct_elem_eq (a b : Fin r) (c : R) (f : MvPolynomial (Fin r × Fin
   · intro x
     first
       | simp [Formalism.GradedWeylDivisibility.rowAct, Formalism.GradedWeylDivisibility.rowGen, Polynomial.algebraMap_apply]
-      | simp [Formalism.GradedWeylDivisibility.rowAct, Formalism.GradedWeylDivisibility.rowGen]
   · intro p q hp hq
     simp only [map_add (f := _), Polynomial.eval_add, hp, hq]
   · intro p v hp
@@ -220,7 +218,6 @@ private theorem rowDiv_mem_weyl_of_mem (hn : n ≤ r) (ν : Fin n → ℕ) (a b 
     rw [SetLike.mem_coe, Submodule.mem_comap]
     first
       | exact Submodule.subset_span ⟨(a, b, k) :: w, rfl⟩
-      | exact Submodule.subset_span ⟨(a, b, k) :: w, by simp [Formalism.GradedWeylDivisibility.applyWord, L]⟩
   exact key hf
 
 theorem bwA_weyl_rowAct_elem (hn : n ≤ r) (ν : Fin n → ℕ) (a b : Fin r) (c : R)
@@ -251,7 +248,6 @@ private theorem rowAct_mul_eq_rowAct_rowAct (g h : Matrix (Fin r) (Fin r) R) (f 
     MvPolynomial.algebraMap_eq, Matrix.mul_apply, Finset.sum_mul, Finset.mul_sum, mul_assoc]
     first
       | exact Finset.sum_comm
-      | rw [Finset.sum_comm]
   rw [key, AlgHom.comp_apply]
 
 theorem bwA_weyl_rowAct_closure (hn : n ≤ r) (ν : Fin n → ℕ) (g : Matrix (Fin r) (Fin r) R)
@@ -287,7 +283,6 @@ theorem bwA_rowGen_map {R S : Type} [CommRing R] [CommRing S] (φ : R →+* S) {
   · intro x
     first
       | simp [Formalism.GradedWeylDivisibility.rowGen, Polynomial.algebraMap_apply]
-      | simp [Formalism.GradedWeylDivisibility.rowGen]
   · intro p q hp hq
     simp only [map_add (f := _), Polynomial.map_add (f := _), hp, hq]
   · intro p v hp
@@ -320,7 +315,6 @@ theorem bwA_G_C (a b : Fin r) (c : R) : bwA_G (n := n) a b (MvPolynomial.C c) 0 
     unfold Formalism.GradedWeylDivisibility.rowDiv
     first
       | simp [Formalism.GradedWeylDivisibility.rowGen, Polynomial.algebraMap_apply, Polynomial.coeff_C]
-      | simp [Formalism.GradedWeylDivisibility.rowGen, Polynomial.coeff_C]
   rw [h]
   split_ifs with hk
   · subst hk
@@ -382,7 +376,6 @@ theorem bwA_G_mul (a b : Fin r) {p q : MvPolynomial (Fin r × Fin n) R} {μ ν :
   have hx' : x.1 + x.2 = k := by
     first
       | exact Finset.HasAntidiagonal.mem_antidiagonal.mp hx
-      | simpa using hx
   have hdeg : μ + ν + (k : ℤ) • bwA_del a b = (μ + (x.1 : ℤ) • bwA_del a b) + (ν + (x.2 : ℤ) • bwA_del a b) := by
     rw [← hx']
     simp only [Nat.cast_add, add_smul]
@@ -418,7 +411,6 @@ theorem bwA_G_monomial (a b : Fin r) (m : Fin r × Fin n →₀ ℕ) (c : R) :
   all_goals first
     | rfl
     | (rw [Finsupp.weight_apply]; simp [Finsupp.sum])
-    | simp [Finsupp.prod]
 
 theorem bwA_G_of_homog (a b : Fin r) (f : MvPolynomial (Fin r × Fin n) R) (μ : Fin r → ℤ)
     (hf : MvPolynomial.IsWeightedHomogeneous (bwA_wZ r n) f μ) : bwA_G a b f μ := by

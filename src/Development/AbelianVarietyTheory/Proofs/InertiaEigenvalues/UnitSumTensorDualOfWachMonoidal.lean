@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsPotentiallyCrystallineLatticeCoefficientExtens
 public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.TensorLatticeUnitPart
 public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.CrystallineSubrepresentation
 import Mathlib.Algebra.Module.StablyFree.Basic
@@ -109,22 +110,7 @@ theorem coe_DcrisMap {ρ : Representation LL G V} {ρ' : Representation LL G V'}
 
 theorem isCrys_of_equiv {ρ : Representation LL G V} {ρ' : Representation LL G V'} (e : V ≃ₗ[LL] V')
     (he : ∀ g x, e (ρ g x) = ρ' g (e x)) (h : IsCrys PD ρ) : IsCrys PD ρ' := by
-  have h1 : CrystallineSubrepresentation.IsEquivariant ρ ρ' e.toLinearMap := he
-  have h2 : CrystallineSubrepresentation.IsEquivariant ρ' ρ e.symm.toLinearMap := fun g x => by
-    apply e.injective
-    simp [he]
-  let E : ↥(Dcris PD ρ) ≃ₗ[LL] ↥(Dcris PD ρ') :=
-    LinearEquiv.ofLinear (CrystallineSubrepresentation.DcrisMap PD h1) (CrystallineSubrepresentation.DcrisMap PD h2)
-      (by
-        ext x
-        simp only [LinearMap.comp_apply, coe_DcrisMap, tensorB_comp, LinearMap.id_apply]
-        rw [show e.toLinearMap.comp e.symm.toLinearMap = LinearMap.id by ext; simp, tensorB_id])
-      (by
-        ext x
-        simp only [LinearMap.comp_apply, coe_DcrisMap, tensorB_comp, LinearMap.id_apply]
-        rw [show e.symm.toLinearMap.comp e.toLinearMap = LinearMap.id by ext; simp, tensorB_id])
-  unfold IsCrys at h ⊢
-  rw [← E.finrank_eq, ← e.finrank_eq, h]
+  apply (config := { allowSynthFailures := true }) GlobalTheory.BaseCoef.isCrys_transport <;> assumption
 
 theorem finite_Dcris [FiniteDimensional LL V] {ρ : Representation LL G V} (h : IsCrys PD ρ) :
     Module.Finite LL ↥(Dcris PD ρ) := by

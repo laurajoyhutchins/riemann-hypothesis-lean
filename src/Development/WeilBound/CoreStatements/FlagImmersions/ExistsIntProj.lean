@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.EigenLatticeVectorBundle
 public import Development.WeilBound.CoreStatements.FlagImmersions.FibSandwich
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ProjectiveLinePlaceTrivialOnConstants
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsExcisionNbhdAway
@@ -158,26 +159,7 @@ variable {X : Scheme.{0}} {G : Over X} [GrpObj G] {Ω : Type} [Field Ω] {ξ : S
 
 theorem lat_act (M : LieModel G ξ E) (f : G ⟶ G) [IsMonHom f] (T : E →ₗ[Ω] E) (hT : M.IsDiffOf f T) {p : Cpt ξ} {e : E}
     (he : e ∈ M.lat p) : T e ∈ M.lat p := by
-  have key : ∀ (e : E) (v : epsAt (X.fromSpecStalk p.1) ⟶ G), M.Extends p e v → M.Extends p (T e) (v ≫ f) := by
-    intro e v hv
-    obtain ⟨h1, h2⟩ := hv
-    refine ⟨?_, ?_⟩
-    · unfold IsTanAt at h1 ⊢
-      rw [Over.comp_left, ← Category.assoc, h1, ← Over.comp_left]
-      simp
-    · rw [hT e, Over.comp_left, h2, Category.assoc, Over.comp_left]
-  unfold LieModel.lat at he ⊢
-  induction he using Submodule.span_induction with
-  | mem x hx =>
-    obtain ⟨v, hv⟩ := hx
-    exact Submodule.subset_span ⟨v ≫ f, key _ _ hv⟩
-  | zero => simp
-  | add x y _ _ hx hy =>
-    rw [map_add (f := _)]
-    exact add_mem hx hy
-  | smul a x _ hx =>
-    rw [LinearMap.map_smul_of_tower]
-    exact Submodule.smul_mem _ a hx
+  apply (config := { allowSynthFailures := true }) GlobalTheory.CompanionTheory.Ar.Flat.EigVb.lat_stable <;> assumption
 
 theorem val_smul (hξ : IsCptGen ξ) {e : E} {w : EC} {a : Ω} {r : V} (ha : ValAt ξ z a r)
     (h : M.ValAt (Spec.map (CommRingCat.ofHom (algebraMap V L)) ≫ z) e (MC.pt w)) :

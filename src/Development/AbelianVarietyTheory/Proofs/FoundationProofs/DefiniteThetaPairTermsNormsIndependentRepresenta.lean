@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.WeilOperatorRationalTranslateMemThetaFunctions
 public import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
 public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ApplyAtOriginMinorProductLinearStatement
 public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsLatticeOfAdelicPointStatement
@@ -88,23 +89,7 @@ theorem differentiable_wd (x : VC D N N') {G : VC D N N' → ℂ} (hG : Differen
 
 theorem wd_wd_of_int {x z : VC D N N'} {G : VC D N N' → ℂ} (hx : Wd D T x G = G) (m : ℤ)
     (hm : (Hf D T x z).im = m) (w : VC D N N') : Wd D T x (Wd D T z G) w = Wd D T z G w := by
-  have h1 := congrFun hx (w + z)
-  have h2 : Hf D T x z = Hf D T z x + 2 * Complex.I * m := by
-    rw [hf_conj x z]
-    apply Complex.ext <;> simp [hm]
-    ring
-  have h3 : Complex.exp (-(Real.pi : ℂ) * Hf D T (w + x) z - (Real.pi : ℂ) * Hf D T z z / 2) *
-      Complex.exp (-(Real.pi : ℂ) * Hf D T w x - (Real.pi : ℂ) * Hf D T x x / 2) =
-      Complex.exp (-(Real.pi : ℂ) * Hf D T (w + z) x - (Real.pi : ℂ) * Hf D T x x / 2) *
-      Complex.exp (-(Real.pi : ℂ) * Hf D T w z - (Real.pi : ℂ) * Hf D T z z / 2) := by
-    rw [← Complex.exp_add, ← Complex.exp_add, Complex.exp_eq_exp_iff_exists_int]
-    refine ⟨-m, ?_⟩
-    rw [hf_add_left, hf_add_left, h2]
-    push_cast
-    ring
-  simp only [Wd, U] at h1 ⊢
-  rw [← h1, add_right_comm w x z]
-  linear_combination (wdPh D T x * wdPh D T z * G (w + z + x)) * h3
+  apply _root_.GlobalTheory.FinWeil.RatTransl.wd_wd_of_int <;> assumption
 
 end Translates
 

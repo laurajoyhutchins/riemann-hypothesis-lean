@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.PullGenBoxGen
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.DegProd
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.NonzeroLocus
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.SiegelPullbackTransfer.ExistsGenTransfer
@@ -80,40 +81,7 @@ lemma gU_pull_box_g (F : J → (X' ⟶ X)) (a : Y ⟶ X') (i j : J → L.ι) (y 
 lemma isGen_boxGen (F : J → (X' ⟶ X)) (φ : K → (Y ⟶ X')) (ε : K → ℤ)
     (t : ∀ i, LB.Gen (LB.LinComb (L.pull (F i)) φ ε)) (ht : ∀ i, (t i).IsGen) :
     (GeneratorPullback.boxGen L F φ ε t).IsGen := by
-  intro i j
-  apply unit_ext
-  intro y hy
-  have hm : ∀ m, y ∈ (LB.LinComb (L.pull (F m)) φ ε).U (fun k _ => i k m) ⊓
-      (LB.LinComb (L.pull (F m)) φ ε).U (fun k _ => j k m) :=
-    fun m => ⟨GeneratorPullback.box_le L F φ i m hy.1, GeneratorPullback.box_le L F φ j m hy.2⟩
-  have hk : ∀ k m, y ∈ (φ k ≫ F m) ⁻¹ᵁ (L.U (i k m) ⊓ L.U (j k m)) := fun k m =>
-    ⟨Set.mem_iInter.1 (Set.mem_iInter.1 hy.1 k) m, Set.mem_iInter.1 (Set.mem_iInter.1 hy.2 k) m⟩
-  have hb : ∀ (c : K → J → L.ι) (hc : y ∈ LB.wchart (LB.LinComb L F (fun _ => 1)) φ c),
-      gU y hc ((GeneratorPullback.boxGen L F φ ε t).s c) =
-        ∏ m, gU y (GeneratorPullback.box_le L F φ c m hc) ((t m).s (fun k _ => c k m)) := fun c hc =>
-    (map_prod (gU y hc) _ _).trans (Finset.prod_congr rfl fun m _ => gU_res _ _ _ _)
-  have Ht : ∀ m, gU y (GeneratorPullback.box_le L F φ i m hy.1) ((t m).s (fun k _ => i k m)) =
-      (∏ k, gU y (hk k m) (pullU (φ k ≫ F m) _ (L.g (i k m) (j k m))) ^ ε k) *
-        gU y (GeneratorPullback.box_le L F φ j m hy.2) ((t m).s (fun k _ => j k m)) := by
-    intro m
-    refine (gU_res (inf_le_left : (LB.LinComb (L.pull (F m)) φ ε).U (fun k _ => i k m) ⊓
-      (LB.LinComb (L.pull (F m)) φ ε).U (fun k _ => j k m) ≤ _) y (hm m) _).symm.trans ?_
-    refine (congrArg (gU y (hm m)) (ht m (fun k _ => i k m) (fun k _ => j k m))).trans ?_
-    refine (map_mul _ _ _).trans (congrArg₂ (· * ·) ?_ (gU_res _ _ _ _))
-    refine (gU_lcg (L.pull (F m)) φ ε _ _ y (hm m)).trans ?_
-    refine Finset.prod_congr rfl fun k _ => congrArg (· ^ ε k) ?_
-    exact gU_pull_g L (F m) (φ k) _ _ y _ (hk k m)
-  have hg : gU y hy ((LB.LinComb (LB.LinComb L F (fun _ => 1)) φ ε).g i j) =
-      ∏ m, ∏ k, gU y (hk k m) (pullU (φ k ≫ F m) _ (L.g (i k m) (j k m))) ^ ε k := by
-    refine (gU_lcg (LB.LinComb L F (fun _ => 1)) φ ε i j y hy).trans ?_
-    refine Eq.trans ?_ Finset.prod_comm
-    refine Finset.prod_congr rfl fun k _ => ?_
-    refine Eq.trans ?_ (Finset.prod_zpow _ _ _).symm
-    exact congrArg (· ^ ε k) (gU_pull_box_g L F (φ k) (i k) (j k) y _ (hk k))
-  refine ((gU_res _ y hy _).trans (hb i hy.1)).trans ?_
-  refine Eq.trans ?_ ((map_mul _ _ _).trans (congrArg₂ (· * ·) hg
-    ((gU_res _ y hy _).trans (hb j hy.2)))).symm
-  exact (Finset.prod_congr rfl fun m _ => Ht m).trans Finset.prod_mul_distrib
+  apply GlobalTheory.BoxCubical.isGen_boxGen <;> assumption
 
 lemma exists_restrict {S : Scheme.{0}} {A B : Over S} (f : A ⟶ B) (U : S.Opens) :
     ∃ ρ : (A.hom ⁻¹ᵁ U).toScheme ⟶ (B.hom ⁻¹ᵁ U).toScheme,

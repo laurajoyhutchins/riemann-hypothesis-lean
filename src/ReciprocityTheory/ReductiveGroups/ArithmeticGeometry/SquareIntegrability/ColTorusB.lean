@@ -61,14 +61,10 @@ theorem ct_expo_num (q c : ℕ) (hq : 1 ≤ q) {U y M1 r : ℝ} (hU : 0 ≤ U) (
       1.07 * c - 1.33 * (q * y ^ 2) := by
   have hπ1 : (3.14 : ℝ) < π := Real.pi_gt_d2
   have hπ2 : π < 3.15 := Real.pi_lt_d2
-  have hq1 : (1 : ℝ) ≤ q := by exact_mod_cast hq
-  have hc0 : (0 : ℝ) ≤ c := Nat.cast_nonneg c
   have hS0 : 0 ≤ Real.sqrt (q * (c + 1)) := Real.sqrt_nonneg _
   have hS2 : Real.sqrt (q * (c + 1)) ^ 2 = q * (c + 1) := Real.sq_sqrt (by positivity)
   have hA : 0 ≤ 2 * π * r * U := by positivity
   have h1 : 2 * π * r * U + 5 * (r * Real.sqrt (q * (c + 1))) ≤ c := by
-    have e : r * (2 * π * U + 5 * Real.sqrt (q * (c + 1))) =
-        2 * π * r * U + 5 * (r * Real.sqrt (q * (c + 1))) := by ring
     linarith
   have ha0 : 0 ≤ r * Real.sqrt (q * (c + 1)) := mul_nonneg hr0 hS0
   have ha : r * Real.sqrt (q * (c + 1)) ≤ c / 5 := by linarith
@@ -80,8 +76,6 @@ theorem ct_expo_num (q c : ℕ) (hq : 1 ≤ q) {U y M1 r : ℝ} (hU : 0 ≤ U) (
       rw [hX]; nlinarith
     exact le_of_mul_le_mul_right h2 (by positivity)
   have ht0 : 0 ≤ q * y ^ 2 := by positivity
-  have hP0 : 0 ≤ r * q * y := by positivity
-  have hPsq : (r * q * y) ^ 2 = (q * r ^ 2) * (q * y ^ 2) := by ring
   have hP : 2 * (r * q * y) ≤ 20 * (q * r ^ 2) + (q * y ^ 2) / 20 := by
     nlinarith [sq_nonneg (20 * (q * r ^ 2) - (q * y ^ 2) / 20)]
   have F1 : π * (q * r ^ 2) ≤ 3.15 * (q * r ^ 2) := mul_le_mul_of_nonneg_right hπ2.le hX0
@@ -91,7 +85,6 @@ theorem ct_expo_num (q c : ℕ) (hq : 1 ≤ q) {U y M1 r : ℝ} (hU : 0 ≤ U) (
   have F3' : 3.14 * (q * y ^ 2) ≤ π * (q * y ^ 2) := mul_le_mul_of_nonneg_right hπ1.le ht0
   have F4 : π * (q / 2) * y ^ 2 ≤ π * (q - M1) * y ^ 2 := by
     have : (q : ℝ) / 2 ≤ q - M1 := by linarith
-    have hy2 := sq_nonneg y
     have := mul_le_mul_of_nonneg_left this Real.pi_pos.le
     nlinarith
   linarith [F1, F2, F3, F3', F4, h1, hXa, ha, ht, hA]
@@ -169,9 +162,7 @@ theorem jet_product_le (q c dK gA dst : ℕ) (hq : 1 ≤ q) {n U t0 Bsq : ℝ} (
         (Real.sqrt Bsq * Real.exp (1.07 * c) * (2 * 3 ^ dK * Real.exp (-(1.33 * t0)))) ≤
       7 * 2 ^ gA * (4.3 : ℝ) ^ dst * Real.exp (-t0) * n ^ c := by
   have hq1 : (1 : ℝ) ≤ q := by exact_mod_cast hq
-  have hc0 : (0 : ℝ) ≤ c := Nat.cast_nonneg c
   have hS1 : 1 ≤ Real.sqrt (q * (c + 1)) := Real.one_le_sqrt.mpr (by nlinarith)
-  have hn0 : 0 ≤ n := by linarith
   have hbase : 2 * π * U + 5 * Real.sqrt (q * (c + 1)) ≤ 6.5 * Real.sqrt (q * (c + 1)) * n := by
     nlinarith
   have hpow : (2 * π * U + 5 * Real.sqrt (q * (c + 1))) ^ c ≤
@@ -185,7 +176,6 @@ theorem jet_product_le (q c dK gA dst : ℕ) (hq : 1 ≤ q) {n U t0 Bsq : ℝ} (
     rw [e, ← mul_pow]
     exact pow_le_pow_left₀ (by positivity) hbase c
   have hbn := ct_base_num q c hq hC5
-  have hX0 : 0 ≤ Real.sqrt Bsq * (2 * 3 ^ dK) := by positivity
   calc (2 * π * U + 5 * Real.sqrt (q * (c + 1))) ^ c *
         (Real.sqrt Bsq * Real.exp (1.07 * c) * (2 * 3 ^ dK * Real.exp (-(1.33 * t0))))
       ≤ (6.5 * Real.exp 1.07 * Real.sqrt (q * (c + 1))) ^ c * Real.exp (-(1.07 * c)) * n ^ c *

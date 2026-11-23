@@ -71,12 +71,9 @@ theorem isIntegral_quotient_of_isMaximal_of_comap_eq {S : Type*} [CommRing S] [A
   haveI : IsScalarTower P (P ⧸ maximalIdeal P) (S ⧸ 𝔑) := by
     first
     | exact IsScalarTower.of_algebraMap_eq (fun p => rfl)
-    | exact IsScalarTower.of_algebraMap_eq (fun p => by simp [Ideal.quotientMap_mk])
   haveI : Algebra.FiniteType P (S ⧸ 𝔑) := by
     first
     | infer_instance
-    | exact Algebra.FiniteType.of_surjective inferInstance (Ideal.Quotient.mkₐ P 𝔑)
-        (Ideal.Quotient.mkₐ_surjective P 𝔑)
   haveI : Algebra.FiniteType (P ⧸ maximalIdeal P) (S ⧸ 𝔑) :=
     Algebra.FiniteType.of_restrictScalars_finiteType P _ _
   haveI : Module.Finite (P ⧸ maximalIdeal P) (S ⧸ 𝔑) :=
@@ -84,8 +81,6 @@ theorem isIntegral_quotient_of_isMaximal_of_comap_eq {S : Type*} [CommRing S] [A
   haveI : Algebra.IsIntegral P (P ⧸ maximalIdeal P) := by
     first
     | infer_instance
-    | exact Algebra.IsIntegral.of_surjective (Ideal.Quotient.mkₐ P (maximalIdeal P))
-        (Ideal.Quotient.mkₐ_surjective P _)
   exact Algebra.IsIntegral.trans (P ⧸ maximalIdeal P)
 
 theorem isMaximal_comap_of_isMaximal_of_comap_eq {S' S : Type*} [CommRing S'] [CommRing S]
@@ -96,7 +91,6 @@ theorem isMaximal_comap_of_isMaximal_of_comap_eq {S' S : Type*} [CommRing S'] [C
   haveI : Algebra.IsIntegral S' (S ⧸ 𝔑) := by
     first
     | exact Algebra.IsIntegral.tower_top P
-    | exact Algebra.IsIntegral.tower_top (R := P)
   letI : Field (S ⧸ 𝔑) := Ideal.Quotient.field _
   have hbot := Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := S') (⊥ : Ideal (S ⧸ 𝔑))
   have heq : (⊥ : Ideal (S ⧸ 𝔑)).comap (algebraMap S' (S ⧸ 𝔑)) = 𝔑.comap (algebraMap S' S) := by
@@ -104,8 +98,6 @@ theorem isMaximal_comap_of_isMaximal_of_comap_eq {S' S : Type*} [CommRing S'] [C
     rw [Ideal.mem_comap, Ideal.mem_bot, Ideal.mem_comap]
     first
     | exact Ideal.Quotient.eq_zero_iff_mem
-    | (rw [IsScalarTower.algebraMap_apply S' S (S ⧸ 𝔑), Ideal.Quotient.algebraMap_eq]
-       exact Ideal.Quotient.eq_zero_iff_mem)
   rw [← heq]
   exact hbot
 
@@ -120,7 +112,6 @@ theorem exists_monic_aeval_mem_of_isMaximal {S : Type*} [CommRing S] [Algebra P 
   have key : Ideal.Quotient.mk 𝔑 (aeval x g) = aeval (Ideal.Quotient.mk 𝔑 x) g := by
     first
     | exact (Polynomial.aeval_algHom_apply (Ideal.Quotient.mkₐ P 𝔑) x g).symm
-    | simpa using (Polynomial.aeval_algHom_apply (Ideal.Quotient.mkₐ P 𝔑) x g).symm
   rw [key, Polynomial.aeval_def]
   exact hgx
 

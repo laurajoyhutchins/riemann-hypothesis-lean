@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JInvCharA
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselDecayBounds.BesselUnitNorm.BesselNormSteps.BesselLine.SfiniteMuN
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -63,22 +64,7 @@ section Grp
 variable {k r : ℕ}
 
 theorem hpk_sq (k r : ℕ) : Hpk k r * Hpk k r = 1 := by
-  ext i j
-  have hi := i.isLt
-  have hj := j.isLt
-  rw [Matrix.mul_apply, Finset.sum_eq_single
-    (⟨if (i : ℕ) < r ∨ r + k < i then 2 * r + k - i else i, by split_ifs <;> omega⟩ :
-      Fin (2 * r + k + 1))]
-  · simp only [Hpk, Matrix.one_apply, Fin.ext_iff, Fin.val_mk]
-    split_ifs <;> first | (exfalso; omega) | norm_num
-  · intro l _ hl
-    have hl' : (l : ℕ) ≠ if (i : ℕ) < r ∨ r + k < i then 2 * r + k - i else i :=
-      fun h => hl (Fin.ext h)
-    have hl2 := l.isLt
-    simp only [Hpk, Fin.ext_iff, Fin.val_mk]
-    split_ifs at hl' ⊢ <;> first | (exfalso; omega) | norm_num
-  · intro h
-    exact absurd (Finset.mem_univ _) h
+  apply ReciprocityTheory.ChartRestriction.DS.Mult1.InvChr.Hpk_sq <;> assumption
 
 theorem uh_mul {a b : Mx k r} (ha : a ∈ UH (Hpk k r)) (hb : b ∈ UH (Hpk k r)) : a * b ∈ UH (Hpk k r) := by
   show (a * b)ᴴ * Hpk k r * (a * b) = Hpk k r

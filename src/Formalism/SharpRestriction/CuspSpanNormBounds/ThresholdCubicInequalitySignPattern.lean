@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.FamilyFormalDegreeLowerBound
 public import Formalism.SharpRestriction.CuspSpanNormBounds.LocalBesselAndTopKernel
 public import Formalism.SharpRestriction.CuspSpanNormBounds.NonGenericAndKTwoTheorems
 public import Formalism.SharpRestriction.CuspSpanNormBounds.PlaceDegreeData
@@ -572,25 +573,7 @@ theorem lamSH_int (D : D7) (τ : D.what₂.Tau) (i : Fin (2 * D.R.rS + D.R.k + 1
 
 theorem lamSH_hc (D : D7) (large₂ : SizeData₂ D) (C' Cl Cg cb Cu cT CT : ℝ) (hH : StandingHypotheses D large₂ C' Cl Cg cb Cu cT CT)
     (τ : D.what₂.Tau) : Formalism.QuantumDeterminants.IsHCParam (lamSH D.R (D.hc τ)) := by
-  obtain ⟨a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21, a22,
-    a23, a24, a25⟩ := hH
-  have hpos : (0 : ℝ) ≤ Cl * D.R.k * (D.R.m : ℝ) ^ 4 + D.R.r * (D.R.m : ℝ) ^ 10 :=
-    add_nonneg (mul_nonneg (mul_nonneg a25.le (by positivity)) (by positivity)) (by positivity)
-  have hdim := dimS_eq D.R
-  constructor
-  · have hdec := dec_all (lamSH D.R (D.hc τ)) (fun i hi => by
-      have := a22 τ ⟨i.1, by omega⟩ (by simp only; omega)
-      have e : lamSH D.R (D.hc τ) ⟨i.1 + 1, hi⟩ < lamSH D.R (D.hc τ) i := by
-        show lamS D.R (D.hc τ) ⟨i.1 + 1, _⟩ < lamS D.R (D.hc τ) ⟨i.1, _⟩
-        linarith
-      exact e)
-    exact fun a c hac => hdec a c hac
-  · intro a
-    obtain ⟨z, hz⟩ := lamSH_int D τ a
-    obtain ⟨s, hs⟩ := D.R.k_even
-    refine ⟨z - (D.R.rS + s), ?_⟩
-    have hk : (D.R.k : ℝ) = (s : ℝ) + s := by exact_mod_cast hs
-    rw [hz]; push_cast; rw [hk]; ring
+  apply Formalism.MainNotions.BridgeLemma.szh_hc <;> assumption
 
 theorem nS_cast (D : D7) : ((2 * D.R.rS + D.R.k + 1 : ℕ) : ℝ) = (D.R.r : ℝ) := by
   obtain ⟨⟨j, hj⟩, h2, h3⟩ := ranks_all_lemma D.R

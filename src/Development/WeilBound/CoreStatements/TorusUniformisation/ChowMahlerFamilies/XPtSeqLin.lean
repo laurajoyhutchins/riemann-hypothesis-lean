@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.CharacterLatticeKernelLocallyFree
 public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.LieLatticeData
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -72,22 +73,7 @@ theorem std_le_dual (R : Subalgebra o C) {m : ℕ} (L : AddSubgroup (Fin m → C
 theorem smul_mem_std (R : Subalgebra o C) {m : ℕ} (L : AddSubgroup (Fin m → C)) (w : C)
     (h : mulLat w (stdLat R _) ≤ L) (v : Fin m → C) (hv : v ∈ dotDual R L) :
     w • v ∈ stdLat R (Fin m) := by
-  rw [mem_std]
-  intro i
-  have he : (Pi.single i (1 : C) : Fin m → C) ∈ stdLat R (Fin m) := by
-    rw [mem_std]
-    intro j
-    rw [Pi.single_apply]
-    split_ifs
-    · exact R.one_mem
-    · exact R.zero_mem
-  have hwe : w • (Pi.single i (1 : C) : Fin m → C) ∈ L :=
-    h (AddSubgroup.mem_map_of_mem (DistribSMul.toAddMonoidHom (Fin m → C) w) he)
-  have hd := (mem_dual R L v).1 hv _ hwe
-  have heq : (w • (Pi.single i (1 : C) : Fin m → C)) ⬝ᵥ v = w * v i := by
-    rw [smul_dotProduct, single_dotProduct, one_mul, smul_eq_mul]
-  rw [heq] at hd
-  simpa [Pi.smul_apply, smul_eq_mul] using hd
+  apply GlobalTheory.CompanionTheory.Ar.Num.LatticeGoodness.KerFree.smul_mem_std <;> assumption
 
 end PositivityTheory.Xgn.A_pt_seq_lin
 

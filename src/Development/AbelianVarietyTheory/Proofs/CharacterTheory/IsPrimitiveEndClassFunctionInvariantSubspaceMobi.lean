@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.CharacterTheory.InvertibleEndomorphismInnerProductPrimitiveMobiu
 public import Development.AbelianVarietyTheory.Definitions.CommutativeAlgebra.InvariantSubspaceMobiusInverseRecEqOfFinrankLt
 public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.CharpolyBlockAndInvariantUnderStabilizerNilradicStatement
 public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.CharpolyEqFinsumPsiStatement
@@ -82,22 +83,7 @@ def res {F : Type} [Field F] (s : F[X] → ℂ) {V : Type} [AddCommGroup V] [Mod
 theorem psi_trivial {F : Type} [Field F] (s : F[X] → ℂ) (hs : IsAdditive s) (V : Type)
     [AddCommGroup V] [Module F V] [FiniteDimensional F V] [Subsingleton V] (g : Module.End F V) :
     psi s V g = 0 := by
-  rw [psi_eq s V g]
-  have hpoly : LinearMap.charpoly g = 1 := by
-    have hdeg : (LinearMap.charpoly g).natDegree = 0 := by
-      rw [LinearMap.charpoly_natDegree]
-      exact Module.finrank_zero_of_subsingleton
-    exact Polynomial.eq_one_of_monic_natDegree_zero (LinearMap.charpoly_monic g) hdeg
-  have hs1 : s 1 = 0 := by
-    have h11 := hs 1 1 monic_one monic_one
-    rw [one_mul] at h11
-    linear_combination -h11
-  have hempty : IsEmpty {W : Submodule F V // W ≠ ⊤ ∧ ∀ x ∈ W, g x ∈ W} := by
-    refine ⟨fun W => W.2.1 ?_⟩
-    refine eq_top_iff.2 fun x _ => ?_
-    rw [Subsingleton.elim x 0]
-    exact W.1.zero_mem
-  rw [hpoly, hs1, finsum_of_isEmpty, sub_zero]
+  apply GlobalTheory.CuspGL.PrimOrth.psi_bot <;> assumption
 
 theorem res_top {F : Type} [Field F] (s : F[X] → ℂ) {V : Type} [AddCommGroup V] [Module F V]
     [FiniteDimensional F V] (k : Module.End F V) : res s ⊤ k = psi s V k := by

@@ -1,5 +1,6 @@
 module
 
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.StabilizerIndexVolumes.DiagMulOfBt
 public import Formalism.SharpRestriction.CuspSpanNormBounds.BlockEnds
 public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
 import Mathlib.Algebra.Order.Floor.Extended
@@ -60,21 +61,7 @@ section Uni
 variable {K : Type*} [Field K] {N : ℕ}
 
 theorem upUni_mul {A B : Matrix (Fin N) (Fin N) K} (hA : IsUpUni A) (hB : IsUpUni B) : IsUpUni (A * B) := by
-  intro i j
-  refine ⟨fun hji => ?_, fun hij => ?_⟩
-  · rw [Matrix.mul_apply]
-    refine Finset.sum_eq_zero fun k _ => ?_
-    by_cases hk : k < i
-    · rw [(hA i k).1 hk, zero_mul]
-    · rw [(hB k j).1 (lt_of_lt_of_le hji (not_lt.1 hk)), mul_zero]
-  · subst hij
-    rw [Matrix.mul_apply, Finset.sum_eq_single i]
-    · rw [(hA i i).2 rfl, (hB i i).2 rfl, one_mul]
-    · intro k _ hk
-      rcases lt_or_gt_of_ne hk with h | h
-      · rw [(hA i k).1 h, zero_mul]
-      · rw [(hB k i).1 h, mul_zero]
-    · simp
+  apply Formalism.L2.SG.Pf.StabilizerIndexVolumes.up_mul <;> assumption
 
 theorem loUni_iff_ct {A : Matrix (Fin N) (Fin N) K} [StarRing K] : IsLoUni A ↔ IsUpUni Aᴴ := by
   constructor
@@ -105,21 +92,7 @@ theorem loUni_det {A : Matrix (Fin N) (Fin N) K} (h : IsLoUni A) : A.det = 1 := 
     exact (h i j).1 hij
 
 theorem upUni_inv {A : Matrix (Fin N) (Fin N) K} (h : IsUpUni A) : IsUpUni A⁻¹ := by
-  have hdet : IsUnit A.det := by rw [upUni_det h]; exact isUnit_one
-  have hbt : A.BlockTriangular id := fun i j hij => (h i j).1 hij
-  haveI := A.invertibleOfIsUnitDet hdet
-  have hbt' : A⁻¹.BlockTriangular id := Matrix.blockTriangular_inv_of_blockTriangular hbt
-  intro i j
-  refine ⟨fun hji => hbt' hji, fun hij => ?_⟩
-  subst hij
-  have e := congrFun (congrFun (Matrix.mul_nonsing_inv A hdet) i) i
-  rw [Matrix.mul_apply, Finset.sum_eq_single i, (h i i).2 rfl, one_mul] at e
-  · simpa using e
-  · intro k _ hk
-    rcases lt_or_gt_of_ne hk with hlt | hgt
-    · rw [(h i k).1 hlt, zero_mul]
-    · rw [hbt' hgt, mul_zero]
-  · simp
+  apply Formalism.L2.SG.Pf.StabilizerIndexVolumes.up_inv <;> assumption
 
 theorem loUni_mul {A B : Matrix (Fin N) (Fin N) K} [StarRing K] (hA : IsLoUni A) (hB : IsLoUni B) :
     IsLoUni (A * B) := by

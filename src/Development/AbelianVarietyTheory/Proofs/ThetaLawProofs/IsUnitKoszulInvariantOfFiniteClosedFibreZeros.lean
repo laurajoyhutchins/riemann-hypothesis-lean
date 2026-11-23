@@ -70,6 +70,7 @@ import Mathlib.Tactic.ReduceModChar
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.BCTools
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.OneArc
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ExistsRosatiGen
+import Development.AbelianVarietyTheory.Proofs.ThetaLawProofs.KeyViaIsPullback
 
 @[expose] public section
 
@@ -206,44 +207,7 @@ theorem keyVia_trans {R R' R'' : Type} [CommRing R] [CommRing R'] [CommRing R'']
     (H' : KeyVia x'' x' f' φ' w') : ∃ w'', KeyVia x'' x (f'.comp f) (φ' ≫ φ) w'' ∧
       ∀ (l : ℕ) (s : RR x l) (s' : RR x' l) (s'' : RR x'' l), SecVia x' x φ w s' s → SecVia x'' x' φ' w' s'' s' →
         SecVia x'' x (φ' ≫ φ) w'' s'' s := by
-  obtain ⟨he, hg, F, hp, hw, hr, hs, hF, hε, hv⟩ := H
-  obtain ⟨he', hg', F', hp', hw', hr', hs', hF', hε', hv'⟩ := H'
-  have g := (isGen_iff w).1 hw
-  have g' := (isGen_iff w').1 hw'
-  obtain ⟨w'', T⟩ := exists_comp x'.P.isLB w w' g g' x.P.isLB x''.P.isLB
-  have he'' : eSec x''.P.A ≫ φ' ≫ φ = spMap (f'.comp f) ≫ eSec x.P.A := by
-    rw [← Category.assoc, he', Category.assoc, he, spMap_comp, Category.assoc]
-  refine ⟨w'', ⟨he'', hg'.trans hg, F'.comp F, (hp'.comp hp).congr (spMap_comp f f').symm rfl,
-    (isGen_iff w'').2 (T.pgen_comp x'.P.isLB g g'), ?_, ?_, fun a => ?_, ?_, fun i => ?_⟩,
-    fun l s s' s'' h h' j k hle => fn_ext fun y hy => ?_⟩
-  · have r₀ := (maps_iff w _ (fun _ => eSec x.P.A) _ x'.rig x.rig (spMap f) _
-      (rigPull_le φ (spMap f) he x.P.L) (fun _ => rfl)).1 hr
-    have r₁ := (maps_iff w' _ (fun _ => eSec x'.P.A) _ x''.rig x'.rig (spMap f') _
-      (rigPull_le φ' (spMap f') he' x'.P.L) (fun _ => rfl)).1 hr'
-    have r₂ := T.pmaps_comp x'.P.isLB (fun _ => he') r₀ r₁
-    rw [← spMap_comp] at r₂
-    exact (maps_iff w'' _ (fun _ => eSec x.P.A) _ x''.rig x.rig (spMap (f'.comp f)) _
-      (rigPull_le (φ' ≫ φ) (spMap (f'.comp f)) he'' x.P.L) (fun _ => rfl)).2 r₂
-  · refine KeyPow.appLE_eq_of_stalk w'' x.th x''.th fun z j k hj hk => ?_
-    obtain ⟨i, hi⟩ := exists_chart x'.P.isLB (φ' z)
-    have a := KeyComp.stalk_of_appLE_eq w x.th x'.th hs (𝟙 _ ≫ φ') z j i hj hi
-    have b := KeyComp.stalk_of_appLE_eq w' x'.th x''.th hs' (𝟙 _) z i k hi hk
-    rw [T _ (𝟙 _) z j i k hj hi hk, ← Category.assoc, a, b, Units.val_mul, _root_.mul_assoc]
-  · rw [RingHom.comp_apply, hF, hF', RingHom.comp_apply]
-  · rw [RingHom.comp_apply, hε, hε']
-  · rw [← Category.assoc, hv', Category.assoc, hv, spMap_comp, Category.assoc]
-    rfl
-  · obtain ⟨i, hi⟩ := exists_chart x'.P.isLB (φ' y)
-    have hj : φ (φ' y) ∈ x.P.L.U (j PUnit.unit) := mem_pull (F := φ' ≫ φ).1 hy.1
-    have a := KeyBasis.via_val (w := w) (n := l) (a' := s'.f) (a := s.f) h (𝟙 _ ≫ φ') y hj hi
-    have b := KeyBasis.via_val (w := w') (n := l) (a' := s''.f) (a := s'.f) h' (𝟙 _) y hi hy.2
-    have t := T _ (𝟙 _) y (j PUnit.unit) i k hj hi hy.2
-    rw [b, ← _root_.mul_assoc, ← Units.val_mul, ← mul_pow, ← t] at a
-    refine (gs_appLE (φ' ≫ φ) _ _ hle (𝟙 _) y hy _).trans (a.trans ?_)
-    refine Eq.trans (congrArg₂ (· * ·) ?_ (gs_res _ y _ hy _).symm) (gs_mul _ y _ hy _ _).symm
-    let v : Γ(x''.P.A.left, (x.P.L.pull (φ' ≫ φ)).U j ⊓ x''.P.L.U k)ˣ := w''.s (j, k)
-    exact ((congrArg (gs (𝟙 _) y _) (Units.val_pow_eq_pow_val v l).symm).trans
-      ((gs_unit (𝟙 _) y _ hy _).trans (congrArg Units.val (map_pow _ _ _)))).symm
+  apply _root_.GlobalTheory.KeyLine.keyVia_trans <;> assumption
 
 theorem exists_pull_hom {R R' : Type} [CommRing R] [IsDomain R] [CommRing R'] {x : KeyIn R} {x' : KeyIn R'}
     {f : R →+* R'} {φ w} (H : KeyVia x' x f φ w) (hf : Function.Injective f) :

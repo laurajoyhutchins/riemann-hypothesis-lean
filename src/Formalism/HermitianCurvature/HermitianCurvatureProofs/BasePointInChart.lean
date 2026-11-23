@@ -97,7 +97,6 @@ theorem gauge_scalar {τ : ℂ} (hτ : τ ≠ 0) (n : ℕ) :
     τ * (1 / 2) * ((((n : ℝ) * ‖τ‖ ^ (n - 1) * (‖τ‖⁻¹ * τ.re) : ℝ) : ℂ) -
         Complex.I * (((n : ℝ) * ‖τ‖ ^ (n - 1) * (‖τ‖⁻¹ * τ.im) : ℝ) : ℂ)) =
       ((‖τ‖ ^ n : ℝ) : ℂ) * ((n : ℂ) / 2) := by
-  have hn : ‖τ‖ ≠ 0 := norm_ne_zero_iff.2 hτ
   have hconj : τ * ((τ.re : ℂ) - Complex.I * τ.im) = ((‖τ‖ ^ 2 : ℝ) : ℂ) := by
     have := Complex.mul_conj τ
     rw [Complex.normSq_eq_norm_sq] at this
@@ -136,7 +135,6 @@ theorem gauge_scalar_bar {τ : ℂ} (hτ : τ ≠ 0) (n : ℕ) :
     conj τ * (1 / 2) * ((((n : ℝ) * ‖τ‖ ^ (n - 1) * (‖τ‖⁻¹ * τ.re) : ℝ) : ℂ) +
         Complex.I * (((n : ℝ) * ‖τ‖ ^ (n - 1) * (‖τ‖⁻¹ * τ.im) : ℝ) : ℂ)) =
       ((‖τ‖ ^ n : ℝ) : ℂ) * ((n : ℂ) / 2) := by
-  have hn : ‖τ‖ ≠ 0 := norm_ne_zero_iff.2 hτ
   have hconj : conj τ * ((τ.re : ℂ) + Complex.I * τ.im) = ((‖τ‖ ^ 2 : ℝ) : ℂ) := by
     have := Complex.mul_conj τ
     rw [Complex.normSq_eq_norm_sq, mul_comm] at this

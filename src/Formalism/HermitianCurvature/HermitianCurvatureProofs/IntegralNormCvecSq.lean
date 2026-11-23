@@ -63,8 +63,6 @@ theorem cvec_inner (s : ℕ) (F G : ℂ → ℂ → H) (x x' : ℂ) (hx : x ≠ 
     ∫ c, ⟪cvec s F x c, cvec s G x' c⟫_ℂ =
       ∫ D, ⟪F x D, ((‖x ^ (s - 1) / x' ^ (s - 1)‖ : ℝ) : ℂ) • G x' ((x ^ (s - 1) / x' ^ (s - 1)) * D)⟫_ℂ := by
   have ha : x ^ (s - 1) ≠ 0 := pow_ne_zero _ hx
-  have hx0 : ‖x‖ ≠ 0 := norm_ne_zero_iff.mpr hx
-  have hx0' : ‖x'‖ ≠ 0 := norm_ne_zero_iff.mpr hx'
   have hk : ‖x ^ (s - 1)‖ ^ 2 ≠ 0 := pow_ne_zero _ (norm_ne_zero_iff.mpr ha)
   have key := integral_comp_mul_C (fun c => ⟪cvec s F x c, cvec s G x' c⟫_ℂ) (x ^ (s - 1)) ha
   have hL : ∫ c, ⟪cvec s F x c, cvec s G x' c⟫_ℂ

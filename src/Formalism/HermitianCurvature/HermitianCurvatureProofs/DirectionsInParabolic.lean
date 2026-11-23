@@ -187,7 +187,6 @@ theorem hpk_conjTranspose (k r : ℕ) : (Hpk k r)ᴴ = Hpk k r := by
   · subst hab
     split_ifs <;> simp
   · have hba : b ≠ a := Ne.symm hab
-    have hv : a.val ≠ b.val := fun h => hab (Fin.ext h)
     simp only [hab, hba, and_false, if_false]
     split_ifs <;> first | (exfalso; omega) | simp
 

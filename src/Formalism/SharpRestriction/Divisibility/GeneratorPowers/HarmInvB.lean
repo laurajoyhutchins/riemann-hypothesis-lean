@@ -110,9 +110,6 @@ theorem hasSubst0 {σ τ : Type} [Finite σ] {a : σ → MvPowerSeries τ S}
   first
   | exact MvPowerSeries.HasSubst.of_constantCoeff_zero ha
   | exact MvPowerSeries.hasSubst_of_constantCoeff_zero ha
-  | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' ha
-  | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [ha s]; exact IsNilpotent.zero)
-  | exact MvPowerSeries.hasSubst_of_constantCoeff_nilpotent (fun s => by rw [ha s]; exact IsNilpotent.zero)
 
 theorem log_expPhi (G : FGLaw S d) (uvec : Lt1 Dw → Fin d → S) (ε : Pt S 1 d)
     (hinv : IsInvPair ε (fun i => logOf G i)) (i : Fin d) :
@@ -131,9 +128,6 @@ theorem log_expPhi (G : FGLaw S d) (uvec : Lt1 Dw → Fin d → S) (ε : Pt S 1 
     first
     | exact MvPowerSeries.HasSubst.of_constantCoeff_zero h0
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero h0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' h0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [h0 s]; exact IsNilpotent.zero)
-    | exact MvPowerSeries.hasSubst_of_constantCoeff_nilpotent (fun s => by rw [h0 s]; exact IsNilpotent.zero)
   have hL0 : ∀ p : Fin 1 × Fin d, MvPowerSeries.constantCoeff (linPt uvec (0 : Fin 1) p.2) = 0 := by
     intro p
     simp [Formalism.MainNotions.ModuliIntegralCharts.H1.ExpOf.linPt]
@@ -141,9 +135,6 @@ theorem log_expPhi (G : FGLaw S d) (uvec : Lt1 Dw → Fin d → S) (ε : Pt S 1 
     first
     | exact MvPowerSeries.HasSubst.of_constantCoeff_zero hL0
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero hL0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' hL0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [hL0 s]; exact IsNilpotent.zero)
-    | exact MvPowerSeries.hasSubst_of_constantCoeff_nilpotent (fun s => by rw [hL0 s]; exact IsNilpotent.zero)
   change MvPowerSeries.subst (fun p : Fin 1 × Fin d => MvPowerSeries.subst (fun q : Fin 1 × Fin d => linPt uvec (0 : Fin 1) q.2) (ε p.2)) (logOf G i) = _
   rw [← MvPowerSeries.subst_comp_subst_apply hA hL, h1, MvPowerSeries.subst_X hL]
 
@@ -161,16 +152,10 @@ theorem log_expPhi_act (G : FGLaw S d) (uvec : Lt1 Dw → Fin d → S) (ε : Pt 
     first
     | exact MvPowerSeries.HasSubst.of_constantCoeff_zero hE0
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero hE0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' hE0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [hE0 s]; exact IsNilpotent.zero)
-    | exact MvPowerSeries.hasSubst_of_constantCoeff_nilpotent (fun s => by rw [hE0 s]; exact IsNilpotent.zero)
   have ha' : MvPowerSeries.HasSubst a := by
     first
     | exact MvPowerSeries.HasSubst.of_constantCoeff_zero ha
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero ha
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' ha
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [ha s]; exact IsNilpotent.zero)
-    | exact MvPowerSeries.hasSubst_of_constantCoeff_nilpotent (fun s => by rw [ha s]; exact IsNilpotent.zero)
   rw [← MvPowerSeries.subst_comp_subst_apply hE ha', log_expPhi G uvec ε hinv i]
 
 theorem germCompOne_identityPoint_left (φ : Pt S 1 d) : comp1 φ (pt S (n := 1) d 0) = φ := by
@@ -199,16 +184,10 @@ theorem subst_lg (G : FGLaw S d) {τ : Type} (Bφ : Fin 2 × Fin d → MvPowerSe
     first
     | exact MvPowerSeries.HasSubst.of_constantCoeff_zero h0
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero h0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' h0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [h0 s]; exact IsNilpotent.zero)
-    | exact MvPowerSeries.hasSubst_of_constantCoeff_nilpotent (fun s => by rw [h0 s]; exact IsNilpotent.zero)
   have hBs : MvPowerSeries.HasSubst Bφ := by
     first
     | exact MvPowerSeries.HasSubst.of_constantCoeff_zero hB
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero hB
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' hB
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [hB s]; exact IsNilpotent.zero)
-    | exact MvPowerSeries.hasSubst_of_constantCoeff_nilpotent (fun s => by rw [hB s]; exact IsNilpotent.zero)
   change MvPowerSeries.subst Bφ (MvPowerSeries.subst (fun p : Fin 1 × Fin d => (![pt S (n := 2) d j] p.1 p.2 : MvPowerSeries (Fin 2 × Fin d) S)) (logOf G i)) = _
   rw [MvPowerSeries.subst_comp_subst_apply hA hBs]
   congr 1
@@ -233,9 +212,6 @@ theorem compL_diagL {O : Type} [CommRing O] [StarRing O] (B : FB S d O) (w0 : O)
     first
     | exact MvPowerSeries.HasSubst.of_constantCoeff_zero hE0
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero hE0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' hE0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [hE0 s]; exact IsNilpotent.zero)
-    | exact MvPowerSeries.hasSubst_of_constantCoeff_nilpotent (fun s => by rw [hE0 s]; exact IsNilpotent.zero)
   have hV0 : ∀ p : Fin 2 × Fin d, MvPowerSeries.constantCoeff ((fun p : Fin 2 × Fin d => (![pt S d 0, comp1 (B.A.act w0) (pt S d 0)] : Fin 2 → Pt S 1 d) p.1 p.2) p) = 0 := by
     intro p
     rcases p with ⟨j, c⟩
@@ -246,9 +222,6 @@ theorem compL_diagL {O : Type} [CommRing O] [StarRing O] (B : FB S d O) (w0 : O)
     first
     | exact MvPowerSeries.HasSubst.of_constantCoeff_zero hV0
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero hV0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' hV0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [hV0 s]; exact IsNilpotent.zero)
-    | exact MvPowerSeries.hasSubst_of_constantCoeff_nilpotent (fun s => by rw [hV0 s]; exact IsNilpotent.zero)
   change MvPowerSeries.subst (fun p : Fin 1 × Fin d => expPhi uvec ε p.2) (MvPowerSeries.subst (fun p : Fin 2 × Fin d => (![pt S d 0, comp1 (B.A.act w0) (pt S d 0)] : Fin 2 → Pt S 1 d) p.1 p.2) (bilL B.G cc)) = _
   rw [← MvPowerSeries.coe_substAlgHom hV, ← MvPowerSeries.coe_substAlgHom hE]
 
@@ -264,17 +237,11 @@ theorem compL_diagL {O : Type} [CommRing O] [StarRing O] (B : FB S d O) (w0 : O)
     first
     | exact MvPowerSeries.HasSubst.of_constantCoeff_zero hP0
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero hP0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' hP0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [hP0 s]; exact IsNilpotent.zero)
-    | exact MvPowerSeries.hasSubst_of_constantCoeff_nilpotent (fun s => by rw [hP0 s]; exact IsNilpotent.zero)
   have hQ0 : ∀ p : Fin 1 × Fin d, MvPowerSeries.constantCoeff (B.A.act w0 p.2) = 0 := fun p => B.A.const w0 p.2
   have hQ : MvPowerSeries.HasSubst (fun p : Fin 1 × Fin d => B.A.act w0 p.2) := by
     first
     | exact MvPowerSeries.HasSubst.of_constantCoeff_zero hQ0
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero hQ0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' hQ0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [hQ0 s]; exact IsNilpotent.zero)
-    | exact MvPowerSeries.hasSubst_of_constantCoeff_nilpotent (fun s => by rw [hQ0 s]; exact IsNilpotent.zero)
   rw [MvPowerSeries.subst_comp_subst_apply hP hE, MvPowerSeries.subst_comp_subst_apply hQ hE]
   simp only [hact]
   simp only [ReciprocityTheory.ChartRestriction.G.Geo.Tor.Germ.pt, MvPowerSeries.subst_X hE]
@@ -302,9 +269,6 @@ theorem quad_form (cc : Fin d → Fin d → S) (u : Lt1 Dw → Fin d → S) (t :
     first
     | exact MvPowerSeries.HasSubst.of_constantCoeff_zero hT0
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero hT0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' hT0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [hT0 s]; exact IsNilpotent.zero)
-    | exact MvPowerSeries.hasSubst_of_constantCoeff_nilpotent (fun s => by rw [hT0 s]; exact IsNilpotent.zero)
   have hsub : ∀ l, MvPowerSeries.subst (fun q => t q • (MvPowerSeries.X q : MvPowerSeries (Fin 1 × Fin (dL Dw)) S)) (linPt u (0 : Fin 1) l) =
       ∑ ℓ, (u ℓ l * t (0, ltIdx Dw ℓ)) • (MvPowerSeries.X ((0 : Fin 1), ltIdx Dw ℓ) : MvPowerSeries (Fin 1 × Fin (dL Dw)) S) := by
     intro l
@@ -341,7 +305,6 @@ theorem quad_form (cc : Fin d → Fin d → S) (u : Lt1 Dw → Fin d → S) (t :
   simp only [Finset.mul_sum]
   first
   | simp only [smul_mul_smul_comm, Finset.smul_sum, smul_smul]
-  | simp only [smul_mul_smul, Finset.smul_sum, smul_smul]
   refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun ℓ _ => Finset.sum_congr rfl (fun ℓ' _ => ?_))))
   congr 1
   ring

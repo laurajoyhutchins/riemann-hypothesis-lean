@@ -576,7 +576,6 @@ theorem first_cofactor_norm_le (m : ℕ) (t : ℂ) (p : XY m) {R : ℝ} (hR : 1 
 theorem remainder_norm_le (m : ℕ) (t : ℂ) (p : XY m) {R : ℝ} (hR : 1 ≤ R) (ht : ‖t‖ ≤ 1) (hx : ∀ k, ‖p.1 k‖ ≤ R)
     (hy : ‖p.2‖ ≤ R) : ‖r1XY m t p‖ ≤ ((m : ℝ) + 1) ^ (m + 2) * R ^ (m + 1) := by
   have hR0 : 0 ≤ R := zero_le_one.trans hR
-  have hm0 : (0 : ℝ) ≤ (m : ℝ) := Nat.cast_nonneg m
   have hm1 : (1 : ℝ) ≤ (m : ℝ) + 1 := by linarith
   have term : ∀ j ∈ Finset.range m,
       ‖(∑ k : Fin m, rm m p k * ((-Xm m p) ^ j *ᵥ Bm m p) k.succ) * t ^ (m - 1 - j)‖ ≤
@@ -715,7 +714,6 @@ theorem DB.mulQ {q : ℕ} {f g : E → ℂ} {u : E} {Q P : ℝ} {a b : ℕ} (hf 
 theorem DB.addQ {q : ℕ} {f g : E → F} {u : E} {Q P : ℝ} {a : ℕ} (hf : DB q f u (Q ^ a) P)
     (hg : DB q g u (Q ^ a) P) (hP : 0 ≤ P) (h2 : (2 : ℝ) ≤ Q) :
     DB q (fun v => f v + g v) u (Q ^ (a + 1)) P := by
-  have hQ0 : 0 ≤ Q := le_trans (by positivity) h2
   refine (hf.add hg).mono ?_ hP le_rfl
   calc Q ^ a + Q ^ a = 2 * Q ^ a := by ring
     _ ≤ Q * Q ^ a := by gcongr
@@ -724,7 +722,6 @@ theorem DB.addQ {q : ℕ} {f g : E → F} {u : E} {Q P : ℝ} {a : ℕ} (hf : DB
 theorem DB.subQ {q : ℕ} {f g : E → F} {u : E} {Q P : ℝ} {a : ℕ} (hf : DB q f u (Q ^ a) P)
     (hg : DB q g u (Q ^ a) P) (hP : 0 ≤ P) (h2 : (2 : ℝ) ≤ Q) :
     DB q (fun v => f v - g v) u (Q ^ (a + 1)) P := by
-  have hQ0 : 0 ≤ Q := le_trans (by positivity) h2
   refine (hf.sub hg).mono ?_ hP le_rfl
   calc Q ^ a + Q ^ a = 2 * Q ^ a := by ring
     _ ≤ Q * Q ^ a := by gcongr
@@ -2068,8 +2065,6 @@ theorem arith (a b m : ℕ) {ε A : ℝ} (hε0 : 0 < ε) (hε : ε ≤ 1 / (2 * 
     0 ≤ A ∧ ((4 * (m + 2) * (a + b) : ℕ) : ℝ) + ((m : ℝ) + 2) * ((m : ℝ) + 1) + 1 ≤ A ∧
       1 ≤ -ε * (((4 * (m + 2) * (a + b) : ℕ) : ℝ) + ((m : ℝ) + 2) * ((m : ℝ) + 1) - A) := by
   have hm0 : (0 : ℝ) ≤ (m : ℝ) := Nat.cast_nonneg m
-  have ha0 : (0 : ℝ) ≤ (a : ℝ) := Nat.cast_nonneg a
-  have hb0 : (0 : ℝ) ≤ (b : ℝ) := Nat.cast_nonneg b
   have hε1 : ε ≤ 1 := by
     refine hε.trans ?_
     rw [div_le_one (by positivity)]

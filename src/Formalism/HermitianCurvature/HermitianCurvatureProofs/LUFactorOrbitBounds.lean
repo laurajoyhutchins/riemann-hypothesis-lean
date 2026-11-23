@@ -953,7 +953,6 @@ lemma ninv_bd (hΓ : 1 ≤ Γ) (hδ : 0 < δ) (hg : g ∈ GV k r) (hgΓ : gN g �
     have : 0 ≤ ((2 * r + k + 1 : ℕ) : ℝ) * (c11 r Γ δ * cPg r Γ δ) := by positivity
     nlinarith
   · obtain ⟨a, rfl⟩ := Es_of_gt l (by omega)
-    have hx : IsUnit (Zm (n⁻¹ * g * n')).det := by rw [det_Zx hn hn']; exact unit_of_det hδ hdet
     have hk := congrFun (congrFun (key hδ hdet hn hn') i) a
     rw [Matrix.mul_apply, sum_split_Es] at hk
     simp only [Pm_Es g (unit_of_det hδ hdet), mul_ite, mul_one, mul_zero, Finset.sum_ite_eq',
@@ -1277,7 +1276,6 @@ instance haar_hpar (k r' : ℕ) : (volume : Measure (HPar k r')).IsAddHaarMeasur
 
 lemma lint_heis_fin (k r' : ℕ) {c : ℝ} (hc : ((2 * (2 * r' + k + 1) + 1 : ℕ) : ℝ) < c) :
     ∫⁻ x : HPar k r', ENNReal.ofReal (((1 + ‖x‖) / 2) ^ (-c)) < ⊤ := by
-  have hc0 : 0 < c := lt_of_le_of_lt (Nat.cast_nonneg _) hc
   have e : ∀ x : HPar k r', ((1 + ‖x‖) / 2) ^ (-c) = (2 : ℝ) ^ c * (1 + ‖x‖) ^ (-c) := by
     intro x
     have hu : 0 ≤ 1 + ‖x‖ := by positivity
@@ -1354,8 +1352,6 @@ theorem lint_gN_fin (k r : ℕ) (μ : Measure (Mt k r)) (hμ : IsHaarOn (Nset k 
       · omega
       · exact h
     push_cast at ha'
-    have hr0 : (0 : ℝ) ≤ r' := Nat.cast_nonneg _
-    have hk0 : (0 : ℝ) ≤ k := Nat.cast_nonneg _
     have ha0 : 0 < a := by nlinarith
     obtain ⟨μ', hμ'⟩ := unipotent_haar_exists k r'
     have := sigmaFinite_haar hμ'
@@ -1509,10 +1505,6 @@ lemma real_step (X G1 G2 C4 Λ1 A A1 β P : ℝ) (m r : ℕ) (hX : 1 ≤ X) (hC4
   have hXA : 0 ≤ X ^ (-A) := Real.rpow_nonneg hXpos.le _
   have hb1 := rp_bd X C4 G1 β (3 * r) (by linarith) (by linarith) h1 hβ
   have hb2 := rp_bd X C4 G2 β (3 * r) (by linarith) (by linarith) h2 hβ
-  have hn1 : 0 ≤ (X ^ (3 * r)) ^ (-β) := Real.rpow_nonneg (by positivity) _
-  have hn2 : 0 ≤ C4 ^ β * G1 ^ (-β) := by
-    have := Real.rpow_nonneg (show (0:ℝ) ≤ C4 by linarith) β
-    have := Real.rpow_nonneg (show (0:ℝ) ≤ G1 by linarith) (-β); positivity
   have hΛm : 0 ≤ Λ1 ^ m := by positivity
   calc P * X ^ (-A) ≤ (Λ1 * X ^ (6 * r)) ^ m * X ^ (-A) := mul_le_mul_of_nonneg_right hP hXA
     _ = Λ1 ^ m * X ^ (-A1) := by
@@ -1552,12 +1544,10 @@ theorem nnMaj : Formalism.FourierDecayAlt.P.JFxDs2.NNMaj := by
   obtain ⟨cW, hcW, hW⟩ := uw_bound D.z D.z_mem D.T_pos
   obtain ⟨cW', hcW', hW'⟩ := uw_bound D.z' D.z'_mem D.T'_pos
 
-  have hc : 1 ≤ max cW cW' := le_trans hcW (le_max_left _ _)
   have hC4 : 1 ≤ max 1 (C3 * max cW cW' ^ (6 * r)) := le_max_left _ _
   set c := max cW cW' with hc_def
   set C4 := max 1 (C3 * c ^ (6 * r)) with hC4_def
   set NN : ℝ := ((2 * r + k + 1 : ℕ) : ℝ) with hNN
-  have hNN1 : 1 ≤ NN := by rw [hNN]; exact_mod_cast (by omega : 1 ≤ 2 * r + k + 1)
   set Λ1 := max 1 (NN * c ^ 2 * C4 ^ 2) with hΛ1_def
   have hΛ1 : 1 ≤ Λ1 := le_max_left _ _
   set A1 := A - 6 * (r : ℝ) * (m : ℝ) with hA1_def
@@ -1679,8 +1669,6 @@ theorem nnMaj : Formalism.FourierDecayAlt.P.JFxDs2.NNMaj := by
         exact ⟨norm_nonneg _, hlet _ (Matrix.of p.2.1) (Or.inr rfl) (Formalism.FourierDecayAlt.P.JFxDs2.sR_mem hp) Y (hv Y hYv)⟩)
       simpa using this
     have hP : (u.map fun Y => ‖AdL p Y‖).prod * (v.map fun Y => ‖AdR p Y‖).prod ≤ (Λ1 * X ^ (6 * r)) ^ m := by
-      have hu0 : 0 ≤ (u.map fun Y => ‖AdL p Y‖).prod := List.prod_nonneg fun y hy => by
-        obtain ⟨Y, _, rfl⟩ := List.mem_map.1 hy; exact norm_nonneg _
       calc _ ≤ (Λ1 * X ^ (6 * r)) ^ u.length * (Λ1 * X ^ (6 * r)) ^ v.length :=
             mul_le_mul hPu hPv (List.prod_nonneg fun y hy => by
               obtain ⟨Y, _, rfl⟩ := List.mem_map.1 hy; exact norm_nonneg _) (by positivity)

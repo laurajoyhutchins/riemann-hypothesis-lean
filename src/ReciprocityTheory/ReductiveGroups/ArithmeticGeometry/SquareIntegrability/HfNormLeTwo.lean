@@ -381,10 +381,6 @@ theorem jof_core (hx : Ext.All) (hs : SplitStatement) (hc : CharStatement) (ht :
         rw [pow_mul, ← hδsq, ← pow_mul, ← pow_mul, mul_comm]
       rw [h1]
       exact pow_le_pow_left₀ (by positivity) hDt 2
-    have hA : 0 ≤ (∏ k ∈ Finset.univ.filter (fun k => owner bs k = none), w) *
-        (∏ k ∈ Finset.univ.filter (fun k => owner bs k = none), X.l2 P.q (sc k)) :=
-      mul_nonneg (Finset.prod_nonneg fun _ _ => by positivity)
-        (Finset.prod_nonneg fun _ _ => l2NormSq_nonneg_gaussianTorus X P.q _)
     have hB : 0 ≤ (∏ p : (Σ j : Fin nb, Fin (bs j).i), w) *
         (∏ p : (Σ j : Fin nb, Fin (bs j).i), X.l2 P.q (sc (colB bs p))) :=
       mul_nonneg (Finset.prod_nonneg fun _ _ => by positivity)

@@ -190,7 +190,6 @@ theorem traceDualGe : Formalism.FourierDecayAlt.S6.DualSupset := by
   obtain ⟨ht1, ht2⟩ := ht
   set ε : E := (-1) ^ s with hε
   have hεε : ε * ε = 1 := by rw [hε, ← pow_add, ← two_mul, pow_mul]; simp
-  have hεc : complexConj E ε = ε := by rw [hε, map_pow, map_neg, map_one]
   set x : E := l * t / g with hx
   have hy : x + complexConj E x ∈ FractionalIdeal.dual ℤ ℚ (1 : FI E) := by
     rw [← hdual]

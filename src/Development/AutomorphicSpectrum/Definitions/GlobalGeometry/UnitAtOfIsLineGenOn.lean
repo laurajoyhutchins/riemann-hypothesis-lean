@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.HodgeComponentFlagDegree
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EtaleLocalizationAtPrimeTensorOfLowHeight
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -126,25 +127,7 @@ theorem wedge_of_frame {L : Lat ξ E} {r : ℕ} {e : Fin r → E} {x : Cpt ξ} (
 
 theorem ιMulti_ne_zero {r : ℕ} {e : Fin r → E} (h : LinearIndependent Ω e) :
     exteriorPower.ιMulti Ω r e ≠ 0 := by
-  classical
-  obtain ⟨g, hg⟩ := LinearMap.exists_extend h.repr
-  let f : Fin r → Module.Dual Ω E := fun j => Finsupp.lapply j ∘ₗ g
-  have hfe : ∀ i j, f j (e i) = if i = j then 1 else 0 := by
-    intro i j
-    have h1 : g (e i) = Finsupp.single i 1 := by
-      have h2 := congrArg (fun φ => φ ⟨e i, Submodule.subset_span ⟨i, rfl⟩⟩) hg
-      simp only [LinearMap.comp_apply, Submodule.subtype_apply] at h2
-      rw [h2]
-      exact h.repr_eq_single i _ rfl
-    simp [f, h1, Finsupp.single_apply]
-  intro h0
-  have hd := exteriorPower.pairingDual_ιMulti_ιMulti f e
-  rw [h0, map_zero] at hd
-  have hm : (Matrix.of fun i j => f j (e i)) = 1 := by
-    ext i j
-    rw [Matrix.of_apply, hfe, Matrix.one_apply]
-  rw [hm, Matrix.det_one] at hd
-  exact zero_ne_one hd
+  apply PositivityTheory.Xgn.ComponentDegreeAlt.wedge_ne_zero <;> assumption
 
 end General
 

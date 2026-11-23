@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsElementPosImUnderCmType
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HighestWeightConjugacy.DensStepOf
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -174,33 +175,7 @@ theorem repPt_eq_cpt (Y : InfinitePlace L → Matrix (Fin n) (Fin n) ℂ) (hY : 
 
 theorem denseRange_emb [IsCMField L] :
     DenseRange (fun x : L => fun w : InfinitePlace L => w.embedding x) := by
-  have hcx : ∀ w : InfinitePlace L, w.IsComplex := fun w => by
-    first
-    | exact NumberField.IsTotallyComplex.isComplex w
-    | exact IsTotallyComplex.isComplex w
-  have hd : DenseRange (algebraMap L (InfiniteAdeleRing L)) :=
-    InfiniteAdeleRing.denseRange_algebraMap L
-  let g : InfiniteAdeleRing L → (InfinitePlace L → ℂ) := fun a w =>
-    InfinitePlace.Completion.extensionEmbedding w (a w)
-  have hg : Continuous g :=
-    continuous_pi fun w => (InfinitePlace.Completion.isometry_extensionEmbedding w).continuous.comp
-      (continuous_apply w)
-  have hs : Function.Surjective g := by
-    intro y
-    have h : ∀ w, ∃ a : w.Completion, InfinitePlace.Completion.extensionEmbedding w a = y w := fun w =>
-      InfinitePlace.Completion.surjective_extensionEmbedding_of_isComplex (hcx w) (y w)
-    choose a ha using h
-    exact ⟨a, funext ha⟩
-  have h := hs.denseRange.comp hd hg
-  convert h using 1
-  funext x
-  funext w
-  simp only [Function.comp_apply, g]
-  first
-  | exact (InfinitePlace.Completion.extensionEmbedding_coe w _).symm
-  | exact (InfinitePlace.Completion.extensionEmbedding_coe w (WithAbs.equiv w |>.symm x)).symm
-  | simp [InfinitePlace.Completion.extensionEmbedding_coe]
-  | rfl
+  apply GlobalTheory.CMTypeImPos.denseRange_embeddings <;> assumption
 
 theorem denseRange_matEmb [IsCMField L] :
     DenseRange (fun b : Matrix (Fin n) (Fin n) L => fun (i j : Fin n) (w : InfinitePlace L) => w.embedding (b i j)) := by

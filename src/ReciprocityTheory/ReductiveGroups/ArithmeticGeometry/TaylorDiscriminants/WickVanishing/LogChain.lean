@@ -66,7 +66,6 @@ theorem low_pderiv {N : ℕ} {g : MvPowerSeries τ k} (hg : Low (N + 1) g) (t : 
   have e : Finsupp.degree (d + Finsupp.single t 1) = Finsupp.degree d + 1 := by
     first
     | rw [map_add (f := _), Finsupp.degree_single]
-    | simp [Finsupp.degree, Finsupp.sum_add_index']
     | (unfold Finsupp.degree; rw [Finsupp.sum_add_index' (by simp) (by simp)]; simp)
   omega
 
@@ -78,13 +77,10 @@ private theorem low_mul_lemma {m n : ℕ} {f g : MvPowerSeries τ k} (hf : Low m
   refine Finset.sum_eq_zero fun x hx => ?_
   first
   | rw [Finset.HasAntidiagonal.mem_antidiagonal] at hx
-  | simp only [Finset.HasAntidiagonal.mem_antidiagonal] at hx
-  | simp only [Finset.mem_antidiagonal] at hx
   have e : Finsupp.degree x.1 + Finsupp.degree x.2 = Finsupp.degree d := by
     rw [← hx]
     first
     | exact (map_add _ _ _).symm
-    | simp [Finsupp.degree, Finsupp.sum_add_index']
   by_cases h1 : Finsupp.degree x.1 < m
   · rw [hf _ h1, zero_mul]
   · rw [hg _ (by omega), mul_zero]
@@ -107,8 +103,6 @@ private theorem low_prod_lemma_3 {a : σ → MvPowerSeries τ k} (ha : ∀ s, Lo
 private theorem finsupp_apply_le_degree' {ι : Type} (d : ι →₀ ℕ) (i : ι) : d i ≤ d.degree := by
   first
   | exact Finsupp.le_degree i d
-  | exact Finsupp.le_degree d i
-  | exact Finsupp.le_degree
 
 theorem low_subst_of_low [Finite σ] {a : σ → MvPowerSeries τ k} (ha : ∀ s, Low 1 (a s)) {N : ℕ}
     {g : MvPowerSeries σ k} (hg : Low N g) : Low N (subst a g) := by
@@ -129,8 +123,6 @@ theorem low_subst_of_low [Finite σ] {a : σ → MvPowerSeries τ k} (ha : ∀ s
       have hdeg : e.degree = ∑ s ∈ e.support, e s := by
         first
         | rfl
-        | exact Finsupp.degree_eq_sum e
-        | simp [Finsupp.degree]
       rw [hdeg]
       exact h
     exact smul_eq_zero_of_right _ (hl d (by omega))

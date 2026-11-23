@@ -1,5 +1,6 @@
 module
 
+import Lemmata.FiberEquations.FiberEq
 public import Formalism.HarderNarasimhan.QuotRealize
 public import Mathlib.Algebra.AffineMonoid.Basic
 public import Mathlib.RingTheory.DedekindDomain.Different
@@ -139,30 +140,7 @@ open Formalism.HN
 
 theorem ident_trace_eq {K : Type} [Field K] [NumberField K] [_root_.NumberField.IsTotallyComplex K] (a : K) :
     ((Algebra.trace ℚ K a : ℚ) : ℝ) = ∑ v : InfinitePlace K, 2 * (v.embedding a).re := by
-  classical
-  have h := trace_eq_sum_embeddings (K := ℚ) (L := K) ℂ (x := a)
-  rw [← Fintype.sum_equiv (RingHom.equivRatAlgHom K ℂ) (fun φ => φ a)
-      (fun σ => σ a) (fun _ => by simp [RingHom.equivRatAlgHom_apply])] at h
-  rw [← Finset.sum_fiberwise Finset.univ InfinitePlace.mk (fun φ => φ a)] at h
-  have h2 := congrArg Complex.re h
-  rw [Complex.re_sum] at h2
-  have hq : (algebraMap ℚ ℂ (Algebra.trace ℚ K a)).re = ((Algebra.trace ℚ K a : ℚ) : ℝ) := by
-    simp
-  rw [hq] at h2
-  rw [h2]
-  refine Finset.sum_congr rfl fun w _ => ?_
-  rw [Complex.re_sum]
-  have hfib : ∀ φ ∈ (Finset.univ.filter fun φ : K →+* ℂ => InfinitePlace.mk φ = w),
-      (φ a).re = (w.embedding a).re := by
-    intro φ hφ
-    have hm := (Finset.mem_filter.mp hφ).2
-    rw [← InfinitePlace.mk_embedding w, InfinitePlace.mk_eq_iff] at hm
-    rcases hm with rfl | hc
-    · rfl
-    · rw [← hc, ComplexEmbedding.conjugate_coe_eq, Complex.conj_re]
-  rw [Finset.sum_congr rfl hfib, Finset.sum_const, InfinitePlace.card_filter_mk_eq,
-    (IsTotallyComplex.isComplex w).mult_eq_two]
-  simp
+  apply Bl.FiberEquations.goal1 <;> assumption
 
 section Assumptions
 

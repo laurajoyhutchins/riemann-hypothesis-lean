@@ -359,8 +359,6 @@ theorem isMirabolic_mul {p q : Matrix (Fin n) (Fin n) K} (hp : IsP R k p) (hq : 
   · rw [up_zero hp.1 h1, zero_mul]; exact R.zero_mem
   by_cases h2 : b < l
   · rw [up_zero hq.1 h2, mul_zero]; exact R.zero_mem
-  have h1' : a.val ≤ l.val := Fin.le_def.1 (not_lt.1 h1)
-  have h2' : l.val ≤ b.val := Fin.le_def.1 (not_lt.1 h2)
   rcases hab with h | h
   · exact R.mul_mem (hp.2 a l (Or.inl h)) (hq.2 l b (Or.inl (by omega)))
   · exact R.mul_mem (hp.2 a l (Or.inr (by omega))) (hq.2 l b (Or.inr h))
@@ -1002,8 +1000,6 @@ theorem countId (ψ : AddChar K ℂ) (hsd : ∀ a : K, (∀ r ∈ R, ψ (a * r) 
           ¬ InTT R k (Z₀ * p) (Z₀' * p') φ} ≃
       {Ψ : MM R k Z₀ ≃ₗ[R] MM R k Z₀' // GB R k Z₀ Z₀' Ψ ∧
         Rel R Ψ (latZ R (Z₀ * p)) (latZ R (Z₀' * p'))}) := by
-  have hdZ := cnt_det_mul R k Z₀ p hd hp
-  have hdZ' := cnt_det_mul R k Z₀' p' hd' hp'
   have hn : 0 < n := by omega
   have hLe : abelian₂ R k Z₀ (eLast R) = 0 := by
     ext j

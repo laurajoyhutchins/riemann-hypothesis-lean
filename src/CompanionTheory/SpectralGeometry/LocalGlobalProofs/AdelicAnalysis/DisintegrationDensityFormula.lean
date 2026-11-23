@@ -453,7 +453,6 @@ theorem exists_isFibreFamily_openOrbit : ∀ (V X Y : Type) [TopologicalSpace V]
   letI : MeasurableSpace Q := borel Q
   haveI : BorelSpace Q := ⟨rfl⟩
   obtain ⟨m, hmf, hm⟩ := exists_slice_measure hg heq ho μ ν χ χ' hχ hχ' hμ hν
-  have hcl : IsClosed (g ⁻¹' {b₀}) := isClosed_singleton.preimage hg
   haveI := comap_isLocallyFinite ho ν
   haveI : IsLocallyFiniteMeasure
       ((ν.comap (fun q : Q => q • b₀)).withDensity (fun q => (χ' q : ℝ≥0∞))) :=

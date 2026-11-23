@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagCoverBasePointInPoints
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsSncModel
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.BlockPullbackHermLineStatement
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.AlgebraicRealisationHolomorphicMapStatement
@@ -95,30 +96,7 @@ theorem evC_mul (z : (Σ k, ι k) → ℂ) (f g : MRing ι) : evC z (f * g) = ev
 theorem sum_mapDomain {κ : K → K'} {v : (Σ k, ι k) → Σ k, ι' k} (hv : ∀ p, (v p).1 = κ p.1)
     [DecidableEq K'] (m : (Σ k, ι k) →₀ ℕ) (k' : K') :
     ∑ i, (Finsupp.mapDomain v m) ⟨k', i⟩ = ∑ p : Σ k, ι k, if κ p.1 = k' then m p else 0 := by
-  classical
-  induction m using Finsupp.induction_linear with
-  | zero => simp
-  | add f g hf hg =>
-    rw [Finsupp.mapDomain_add]
-    simp only [Finsupp.add_apply, Finset.sum_add_distrib, hf, hg]
-    rw [← Finset.sum_add_distrib]
-    refine Finset.sum_congr rfl fun p _ => ?_
-    split_ifs <;> simp
-  | single p n =>
-    have hR : (∑ q : Σ k, ι k, if κ q.1 = k' then (Finsupp.single p n) q else 0) =
-        if κ p.1 = k' then n else 0 := by
-      rw [Finset.sum_eq_single p]
-      · simp
-      · intro q _ hq
-        simp [Finsupp.single_apply, Ne.symm hq]
-      · simp
-    have hL : ∀ q : Σ k, ι' k, ∑ i, (Finsupp.single q n) ⟨k', i⟩ = if q.1 = k' then n else 0 := by
-      rintro ⟨kq, iq⟩
-      by_cases h : kq = k'
-      · subst h
-        simp [Finsupp.single_apply]
-      · simp [Finsupp.single_apply, h]
-    rw [Finsupp.mapDomain_single, hL, hR, hv]
+  apply GlobalTheory.CompanionTheory.Ar.PB.CovMap.LocImg.Pt.sum_mapDomain_block <;> assumption
 
 theorem isMultiHomog_rename {κ : K → K'} {v : (Σ k, ι k) → Σ k, ι' k} (hb : IsBlockMap κ v) {f : MRing ι}
     {b : K → ℕ} (hf : IsMultiHomog f b) : IsMultiHomog (rename v f) (Function.extend κ b 0) := by

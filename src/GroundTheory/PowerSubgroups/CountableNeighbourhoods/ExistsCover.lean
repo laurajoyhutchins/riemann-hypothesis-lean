@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.SemistableReduction.SemiContractC
 public import GroundTheory.HeightsAndTheta.Heights.KernelsLattice
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -53,33 +54,7 @@ theorem exists_ne_zero_smul_mem {K : Type} [Field K] [NumberField K] {i : ℕ}
     (L : Submodule (RingOfIntegers K) (Fin i → K))
     (hL : Submodule.span K (L : Set (Fin i → K)) = ⊤) (v : Fin i → K) :
     ∃ d : RingOfIntegers K, d ≠ 0 ∧ d • v ∈ L := by
-  let T : Submodule K (Fin i → K) :=
-    { carrier := {v | ∃ d : RingOfIntegers K, d ≠ 0 ∧ d • v ∈ L}
-      zero_mem' := ⟨1, one_ne_zero, by simp⟩
-      add_mem' := by
-        rintro a b ⟨d₁, h₁, ha⟩ ⟨d₂, h₂, hb⟩
-        refine ⟨d₁ * d₂, mul_ne_zero h₁ h₂, ?_⟩
-        rw [smul_add]
-        refine L.add_mem ?_ ?_
-        · rw [mul_comm, mul_smul]; exact L.smul_mem _ ha
-        · rw [mul_smul]; exact L.smul_mem _ hb
-      smul_mem' := by
-        rintro c v ⟨d, hd, hv⟩
-        obtain ⟨⟨a, b⟩, hab⟩ := IsLocalization.surj (nonZeroDivisors (RingOfIntegers K)) c
-        refine ⟨(b : RingOfIntegers K) * d, mul_ne_zero (nonZeroDivisors.coe_ne_zero b) hd, ?_⟩
-        have key : ((b : RingOfIntegers K) * d) • (c • v) = a • (d • v) := by
-          rw [← algebraMap_smul K ((b : RingOfIntegers K) * d) (c • v), ← algebraMap_smul K a (d • v),
-            ← algebraMap_smul K d v, smul_smul, smul_smul]
-          congr 1
-          simp only [map_mul] at hab ⊢
-          rw [← hab]
-          ring
-        rw [key]
-        exact L.smul_mem _ hv }
-  have hT : Submodule.span K (L : Set (Fin i → K)) ≤ T :=
-    Submodule.span_le.2 fun x hx => ⟨1, one_ne_zero, by simpa using hx⟩
-  rw [hL] at hT
-  exact hT Submodule.mem_top
+  apply ReciprocityTheory.MultiplicativeHeights.sc_scale <;> assumption
 
 theorem exists_cover {K : Type} [Field K] [NumberField K] {i : ℕ}
     {F X : GroundTheory.Heights₂.Heights.HermLattice K i} :

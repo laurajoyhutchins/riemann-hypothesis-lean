@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.GaussianSeminormBounds.RealSeminormFiltration.RLParity
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -89,38 +90,5 @@ theorem at_algebraMap_sgnAd_sub_one (w : InfinitePlace F) :
 end SignAdele
 
 theorem even_im_hermitian_sub : Parity := by
-  intro F E _ _ _ _ _ σ B a a' G X om om' hT w
-  let u : (AF F)ˣ := ⟨sgnAd w, sgnAd w, sgnAd_mul_self w, sgnAd_mul_self w⟩
-  let z : (AE F E)ˣ := Units.map (algebraMap (AF F) (AE F E) : AF F →* AE F E) u
-  have hz : At (evI F) ((z : AE F E) - 1) := at_algebraMap_sgnAd_sub_one w
-  have hpi : ∀ v, piInf (B.emb v) (z : AE F E) = if v = w then -1 else 1 := by
-    intro v
-    show piInf (B.emb v) (algebraMap (AF F) (AE F E) (sgnAd w)) = _
-    rw [piInf_algebraMap, evInf_sgnAd]
-    split_ifs <;> simp
-  have hexp : ∀ m : InfinitePlace F → ℤ,
-      ∏ v, (piInf (B.emb v) (z : AE F E) / ‖piInf (B.emb v) (z : AE F E)‖) ^ m v = (-1 : ℂ) ^ m w := by
-    intro m
-    rw [Finset.prod_eq_single w (fun v _ hv => by rw [hpi, if_neg hv]; simp) (fun h => absurd (Finset.mem_univ w) h),
-      hpi, if_pos rfl]
-    simp
-  have eα := hT.chars.expα z hz
-  have eβ := hT.chars.expβ z hz
-  rw [hexp] at eα eβ
-  have rα : (X.α z : ℂ) = _ := hT.chars.resα u
-  have rβ : (X.β z : ℂ) = _ := hT.chars.resβ u
-  have hpar : ((-1 : ℂ)) ^ a' = (-1) ^ a := by
-    have he := hT.geo.even
-    rcases Nat.even_or_odd a with ha | ha
-    · rw [ha.neg_one_pow, ((Nat.even_add.1 he).1 ha).neg_one_pow]
-    · have ha' : Odd a' := Nat.not_even_iff_odd.1 fun h => Nat.not_even_iff_odd.2 ha ((Nat.even_add.1 he).2 h)
-      rw [ha.neg_one_pow, ha'.neg_one_pow]
-  have hab : (-1 : ℂ) ^ B.mα w = (-1) ^ B.mβ w := by
-    rw [← eα, ← eβ, rα, rβ, hpar]
-  rcases Int.even_or_odd (B.mα w - B.mβ w) with h | h
-  · exact h
-  · exfalso
-    have h1 := h.neg_one_zpow (α := ℂ)
-    rw [zpow_sub₀ (by norm_num), hab, div_self (zpow_ne_zero _ (by norm_num))] at h1
-    norm_num at h1
+  apply PositivityTheory.RL.even_im_hermitian_sub <;> assumption
 end GlobalTheory.RealLift

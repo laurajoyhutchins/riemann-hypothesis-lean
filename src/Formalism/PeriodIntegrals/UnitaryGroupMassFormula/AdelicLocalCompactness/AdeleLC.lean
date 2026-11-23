@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicUnimodularity.CartierFrobeniusFormLocal
 public import Mathlib.NumberTheory.NumberField.AdeleRing
 public import Mathlib.RingTheory.Henselian
 public import Mathlib.RingTheory.RegularLocalRing.Defs
@@ -258,36 +259,7 @@ private theorem mem_maximalIdeal_of_valued_lt_one (d : Valued.integer (v.adicCom
 
 theorem finite_residueField :
     Finite (IsLocalRing.ResidueField (Valued.integer (v.adicCompletion F))) := by
-  classical
-  let f0 : 𝓞 F →+* Valued.integer (v.adicCompletion F) :=
-    (algebraMap (𝓞 F) (v.adicCompletion F)).codRestrict _ (algebraMap_mem_integer F v)
-  let φ : 𝓞 F →+* IsLocalRing.ResidueField (Valued.integer (v.adicCompletion F)) :=
-    (IsLocalRing.residue (Valued.integer (v.adicCompletion F))).comp f0
-  have hker : ∀ a ∈ v.asIdeal, φ a = 0 := by
-    intro a ha
-    show IsLocalRing.residue (Valued.integer (v.adicCompletion F)) (f0 a) = 0
-    rw [IsLocalRing.residue_eq_zero_iff]
-    apply mem_maximalIdeal_of_valued_lt_one
-    show Valued.v (algebraMap (𝓞 F) (v.adicCompletion F) a) < 1
-    rw [valued_algebraMap_ringOfIntegers_eq_intValuation]
-    exact (intValuation_lt_one_iff_mem v a).mpr ha
-  have hsurj : Function.Surjective (Ideal.Quotient.lift v.asIdeal φ hker) := by
-    intro z
-    obtain ⟨x, rfl⟩ := IsLocalRing.residue_surjective z
-    have hx : Valued.v (x : v.adicCompletion F) ≤ 1 := by
-      exact x.2
-    obtain ⟨r, hr⟩ := exists_ringOfIntegers_valued_sub_lt_one_of_le_one F v x hx
-    refine ⟨Ideal.Quotient.mk _ r, ?_⟩
-    show φ r = IsLocalRing.residue (Valued.integer (v.adicCompletion F)) x
-    rw [← sub_eq_zero]
-    show IsLocalRing.residue (Valued.integer (v.adicCompletion F)) (f0 r) -
-      IsLocalRing.residue (Valued.integer (v.adicCompletion F)) x = 0
-    rw [← map_sub, IsLocalRing.residue_eq_zero_iff]
-    apply mem_maximalIdeal_of_valued_lt_one
-    show Valued.v (algebraMap (𝓞 F) (v.adicCompletion F) r - (x : v.adicCompletion F)) < 1
-    rw [Valuation.map_sub_swap]
-    exact hr
-  exact Finite.of_surjective _ hsurj
+  apply PI.WAU.finite_residue <;> assumption
 
 instance compactSpace_integer : CompactSpace (Valued.integer (v.adicCompletion F)) := by
   haveI : IsDiscreteValuationRing (Valued.integer (v.adicCompletion F)) :=

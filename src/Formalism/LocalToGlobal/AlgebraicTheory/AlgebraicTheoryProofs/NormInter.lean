@@ -1,5 +1,6 @@
 module
 
+import Formalism.LocalToGlobal.AlgebraicTheory.AlgebraicTheoryProofs.NormPow
 public import Formalism.LocalToGlobal.AlgebraicTheory.StatementNorm
 public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.CayleyGaussianIntegrals.LogarithmEquivalence
 public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.QuadraticSemicharacterIdentityReformulated2
@@ -70,26 +71,7 @@ variable {V : Type} [AddCommGroup V]
 
 theorem relIdx_eq_card {Λ₁ Λ₂ : AddSubgroup V} {S : Finset V} (hS : IsReps Λ₁ Λ₂ S) :
     relIdx Λ₁ Λ₂ = S.card := by
-  unfold relIdx AddSubgroup.relIndex AddSubgroup.index
-  let f : S → (Λ₂ ⧸ Λ₁.addSubgroupOf Λ₂) := fun x => QuotientAddGroup.mk ⟨x.1, hS.1 x.1 x.2⟩
-  have hf : Function.Bijective f := by
-    constructor
-    · rintro ⟨x, hx⟩ ⟨y, hy⟩ hxy
-      have h1 := (QuotientAddGroup.eq).1 hxy
-      rw [AddSubgroup.mem_addSubgroupOf] at h1
-      have h2 : x - y ∈ Λ₁ := by
-        have := Λ₁.neg_mem h1
-        simpa [sub_eq_add_neg, add_comm] using this
-      exact Subtype.ext (hS.2.1 x hx y hy h2)
-    · intro q
-      induction q using QuotientAddGroup.induction_on with
-      | H z =>
-        obtain ⟨x, hx, hzx⟩ := hS.2.2 z.1 z.2
-        refine ⟨⟨x, hx⟩, ?_⟩
-        apply (QuotientAddGroup.eq).2
-        rw [AddSubgroup.mem_addSubgroupOf]
-        simpa [sub_eq_add_neg, add_comm] using hzx
-  rw [← Nat.card_eq_of_bijective f hf, Nat.card_eq_fintype_card, Fintype.card_coe]
+  apply Formalism.L2.AlgTh.RepresentativeBijection.relIdx_eq_card <;> assumption
 
 theorem semiChar_congr [Module ℂ V] {H : Sesq V} {Λ : AddSubgroup V} {α α' : V → ℂ} (h : IsSemiChar H Λ α)
     (he : ∀ x ∈ Λ, α' x = α x) : IsSemiChar H Λ α' := by

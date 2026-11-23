@@ -1,5 +1,6 @@
 module
 
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.FiniteDimensionalOfOrtho
 public import Formalism.HermitianLattices.StatementMass
 public import Formalism.HermitianLattices.FinalNeighbourConstruct
 public import Formalism.HermitianLattices.HermitianLatticesProofs.DualBasic
@@ -93,27 +94,7 @@ theorem integral_of_orthonormal_basis (h : V →ₗ⋆[K] V →ₗ[K] K) (L : Su
 
 theorem unimodular_of_orthonormal_basis (h : V →ₗ⋆[K] V →ₗ[K] K) (L : Submodule (𝓞 K) V) {n : ℕ} (hL : IsOrthoLattice h L n) :
     IsUnimodular h L := by
-  have hint := integral_of_orthonormal_basis h L hL
-  obtain ⟨e, -, hsp, rfl, he⟩ := hL
-  apply le_antisymm
-  · intro z hz
-    rw [dualBasic_mem_dual] at hz
-    have hz' : z ∈ Submodule.span K (Set.range e) := by rw [hsp]; trivial
-    obtain ⟨c, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun K).1 hz'
-    refine Submodule.sum_mem _ fun i _ => ?_
-    have h1 := hz (e i) (Submodule.subset_span ⟨i, rfl⟩)
-    have h2 : h (e i) (∑ j, c j • e j) = c i := by
-
-      simp only [map_sum, map_smul, he, smul_eq_mul]
-      simp [Finset.sum_ite_eq]
-    rw [h2] at h1
-    obtain ⟨o, ho⟩ := Submodule.mem_one.1 h1
-    rw [← ho, algebraMap_smul]
-    exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, rfl⟩)
-  · intro z hz
-    rw [dualBasic_mem_dual]
-    intro y hy
-    exact hint y hy z hz
+  apply Formalism.HermitianLattices.Ext.L3.isUnimodular_of_ortho <;> assumption
 
 theorem genus_orthonormal_integral_unimodular (h : V →ₗ⋆[K] V →ₗ[K] K) (hs : h.IsSymm) (L : Submodule (𝓞 K) V) {n : ℕ} (hL : IsOrthoLattice h L n)
     (M : Submodule (𝓞 K) V) (hM : M ∈ genus h L) : IsIntegralLat h M ∧ dual h M = M := by

@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.WeightMapInjective
 public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.PairRelationOfScaledRatio
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArithmeticIntersection.CompRightEqZero
 import Mathlib.Algebra.Order.Floor.Extended
@@ -66,46 +67,7 @@ namespace PositivityTheory.Xgp.tsg_smul
 
 theorem toWt_inj (Ψ : Type) (N : ℕ) :
     Function.Injective (toWt : MvPolynomial (Ψ × Fin N) ℝ → MvPolynomial (Ψ × Fin N) ℝ) := by
-  classical
-  let S : Ψ × Fin N → MvPolynomial (Ψ × Fin N) ℝ := fun p => ∑ k ∈ Finset.Ici p.2, X (p.1, k)
-  have key : ∀ p, aeval S (gapX p) = X p := by
-    intro p
-    obtain ⟨a, i⟩ := p
-    have h1 : Finset.Ici i = insert i (Finset.Ioi i) := (Finset.Ioi_insert i).symm
-    simp only [gapX]
-    split_ifs with h
-    · have h2 : Finset.Ioi i = Finset.Ici (⟨i.1 + 1, h⟩ : Fin N) := by
-        ext k
-        simp only [Finset.mem_Ioi, Finset.mem_Ici, Fin.lt_iff_val_lt_val, Fin.le_iff_val_le_val, Fin.val_mk]
-        omega
-      have hn : i ∉ Finset.Ici (⟨i.1 + 1, h⟩ : Fin N) := by
-        simp only [Finset.mem_Ici, Fin.le_iff_val_le_val, Fin.val_mk]
-        omega
-      simp only [S, map_sub, aeval_X, h1, h2]
-      rw [Finset.sum_insert hn]
-      ring
-    · have h2 : Finset.Ioi i = ∅ := by
-        ext k
-        constructor
-        · intro hk
-          rw [Finset.mem_Ioi, Fin.lt_iff_val_lt_val] at hk
-          have := k.isLt
-          exfalso
-          omega
-        · intro hk
-          simp at hk
-      simp only [S, map_sub, map_zero, aeval_X, h1, h2, sub_zero]
-      simp
-  have hcomp : (aeval S).comp (toWt : MvPolynomial (Ψ × Fin N) ℝ →ₐ[ℝ] _) = AlgHom.id ℝ _ := by
-    apply MvPolynomial.algHom_ext
-    intro p
-    rw [AlgHom.comp_apply, AlgHom.id_apply]
-    show aeval S (aeval gapX (X p)) = X p
-    rw [aeval_X, key]
-  have e : ∀ q, aeval S (toWt q) = q := fun q => by
-    simpa using AlgHom.congr_fun hcomp q
-  intro f g hfg
-  rw [← e f, ← e g, hfg]
+  apply GlobalTheory.CompanionTheory.Ar.Top.FlDeg.toWt_leftInverse_injective <;> assumption
 
 end PositivityTheory.Xgp.tsg_smul
 

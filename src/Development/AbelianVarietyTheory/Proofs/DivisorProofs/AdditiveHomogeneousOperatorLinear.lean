@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.ThetaLifts.FrameEstimates.FinBound
 public import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
 public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
 public import Development.AbelianVarietyTheory.PublishedTheorems.GlobalTheta.PlaneFormNondegenerate
@@ -85,31 +86,7 @@ theorem sb_indicator (U : AddSubgroup V) (ho : IsOpen (U : Set V)) (hc : IsCompa
 
 theorem sb_eventually_invariant {f : V → ℂ} (hf : f ∈ SB V) :
     ∀ᶠ w in 𝓝 (0 : V), ∀ Y, f (Y + w) = f Y := by
-  have h1 : ∀ᶠ w in 𝓝 (0 : V), ∀ Y ∈ tsupport f, f (Y + w) = f Y := by
-    apply hf.2.isCompact.eventually_forall_of_forall_eventually
-    intro Y _
-    have hc : Tendsto (fun z : V × V => z.2 + z.1) (𝓝 ((0 : V), Y)) (𝓝 Y) := by
-      have hcont : Continuous (fun z : V × V => z.2 + z.1) := by fun_prop
-      convert hcont.tendsto ((0 : V), Y) using 2
-      simp
-    have hc2 : Tendsto (fun z : V × V => z.2) (𝓝 ((0 : V), Y)) (𝓝 Y) :=
-      continuous_snd.tendsto _
-    filter_upwards [hc.eventually (hf.1.eventually_eq Y), hc2.eventually (hf.1.eventually_eq Y)]
-      with z h1 h2
-    rw [h1, h2]
-  have h2 : ∀ᶠ w in 𝓝 (0 : V), ∀ Y ∈ tsupport f, f (Y + -w) = f Y := by
-    have : Tendsto (fun w : V => -w) (𝓝 0) (𝓝 0) := by
-      simpa using (continuous_neg.tendsto (0 : V))
-    exact this.eventually h1
-  filter_upwards [h1, h2] with w hw1 hw2
-  intro Y
-  by_cases hY : Y ∈ tsupport f
-  · exact hw1 Y hY
-  by_cases hY' : Y + w ∈ tsupport f
-  · have := hw2 _ hY'
-    simp only [add_neg_cancel_right] at this
-    exact this.symm
-  · rw [image_eq_zero_of_notMem_tsupport hY, image_eq_zero_of_notMem_tsupport hY']
+  apply PositivityTheory.ThKEst.W.sb_inv <;> assumption
 
 variable (A : (V → ℂ) → V → ℂ)
 

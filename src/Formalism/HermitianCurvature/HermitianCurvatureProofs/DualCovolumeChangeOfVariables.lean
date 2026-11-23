@@ -66,7 +66,6 @@ theorem trace_places (E : Type) [Field E] [NumberField E] [_root_.NumberField.Is
 
 theorem t_TracePairing : TracePairing := by
   intro E _ _ _ g c l t hg hc
-  have hg' : (g : ℝ) ≠ 0 := by positivity
   rw [trace_places, PiLp.inner_apply]
   refine Finset.sum_congr rfl fun w _ => ?_
   simp only [dm, semb, cemb, AddMonoidHom.comp_apply, AddMonoidHom.coe_mk, ZeroHom.coe_mk,

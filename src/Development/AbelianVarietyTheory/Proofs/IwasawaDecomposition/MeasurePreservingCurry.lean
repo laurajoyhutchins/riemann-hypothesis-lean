@@ -45,6 +45,7 @@ import Mathlib.Tactic.NormNum.Ordinal
 import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LintegralProdChartCoordinatesEqProd
 
 @[expose] public section
 
@@ -58,19 +59,7 @@ namespace GlobalTheory.FlagFibre
 
 theorem measurePreserving_curry (ι κ : Type) [Fintype ι] [Fintype κ] :
     MeasurePreserving (MeasurableEquiv.curry ι κ ℂ) volume volume := by
-  have h : (volume : Measure (ι × κ → ℂ)) =
-      (volume : Measure (ι → κ → ℂ)).map (MeasurableEquiv.curry ι κ ℂ).symm := by
-    refine Measure.pi_eq fun s hs => ?_
-    rw [Measure.map_apply (MeasurableEquiv.measurable _) (MeasurableSet.univ_pi hs)]
-    have e : (MeasurableEquiv.curry ι κ ℂ).symm ⁻¹' Set.univ.pi s =
-        Set.univ.pi (fun i => Set.univ.pi (fun j => s (i, j))) := by
-      ext f; simp [MeasurableEquiv.coe_curry_symm, Function.uncurry]
-    rw [e, volume_pi, Measure.pi_pi]
-    simp_rw [volume_pi, Measure.pi_pi]
-    rw [Fintype.prod_prod_type]
-  refine ⟨(MeasurableEquiv.curry ι κ ℂ).measurable, ?_⟩
-  rw [h, Measure.map_map (MeasurableEquiv.measurable _) (MeasurableEquiv.measurable _)]
-  simp
+  apply _root_.GlobalTheory.IntBall.measurePreserving_curry_lowCoord <;> assumption
 
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r j : ℕ} (X : Data E r) (hj : j ≤ r) {Tau : Type}
   [Fintype Tau] (κ : Tau ≃ X.Ψ)

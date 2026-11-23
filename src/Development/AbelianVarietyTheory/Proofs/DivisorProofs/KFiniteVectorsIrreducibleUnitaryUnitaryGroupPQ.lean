@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.GlobalProofs.KFiniteVectorsIrreducibleUnitaryUnitaryGroupPQ
 public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.IsIrrKSubOfIsKTypeOf
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.SmoothDefs
 public import CompanionTheory.AutomorphicTheory.HarishChandraMultiplicity.HCMult
@@ -76,16 +77,7 @@ theorem isAdmissible_of [CompleteSpace H] (hσ : Formalism.MainNotions.S.IsURepO
 
 theorem isLieStable_of [CompleteSpace H] (hσ : Formalism.MainNotions.S.IsURepOn (Formalism.MainNotions.S.UJset ε) σ)
     (hirr : Formalism.MainNotions.S.IsIrredOn (Formalism.MainNotions.S.UJset ε) σ) : IsLieStable ε σ (kFinSub ε σ) := by
-  intro X hX v hv
-  obtain ⟨h1, h2⟩ := CompanionTheory.D.gk.HC.K_finite_smooth_vectors n ε H σ hσ hirr
-  have hvS : v ∈ smD ε σ := h1 v hv
-  rw [dRep_eq_dS]
-  have e := dS_eq_actM (isDerivedOn_smE hσ) hX ⟨v, hvS⟩
-  simp only [] at e
-  rw [e]
-  simp only [actM, LinearMap.sum_apply, LinearMap.smul_apply, Submodule.coe_sum, Submodule.coe_smul]
-  exact Submodule.sum_mem _ fun a _ => Submodule.sum_mem _ fun b _ =>
-    Submodule.smul_mem _ _ (h2 a b ⟨v, hvS⟩ hv)
+  apply _root_.GlobalTheory.CompanionTheory.KFinLink.isLieStable_of <;> assumption
 
 theorem lieIrr_of [CompleteSpace H] (hσ : Formalism.MainNotions.S.IsURepOn (Formalism.MainNotions.S.UJset ε) σ)
     (hirr : Formalism.MainNotions.S.IsIrredOn (Formalism.MainNotions.S.UJset ε) σ) (S : Submodule ℂ H) (hS : S ≤ kFinSub ε σ)

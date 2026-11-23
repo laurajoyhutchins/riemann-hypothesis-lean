@@ -120,7 +120,6 @@ theorem rd_pos' : 0 < S6.rd E := GermRealisation.rd_pos E
 theorem gamLev_nonneg (S : C.HidaSetting E Wp Wq) (i : ℕ) :
     0 ≤ D.GamLev S.G.k S.G.r (D.kapG (S.g : ℝ) (S6.rd E)) (D.deG (S.g : ℝ) (S6.rd E)) i := by
   have hrd := (rd_pos' (E := E)).le
-  have hg : (0 : ℝ) ≤ (S.g : ℝ) := Nat.cast_nonneg _
   unfold D.GamLev
   refine Finset.prod_nonneg fun l _ => div_nonneg (zpow_nonneg ?_ _) ?_
   · unfold D.kapG; positivity
@@ -359,10 +358,7 @@ theorem germConst : GermConst := by
   set e2 : ℤ := (S.G.k : ℤ) + 2 * ρ + 1 with he2
   refine ⟨Hf * (R ^ (-ν2 - ν1 * e1 - ν2 * e2) * √δ * Real.pi ^ ((m + 1) * (m + 4) / 2) / B1 /
     q ^ (ν1 * ((m + 1 : ℕ) : ℤ) * ((S.G.k : ℤ) + 2 * ρ + m + 2) + ν2 * e2)), fun x D z hx hD hz => ?_⟩
-  have hX : 0 < ‖x‖ := norm_pos_iff.mpr hx
-  have hDn : 0 < ‖D‖ := norm_pos_iff.mpr hD
   have hz0 : z ≠ 0 := by rintro rfl; apply hD; rw [← hz]; simp
-  have hZ : 0 < ‖z‖ := norm_pos_iff.mpr hz0
   have hZl : ((m : ℝ) + 2) * Real.log ‖z‖ = Real.log ‖D‖ := by
     rw [← hz, norm_pow, Real.log_pow]; push_cast; ring
   rcases hHf0.eq_or_lt with h0 | hHp

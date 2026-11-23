@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.GenusPolyhedralBounds.RelativeIndexClassSets.LocalFormOfWeakForm
 public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.ETExSt
 public import Formalism.LocalToGlobal.ProjectiveLattices.HasDataCondition
 import Mathlib.Algebra.Order.Floor.Extended
@@ -51,33 +52,7 @@ open Formalism.MainNotions Formalism.BasicNotions NumberField IsDedekindDomain F
 variable {D : Formalism.BasicNotions.D7} {B : WeightFamilies.Prov D} {P : ModuliIntegralCharts.Prov D} {j : ℕ}
 
 theorem phiC_nonneg (X : WeightAlgebra.PJ D B P j) (la : HeightOneSpectrum (𝓞 B.KO)) (y : X.Pt la) : 0 ≤ X.phiC la y := by
-  unfold WeightAlgebra.PJ.phiC
-  split_ifs
-  · refine mul_nonneg (Nat.cast_nonneg _) (Real.sInf_nonneg ?_)
-    rintro x ⟨l, -, hl, rfl⟩
-    by_cases h0 : (P.loc X.dat (WeightAlgebra.resCh la)).beS (X.pt66 la y) = 0
-    · rw [h0, map_zero]
-    · refine (hl _ (fun a => ?_) h0).le
-      obtain ⟨ι, _, b, hb⟩ := (P.loc X.dat (WeightAlgebra.resCh la)).be_posDef (X.pt66 la y)
-      show 0 ≤ (P.loc X.dat (WeightAlgebra.resCh la)).be (X.pt66 la y) a a
-      by_cases hc : (fun i => ((b.repr a i : ℤ) : ℝ)) = 0
-      · have : a = 0 := by
-          apply b.repr.injective
-          ext i
-          have := congrFun hc i
-          simpa using this
-        simp [this]
-      · have h1 := hb _ hc
-        have h2 : (P.loc X.dat (WeightAlgebra.resCh la)).be (X.pt66 la y) a a =
-            ∑ i, ∑ k, ((b.repr a i : ℤ) : ℝ) * ((b.repr a k : ℤ) : ℝ) *
-              (P.loc X.dat (WeightAlgebra.resCh la)).be (X.pt66 la y) (b i) (b k) := by
-          conv_lhs => rw [← b.sum_repr a]
-
-          simp only [map_sum, map_zsmul, LinearMap.sum_apply, LinearMap.smul_apply, zsmul_eq_mul, Finset.mul_sum]
-          rw [Finset.sum_comm]
-          exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun k _ => by ring
-        rw [h2]; exact h1.le
-  · exact le_rfl
+  apply Formalism.MainNotions.Gaps.T0.phiC_nonneg <;> assumption
 
 theorem mem_Mlat (X : WeightAlgebra.PJ D B P j) (i : ℕ) (η : B.Cusp j (Formalism.L2.Pj.wEt D j i)) (h : EtVal X i η) :
     η ∈ B.Mlat j _ := by

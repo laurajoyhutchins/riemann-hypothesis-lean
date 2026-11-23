@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LabelledCharactersEqAndCongrPrimeToPart
 public import Development.AbelianVarietyTheory.Definitions.GlobalTwisting.AuxiliaryPrimeMemAvoidedPrimes
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -47,23 +48,7 @@ namespace GlobalTheory.EX.DC.TameGen
 
 theorem part_pow {G : Type} [Monoid G] {l : ℕ} (hl : l.Prime) {x : G} (hx : IsOfFinOrder x) :
     ∃ a : ℕ, Formalism.CyclotomicNorms.primeToPart l x ^ (l ^ a) = x ^ (l ^ a) := by
-  have hn : orderOf x ≠ 0 := hx.orderOf_pos.ne'
-  set a := (orderOf x).factorization l with ha
-  set M := orderOf x / l ^ a with hM
-  have hmul : l ^ a * M = orderOf x := Nat.ordProj_mul_ordCompl_eq_self _ _
-  have hcop : M.Coprime l := (Nat.coprime_ordCompl hl hn).symm
-  have hM0 : M ≠ 0 := (Nat.ordCompl_pos l hn).ne'
-  haveI : NeZero M := ⟨hM0⟩
-  set u := (((l ^ a : ℕ) : ZMod M)⁻¹).val with hu
-  have hz : Formalism.CyclotomicNorms.primeToPart l x = x ^ (l ^ a * u) := rfl
-  have hone : (x ^ (l ^ a)) ^ M = 1 := by rw [← pow_mul, hmul, pow_orderOf_eq_one]
-  have hmod : l ^ a * u ≡ 1 [MOD M] := by
-    rw [← ZMod.natCast_eq_natCast_iff, Nat.cast_mul, hu, ZMod.natCast_zmod_val, Nat.cast_one]
-    exact ZMod.coe_mul_inv_eq_one _ (Nat.Coprime.pow_left a hcop.symm)
-  refine ⟨a, ?_⟩
-  rw [hz, ← pow_mul, mul_comm, pow_mul]
-  have := pow_eq_pow_of_modEq hmod hone
-  rwa [pow_one] at this
+  apply GlobalTheory.ParamLabel.Congr.part_pow <;> assumption
 
 theorem pow_eq_of_part_eq {G : Type} [Monoid G] {l : ℕ} (hl : l.Prime) {x y : G} (hx : IsOfFinOrder x)
     (hy : IsOfFinOrder y) (h : Formalism.CyclotomicNorms.primeToPart l x = Formalism.CyclotomicNorms.primeToPart l y) :

@@ -63,7 +63,6 @@ theorem schur_on_minimal_subspace :
 
   let σ : N → (Q →L[ℂ] Q) := fun T =>
     (T.1.comp Q.subtypeL).codRestrict Q (fun v => hQinv T.1 T.2 v v.2)
-  have hσ : ∀ (T : N) (v : Q), ((σ T v : Q) : H) = T.1 v := fun _ _ => rfl
 
   have hperp : ∀ T ∈ N, ∀ w ∈ Qᗮ, T w ∈ Qᗮ := by
     intro T hT w hw

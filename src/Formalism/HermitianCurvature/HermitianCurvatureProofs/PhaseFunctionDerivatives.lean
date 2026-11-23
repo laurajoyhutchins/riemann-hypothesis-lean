@@ -328,8 +328,6 @@ theorem b_differentiableAt {n : ℕ} (D' : ℂ) (x : Fin n → ℂ) (hx : ∀ k,
 theorem b_near (m : ℕ) (δ : ℝ) (hδ : 0 < δ) (z : ℂ) (hz : 100 * ((m : ℝ) + 2) * δ ≤ ‖z‖)
     (x : Fin (m + 1) → ℂ) (hx : ∀ k, ‖x k - z‖ ≤ 2 * δ) (hx0 : ∀ k, x k ≠ 0) (k : Fin (m + 1)) :
     ‖x k - z‖ ≤ 6 * ‖z‖ * ‖dg0 (z ^ (m + 2)) x‖ := by
-  have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg m
-  have hs : (0 : ℝ) < (m : ℝ) + 2 := by linarith
   have hzpos : 0 < ‖z‖ := lt_of_lt_of_le (by positivity) hz
   have hz0 : z ≠ 0 := norm_pos_iff.1 hzpos
   have hD : z ^ (m + 2) ≠ 0 := pow_ne_zero _ hz0
@@ -399,7 +397,6 @@ open Formalism.FourierDecayAlt.G
 
 theorem phase_near_critical : Formalism.FourierDecayAlt.G.PhaseFunctionNearCritical := by
   intro m δ Rz hδ
-  have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg m
   refine ⟨(2 * ((m : ℝ) + 1) + 2 ^ (m + 1) + 6) * |Rz| + 1, by positivity, ?_⟩
   intro z hz hzR
   have hzpos : 0 < ‖z‖ := lt_of_lt_of_le (by positivity) hz
@@ -459,7 +456,6 @@ theorem phase_near_critical : Formalism.FourierDecayAlt.G.PhaseFunctionNearCriti
     refine (PhaseFunctionDerivatives.b_near m δ hδ z hz x hxk (hne x hx') k).trans ?_
     apply mul_le_mul_of_nonneg_right _ hd0
     have : (0 : ℝ) ≤ 2 ^ (m + 1) := by positivity
-    have h0 : 0 ≤ |Rz| := abs_nonneg _
     nlinarith
 
 end Formalism.FourierDecayAlt.P
@@ -483,7 +479,6 @@ theorem c_le (a : ℝ) (ha : 0 ≤ a) (E' : ℕ) (d A : ℝ) (hd : 0 ≤ d) (hA 
     · rw [max_eq_left h]; linarith
     · rw [max_eq_right h]; linarith
   obtain ⟨p, hp⟩ : ∃ p : ℝ, p = (E' : ℝ) + d + 1 := ⟨_, rfl⟩
-  have hp0 : 0 ≤ p := by rw [hp]; positivity
   rw [← hp] at hA ⊢
   have s1 : (max 1 a) ^ (-A) ≤ (max 1 a) ^ (-p) := Real.rpow_le_rpow_of_exponent_le hM1 (by linarith)
   have s2 : (max 1 a) ^ (-p) ≤ ((1 + a) / 2) ^ (-p) :=

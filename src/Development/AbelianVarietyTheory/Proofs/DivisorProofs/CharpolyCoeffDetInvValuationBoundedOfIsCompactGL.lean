@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConjZpowersEntriesValuedBoundedOfCompactClosure
 public import Development.AbelianVarietyTheory.Definitions.Divisors.SimpleTwistedTraceFormulaStable
 public import Mathlib.LinearAlgebra.Matrix.Charpoly.Univ
 import Mathlib.Algebra.Order.Floor.Extended
@@ -56,17 +57,7 @@ variable {E : Type} [Field E] [NumberField E]
 
 theorem isOpen_le_exp (w : Pl E) (m : ℤ) :
     IsOpen {y : w.adicCompletion E | Valued.v y ≤ WithZero.exp m} := by
-  obtain ⟨c, hc⟩ := HeightOneSpectrum.valuedAdicCompletion_surjective E w (WithZero.exp m)
-  have hc0 : c ≠ 0 := by
-    rintro rfl
-    rw [map_zero] at hc
-    exact WithZero.exp_ne_zero hc.symm
-  have : {y : w.adicCompletion E | Valued.v y ≤ WithZero.exp m} =
-      {y | Valued.v.restrict y ≤ Valued.v.restrict c} := by
-    ext y
-    simp only [Set.mem_ofPred_eq, Valuation.restrict_le_iff, hc]
-  rw [this]
-  exact Valued.isOpen_closedBall _ (by simp [hc0])
+  apply _root_.GlobalTheory.PowBdd.isOpen_le_exp <;> assumption
 
 theorem exists_bound_of_isCompact (w : Pl E) {S : Set (w.adicCompletion E)} (hS : IsCompact S) :
     ∃ γ : WithZero (Multiplicative ℤ), ∀ x ∈ S, Valued.v x ≤ γ := by

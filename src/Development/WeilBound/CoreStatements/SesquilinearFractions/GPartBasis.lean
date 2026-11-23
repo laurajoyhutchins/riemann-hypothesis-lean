@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.Divisibility.GeneratorPowers.PsiCover
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsTransition
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -220,24 +221,7 @@ theorem type_part_linear_independent (H : Host E) (D : Datum H) {g : ℕ} (ty : 
   rw [hSV, finrank_typeSupportedVectors, hcount]
 
 theorem Host_rt0_conj_eq_neg (H : Host E) : starRingEnd ℂ H.rt0 = -H.rt0 := by
-  have h := H.sqrt_neg_disc_sq
-  have hd : (0 : ℝ) < H.d := by exact_mod_cast H.d_prime.pos
-  apply Complex.ext
-  · have h1 := congrArg Complex.re h
-    have h2 := congrArg Complex.im h
-    simp only [pow_two, Complex.mul_re, Complex.mul_im, Complex.neg_re, Complex.natCast_re, Complex.neg_im,
-      Complex.natCast_im, neg_zero] at h1 h2
-    have hb : H.rt0.im ≠ 0 := by
-      intro hb
-      rw [hb] at h1
-      nlinarith [sq_nonneg H.rt0.re]
-    have ha : H.rt0.re = 0 := by
-      have : 2 * H.rt0.re * H.rt0.im = 0 := by linarith
-      rcases mul_eq_zero.mp this with h3 | h3
-      · linarith
-      · exact absurd h3 hb
-    simp [ha]
-  · simp
+  apply Formalism.MainNotions.ModuliIntegralCharts.H1.rt0_conj_neg_ne_zero <;> assumption
 
 theorem Host_rt0_ne_zero (H : Host E) : H.rt0 ≠ 0 := by
   intro h

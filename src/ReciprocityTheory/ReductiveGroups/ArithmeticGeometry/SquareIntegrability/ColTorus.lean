@@ -368,11 +368,6 @@ theorem ct_core (hP : Ext.PackingCount) (hGT : Ext.GaussianTailBound) (hA : Prop
     rw [l2_ctU_eq_l2_ctY (Col.YB hI hP q) w hβt] at h4
     have hK6 := twentyfour_le_constant P
     have hK6p : 0 < P.K6 := by linarith
-    have hl20 : 0 ≤ X.l2 q (Col.colS X I q β) := by
-      unfold PT.l2
-      rw [MeasureTheory.setAverage_eq]
-      exact smul_nonneg (inv_nonneg.2 MeasureTheory.measureReal_nonneg)
-        (MeasureTheory.integral_nonneg fun v => by unfold PT.ptN2; positivity)
     have hn1 : (1 : ℝ) ≤ n ^ (2 * c) := one_le_pow₀ hn
     rw [hl2, hCn, ← mul_assoc, mul_assoc P.K6⁻¹, ← Real.exp_add,
       show -(2 * Real.pi * ‖u‖ ^ 2 / q) + 2 * Real.pi * ‖u‖ ^ 2 / q = 0 by ring, Real.exp_zero,

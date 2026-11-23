@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.WeightVectorTensorEqDual
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.CompRevRev
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.KTypeLemma.QuotientHighestWeightTensorStandard
 import Mathlib.Algebra.Order.Floor.Extended
@@ -137,54 +138,10 @@ end Tens
 section Wt
 
 theorem rhoN_tw (ε : Fin n → Bool) (a : Fin n) : rhoN (ε ∘ Fin.rev) a = -rhoN ε (Fin.rev a) := by
-  unfold rhoN
-  simp only [Function.comp_apply]
-  have h1 : (univ.filter fun b => a < b ∧ ε (Fin.rev b) ≠ ε (Fin.rev a)).card =
-      (univ.filter fun b => b < Fin.rev a ∧ ε b ≠ ε (Fin.rev a)).card := by
-    refine Finset.card_nbij' Fin.rev Fin.rev ?_ ?_ ?_ ?_
-    · intro b hb; simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hb ⊢
-      exact ⟨Fin.rev_lt_rev.2 hb.1, hb.2⟩
-    · intro b hb; simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hb ⊢
-      refine ⟨?_, by simpa using hb.2⟩
-      simpa using Fin.rev_lt_rev.2 hb.1
-    · intro b _; simp
-    · intro b _; simp
-  have h2 : (univ.filter fun b => b < a ∧ ε (Fin.rev b) ≠ ε (Fin.rev a)).card =
-      (univ.filter fun b => Fin.rev a < b ∧ ε b ≠ ε (Fin.rev a)).card := by
-    refine Finset.card_nbij' Fin.rev Fin.rev ?_ ?_ ?_ ?_
-    · intro b hb; simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hb ⊢
-      exact ⟨Fin.rev_lt_rev.2 hb.1, hb.2⟩
-    · intro b hb; simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hb ⊢
-      refine ⟨?_, by simpa using hb.2⟩
-      simpa using Fin.rev_lt_rev.2 hb.1
-    · intro b _; simp
-    · intro b _; simp
-  rw [h1, h2]; ring
+  apply ReciprocityTheory.ChartRestriction.DS.Lap.LemK.DualRepresentationReversal.rhoN_rev <;> assumption
 
 theorem rhoC_tw (ε : Fin n → Bool) (a : Fin n) : rhoC (ε ∘ Fin.rev) a = -rhoC ε (Fin.rev a) := by
-  unfold rhoC
-  simp only [Function.comp_apply]
-  have h1 : (univ.filter fun b => a < b ∧ ε (Fin.rev b) = ε (Fin.rev a)).card =
-      (univ.filter fun b => b < Fin.rev a ∧ ε b = ε (Fin.rev a)).card := by
-    refine Finset.card_nbij' Fin.rev Fin.rev ?_ ?_ ?_ ?_
-    · intro b hb; simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hb ⊢
-      exact ⟨Fin.rev_lt_rev.2 hb.1, hb.2⟩
-    · intro b hb; simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hb ⊢
-      refine ⟨?_, by simpa using hb.2⟩
-      simpa using Fin.rev_lt_rev.2 hb.1
-    · intro b _; simp
-    · intro b _; simp
-  have h2 : (univ.filter fun b => b < a ∧ ε (Fin.rev b) = ε (Fin.rev a)).card =
-      (univ.filter fun b => Fin.rev a < b ∧ ε b = ε (Fin.rev a)).card := by
-    refine Finset.card_nbij' Fin.rev Fin.rev ?_ ?_ ?_ ?_
-    · intro b hb; simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hb ⊢
-      exact ⟨Fin.rev_lt_rev.2 hb.1, hb.2⟩
-    · intro b hb; simp only [Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq] at hb ⊢
-      refine ⟨?_, by simpa using hb.2⟩
-      simpa using Fin.rev_lt_rev.2 hb.1
-    · intro b _; simp
-    · intro b _; simp
-  rw [h1, h2]; ring
+  apply ReciprocityTheory.ChartRestriction.DS.Lap.LemK.DualRepresentationReversal.rhoC_rev <;> assumption
 
 theorem lowK_tw (ε : Fin n → Bool) (ν : Fin n → ℝ) :
     lowK (ε ∘ Fin.rev) (fun a => -ν (Fin.rev a)) = fun a => -lowK ε ν (Fin.rev a) := by

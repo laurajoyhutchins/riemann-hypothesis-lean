@@ -191,7 +191,6 @@ theorem fdeg_eq {σ : Mx k r → (H →L[ℂ] H)} {μG : Measure (Formalism.Quan
   simp only [hpt] at hI
   rw [integral_complex_ofReal] at hI
   have hn : 0 < ‖u‖ := norm_pos_iff.mpr hu
-  have hu4 : (0 : ℝ) < ‖u‖ ^ 4 := pow_pos hn 4
   have huu : ⟪u, u⟫_ℂ = ((‖u‖ ^ 2 : ℝ) : ℂ) := by
     apply Complex.ext
     · rw [Complex.ofReal_re]

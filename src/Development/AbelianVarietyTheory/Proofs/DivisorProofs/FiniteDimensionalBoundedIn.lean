@@ -52,6 +52,7 @@ import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsLinearSystemMaximalDegreeFactorization
 
 @[expose] public section
 
@@ -89,18 +90,7 @@ def coeffMap {n : ℕ} (b : Module.Basis (Fin n) k[X] A) (D : Ideal A) (d : ℕ)
 
 theorem coeffMap_injective {n : ℕ} (b : Module.Basis (Fin n) k[X] A) (D : Ideal A) (d : ℕ) :
     Function.Injective (coeffMap b D d) := by
-  rw [← LinearMap.ker_eq_bot, LinearMap.ker_eq_bot']
-  intro f hf
-  have h0 : ∀ i, b.repr (f : A) i = 0 := by
-    intro i
-    ext j
-    by_cases hj : j ≤ d
-    · have := congrFun (congrFun hf i) ⟨j, Nat.lt_succ_of_le hj⟩
-      simpa [coeffMap] using this
-    · rw [coeff_eq_zero_of_natDegree_lt (lt_of_le_of_lt (f.2.2 i) (not_le.1 hj))]; simp
-  have : (f : A) = 0 := by
-    rw [← b.sum_repr (f : A)]; simp [h0]
-  exact Subtype.ext this
+  apply _root_.GlobalTheory.LinSys.coeffMap_injective <;> assumption
 
 instance finiteDimensional_boundedIn {n : ℕ} (b : Module.Basis (Fin n) k[X] A) (D : Ideal A)
     (d : ℕ) : FiniteDimensional k (boundedIn b D d) :=

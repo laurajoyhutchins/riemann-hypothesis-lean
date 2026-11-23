@@ -162,8 +162,6 @@ theorem cloud_pair_le (k : ℕ) (lam v : ℕ → ℝ) (e : ℕ) (c g b Y ε : �
       nlinarith [hF1 e]
     · rw [Finset.erase_eq_of_notMem he]
   have hDnn : 0 ≤ ∏ i ∈ Icc 1 k, |Y + 1 / 2 + v i| := Finset.prod_nonneg fun i _ => hD0 i
-  have hFSnn : 0 ≤ ∏ s ∈ ((Icc 1 (k - 1)).erase e), (1 + (1 + c) / max |Y + lam s| 1) := Finset.prod_nonneg fun s _ => hFnn s
-  have hb1 : 1 ≤ b := by linarith
   by_cases he : e ∈ (Icc 1 (k - 1))
   · rw [← Finset.mul_prod_erase _ _ he]
     have hAe : |Y + ε + lam e| + c ≤ 3 * b := by

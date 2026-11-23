@@ -56,8 +56,6 @@ theorem geom_sum_int_le (D M : ℕ) (hD : 0 < D) (hM : 1 ≤ M) (x₀ C : ℝ) :
         else ENNReal.ofReal (C * Real.exp (2 * D * ((j : ℝ) + Real.log r)))) *
           ENNReal.ofReal (Real.exp (-(2 * D * (M + 1) * (j : ℝ)))) ≤
         ENNReal.ofReal (C' * r ^ (2 * D * (M + 1))) := by
-  have hDr : (0 : ℝ) < D := by exact_mod_cast hD
-  have hMr : (0 : ℝ) < M := by exact_mod_cast hM
   obtain ⟨a, ha⟩ : ∃ a : ℝ, a = 2 * D * M := ⟨_, rfl⟩
   have ha0 : 0 < a := by rw [ha]; positivity
   obtain ⟨q, hq⟩ : ∃ q : ℝ, q = Real.exp (-a) := ⟨_, rfl⟩
@@ -70,7 +68,6 @@ theorem geom_sum_int_le (D M : ℕ) (hD : 0 < D) (hM : 1 ≤ M) (x₀ C : ℝ) :
   refine ⟨K * Real.exp (-a * x₀) / (1 - q), fun r hr => ?_⟩
   obtain ⟨n₀, hn₀⟩ : ∃ n₀ : ℤ, n₀ = ⌈x₀ - Real.log r⌉ := ⟨_, rfl⟩
   have hn₀le : x₀ - Real.log r ≤ n₀ := by rw [hn₀]; exact Int.le_ceil _
-  have hr2 : (0 : ℝ) < r ^ (2 * D) := by positivity
   obtain ⟨A, hA⟩ : ∃ A : ℝ, A = K * r ^ (2 * D) * Real.exp (-a * n₀) := ⟨_, rfl⟩
   have hA0 : 0 ≤ A := by rw [hA]; have := Real.exp_pos (-a * n₀); positivity
 

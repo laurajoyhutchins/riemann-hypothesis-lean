@@ -180,7 +180,6 @@ theorem exists_unit_norm_eq : ∀ (E : Type) [Field E] [NumberField E] [IsCMFiel
         x ∣ y ↔ Valued.v (y : Kv) ≤ Valued.v (x : Kv) := by
       first
       | exact (Formalism.BasicNotions.Examples₂.adicInt_integers (K := E) w ).dvd_iff_le
-      | exact Valuation.Integers.dvd_iff_le (Formalism.BasicNotions.Examples₂.adicInt_integers (K := E) w )
 
     have adicInt_max_eq_span (π : Ov) (hπ : Valued.v (π : Kv) = exp (-1 : ℤ)) :
         maximalIdeal Ov = Ideal.span {π} := by
@@ -194,13 +193,11 @@ theorem exists_unit_norm_eq : ∀ (E : Type) [Field E] [NumberField E] [IsCMFiel
         first
         | rfl
         | push_cast; rfl
-        | simp
       have hpow : Valued.v ((π ^ n : Ov) : Kv) = exp (-(n : ℤ)) := by
         rw [h1, map_pow, hπ]
         first
         | (rw [← WithZero.exp_nsmul]; congr 1; simp)
         | (rw [← WithZero.exp_nsmul]; simp)
-        | simp [WithZero.exp, ← ofAdd_nsmul]
       rw [adicInt_max_eq_span π hπ, Ideal.span_singleton_pow, Ideal.mem_span_singleton,
         adicInt_dvd_iff, hpow]
 
@@ -213,8 +210,6 @@ theorem exists_unit_norm_eq : ∀ (E : Type) [Field E] [NumberField E] [IsCMFiel
       have h0 : Valued.v x ≠ 0 := by
         first
         | exact (Valuation.ne_zero_iff _).mpr hx
-        | exact (map_ne_zero _).mpr hx
-        | simpa using hx
       obtain ⟨N, hN⟩ := wz_exists_nat_lt (Valued.v x) h0
       exact absurd (h N) (not_le.mpr hN)
 
@@ -227,9 +222,6 @@ theorem exists_unit_norm_eq : ∀ (E : Type) [Field E] [NumberField E] [IsCMFiel
         first
         | exact Valuation.loc_const hx0
         | exact Valued.locally_const hx0
-        | exact (Valued.isOpen_sphere Kv hx0).mem_nhds rfl
-        | exact (Valued.isClopen_sphere Kv hx0).isOpen.mem_nhds rfl
-        | exact (Valued.isOpen_sphere (R := Kv) hx0).mem_nhds rfl
       filter_upwards [hmem] with y hy
       show ¬ Valued.v y ≤ r
       rw [show Valued.v y = Valued.v x from hy]

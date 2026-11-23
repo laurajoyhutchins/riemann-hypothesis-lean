@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FundamentalExactSequenceContinuityAllTheories
 public import Formalism.SharpRestriction.LevelLetterCocycles.InvariantsIsoOfGenerators
 public import Formalism.SharpRestriction.LevelLetterCocycles.NormLtOneIffToZMod
 public import Formalism.SharpRestriction.LevelLetterCocycles.ZlWCbInjective
@@ -202,31 +203,7 @@ theorem chiQ_norm (P : LocPrime l) (h : GQ l) : ‖(P.χQ h : ℚ_[l])‖ = 1 :=
   rw [h3, Padic.add_eq_max_of_ne (ne_of_gt hlt), max_eq_left hlt.le, hA]
 
 theorem chiQ_cont (P : LocPrime l) : Continuous (fun h : GQ l => (P.χQ h : ℚ_[l])) := by
-  rw [continuous_iff_continuousAt]
-  intro g
-  rw [ContinuousAt, Metric.tendsto_nhds]
-  intro ε hε
-  have hl1 : (l : ℝ)⁻¹ < 1 := inv_lt_one_of_one_lt₀ (by exact_mod_cast hl.out.one_lt)
-  obtain ⟨m, hm⟩ := exists_pow_lt_of_lt_one hε hl1
-  let E : IntermediateField ℚ_[l] (Om l) := IntermediateField.adjoin ℚ_[l] {P.ζQ (m + 1)}
-  haveI : FiniteDimensional ℚ_[l] E :=
-    IntermediateField.adjoin.finiteDimensional (Algebra.IsIntegral.isIntegral _)
-  have hU : IsOpen (E.fixingSubgroup : Set (GQ l)) := E.fixingSubgroup_isOpen
-  have hopen : IsOpen {h : GQ l | g⁻¹ * h ∈ E.fixingSubgroup} := hU.preimage (continuous_const_mul g⁻¹)
-  filter_upwards [hopen.mem_nhds (by simp)] with h hh
-  rw [dist_eq_norm]
-  have hfix : (g⁻¹ * h) (P.ζQ (m + 1)) = P.ζQ (m + 1) :=
-    (mem_fixingSubgroup_iff _).1 hh (P.ζQ (m + 1)) (IntermediateField.subset_adjoin _ _ rfl)
-  have h1 := chiQ_fix P (g⁻¹ * h) (m + 1) (by omega) hfix
-  have hmul : (P.χQ h : ℚ_[l]) = P.χQ g * P.χQ (g⁻¹ * h) := by
-    rw [← Units.val_mul, ← map_mul, mul_inv_cancel_left]
-  have hle : (l : ℝ) ^ (-((m + 1 : ℕ) : ℤ)) ≤ (l : ℝ)⁻¹ ^ m := by
-    rw [zpow_neg, zpow_natCast, ← inv_pow]
-    exact pow_le_pow_of_le_one (by positivity) hl1.le (by omega)
-  calc ‖(P.χQ h : ℚ_[l]) - P.χQ g‖ = ‖(P.χQ g : ℚ_[l])‖ * ‖(P.χQ (g⁻¹ * h) : ℚ_[l]) - 1‖ := by
-        rw [hmul, ← norm_mul, mul_sub, mul_one]
-    _ ≤ 1 * (l : ℝ) ^ (-((m + 1 : ℕ) : ℤ)) := by rw [chiQ_norm]; exact mul_le_mul_of_nonneg_left h1 zero_le_one
-    _ < ε := by rw [one_mul]; exact lt_of_le_of_lt hle hm
+  apply GlobalTheory.FundCont.continuous_chi <;> assumption
 
 theorem norm_of_v_one (P : LocPrime l) (LL : FinExt l) (x : ℚ_[l])
     (hv : P.v LL (algebraMap ℚ_[l] ↥LL.1 x) = 1) : ‖x‖ = (l : ℝ)⁻¹ := by

@@ -106,7 +106,6 @@ theorem selfDual_psiInf_std (F : Type) [Field F] [NumberField F] (hF : IsTotally
       continuous_toFun := hh.continuous
       continuous_invFun :=
         (e.toEquiv.toHomeomorphOfContinuousOpen hh.continuous hh.isOpenMap).symm.continuous }
-  have hcoe : ∀ x, e' x = e x := fun _ => rfl
   set c : ℝ := Real.sqrt |(discr F : ℝ)| with hc
   have hc0 : 0 < c := by
     have : (discr F : ℝ) ≠ 0 := by exact_mod_cast discr_ne_zero F

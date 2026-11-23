@@ -95,7 +95,6 @@ private theorem measurableSMul_and_smulInvariantMeasure_subgroup (Γ : Subgroup 
   refine ⟨?_, ?_⟩
   · first
     | infer_instance
-    | exact ⟨fun c => measurable_const_mul (c : G), fun x => (measurable_mul_const x).comp measurable_subtype_coe⟩
   · constructor
     intro c s hs
     have hc := hν (c : G) c.2
@@ -130,19 +129,16 @@ theorem ind_mul_right {M : Type*} [Zero M] [One M] {B : Set G} (x : G) :
   funext r
   first
   | rfl
-  | simp only [Set.indicator_apply, Set.mem_setOf_eq, Pi.one_apply]
 
 theorem ind_inv_mul {M : Type*} [Zero M] [One M] {A : Set G} (y : G) :
     (fun r => A.indicator (1 : G → M) (r⁻¹ * y)) = {r | r⁻¹ * y ∈ A}.indicator 1 := by
   funext r
   first
   | rfl
-  | simp only [Set.indicator_apply, Set.mem_setOf_eq, Pi.one_apply]
 
 private theorem measurable_one_ennreal : Measurable (1 : G → ℝ≥0∞) := by
   first
   | exact measurable_one
-  | exact measurable_const
 
 theorem lint_eq {A B : Set G} (hA : MeasurableSet A) (hB : MeasurableSet B) (c : ℝ≥0∞)
     (hcB : ∀ x, ν {r | r * x ∈ B} = c) (hcA : ∀ y, ν {r | r⁻¹ * y ∈ A} = c)
@@ -152,7 +148,6 @@ theorem lint_eq {A B : Set G} (hA : MeasurableSet A) (hB : MeasurableSet B) (c :
   have hL : c * ∫⁻ x in A, g x ∂μ = ∫⁻ x, ∫⁻ r, A.indicator (1 : G → ℝ≥0∞) x * B.indicator (1 : G → ℝ≥0∞) (r * x) * g x ∂ν ∂μ := by
     first
     | rw [← lintegral_indicator hA]
-    | rw [← lintegral_indicator _ hA]
     rw [← lintegral_const_mul'' c (hg.indicator hA)]
     refine lintegral_congr fun x => ?_
     have hm : Measurable fun r : G => B.indicator (1 : G → ℝ≥0∞) (r * x) :=
@@ -173,7 +168,6 @@ theorem lint_eq {A B : Set G} (hA : MeasurableSet A) (hB : MeasurableSet B) (c :
   have hR : c * ∫⁻ y in B, g y ∂μ = ∫⁻ y, ∫⁻ r, A.indicator (1 : G → ℝ≥0∞) (r⁻¹ * y) * B.indicator (1 : G → ℝ≥0∞) y * g y ∂ν ∂μ := by
     first
     | rw [← lintegral_indicator hB]
-    | rw [← lintegral_indicator _ hB]
     rw [← lintegral_const_mul'' c (hg.indicator hB)]
     refine lintegral_congr fun y => ?_
     have hm : Measurable fun r : G => A.indicator (1 : G → ℝ≥0∞) (r⁻¹ * y) :=
@@ -194,10 +188,6 @@ theorem lint_eq {A B : Set G} (hA : MeasurableSet A) (hB : MeasurableSet B) (c :
   have h3 : AEMeasurable (fun p : G × G => g p.1) (μ.prod ν) := by
     first
     | exact hg.comp_quasiMeasurePreserving Measure.quasiMeasurePreserving_fst
-    | exact hg.comp_quasiMeasurePreserving (Measure.quasiMeasurePreserving_fst (μ := μ) (ν := ν))
-    | exact hg.comp_fst
-    | exact hg.fst_prod
-    | exact hg.fst
   have hF : AEMeasurable (Function.uncurry fun (x r : G) =>
       A.indicator (1 : G → ℝ≥0∞) x * B.indicator (1 : G → ℝ≥0∞) (r * x) * g x) (μ.prod ν) := by
     have k1 : Measurable fun p : G × G => A.indicator (1 : G → ℝ≥0∞) p.1 :=
@@ -221,7 +211,6 @@ theorem lint_eq {A B : Set G} (hA : MeasurableSet A) (hB : MeasurableSet B) (c :
   refine lintegral_congr fun y => ?_
   first
   | simp only [mul_inv_cancel_left, hr]
-  | simp [hr]
 
 end Unfold
 
@@ -262,15 +251,12 @@ theorem int_eq {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteS
     have hg : AEMeasurable (fun x => ‖f x‖ₑ) μ := by
       first
       | exact hf.enorm
-      | exact (continuous_enorm.comp_aestronglyMeasurable hf).aemeasurable
     have e := lint_eq (μ := μ) ν hA hB c hcB hcA
       (fun x => ‖f x‖ₑ) hg (by filter_upwards [hinv] with r hr x; simp only [hr])
     have e' := ennreal_eq_of_mul_left_eq hc0 hct e
     have hA' : ∫⁻ x in A, ‖f x‖ₑ ∂μ < ⊤ := by
       first
       | exact hfA.2
-      | exact hfA.hasFiniteIntegral
-      | exact hasFiniteIntegral_iff_enorm.1 hfA.2
     refine ⟨hf.restrict, ?_⟩
     first
     | (show ∫⁻ x in B, ‖f x‖ₑ ∂μ < ⊤; rw [← e']; exact hA')
@@ -287,7 +273,6 @@ theorem int_eq {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteS
   | (obtain ⟨L, hL⟩ : ∃ L : E →L[ℝ] ℝ, L (∫ x in A, f x ∂μ) ≠ L (∫ x in B, f x ∂μ) :=
         SeparatingDual.exists_separating_of_ne hne
      exact hL (key L))
-  | exact hne ((NormedSpace.eq_iff_forall_dual_eq ℝ).2 key)
 
 end Boch
 
@@ -364,7 +349,6 @@ theorem shift_general (μ : Measure G) [SigmaFinite μ] [μ.IsMulLeftInvariant]
     have hu := SF_measure_univ Γ ν hνΓ hΩ
     first
     | (rw [h0, tsum_zero] at hu; exact Measure.measure_univ_eq_zero.1 hu)
-    | simpa [h0] using hu
   have hcB : ∀ x, ν {r | r * x ∈ {y | h * y ∈ Ω}} = ν Ω := by
     intro x
     have hm : Measurable fun y : G => h⁻¹ * y * h := (measurable_const_mul h⁻¹).mul_const h

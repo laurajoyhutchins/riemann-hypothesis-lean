@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DegreeLatticePrimeScaling
 public import Development.AbelianVarietyTheory.Definitions.Divisors.OrthSubrepresentation
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCoboundaryOfNormOneInSubalgebraStatement
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaloisTwistedNormGLBasicPropertiesStatement
@@ -68,24 +69,7 @@ theorem stdForm_adjoin_map_mem {F F' : Type} [Field F] [Field F'] [Algebra F F']
     (γ : GL (Fin n) F) {M : Matrix (Fin n) (Fin n) F'}
     (hM : M ∈ Algebra.adjoin F' {((incl F F' n γ : GL (Fin n) F') : Matrix (Fin n) (Fin n) F')}) :
     M.map t ∈ Algebra.adjoin F' {((incl F F' n γ : GL (Fin n) F') : Matrix (Fin n) (Fin n) F')} := by
-  let T : Matrix (Fin n) (Fin n) F' →+* Matrix (Fin n) (Fin n) F' := ((t : F' ≃+* F') : F' →+* F').mapMatrix
-  have hT : ∀ N, T N = N.map t := fun N => rfl
-  rw [← hT]
-  induction hM using Algebra.adjoin_induction with
-  | mem x hx =>
-    rw [Set.mem_singleton_iff] at hx
-    subst hx
-    rw [hT, stdForm_incl_map_eq]
-    exact Algebra.subset_adjoin rfl
-  | algebraMap r =>
-    have : T (algebraMap F' (Matrix (Fin n) (Fin n) F') r) = algebraMap F' (Matrix (Fin n) (Fin n) F') (t r) := by
-      rw [hT]
-      ext i j
-      by_cases h : i = j <;> simp [Matrix.algebraMap_matrix_apply, h]
-    rw [this]
-    exact Subalgebra.algebraMap_mem _ _
-  | add x y _ _ hx hy => rw [map_add (f := _)]; exact Subalgebra.add_mem _ hx hy
-  | mul x y _ _ hx hy => rw [map_mul]; exact Subalgebra.mul_mem _ hx hy
+  apply GlobalTheory.Shin.NormSurj.adjoin_stable <;> assumption
 
 theorem stdForm_commute_iff {F' : Type} [Field F'] {n : ℕ} (x y : GL (Fin n) F') :
     Commute x y ↔ Commute (x : Matrix (Fin n) (Fin n) F') (y : Matrix (Fin n) (Fin n) F') := by

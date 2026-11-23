@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.KrullDimLEIsLocalRingQuotPow
 public import Mathlib.Basic.Complex.Basic
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsCompletedStrictHens
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.NonzeroLocus
@@ -73,22 +74,7 @@ theorem eq_zero_of_forall_mem_pow {R : Type} [CommRing R] [IsNoetherianRing R] (
 theorem krullDimLE_and_isLocalRing_quotient_pow {R : Type} [CommRing R] (m : Ideal R)
     [hm : m.IsMaximal] (n : ℕ) :
     Ring.KrullDimLE 0 (R ⧸ m ^ (n + 1)) ∧ IsLocalRing (R ⧸ m ^ (n + 1)) := by
-  have hJt : m ^ (n + 1) ≠ ⊤ := fun h => hm.ne_top
-    (top_le_iff.1 (h ▸ Ideal.pow_le_self (Nat.succ_ne_zero n)))
-  have : Nontrivial (R ⧸ m ^ (n + 1)) := Ideal.Quotient.nontrivial_iff.2 hJt
-  have key : ∀ P : Ideal (R ⧸ m ^ (n + 1)), P.IsPrime →
-      P = m.map (Ideal.Quotient.mk (m ^ (n + 1))) := by
-    intro P hP
-    have hc : (P.comap (Ideal.Quotient.mk (m ^ (n + 1)))).IsPrime := Ideal.comap_isPrime _ _
-    have h1 : m ≤ P.comap (Ideal.Quotient.mk (m ^ (n + 1))) := by
-      refine Ideal.IsPrime.le_of_pow_le (n := n + 1) fun a ha => ?_
-      rw [Ideal.mem_comap, Ideal.Quotient.eq_zero_iff_mem.2 ha]
-      exact P.zero_mem
-    exact (Ideal.map_comap_of_surjective _ Ideal.Quotient.mk_surjective P).symm.trans
-      (congrArg _ (hm.eq_of_le hc.ne_top h1).symm)
-  obtain ⟨P, hP⟩ := Ideal.exists_maximal (R ⧸ m ^ (n + 1))
-  exact ((Ring.krullDimLE_zero_and_isLocalRing_tfae (R ⧸ m ^ (n + 1))).out 2 1 rfl rfl).mp
-    ⟨P, hP.isPrime, fun Q hQ => (key Q hQ).trans (key P hP.isPrime).symm⟩
+  apply GlobalTheory.AbCoh.LowBaseChange.krullDimLE_isLocalRing_quot_pow <;> assumption
 
 theorem exists_isGen_translDiff_comp {S : Scheme.{0}} (A : Over S) [GrpObj A] (L : LB A.left)
     {T T' : Over S} (q : T' ⟶ T) (x : T ⟶ A)

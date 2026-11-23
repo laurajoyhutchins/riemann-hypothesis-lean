@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.GrowthGaloisInvariantsModPrimePowerLattice
 public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
 public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ExistsSmulMemBis
 import Mathlib.Algebra.Order.Floor.Extended
@@ -64,42 +65,7 @@ namespace GlobalTheory.CompanionTheory.GrowthOfInvariants
 
 theorem card_quot_pow {O : Type} [CommRing O] [IsDomain O] (ϖ : O) (hϖ : ϖ ≠ 0) (n : ℕ) :
     Nat.card (O ⧸ Ideal.span {ϖ ^ n}) = Nat.card (O ⧸ Ideal.span {ϖ}) ^ n := by
-  have key : ∀ a : O, Nat.card (O ⧸ Ideal.span {a}) =
-      (Submodule.toAddSubgroup (Ideal.span {a} : Ideal O)).index := fun a => rfl
-  induction n with
-  | zero =>
-    have : Subsingleton (O ⧸ Ideal.span {ϖ ^ 0}) := by
-      rw [pow_zero, Ideal.span_singleton_one]
-      exact Ideal.Quotient.subsingleton_iff.mpr rfl
-    simp [Nat.card_of_subsingleton (0 : O ⧸ Ideal.span {ϖ ^ 0})]
-  | succ n ih =>
-    let f : O →+ O := AddMonoidHom.mulLeft (ϖ ^ n)
-    have hle : Submodule.toAddSubgroup (Ideal.span {ϖ ^ (n + 1)} : Ideal O) ≤
-        Submodule.toAddSubgroup (Ideal.span {ϖ ^ n} : Ideal O) := by
-      intro x hx
-      have hx' : x ∈ (Ideal.span {ϖ ^ (n + 1)} : Ideal O) := hx
-      change x ∈ (Ideal.span {ϖ ^ n} : Ideal O)
-      rw [Ideal.mem_span_singleton] at hx' ⊢
-      exact (pow_dvd_pow ϖ (Nat.le_succ n)).trans hx'
-    have hrange : f.range = Submodule.toAddSubgroup (Ideal.span {ϖ ^ n} : Ideal O) := by
-      ext x
-      constructor
-      · rintro ⟨y, rfl⟩
-        change ϖ ^ n * y ∈ (Ideal.span {ϖ ^ n} : Ideal O)
-        exact Ideal.mul_mem_right _ _ (Ideal.mem_span_singleton_self _)
-      · intro hx
-        have hx' : x ∈ (Ideal.span {ϖ ^ n} : Ideal O) := hx
-        obtain ⟨y, rfl⟩ := Ideal.mem_span_singleton.mp hx'
-        exact ⟨y, rfl⟩
-    have hcomap : (Submodule.toAddSubgroup (Ideal.span {ϖ ^ (n + 1)} : Ideal O)).comap f =
-        Submodule.toAddSubgroup (Ideal.span {ϖ} : Ideal O) := by
-      ext x
-      change ϖ ^ n * x ∈ (Ideal.span {ϖ ^ (n + 1)} : Ideal O) ↔ x ∈ (Ideal.span {ϖ} : Ideal O)
-      rw [Ideal.mem_span_singleton, Ideal.mem_span_singleton, pow_succ]
-      exact mul_dvd_mul_iff_left (pow_ne_zero n hϖ)
-    have h1 := AddSubgroup.relIndex_mul_index hle
-    rw [← hrange, ← AddSubgroup.index_comap, hcomap, hrange, ← key, ← key, ← key, ih] at h1
-    rw [← h1, pow_succ, mul_comm]
+  apply GlobalTheory.GrowthOfInvariants.card_quot_span_pow <;> assumption
 
 theorem card_le_of_fibers {Q R E : Type} [AddCommGroup Q] [AddCommGroup E] [Finite R] [Finite E]
     (g : Q → R) (φ : E →+ Q) (hg : ∀ x y, g x = g y → ∃ e, x - y = φ e) :

@@ -84,10 +84,6 @@ theorem hasDerivAt_Gint {ε : Fin n → Bool} {Λ : Fin n → ℝ} (T : KType ε
   have hop : ∀ a b : KG ε, T.op (a * b) = T.op a * T.op b := by
     intro a b
     simp [KType.op]
-  have hop1 : ∀ a : KG ε, T.op a⁻¹ * T.op a = 1 := by
-    intro a
-    simp only [KType.op, map_inv]
-    rw [← Submonoid.coe_mul, inv_mul_cancel, Submonoid.coe_one]
   have hγ0 : γ 0 = 1 := by
     ext i j
     have h00 := congrFun (congrFun (hγ 0) i) j

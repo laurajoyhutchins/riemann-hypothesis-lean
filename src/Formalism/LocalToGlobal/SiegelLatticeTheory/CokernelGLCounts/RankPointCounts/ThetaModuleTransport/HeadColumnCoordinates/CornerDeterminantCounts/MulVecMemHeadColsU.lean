@@ -1,5 +1,6 @@
 module
 
+import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.UnitaryGramLifts.LiftMemHead
 public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.RankPointCounts.ThetaModuleTransport.HeadColumnCoordinates.SharpSpanCounting.Common
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -63,21 +64,7 @@ variable {R : Type} [CommRing R] {r : ℕ}
 
 theorem mulVec_mem_headColsU (Z : Matrix (Fin (r + 1)) (Fin (r + 1)) R) (w : Fin (r + 1) → R)
     (hw : w (Fin.last r) = 0) : Z.mulVec w ∈ headCols Z := by
-  have hw' : w = ∑ j, w j • Pi.single j (1 : R) := by
-    funext i
-    simp [Finset.sum_apply, Pi.single_apply]
-  have hsum : Z.mulVec w = ∑ j, w j • Z.mulVec (Pi.single j 1) := by
-    conv_lhs => rw [hw']
-
-    rw [← Matrix.mulVecLin_apply, map_sum]
-    simp only [map_smul, Matrix.mulVecLin_apply]
-  rw [hsum, Fin.sum_univ_castSucc, hw, zero_smul, add_zero]
-  refine Submodule.sum_mem _ fun a _ => Submodule.smul_mem _ _ ?_
-  have hc : Z.mulVec (Pi.single a.castSucc 1) = fun i => Z i a.castSucc := by
-    funext i
-    simp [Matrix.mulVec, dotProduct, Pi.single_apply]
-  rw [hc]
-  exact Submodule.subset_span ⟨a, rfl⟩
+  apply Formalism.L2.SG.LocalCountModules.ThetaMbe0GWork.lift_mem_head <;> assumption
 
 end Cols
 

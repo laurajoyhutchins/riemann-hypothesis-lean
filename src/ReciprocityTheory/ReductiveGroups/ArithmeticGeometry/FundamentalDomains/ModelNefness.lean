@@ -91,10 +91,6 @@ theorem reductionTheory_holds : MahlerCompactnessCriterion (E := E) := by
   obtain ⟨S, hS⟩ := X.Γ_index
   let q := fun t (s : GL (Fin r) E) (k : Fin r) (i : Fin (finrank ℤ X.Λ)) =>
     (RealPlaceEmbeddings.qb X (rep t)).repr ((s : Matrix (Fin r) (Fin r) E) *ᵥ Pi.single k 1) i
-  have hQ : (0:ℝ) ≤ ∑ t ∈ hfin.toFinset, ∑ s ∈ S, ∑ k : Fin r, ∑ i : Fin (finrank ℤ X.Λ),
-      ‖((q t s k i : ℚ) : ℂ)‖ :=
-    Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ =>
-      Finset.sum_nonneg fun _ _ => norm_nonneg _
   set Q : ℝ := ∑ t ∈ hfin.toFinset, ∑ s ∈ S, ∑ k : Fin r, ∑ i : Fin (finrank ℤ X.Λ),
       ‖((q t s k i : ℚ) : ℂ)‖ with hQ_def
   have hG0 : (0:ℝ) ≤ ∑ τ : X.Ψ, ∑ k : Fin r, ∑ a : Fin r, ‖(X.Gm.map τ.1)⁻¹ k a‖ :=

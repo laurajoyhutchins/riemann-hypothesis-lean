@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsOpenKerFinIdele
 public import Development.AbelianVarietyTheory.BlockTheory.TwistedDiscreteSeries.PositiveTwistAverage
 public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
 public import Mathlib.Algebra.Module.Lattice.Full
@@ -68,24 +69,7 @@ noncomputable section
 namespace GlobalTheory.RootEx.UniformLattices
 
 theorem eq_one_of_pow_near {z : ℂ} (h : ∀ n : ℕ, ‖z ^ n - 1‖ < 1 / 2) : z = 1 := by
-  by_contra hz
-  have hp : 0 < ‖z - 1‖ := norm_pos_iff.2 (sub_ne_zero.2 hz)
-  obtain ⟨n, hn⟩ := exists_nat_gt (1 / ‖z - 1‖)
-  have h1 : ‖(∑ k ∈ Finset.range n, z ^ k) - n‖ ≤ n / 2 := by
-    have : (∑ k ∈ Finset.range n, z ^ k) - n = ∑ k ∈ Finset.range n, (z ^ k - 1) := by
-      rw [Finset.sum_sub_distrib]; simp
-    rw [this]
-    refine (norm_sum_le _ _).trans ?_
-    refine (Finset.sum_le_sum fun k _ => (h k).le).trans ?_
-    simp; linarith
-  have h2 : (n : ℝ) / 2 ≤ ‖∑ k ∈ Finset.range n, z ^ k‖ := by
-    have := norm_sub_norm_le (n : ℂ) (∑ k ∈ Finset.range n, z ^ k)
-    rw [norm_sub_rev, Complex.norm_natCast] at this
-    linarith
-  have h3 := h n
-  rw [← geom_sum_mul, norm_mul] at h3
-  rw [div_lt_iff₀ hp] at hn
-  nlinarith
+  apply GlobalTheory.CuspRep.eq_one_of_pow_near <;> assumption
 
 section Lattices
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.JInvNormLeOne
 public import Formalism.PeriodIntegrals.GoodTwo
 public import Formalism.LocalToGlobal.TorsionIntegrality.UniformGaussModels.StatementH
 public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.ModularJExpansionAndPolynomialAndIsIntegral
@@ -71,25 +72,7 @@ namespace GlobalTheory.ThLoc.GoodTwo
 open PI.GoodTwo
 
 theorem isIntegral_jInv : Formalism.L2.Th1.CM.JInvariantIntegrality := by
-  intro d L _ hd4 hcm
-  obtain ⟨a, τ, ha, h⟩ := GlobalTheory.exists_lattice_eq_mul_tau L
-  have e : Formalism.L2.Th1.CM.jInv L = (GlobalTheory.latticeCurve L).j := by
-    rw [WeierstrassCurve.j, Units.val_inv_eq_inv_val, WeierstrassCurve.coe_Δ', GlobalTheory.latticeCurve_Δ, GlobalTheory.latticeCurve_c₄,
-      Formalism.L2.Th1.CM.jInv]
-    ring
-  rw [e, GlobalTheory.latticeCurve_j ha h]
-  refine GlobalTheory.isIntegral_modularJ_of_mul_mem (α := Formalism.L2.Th1.CM.omegaK d) ?_ ?_
-  · intro m hm
-    have him := congrArg Complex.im hm
-    simp [Formalism.L2.Th1.CM.omegaK] at him
-    omega
-  · intro x hx
-    obtain ⟨m, n, rfl⟩ := Submodule.mem_span_pair.1 hx
-    obtain ⟨m', n', h'⟩ := (h _).1 (hcm _ ((h _).2 ⟨m, n, rfl⟩))
-    refine Submodule.mem_span_pair.2 ⟨m', n', ?_⟩
-    simp only [zsmul_eq_mul, mul_one]
-    apply mul_left_cancel₀ ha
-    rw [h']; ring
+  apply GlobalTheory.ThLoc.cm1 <;> assumption
 
 theorem norm_jInv_le_one (d : ℕ) (L : PeriodPair) (hsq : Squarefree d) (hmod : d % 4 = 3) (hcm : Formalism.L2.Th1.CM.HasCMBy d L)
     (p : ℕ) [Fact p.Prime] (ι : ℂ ≃+* ℂ_[p]) : ‖ι (Formalism.L2.Th1.CM.jInv L)‖ ≤ 1 :=

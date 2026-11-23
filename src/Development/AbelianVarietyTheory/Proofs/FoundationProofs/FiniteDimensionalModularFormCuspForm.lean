@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsSturmBoundIsModularFormCoeffSeq
 public import Mathlib.NumberTheory.ModularForms.NormTrace
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -131,31 +132,7 @@ theorem qParam_pow_bigO {h : ℝ} (hh : 0 < h) {m M : ℕ} (hm : (M : ℝ) * h �
 
 theorem norm_bigO {F : Type*} [FunLike F ℍ ℂ] {Γ : Subgroup (GL (Fin 2) ℝ)} {k : ℤ} [ModularFormClass F Γ k]
     [Γ.IsArithmetic] (f : F) : (ModularForm.norm 𝒮ℒ f : ℍ → ℂ) =O[atImInfty] (f : ℍ → ℂ) := by
-  classical
-  let := Fintype.ofFinite (𝒮ℒ ⧸ (Γ.subgroupOf 𝒮ℒ))
-  have hb : ∀ q : 𝒮ℒ ⧸ (Γ.subgroupOf 𝒮ℒ),
-      SlashInvariantForm.quotientFunc (k := k) f q =O[atImInfty] fun _ => (1 : ℂ) := by
-    refine Quotient.forall.mpr fun ⟨r, hr⟩ => ?_
-    have hc : IsCusp OnePoint.infty 𝒮ℒ := Fact.out
-    have := (ModularForm.translate f r⁻¹).bdd_at_cusps' (c := OnePoint.infty)
-      (by simpa using hc.of_isFiniteRelIndex_conj hr)
-    rw [OnePoint.isBoundedAt_infty_iff] at this
-    have h2 : (ModularForm.translate f r⁻¹ : ℍ → ℂ) =O[atImInfty] (1 : ℍ → ℝ) := this
-    refine IsBigO.trans h2 ?_
-    exact IsBigO.of_bound 1 (by simp)
-  have h1 : (∏ q ∈ Finset.univ.erase (⟦1⟧ : 𝒮ℒ ⧸ (Γ.subgroupOf 𝒮ℒ)),
-      SlashInvariantForm.quotientFunc (k := k) f q) =O[atImInfty] fun _ => (1 : ℂ) := by
-    have := IsBigO.finsetProd (s := Finset.univ.erase (⟦1⟧ : 𝒮ℒ ⧸ (Γ.subgroupOf 𝒮ℒ))) (fun q _ => hb q)
-    simpa [Finset.prod_fn] using this
-  have h2 := (isBigO_refl (f : ℍ → ℂ) atImInfty).mul h1
-  simp only [mul_one] at h2
-  refine h2.congr_left fun τ => ?_
-  have h3 := congr_fun (Finset.mul_prod_erase Finset.univ (fun q => SlashInvariantForm.quotientFunc (k := k) f q)
-    (Finset.mem_univ (⟦1⟧ : 𝒮ℒ ⧸ (Γ.subgroupOf 𝒮ℒ)))) τ
-  rw [ModularForm.coe_norm]
-  have h4 : SlashInvariantForm.quotientFunc (k := k) f (⟦1⟧ : 𝒮ℒ ⧸ (Γ.subgroupOf 𝒮ℒ)) = f := by simp
-  rw [h4, Pi.mul_apply] at h3
-  convert h3
+  apply GlobalTheory.EisM.modularFormNorm_isBigO_self_atImInfty <;> assumption
 
 theorem sturm {Γ : Subgroup (GL (Fin 2) ℝ)} [Γ.IsArithmetic] {h : ℝ} (hh : 0 < h)
     (hΓ : h ∈ Γ.strictPeriods) (k : ℤ) :

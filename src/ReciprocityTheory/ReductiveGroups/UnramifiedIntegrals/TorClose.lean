@@ -121,12 +121,6 @@ theorem norm_x_sub_le_of_formalGroup (W : WeierstrassCurve C) (h1 : W.a₁ = 0) 
   have hY : ‖yd‖ ^ 2 = ‖xd‖ ^ 3 := by
     rw [← norm_pow, e, IsUltrametricDist.norm_add_eq_max_of_norm_ne_norm hne2, norm_pow,
       max_eq_left (by linarith)]
-  have hYpos : 0 < ‖yd‖ := by
-    by_contra hneg
-    have h0 : ‖yd‖ = 0 := le_antisymm (not_lt.1 hneg) (norm_nonneg _)
-    rw [h0] at hY
-    have := pow_pos hX0 3
-    nlinarith
   have hne1 : ‖px W (A + B)‖ ≠ ‖-xd‖ := ne_of_lt (by rw [norm_neg]; linarith)
   have hxs : ‖px W (A + B) - xd‖ = ‖xd‖ := by
     rw [sub_eq_add_neg, IsUltrametricDist.norm_add_eq_max_of_norm_ne_norm hne1, norm_neg,

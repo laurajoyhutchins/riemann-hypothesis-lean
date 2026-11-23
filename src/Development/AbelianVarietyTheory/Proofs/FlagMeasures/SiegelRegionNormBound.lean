@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.BesselModelUnitaryGroupOpNormProperties
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.MatrixOfBesselTwoSidedAction
 public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.LeadingMinorInvariant
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ImportsBisMore
@@ -208,23 +209,7 @@ theorem continuous_opn {N : ℕ} : Continuous fun x : Matrix (Fin N) (Fin N) ℂ
     (Matrix.toEuclideanCLM (𝕜 := ℂ) (n := Fin N)).toAlgEquiv.toLinearMap).norm
 
 theorem one_le_opn {k r : ℕ} {x : Mat k r} (hx : x ∈ GG k r) : 1 ≤ opn x := by
-  have h1 : opn xᴴ = opn x := by
-    unfold opn
-    rw [← Matrix.star_eq_conjTranspose, map_star, norm_star]
-  have h2 : opn (Hpk k r) ≤ opn x * opn (Hpk k r) * opn x := by
-    conv_lhs => rw [← show xᴴ * Hpk k r * x = Hpk k r from hx]
-    refine (opn_mul_le _ _).trans (mul_le_mul_of_nonneg_right ?_ (opn_nonneg _))
-    rw [← h1]; exact opn_mul_le _ _
-  have h3 : 1 ≤ opn (Hpk k r) * opn (Hpk k r) := by
-    have := opn_mul_le (Hpk k r) (Hpk k r)
-    rwa [(hpkFacts k r).2.1, opn_one] at this
-  have h4 : 0 < opn (Hpk k r) := lt_of_le_of_ne (opn_nonneg _) fun h => by
-    rw [← h] at h3; norm_num at h3
-  by_contra h
-  have h5 := not_le.1 h
-  have h6 := opn_nonneg x
-  have h7 : opn x * opn x < 1 := by nlinarith
-  nlinarith
+  apply GlobalTheory.SgInf.OpNormU.one_le_opn <;> assumption
 
 theorem eucl_le_sum {N : ℕ} (v : Fin N → ℂ) : eucl v ≤ ∑ i, ‖v i‖ := by
   unfold eucl

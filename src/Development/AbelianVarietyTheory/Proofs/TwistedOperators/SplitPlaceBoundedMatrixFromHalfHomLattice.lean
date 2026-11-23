@@ -46,6 +46,7 @@ import Mathlib.Tactic.Polynomial.Basic
 import Mathlib.Tactic.ReduceModChar
 import Mathlib.Topology.Sheaves.Init
 import Development.AbelianVarietyTheory.Proofs.TwistedOperators.RestrictedTensorBasePointNormSq
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ConjugatePlaceBoundedMatrixFromConjugateHalfHomL
 
 @[expose] public section
 
@@ -71,27 +72,7 @@ theorem rk_mem_latHat (S T : HSp D) (ΛS : Submodule (𝓞 D.host.E) (Fin S.rank
     {t : Fin T.rank → Af D.host.F ⊗[D.host.F] D.host.E}
     (ht : t ∈ latHat D.host.F D.host.E (ΛT : Set (Fin T.rank → D.host.E))) :
     rk S T a s t ∈ latO S T ΛS ΛT fun _ => True := by
-  change rkHom S T a s t ∈ _
-  induction hs using AddSubgroup.closure_induction with
-  | mem s hs =>
-    induction ht using AddSubgroup.closure_induction with
-    | mem t ht =>
-      obtain ⟨α, hα, x, hx, rfl⟩ := hs
-      obtain ⟨β, hβ, y, hy, rfl⟩ := ht
-      refine AddSubgroup.subset_closure ⟨β * α, fun v => ?_, fun _ h => absurd trivial h, a, ha, x, hx, y, hy, ?_⟩
-      · rw [map_mul]; exact mul_mem (hβ v) (hα v)
-      · ext i j
-        change liftFin D (_ * _ * ∑ k, (α ⊗ₜ[D.host.F] star (x k)) * _) = _
-        rw [Matrix.of_apply, ← liftFin_tmul]
-        congr 1
-        simp only [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
-        rw [← TensorProduct.tmul_sum, Algebra.TensorProduct.tmul_mul_tmul]
-    | zero => rw [map_zero]; exact zero_mem _
-    | add y z _ _ hy hz => rw [map_add]; exact add_mem hy hz
-    | neg y _ hy => rw [map_neg]; exact neg_mem hy
-  | zero => rw [map_zero]; exact zero_mem _
-  | add y z _ _ hy hz => rw [map_add]; exact add_mem hy hz
-  | neg y _ hy => rw [map_neg]; exact neg_mem hy
+  apply _root_.GlobalTheory.ConjHalfOnto.rk_mem_lat <;> assumption
 
 theorem honto : ∀ (D : D7) (S T : HSp D) (ΛS : Submodule (𝓞 D.host.E) (Fin S.rank → D.host.E)) (ΛT : Submodule (𝓞 D.host.E) (Fin T.rank → D.host.E)) (βS : GL (Fin S.rank) (EAf D)) (βT : GL (Fin T.rank) (EAf D)), IsSelfDualC S ΛS → IsSelfDualC T ΛT → Formalism.L2.DIV.IsFrame βS ΛS → Formalism.L2.DIV.IsFrame βT ΛT → ∀ (v : FinPl D) (φ : SplitProj D v) (e : AE D), IsIdemOf φ e → ∀ a : D.host.E, a ∈ D.host.AA → a ≠ 0 → ∀ y : Matrix (Fin T.rank) (Fin S.rank) (Fv D.host.F v), (∀ i j, Valued.v (y i j) ≤ Valued.v (rdQ φ a)) → ∃ u, u ∈ latO S T ΛS ΛT (fun _ => True) ∧ IsHalf e u ∧ mapCo φ S T (frCo φ βS) (frCo φ βT) u = y := by
   intro D S T ΛS ΛT βS βT hSd hTd hfS hfT v φ e he a haA ha0 y hy

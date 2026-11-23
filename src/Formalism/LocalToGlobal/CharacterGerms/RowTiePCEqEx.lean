@@ -1,5 +1,6 @@
 module
 
+import Formalism.LocalToGlobal.CharacterGerms.RowTiePOActLog
 public import Formalism.LocalToGlobal.CharacterGerms.RowTiePCEqDer
 public import Formalism.LocalToGlobal.CharacterGerms.RowTiePGerm
 import Formalism.FormalGroupLog.FormalGroupLogProofs.ChainRule
@@ -87,21 +88,7 @@ theorem constantCoeff_pderiv {σ : Type} (q : σ) (f : MvPowerSeries σ C) :
   simp
 
 theorem ev_zero_pt {n : ℕ} (f : PS C 1 dd) : ev (n := n) (![0] : Fin 1 → Pt C n dd) f = MvPowerSeries.C (constantCoeff f) := by
-  have hZ : Z0 (![0] : Fin 1 → Pt C n dd) := by
-    intro k i; fin_cases k; simp
-  have h1 : f = MvPowerSeries.C (constantCoeff f) + (f - MvPowerSeries.C (constantCoeff f)) := by ring
-  conv_lhs => rw [h1]
-  rw [ev_add hZ, ev_C]
-  have h2 : ev (n := n) (![0] : Fin 1 → Pt C n dd) (f - MvPowerSeries.C (constantCoeff f)) = 0 := by
-    unfold ev
-    have e : (fun p : Fin 1 × Fin dd => (![0] : Fin 1 → Pt C n dd) p.1 p.2) = fun _ => 0 := by
-      funext p
-      obtain ⟨k, j⟩ := p
-      fin_cases k
-      rfl
-    rw [e]
-    exact RowTiePCEqSum.subst_zero_const _ (by simp)
-  rw [h2, add_zero]
+  apply Formalism.L2.FormalSeriesBounds.OActLog.ev_zero_pt <;> assumption
 
 theorem ex_lin (Y : FBChart C V O dd) (i m : Fin dd) :
     constantCoeff (pderiv (R := C) ((0 : Fin 1), i) (Y.ex m)) = if i = m then 1 else 0 := by

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.BesselSubgroupProductMeasureIsHaar
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryQuotientCompactness.SsetGroup
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryQuotientCompactness.NilpotentSubgroup
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.UnitaryQuotientCompactness.UnipotentRadicalContracting
@@ -66,27 +67,7 @@ lemma isClosed_UH : IsClosed (UH (Hpk k r)) := by
   exact isClosed_eq hc continuous_const
 
 lemma isClosed_N : IsClosed (Nset k r) := by
-  have e : Nset k r = UH (Hpk k r) ∩ ⋂ i : Fin (2 * r + k + 1), ⋂ j : Fin (2 * r + k + 1),
-      {g : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ |
-        j.val ≤ r + k → min j.val r ≤ i.val → g i j = if i = j then 1 else 0} := by
-    ext g
-    rw [mem_Nset_iff]
-    simp only [Set.mem_inter_iff, Set.mem_iInter, Set.mem_setOf_eq]
-    rfl
-  rw [e]
-  refine isClosed_UH.inter (isClosed_iInter fun i => isClosed_iInter fun j => ?_)
-  by_cases hp : j.val ≤ r + k ∧ min j.val r ≤ i.val
-  · have : {g : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ |
-        j.val ≤ r + k → min j.val r ≤ i.val → g i j = if i = j then 1 else 0} =
-        {g | g i j = if i = j then 1 else 0} := by
-      ext g; simp only [Set.mem_setOf_eq]; exact ⟨fun h => h hp.1 hp.2, fun h _ _ => h⟩
-    rw [this]
-    exact isClosed_eq ((continuous_apply j).comp (continuous_apply i)) continuous_const
-  · have : {g : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ |
-        j.val ≤ r + k → min j.val r ≤ i.val → g i j = if i = j then 1 else 0} = Set.univ := by
-      ext g; simp only [Set.mem_setOf_eq, Set.mem_univ, iff_true]
-      intro h1 h2; exact absurd ⟨h1, h2⟩ hp
-    rw [this]; exact isClosed_univ
+  apply GlobalTheory.ProdHaar.isClosed_Nset <;> assumption
 
 lemma S_sub_UH {g : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ} (hg : g ∈ Sset k r z) :
     g ∈ UH (Hpk k r) := by

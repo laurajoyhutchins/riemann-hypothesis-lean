@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.CardTorsionTranslateZerosLt
 public import Development.AbelianVarietyTheory.Definitions.Degenerations.PullChartIsLB
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
 public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.ExistsUniqueDescendOfTorsionInvariant
@@ -84,29 +85,7 @@ theorem sec_eq_zero_of_dim_zero {K : Type} [Field K] [IsAlgClosed K] (P : Out.Po
     {M : LB (Out.baseOver (Sp K) ⊗ P.A).left} (s : M.Sec)
     (hs : ¬ ⊤ ≤ (Out.ptSecT P.A (1 : Out.baseOver (Sp K) ⟶ P.A)).left ⁻¹ᵁ Out.nonzeroLocus s) (j : M.ι) :
     s.f j = 0 := by
-  have := polAV_isIntegral_of_isAlgClosed K P
-  have : Etale P.A.hom := (Etale.iff_smoothOfRelativeDimension_zero _).2 (hg ▸ P.smoothDim)
-  let e : Sp K ⟶ P.A.left := (1 : Out.baseOver (Sp K) ⟶ P.A).left
-  have := isOpenImmersion_of_section_of_etale P.A.hom e (Over.w _)
-  have : IsDominant e := ⟨e.isOpenEmbedding.isOpen_range.dense ⟨_, (default : PrimeSpectrum K), rfl⟩⟩
-  have : IsIso (snd (Out.baseOver (Sp K)) P.A).left :=
-    inferInstanceAs (IsIso (pullback.snd (𝟙 (Sp K)) P.A.hom))
-  let z : Sp K ⟶ (Out.baseOver (Sp K) ⊗ P.A).left := (Out.ptSecT P.A (1 : Out.baseOver (Sp K) ⟶ P.A)).left
-  have hz : z = e ≫ inv (snd (Out.baseOver (Sp K)) P.A).left := by
-    rw [IsIso.eq_comp_inv]
-    exact congrArg (·.left) (lift_snd (𝟙 _) (1 : Out.baseOver (Sp K) ⟶ P.A))
-  have hd : IsDominant z := by rw [hz]; infer_instance
-  have : IsReduced (Out.baseOver (Sp K) ⊗ P.A).left :=
-    isReduced_of_isOpenImmersion (snd (Out.baseOver (Sp K)) P.A).left
-  by_contra hne
-  have hb : ((Out.baseOver (Sp K) ⊗ P.A).left.basicOpen (s.f j) : Set (Out.baseOver (Sp K) ⊗ P.A).left).Nonempty := by
-    rw [Set.nonempty_iff_ne_empty]
-    exact fun h => hne ((basicOpen_eq_bot_iff _).1 (TopologicalSpace.Opens.ext h))
-  obtain ⟨y, hy⟩ := hd.denseRange.exists_mem_open (TopologicalSpace.Opens.isOpen _) hb
-  refine hs fun y' _ => ?_
-  have : y' = y := Subsingleton.elim (α := PrimeSpectrum K) _ _
-  subst this
-  exact TopologicalSpace.Opens.mem_iSup.2 ⟨j, hy⟩
+  apply GlobalTheory.FewZeros.sec_eq_zero_of_dim_zero <;> assumption
 
 theorem twist_eq_zero (h : Out.Laws) (h₂ : Out.Laws2) {K : Type} [Field K] [IsAlgClosed K]
     (P : Out.PolAV (Sp K)) {g N N' d : ℕ} (hB : Big g N N') (hN' : (N' : K) ≠ 0) (hg : P.g ≤ g) (hd : 1 ≤ d)

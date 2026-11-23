@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TorusSubmoduleMulLeftImageMemSelfDualStableLatti
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LinearDescent
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -89,40 +90,7 @@ theorem herm_torus_mul_right_eq_inv_mul_middle (x y : B.A) (t : B.Aˣ) (ht : t �
 
 theorem torusOrb_mulLat_mem_X (x : B.A) (t : B.Aˣ) (ht : t ∈ B.T) (L : Submodule K.O B.A) (hL : L ∈ B.X x) :
     mulLat K.O (t : B.A) L ∈ B.X x := by
-  obtain ⟨⟨hfg, hsp⟩, hg, hsd⟩ := hL
-  refine ⟨⟨hfg.map _, ?_⟩, ?_, ?_⟩
-  · rw [eq_top_iff]
-    intro a _
-    have hmem : ((t⁻¹ : B.Aˣ) : B.A) * a ∈ Submodule.span K.E (L : Set B.A) := by rw [hsp]; trivial
-    have h2 := Submodule.mem_map_of_mem (f := LinearMap.mulLeft K.E (t : B.A)) hmem
-    rw [Submodule.map_span] at h2
-    have h3 : (LinearMap.mulLeft K.E (t : B.A)) ((((t⁻¹ : B.Aˣ) : B.A) * a)) = a := by
-      simp [LinearMap.mulLeft_apply, ← mul_assoc]
-    rw [h3] at h2
-    have e : ((mulLat K.O (t : B.A) L : Submodule K.O B.A) : Set B.A) =
-        (LinearMap.mulLeft K.E (t : B.A)) '' (L : Set B.A) := by
-      show ((L.map (LinearMap.mulLeft K.O (t : B.A)) : Submodule K.O B.A) : Set B.A) = _
-      rw [Submodule.map_coe]
-      rfl
-    rw [e]
-    exact h2
-  · intro y hy
-    rw [torusOrb_mem_mulLat_unit] at hy ⊢
-    rw [mul_left_comm]
-    exact hg _ hy
-  · intro y
-    rw [torusOrb_mem_mulLat_unit, hsd]
-    constructor
-    · intro h z hz
-      rw [torusOrb_mem_mulLat_unit] at hz
-      have := h _ hz
-      rw [← herm_torus_mul_right_eq_inv_mul_middle B x y t ht] at this
-      simpa [← mul_assoc] using this
-    · intro h z hz
-      rw [← herm_torus_mul_right_eq_inv_mul_middle B x y t ht]
-      apply h
-      rw [torusOrb_mem_mulLat_unit]
-      simpa [← mul_assoc] using hz
+  apply GlobalTheory.UnitLemma.TorusAction.torus_mem_X <;> assumption
 
 def torusOrbRel (x : B.A) (L M : B.X x) : Prop :=
   ∃ t ∈ B.T, (M : Submodule K.O B.A) = mulLat K.O (t : B.A) (L : Submodule K.O B.A)

@@ -212,20 +212,12 @@ include hσ hJ he hff hef hdet hfix h2 hδ hσδ in
 theorem OFam.extend {r : ℕ} (F : OFam (σ := σ) (J := J) e f r) (hns : ¬ F.Spans) :
     Nonempty (OFam (σ := σ) (J := J) e f (r + 1)) := by
   classical
-  have hadd1 : ∀ x y z, hf σ J (x + y) z = hf σ J x z + hf σ J y z := by
-    intro x y z
-    simp only [hf, Pi.add_apply, add_mul, Finset.sum_add_distrib]
   have hadd2 : ∀ x y z, hf σ J x (y + z) = hf σ J x y + hf σ J x z := by
     intro x y z
     simp only [hf, Pi.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
   have hsub2 : ∀ x y z, hf σ J x (y - z) = hf σ J x y - hf σ J x z := by
     intro x y z
     simp only [hf, Pi.sub_apply, map_sub, mul_sub, Finset.sum_sub_distrib]
-  have hsm1 : ∀ (c : K) x y, hf σ J (c • x) y = c * hf σ J x y := by
-    intro c x y
-    simp only [hf, Pi.smul_apply, smul_eq_mul, Finset.mul_sum]
-    refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
-    ring
   have hsm2 : ∀ (c : K) x y, hf σ J x (c • y) = σ c * hf σ J x y := by
     intro c x y
     simp only [hf, Pi.smul_apply, smul_eq_mul, map_mul, Finset.mul_sum]
@@ -317,23 +309,9 @@ theorem OFam.extend {r : ℕ} (F : OFam (σ := σ) (J := J) e f r) (hns : ¬ F.S
 include hσ hJ he hff hef in
 theorem OFam.card_le [Nontrivial K] {r : ℕ} (F : OFam (σ := σ) (J := J) e f r) : r + 2 ≤ Fintype.card ι := by
   classical
-  have hadd1 : ∀ x y z, hf σ J (x + y) z = hf σ J x z + hf σ J y z := by
-    intro x y z
-    simp only [hf, Pi.add_apply, add_mul, Finset.sum_add_distrib]
-  have hadd2 : ∀ x y z, hf σ J x (y + z) = hf σ J x y + hf σ J x z := by
-    intro x y z
-    simp only [hf, Pi.add_apply, map_add (f := _), mul_add, Finset.sum_add_distrib]
-  have hsub2 : ∀ x y z, hf σ J x (y - z) = hf σ J x y - hf σ J x z := by
-    intro x y z
-    simp only [hf, Pi.sub_apply, map_sub, mul_sub, Finset.sum_sub_distrib]
   have hsm1 : ∀ (c : K) x y, hf σ J (c • x) y = c * hf σ J x y := by
     intro c x y
     simp only [hf, Pi.smul_apply, smul_eq_mul, Finset.mul_sum]
-    refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
-    ring
-  have hsm2 : ∀ (c : K) x y, hf σ J x (c • y) = σ c * hf σ J x y := by
-    intro c x y
-    simp only [hf, Pi.smul_apply, smul_eq_mul, map_mul, Finset.mul_sum]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
     ring
   have hsym : ∀ x y, hf σ J y x = σ (hf σ J x y) := by

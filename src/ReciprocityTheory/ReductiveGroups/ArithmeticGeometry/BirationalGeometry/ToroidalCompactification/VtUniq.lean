@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsPowerSectionOfChartFunctions
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CubeVal
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.GlobalSectionsRankAlgClosed
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.RosatiAdj
@@ -68,27 +69,7 @@ variable {A U : Type} [CommGroup A] [CommGroup U]
 
 theorem cubN_right {θ : A → A → A → U} (h : IsCub θ) {k : ℕ} {x : A} (hx : x ^ k = 1) (z y : A) :
     cubN θ k 1 x (z * y) * θ x z y ^ k = cubN θ k 1 x z * cubN θ k 1 x y := by
-  have cyc : ∀ p q r, θ r p q = θ p q r := fun p q r => (h.s01 r p q).trans (h.s12 p r q)
-  have key : ∀ a, θ a x (z * y) * θ x z y = θ a x z * θ a x y * (θ (a * x) z y * (θ a z y)⁻¹) := by
-    intro a
-    have c1 := h.coc x z y a
-    have c2 := h.coc a x z y
-    rw [← cyc x z a, ← cyc (x * z) y a, ← cyc x (z * y) a, ← cyc z y a] at c1
-    rw [← _root_.mul_assoc, eq_mul_inv_iff_mul_eq]
-    calc θ a x (z * y) * θ x z y * θ a z y = θ a x (z * y) * θ a z y * θ x z y := mul_right_comm _ _ _
-      _ = θ a (x * z) y * θ a x z * θ x z y := by rw [← c1]
-      _ = θ a x z * (θ a (x * z) y * θ x z y) := by rw [mul_comm (θ a (x * z) y) (θ a x z), _root_.mul_assoc]
-      _ = θ a x z * (θ (a * x) z y * θ a x y) := by rw [← c2]
-      _ = θ a x z * θ a x y * θ (a * x) z y := by rw [mul_comm (θ (a * x) z y) (θ a x y), _root_.mul_assoc]
-  have htel : ∏ i ∈ Finset.range k, (θ (x ^ i * x) z y * (θ (x ^ i) z y)⁻¹) = 1 := by
-    have := Finset.prod_range_div (fun i => θ (x ^ i) z y) k
-    simp only [pow_succ, div_eq_mul_inv] at this
-    rw [this, hx, pow_zero, mul_inv_cancel]
-  have hG : θ x z y ^ k = ∏ _i ∈ Finset.range k, θ x z y := by simp
-  unfold cubN
-  simp only [_root_.one_mul]
-  rw [hG, ← Finset.prod_mul_distrib, Finset.prod_congr rfl (fun i _ => key (x ^ i)), Finset.prod_mul_distrib,
-    Finset.prod_mul_distrib, htel, _root_.mul_one]
+  apply GlobalTheory.ThetaInValues.cubN_mul <;> assumption
 
 theorem lift_const {k : ℕ} (hk : Odd k) {t d : A} (ht : t ^ k = 1) (hd : d ^ k = 1) (φ' φ β ν' ν κ : A → U) (c e : U)
     (hga : ∀ y, φ (y * d) * β (y * d * t) * β y = φ y * β (y * t) * β (y * d))

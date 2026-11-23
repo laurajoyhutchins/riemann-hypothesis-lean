@@ -1,5 +1,6 @@
 module
 
+import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.DDMulApply
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.DensityLemma.PFibreBoundVDefs
 public import Formalism.HermitianCurvature.FiniteOrderIntersectionInSmooth
 import Mathlib.Algebra.Order.Floor.Extended
@@ -98,21 +99,7 @@ lemma esI_val (a : Fin r) : (esI k r a).val = 2 * r + k - a.val := rfl
 
 lemma sum_split {M : Type*} [AddCommMonoid M] (f : Fin (2 * r + k + 1) → M) :
     ∑ i, f i = ∑ a : Fin r, f (eI k r a) + ∑ j : Fin (k + 1), f (wI k r j) + ∑ a : Fin r, f (esI k r a) := by
-  have hinj : Function.Injective
-      (Sum.elim (eI k r) (Sum.elim (wI k r) (esI k r)) : Fin r ⊕ (Fin (k + 1) ⊕ Fin r) → Fin (2 * r + k + 1)) := by
-    rintro (a | j | a) (b | i | b) h <;>
-      simp only [Sum.elim_inl, Sum.elim_inr, Fin.ext_iff, eI_val, wI_val, esI_val, Sum.inl.injEq,
-        Sum.inr.injEq, reduceCtorEq] at h ⊢ <;>
-      omega
-  have hbij : Function.Bijective
-      (Sum.elim (eI k r) (Sum.elim (wI k r) (esI k r)) : Fin r ⊕ (Fin (k + 1) ⊕ Fin r) → Fin (2 * r + k + 1)) := by
-    rw [Fintype.bijective_iff_injective_and_card]
-    refine ⟨hinj, ?_⟩
-    simp only [Fintype.card_sum, Fintype.card_fin]
-    omega
-  rw [← Fintype.sum_bijective _ hbij (fun x => f (Sum.elim (eI k r) (Sum.elim (wI k r) (esI k r)) x)) f
-    (fun _ => rfl)]
-  simp only [Fintype.sum_sum_type, Sum.elim_inl, Sum.elim_inr, add_assoc]
+  apply WlocSk.NB.sum_split <;> assumption
 
 lemma cases3 {P : Fin (2 * r + k + 1) → Prop} (h1 : ∀ a, P (eI k r a)) (h2 : ∀ j, P (wI k r j))
     (h3 : ∀ a, P (esI k r a)) (i : Fin (2 * r + k + 1)) : P i := by

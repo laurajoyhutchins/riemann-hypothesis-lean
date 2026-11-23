@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsEmbeddingPadicAlgClPlace
 public import Formalism.LocalToGlobal.InertKernelTheory.DefsFrONB
 public import Formalism.LocalToGlobal.GlobalTheory.GL3.IsometryLinkageTrivialLevel
 import Formalism.LocalRingCardinality.SpanPowerMembership.ExampleLayerExistsGenerators
@@ -319,37 +320,7 @@ theorem intAt_det {n : Type*} [Fintype n] [DecidableEq n] (M : Matrix n n K) (h 
 
 theorem norm_le_one_of_int {k : Type*} [NormedField k] [IsUltrametricDist k] {y : k}
     (hy : IsIntegral ℤ y) : ‖y‖ ≤ 1 := by
-  by_contra hlt
-  push_neg at hlt
-  obtain ⟨P, hPm, hP⟩ := hy
-  have hsum : y ^ P.natDegree = -∑ i ∈ Finset.range P.natDegree, (P.coeff i : k) * y ^ i := by
-    have h := hP
-    rw [hPm.as_sum] at h
-    simp only [Polynomial.eval₂_add, Polynomial.eval₂_X_pow, Polynomial.eval₂_finsetSum,
-      Polynomial.eval₂_mul, Polynomial.eval₂_C, Polynomial.eval₂_X_pow, algebraMap_int_eq, eq_intCast, map_sum] at h
-    refine eq_neg_of_add_eq_zero_left ?_
-    rw [← h]
-    congr 1
-    refine Finset.sum_congr rfl fun i _ => ?_
-    congr 1
-    rw [← Polynomial.C_eq_intCast, Polynomial.eval₂_C]
-    simp
-  have hy1 : 1 ≤ ‖y‖ := hlt.le
-  rcases Nat.eq_zero_or_pos P.natDegree with hn | hn
-  · rw [hn, pow_zero, Finset.range_zero, Finset.sum_empty, neg_zero] at hsum
-    exact one_ne_zero hsum
-  · have hle : ‖∑ i ∈ Finset.range P.natDegree, (P.coeff i : k) * y ^ i‖ ≤ ‖y‖ ^ (P.natDegree - 1) := by
-      refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg (by positivity) fun i hi => ?_
-      rw [norm_mul, norm_pow]
-      have hc : ‖(P.coeff i : k)‖ ≤ 1 := IsUltrametricDist.norm_intCast_le_one ..
-      have hp : ‖y‖ ^ i ≤ ‖y‖ ^ (P.natDegree - 1) :=
-        pow_le_pow_right₀ hy1 (by have := Finset.mem_range.mp hi; omega)
-      calc ‖(P.coeff i : k)‖ * ‖y‖ ^ i ≤ 1 * ‖y‖ ^ (P.natDegree - 1) :=
-            mul_le_mul hc hp (by positivity) zero_le_one
-        _ = ‖y‖ ^ (P.natDegree - 1) := one_mul _
-    rw [← norm_neg, ← hsum, norm_pow] at hle
-    have hlt2 : ‖y‖ ^ (P.natDegree - 1) < ‖y‖ ^ P.natDegree := pow_lt_pow_right₀ hlt (by omega)
-    linarith
+  apply GlobalTheory.norm_le_one_of_isIntegral_int <;> assumption
 
 theorem norm_nat_coprime [Fact p.Prime] {s : ℕ} (h : Nat.Coprime s p) : ‖(s : ℂ_[p])‖ = 1 := by
   have h1 : ((s : ℚ_[p]) : ℂ_[p]) = (s : ℂ_[p]) := map_natCast (algebraMap ℚ_[p] ℂ_[p]) s

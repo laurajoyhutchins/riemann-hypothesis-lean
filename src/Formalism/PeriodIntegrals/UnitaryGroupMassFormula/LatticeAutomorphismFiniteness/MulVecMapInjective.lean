@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CountPositivity.CardLeOfNegFamily
 public import Formalism.LocalRingCardinality.DataSpaces
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeAutomorphismFiniteness.SylvesterLe
 public import Lemmata.GeneralBFactUpperAltForm.Imports
@@ -58,23 +59,7 @@ variable {E : Type} [Field E] [NumberField E] [StarRing E] (S : HSpace E)
 
 theorem hT_expand (x y : S.V) :
     S.hT x y = ∑ i, ∑ j, star (S.frame.repr x i) * S.gram i j * S.frame.repr y j := by
-  have hx : ∀ w, S.hT x w = ∑ i, star (S.frame.repr x i) * S.hT (S.frame i) w := by
-    intro w
-    conv_lhs => rw [← S.frame.sum_repr x]
-
-    rw [map_sum, LinearMap.sum_apply]
-    simp [LinearMap.map_smulₛₗ, starRingEnd_apply]
-  have hy : ∀ w, S.hT w y = ∑ j, S.hT w (S.frame j) * S.frame.repr y j := by
-    intro w
-    conv_lhs => rw [← S.frame.sum_repr y]
-
-    rw [map_sum]
-    simp [mul_comm]
-  rw [hx]
-  refine Finset.sum_congr rfl fun i _ => ?_
-  rw [hy, Finset.mul_sum]
-  refine Finset.sum_congr rfl fun j _ => ?_
-  simp [HSpace.gram, mul_assoc]
+  apply PI.CntNotPosW.hT_expand' <;> assumption
 
 theorem herm_swap (x y : S.V) : S.hT y x = star (S.hT x y) := by
   rw [← S.herm.eq x y]; rfl

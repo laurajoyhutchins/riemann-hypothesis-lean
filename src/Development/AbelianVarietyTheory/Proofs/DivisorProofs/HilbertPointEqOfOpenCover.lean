@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IdealSheafDataExtOfOpenCover
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ComapEqKerIff
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -54,21 +55,7 @@ namespace GlobalTheory.HilbGlue
 theorem idealSheaf_ext_of_openImmersions {P : Scheme.{0}} {ι : Type*} {X : ι → Scheme.{0}}
     (f : ∀ i, X i ⟶ P) [∀ i, IsOpenImmersion (f i)] (hf : ∀ x : P, ∃ i y, f i y = x)
     (I J : P.IdealSheafData) (h : ∀ i, I.comap (f i) = J.comap (f i)) : I = J := by
-  refine Scheme.IdealSheafData.ext_of_iSup_eq_top (ι := Σ i, (X i).affineOpens)
-    (fun a => ⟨f a.1 ''ᵁ a.2.1, a.2.2.image_of_isOpenImmersion (f a.1)⟩) ?_ ?_
-  · rw [eq_top_iff]
-    rintro x -
-    obtain ⟨i, y, rfl⟩ := hf x
-    obtain ⟨W, hW, hyW⟩ : ∃ W : (X i).Opens, IsAffineOpen W ∧ y ∈ W := by
-      obtain ⟨_, ⟨W, hW, rfl⟩, hy, -⟩ := (X i).isBasis_affineOpens.exists_subset_of_mem_open
-        (Set.mem_univ y) isOpen_univ
-      exact ⟨W, hW, hy⟩
-    exact TopologicalSpace.Opens.mem_iSup.2 ⟨⟨i, W, hW⟩, ⟨y, hyW, rfl⟩⟩
-  · rintro ⟨i, W⟩
-    have e := congrArg (fun K : (X i).IdealSheafData => K.ideal W) (h i)
-    simp only [Scheme.IdealSheafData.ideal_comap_of_isOpenImmersion] at e
-    exact Ideal.comap_injective_of_surjective _
-      ((ConcreteCategory.bijective_of_isIso ((f i).appIso W).inv).2) e
+  apply GlobalTheory.HilbAff.idealSheafData_ext_of_openCover <;> assumption
 
 end GlobalTheory.HilbGlue
 

@@ -110,7 +110,6 @@ theorem locInA_prim {ι : Type} (v : ι → V) (h : H.Prim abelian₂ v) : H.Pri
   refine ⟨fun a => locInA_mem e hL (v a) (h1 a), ?_, ?_⟩
   · first
       | exact h2.map' (e : V →ₗ[E] V) (LinearEquiv.ker e)
-      | exact h2.map' (e : V →ₗ[E] V) (LinearMap.ker_eq_bot.2 e.injective)
   · intro x hx hxs
     have hs : e.symm x ∈ Submodule.span E (Set.range v) :=
       locInA_span_mem e.symm (fun i => e (v i)) v (fun i => e.symm_apply_apply (v i)) hxs
@@ -162,14 +161,12 @@ theorem locInA_zhat {r : ℕ} (f f' : Fin (r + 1) → V) :
     H.Zhat (fun a => e (f a)) (fun b => e (f' b)) = H.Zhat f f' := by
   first
     | (ext a b; simp only [Loc.HermSp.Zhat, Matrix.of_apply, hiso])
-    | (unfold Loc.HermSp.Zhat; simp only [hiso])
 
 omit hL in
 theorem locInA_dl {r : ℕ} (f f' : Fin (r + 1) → V) (l : ℕ) :
     H.Dl (fun a => e (f a)) (fun b => e (f' b)) l = H.Dl f f' l := by
   first
     | simp only [Loc.HermSp.Dl, locInA_zhat H e hiso f f']
-    | (unfold Loc.HermSp.Dl; rw [locInA_zhat H e hiso f f'])
 
 theorem locInA_frame {r : ℕ} (f : Fin (r + 1) → V) (T : F) (h : H.IsFrame abelian₂ r f T) :
     H.IsFrame Lam' r (fun a => e (f a)) T := by
@@ -232,8 +229,6 @@ include hf in
 theorem locInA_fs (a : Fin (r + 1)) : e.symm (t₁.f a) = t₁.f a := by
   first
     | exact e.symm_apply_eq.2 (hf a).symm
-    | (conv_lhs => rw [← hf a]
-       exact e.symm_apply_apply _)
 
 include hf' in
 theorem locInA_fs' (b : Fin (r + 1)) : e.symm (f₃' b) = f₂' b := by
@@ -272,8 +267,6 @@ theorem locInA_mk_e (x : ↥(H.perp (H.X t₁.f))) (y : ↥(H.perp (H.X t₁.f))
   have h2 : y - x ∈ (H.X t₁.f).comap (H.perp (H.X t₁.f)).subtype := h1
   first
     | exact (Submodule.Quotient.eq _).2 h2
-    | (simp only [Loc.HermSp.mkW, Submodule.mkQ_apply]
-       exact (Submodule.Quotient.eq _).2 h2)
 
 
 include hf hX in
@@ -298,12 +291,9 @@ theorem locInA_q_mk (x : ↥(H.perp (H.X f₂'))) (y : ↥(H.perp (H.X f₃'))) 
       (locInA_Xs' H e hiso hf') x = y := by
     first
       | exact Subtype.ext hy.symm
-      | exact Subtype.ext (by simp [perpEquiv, hy])
   rw [← hxy]
   first
     | rfl
-    | (simp only [qEquiv, Loc.HermSp.mkW, Submodule.mkQ_apply]
-       rfl)
 
 theorem lset_q {Lam₂ Lam₃ : Submodule M.L.O V} (hL : ∀ x, x ∈ Lam₃ ↔ e.symm x ∈ Lam₂) :
     qE H e hiso hf' '' H.Lset Lam₂ f₂' = H.Lset Lam₃ f₃' := by
@@ -508,8 +498,6 @@ theorem locSet_back {Lam₂ Lam₃ : Submodule M.L.O V} (hL : ∀ x, x ∈ Lam�
       have hinj : Function.Injective (Prod.map (qE H e hiso hf') (id : H.Wb t₁.f → H.Wb t₁.f)) := by
         first
           | exact (qE H e hiso hf').injective.prodMap Function.injective_id
-          | exact (qE H e hiso hf').injective.Prod_map Function.injective_id
-          | exact Prod.map_injective.2 ⟨(qE H e hiso hf').injective, Function.injective_id⟩
       exact Set.image_injective.2 hinj he
 
 end Move

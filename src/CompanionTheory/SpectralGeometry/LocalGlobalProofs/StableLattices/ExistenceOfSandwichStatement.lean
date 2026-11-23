@@ -119,7 +119,6 @@ theorem exists_basis_herm_le_one [FiniteDimensional L V] {s : L →+* L} {h : V 
     rw [lt_div_iff₀ (by positivity)] at ht
     exact ht.le
   have ht1 : ‖t‖ ≤ 1 := by nlinarith [norm_nonneg t]
-  have htK' : ‖t‖ * K ≤ 1 := by nlinarith [norm_nonneg t]
   have tne : t ≠ 0 := norm_pos_iff.1 ht0
   have hu : ∀ i : Fin (Module.finrank L V), IsUnit ((fun _ => t) i : L) :=
     fun _ => isUnit_iff_ne_zero.2 tne
@@ -156,7 +155,6 @@ theorem IsLat.smul_mem {Λ : AddSubgroup V} (hΛ : IsLat L Λ) {a : L} (ha : ‖
 theorem ball_absorbing {m : ℕ} (b : Module.Basis (Fin m) L V) (x : V) :
     ∃ a : L, a ≠ 0 ∧ a • x ∈ ball b := by
   let K : ℝ := ∑ i, ‖b.repr x i‖
-  have hK0 : 0 ≤ K := Finset.sum_nonneg fun _ _ => norm_nonneg _
   obtain ⟨t, ht0, ht⟩ := NormedField.exists_norm_lt L (show (0 : ℝ) < 1 / (K + 1) by positivity)
   have htK : ‖t‖ * (K + 1) ≤ 1 := by
     rw [lt_div_iff₀ (by positivity)] at ht
@@ -198,7 +196,6 @@ theorem exists_scale {s : L →+* L} {h : V → V → L} (hh : IsHerm s h) (B : 
     rw [h1] at h2
     exact h2
   let C : ℝ := ∑ k, ∑ i, ‖b.repr (w k) i‖
-  have hC0 : 0 ≤ C := Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ => norm_nonneg _
   have hCki : ∀ k i, ‖b.repr (w k) i‖ ≤ C := fun k i =>
     (Finset.single_le_sum (f := fun i => ‖b.repr (w k) i‖)
       (fun _ _ => norm_nonneg _) (Finset.mem_univ i)).trans

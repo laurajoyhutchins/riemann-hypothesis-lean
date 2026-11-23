@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.LevelLetterCocycles.RepresentationCongruences.Pi0MemADelta
 public import Formalism.SharpRestriction.LevelLetterCocycles.ArcLiftingSetup
 public import Formalism.SharpRestriction.LevelLetterCocycles.ConstantCoeffAlgHom
 import Mathlib.Algebra.Order.Floor.Extended
@@ -78,26 +79,7 @@ theorem delF_iff (g : W.Gam) : g ∈ W.DelF ↔ IsOfFinOrder g := by
   rw [W.DelF_def, isOfFinOrder_iff_pow_eq_one]
 
 theorem π₀_mem : W.π₀ ∈ W.AΔ := by
-  intro δ hδ
-  have hδ' : IsOfFinOrder δ := (delF_iff W δ).1 hδ
-  funext i
-  rw [γA_apply]
-  show W.γ₀ δ W.π₀₁ = W.π₀₁
-  unfold LocWach.π₀₁
-
-  rw [map_add (f := _), map_sub, map_one, map_natCast, map_sum]
-  congr 1
-  refine Finset.sum_equiv (Equiv.mulLeft δ) (fun g => ?_) (fun g _ => ?_)
-  · rw [delF_iff, delF_iff]
-    constructor
-    · intro hg
-      exact hδ'.mul hg
-    · intro hg
-      have := hδ'.inv.mul hg
-      simpa using this
-  · show W.γ₀ δ (W.γ₀ g (1 + X)) = W.γ₀ (δ * g) (1 + X)
-    rw [map_mul]
-    rfl
+  apply Formalism.MainNotions.N.FrobeniusPowerSeries.TypesA.pi0_mem_ADelta <;> assumption
 
 theorem qA_mem : qA W ∈ W.AΔ :=
   W.AΔ.add_mem (π₀_mem W) (natCast_mem _ _)

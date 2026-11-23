@@ -429,8 +429,6 @@ theorem _root_.Formalism.FourierDecayAlt.P.head_algebra_relations_vector : HeadA
   have hZ : Z''.det ≠ 0 := by rw [hZdet]; exact mul_ne_zero hW hεne
   have hZinv : ∀ b, Z''⁻¹ b (Fin.last m) = εv b * W⁻¹ b (Fin.last m) := by
     intro b
-    have hWu : IsUnit W.det := isUnit_iff_ne_zero.2 hW
-    have hDu : IsUnit (Matrix.diagonal εv).det := isUnit_iff_ne_zero.2 (by rw [hDdet]; exact hεne)
     rw [hZdef, Matrix.mul_inv_rev, hDinv, Matrix.diagonal_mul]
   set c : ℂ := (-1 : ℂ) ^ (m + 1) * d with hcdef
   set c' : ℂ := -((-1 : ℂ) ^ (m + 1) * d) with hc'def
@@ -526,7 +524,6 @@ theorem _root_.Formalism.FourierDecayAlt.P.head_algebra_relations_vector : HeadA
   set P0 := ∏ l : Fin m, (-1 : ℂ) ^ (l : ℕ) with hP0
   set e := (-1 : ℂ) ^ m with he
   have hP0sq : P0 * P0 = 1 := prod_neg_one_sq m
-  have hesq : e * e = 1 := by rw [he, ← mul_pow]; norm_num
   have hP0ne : P0 ≠ 0 := fun h => by rw [h, zero_mul] at hP0sq; exact zero_ne_one hP0sq
   have hene : e ≠ 0 := pow_ne_zero _ (by norm_num)
   have hm1 : (-1 : ℂ) ^ (m + 1) = -e := by rw [pow_succ, he]; ring

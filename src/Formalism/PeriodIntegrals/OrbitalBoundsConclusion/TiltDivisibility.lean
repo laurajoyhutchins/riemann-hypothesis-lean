@@ -1,7 +1,6 @@
 module
 
 public import Formalism.PeriodIntegrals.ArtSch
-public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TiltedDivisibility.TiltDivOfGeneral
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
 import Mathlib.Algebra.Order.Interval.Basic
@@ -41,7 +40,10 @@ import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.PAdicHodge.PerfectoidField
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.FrobeniusSubOneSurjectiveWittTilt
 
 @[expose] public section
 
-theorem tilt_divisibility : PI.ArtSch.TiltDiv := PI.ArtSch.tiltDiv_of_general
+theorem tilt_divisibility : PI.ArtSch.TiltDiv :=
+  @GlobalTheory.ArtinSchreierTilt.tiltDiv

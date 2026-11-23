@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FamilyExponentialConjugate
 public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.ModelsAt
 public import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsValLineLogNormAtIffEmbedding
 import Development.AbelianVarietyTheory.Proofs.ToricGeometry.TangentBijectionOfValues
@@ -58,17 +59,7 @@ attribute [local instance] Over.cartesianMonoidalCategory
 
 theorem fderiv_star_star_zero {g : ℕ} (F : (Fin g → ℂ) → ℂ) (w : Fin g → ℂ) :
     fderiv ℂ (star ∘ F ∘ star) 0 (star w) = star (fderiv ℂ F 0 w) := by
-  by_cases hF : DifferentiableAt ℂ F 0
-  · have d := hF.hasFDerivAt.star_star
-    rw [star_zero] at d
-    rw [d.fderiv]
-    simp
-  · have hG : ¬ DifferentiableAt ℂ (star ∘ F ∘ star) 0 := fun hG => hF (by
-      have := hG.star_star
-      have e : star ∘ (star ∘ F ∘ star) ∘ star = F := funext fun z => by simp
-      rwa [star_zero, e] at this)
-    rw [fderiv_zero_of_not_differentiableAt hF, fderiv_zero_of_not_differentiableAt hG]
-    simp
+  apply _root_.GlobalTheory.CompanionTheory.Ar.Flat.ConjExp.fderiv_conj_zero <;> assumption
 
 variable {A A' : Over (Sp ℂ)} [GrpObj A] [GrpObj A'] {ψ : A'.left ⟶ A.left} (h : IsGrpPullback A' A cj ψ)
 variable {X : Scheme.{0}} {L : LB X} {φ : A.left ⟶ X} {g : ℕ} (u : HolUnif A (L.pull φ) g)

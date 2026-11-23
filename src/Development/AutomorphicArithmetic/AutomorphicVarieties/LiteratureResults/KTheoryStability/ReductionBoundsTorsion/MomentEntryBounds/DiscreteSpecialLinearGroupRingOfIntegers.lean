@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ImportsLast
 public import Development.AutomorphicArithmetic.AutomorphicVarieties.LiteratureResults.KTheoryStability.ReductionBoundsTorsion.MomentEntryBounds.InstLCSL
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -55,28 +56,7 @@ namespace PositivityTheory.KB.MomentRationality.Disc
 
 theorem eq_zero_of_lt_one {L : Type} [Field L] [NumberField L] (a : 𝓞 L)
     (h : ∀ w : InfinitePlace L, w (a : L) < 1) : a = 0 := by
-  classical
-  by_contra ha
-  have hn : Algebra.norm ℤ a ≠ 0 := Algebra.norm_ne_zero_iff.2 ha
-  have h1 : (1 : ℝ) ≤ |((Algebra.norm ℤ a : ℤ) : ℝ)| := by
-    have : (1 : ℤ) ≤ |Algebra.norm ℤ a| := Int.one_le_abs hn
-    exact_mod_cast this
-  have h2 := prod_eq_abs_norm (a : L)
-  rw [← Algebra.coe_norm_int] at h2
-  have h3 : ∏ w : InfinitePlace L, w (a : L) ^ w.mult < 1 := by
-    obtain ⟨w0⟩ := (inferInstance : Nonempty (InfinitePlace L))
-    rw [← Finset.mul_prod_erase Finset.univ _ (Finset.mem_univ w0)]
-    have hp : ∏ w ∈ Finset.univ.erase w0, w (a : L) ^ w.mult ≤ 1 :=
-      Finset.prod_le_one₀ (fun w _ => pow_nonneg (apply_nonneg _ _) _)
-        (fun w _ => pow_le_one₀ (apply_nonneg _ _) (h w).le)
-    have hw0 : w0 (a : L) ^ w0.mult < 1 :=
-      pow_lt_one₀ (apply_nonneg _ _) (h w0) InfinitePlace.mult_pos.ne'
-    calc _ ≤ w0 (a : L) ^ w0.mult * 1 :=
-          mul_le_mul_of_nonneg_left hp (pow_nonneg (apply_nonneg _ _) _)
-      _ < 1 := by rw [mul_one]; exact hw0
-  rw [h2] at h3
-  push_cast at h3
-  linarith
+  apply GlobalTheory.SmallIntegerVanishing.eq_zero_of_small <;> assumption
 
 theorem continuous_entry {L : Type} [Field L] [NumberField L] {N : ℕ} (w : InfinitePlace L) (i j : Fin N) :
     Continuous fun x : Sp L N => mt x w i j := by

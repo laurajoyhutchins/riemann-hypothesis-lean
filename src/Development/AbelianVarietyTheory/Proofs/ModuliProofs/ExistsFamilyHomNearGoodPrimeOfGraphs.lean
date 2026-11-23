@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsAwayFlatProjRep
 public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsGaloisCover
 public import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.IsProjByOfIsPullback
 public import Development.AbelianVarietyTheory.Proofs.ModuliProofs.ExistsAwayProjectiveFormsThroughPoints
@@ -91,24 +92,7 @@ theorem eval₂_eq_zero_of_forms_le {K σ : Type} [CommRing K] {I J : Ideal (MvP
     (hle : ∀ e ≥ d, ∀ F : MvPolynomial σ K, F.IsHomogeneous e → F ∈ I → F ∈ J)
     {T : Type} [CommRing T] (β : K →+* T) (v : σ → T) (hv : Ideal.span (Set.range v) = ⊤)
     (hJ : ∀ F ∈ J, eval₂ β v F = 0) : ∀ F ∈ I, eval₂ β v F = 0 := by
-  intro F hF
-  have key : ∀ e, eval₂ β v (homogeneousComponent e F) = 0 := by
-    intro e
-    have h1 : ∀ i, v i ^ d * eval₂ β v (homogeneousComponent e F) = 0 := by
-      intro i
-      have := hJ _ (hle (d + e) (by omega) (X i ^ d * homogeneousComponent e F)
-        ((isHomogeneous_X_pow i d).mul (homogeneousComponent_isHomogeneous e F)) (I.mul_mem_left _ (hI F hF e)))
-      rwa [eval₂_mul, eval₂_pow, eval₂_X] at this
-    have h2 := Ideal.span_pow_eq_top _ hv d
-    have h3 : Ideal.span ((fun x => x ^ d) '' Set.range v) ≤
-        LinearMap.ker (LinearMap.toSpanSingleton T T (eval₂ β v (homogeneousComponent e F))) := by
-      refine Ideal.span_le.2 ?_
-      rintro _ ⟨_, ⟨i, rfl⟩, rfl⟩
-      exact h1 i
-    rw [h2] at h3
-    simpa using h3 (Submodule.mem_top (x := (1 : T)))
-  rw [← sum_homogeneousComponent F, eval₂_sum]
-  exact Finset.sum_eq_zero fun e _ => key e
+  apply GlobalTheory.ZM.NearCut.eval₂_eq_zero_of_forms_le <;> assumption
 
 
 open MvPolynomial in

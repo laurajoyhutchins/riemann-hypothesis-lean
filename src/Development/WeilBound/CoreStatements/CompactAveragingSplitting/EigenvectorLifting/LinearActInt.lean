@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.LocallyConstantCoinvariants.PfDictMod
 public import Development.AbelianVarietyTheory.Definitions.Divisors.HilbertNinetyQuotientHomEqIff
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsLocallyConstantAddChar
 import Development.AbelianVarietyTheory.Proofs.FoundationProofs.PadicIsNonarchimedeanLocalField
@@ -70,58 +71,11 @@ variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchim
 
 omit [Invertible (2 : k)] in
 theorem norm_char (hc : Continuous ψ) (x : k) : ‖ψ x‖ = 1 := by
-  have hle : ∀ y, ‖ψ y‖ ≤ 1 := fun y => by
-    by_cases h0 : y = 0
-    · simp [h0]
-    obtain ⟨M, hM⟩ := (GlobalTheory.SplitWeil.isCompact_cball (Units.mk0 y h0)).exists_bound_of_continuousOn hc.continuousOn
-    have hm : ∀ n : ℕ, n • y ∈ GlobalTheory.SplitWeil.cball (Units.mk0 y h0) := fun n => by
-      induction n with
-      | zero => simp [GlobalTheory.SplitWeil.cball]
-      | succ n ih =>
-        rw [succ_nsmul]
-        exact GlobalTheory.SplitWeil.add_mem_cball ih (by simp [GlobalTheory.SplitWeil.cball])
-    by_contra hy
-    obtain ⟨n, hn⟩ := pow_unbounded_of_one_lt M (not_le.1 hy)
-    have := hM _ (hm n)
-    rw [AddChar.map_nsmul_eq_pow, norm_pow] at this
-    exact absurd hn (not_lt.2 this)
-  have h1 : ‖ψ x‖ * ‖ψ (-x)‖ = 1 := by
-    rw [← norm_mul, ← AddChar.map_add_eq_mul, add_neg_cancel, AddChar.map_zero_eq_one, norm_one]
-  refine le_antisymm (hle x) ?_
-  calc (1 : ℝ) = ‖ψ x‖ * ‖ψ (-x)‖ := h1.symm
-    _ ≤ ‖ψ x‖ * 1 := mul_le_mul_of_nonneg_left (hle _) (norm_nonneg _)
-    _ = ‖ψ x‖ := mul_one _
+  apply PositivityTheory.KCo.Mod.norm_one <;> assumption
 
 theorem eventually_fix (hc : Continuous ψ) {φ : (κ → k) → ℂ} (hφ : φ ∈ SB (κ → k)) :
     ∀ᶠ w in 𝓝 (0 : (κ → k) × (κ → k)), schr ψ w φ = φ := by
-  have := nonarch_field k
-  have hlc := isLocallyConstant_addChar ψ hc
-  have h1 : IsLocallyConstant fun z : ((κ → k) × (κ → k)) × (κ → k) => schr ψ z.1 φ z.2 - φ z.2 := by
-    refine IsLocallyConstant.sub (IsLocallyConstant.mul ?_ ?_) (hφ.1.comp_continuous continuous_snd)
-    · exact hlc.comp_continuous ((continuous_snd.dotProduct continuous_fst.snd).add
-        (continuous_const.mul (continuous_fst.fst.dotProduct continuous_fst.snd)))
-    · exact hφ.1.comp_continuous (continuous_snd.add continuous_fst.fst)
-  have h2 : IsLocallyConstant fun z : ((κ → k) × (κ → k)) × (κ → k) => φ (z.2 - z.1.1) - φ z.2 :=
-    (hφ.1.comp_continuous (continuous_snd.sub continuous_fst.fst)).sub (hφ.1.comp_continuous continuous_snd)
-  have hK : IsCompact (tsupport φ) := hφ.2
-  have e1 := hK.eventually_forall_of_forall_eventually (x₀ := (0 : (κ → k) × (κ → k)))
-    (P := fun w x => schr ψ w φ x - φ x = 0) fun y _ => by
-      simpa [schr] using h1.eventually_eq (0, y)
-  have e2 := hK.eventually_forall_of_forall_eventually (x₀ := (0 : (κ → k) × (κ → k)))
-    (P := fun w x => φ (x - w.1) - φ x = 0) fun y _ => by
-      simpa using h2.eventually_eq (0, y)
-  filter_upwards [e1, e2] with w a1 a2
-  funext x
-  by_cases hx : x ∈ tsupport φ
-  · exact sub_eq_zero.1 (a1 x hx)
-  have h0 : φ x = 0 := image_eq_zero_of_notMem_tsupport hx
-  have h3 : φ (x + w.1) = 0 := by
-    by_cases hy : x + w.1 ∈ tsupport φ
-    · have := a2 _ hy
-      rw [add_sub_cancel_right, h0, zero_sub, neg_eq_zero] at this
-      exact this
-    · exact image_eq_zero_of_notMem_tsupport hy
-  rw [schr, h3, h0, mul_zero]
+  apply PositivityTheory.KCo.Mod.small <;> assumption
 
 
 omit [Invertible (2 : k)] in

@@ -406,7 +406,6 @@ theorem ch_core (C ε CE Ko c M : ℝ) (hC : 0 ≤ C) (hε : 0 < ε) (hc : |c| �
   obtain ⟨x₁, hx₁⟩ := Filter.eventually_atTop.1
     ((tendsto_rpow_atTop (show 0 < 3 * ε / 8 by positivity)).eventually_ge_atTop 26)
   set A1 : ℝ := 5 + Cd + |Ko| + |M| * (4 + Cd + |Ko|) + 4 * |CE| with hA1
-  have hA10 : 0 ≤ A1 := by positivity
   obtain ⟨x₂, hx₂⟩ := Filter.eventually_atTop.1
     ((tendsto_rpow_atTop (show (0 : ℝ) < 1 / 4 by norm_num)).eventually_ge_atTop (|M| * A1))
   refine ⟨max 3 (max x₁ x₂), fun x hx => ?_⟩
@@ -448,11 +447,6 @@ theorem ch_core (C ε CE Ko c M : ℝ) (hC : 0 ≤ C) (hε : 0 < ε) (hc : |c| �
   have hMe : 0 ≤ |M| * (4 + Cd + |Ko|) * (s * e) := by positivity
   have hCe : 0 ≤ |CE| * (s * e) := by positivity
   have hKe : 0 ≤ |Ko| * (s * e) := by positivity
-  have hCde : 0 ≤ Cd * (s * e) := by positivity
-  have hR : A1 * (s * e) = 5 * (s * e) + Cd * (s * e) + |Ko| * (s * e) + |M| * (4 + Cd + |Ko|) * (s * e)
-      + 4 * (|CE| * (s * e)) := by
-    rw [hA1]; ring
-  have hρ0 : 0 ≤ x ^ (-1 + ε) := Real.rpow_nonneg hx0.le _
   have r1 : Cd ≤ A1 * (s * e) := by linarith [up Cd hCd]
   have r2 : Real.log (x + 1) + Cd + |Ko| + |M| * x ^ (-1 + ε) * (x * (Real.log x + Cd + |Ko|)) ≤ A1 * (s * e) := by
     have e1 : |M| * x ^ (-1 + ε) * (x * (Real.log x + Cd + |Ko|)) = |M| * ((Real.log x + Cd + |Ko|) * e) := by
@@ -463,7 +457,6 @@ theorem ch_core (C ε CE Ko c M : ℝ) (hC : 0 ≤ C) (hε : 0 < ε) (hc : |c| �
       linarith
     have e3 : |M| * ((Real.log x + Cd + |Ko|) * e) ≤ |M| * ((4 + Cd + |Ko|) * s * e) :=
       mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_right e2 (by linarith)) (abs_nonneg M)
-    have e4 : |M| * ((4 + Cd + |Ko|) * s * e) = |M| * (4 + Cd + |Ko|) * (s * e) := by ring
     rw [e1]
     linarith [up Cd hCd, up _ (abs_nonneg Ko)]
   have r3 : Real.log (x + 1) + Cd + |CE| * Real.log x ≤ A1 * (s * e) := by
@@ -488,7 +481,6 @@ theorem ch_core (C ε CE Ko c M : ℝ) (hC : 0 ≤ C) (hε : 0 < ε) (hc : |c| �
     have k1 := mul_le_mul_of_nonneg_right (hM.trans (le_abs_self M)) (show 0 ≤ A1 * (s * e) by positivity)
     have k2 := mul_le_mul_of_nonneg_right hbig (show 0 ≤ s * e by positivity)
     have k3 : 0 ≤ s * (s * e) := by positivity
-    have k4 : |M| * (A1 * (s * e)) = |M| * A1 * (s * e) := by ring
     linarith
   have hc' := CharacterBalanceMoves.core A0 D S hHost ell N TT T2 a w hx3 hb hS hThin hCost hT2 hTop hY
   have hz := proposition_size_bound _ _ _ _ _ _ _ _ _ _ _ G hW hc'

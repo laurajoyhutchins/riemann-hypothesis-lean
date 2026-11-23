@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PullbackFramesComplexPoint
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsValFam
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ExistsGenOfIsVBOne
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ComponentPointCmEigenFrameStatement
@@ -206,21 +207,7 @@ theorem val_inv {a : Ω} {r : F} (h : ValAt ξ z a r) (hr : r ≠ 0) : ValAt ξ 
 
 theorem val_det (h : genPt ξ ⤳ centre z) {n : ℕ} {P : Matrix (Fin n) (Fin n) Ω} {A : Matrix (Fin n) (Fin n) F}
     (hP : ∀ i j, ValAt ξ z (P i j) (A i j)) : ValAt ξ z P.det A.det := by
-  have : ∀ i j, ∃ s : X.presheaf.stalk (centre z), genMap ξ ⟨centre z, h⟩ s = P i j ∧
-      (Scheme.stalkClosedPointTo z).hom s = A i j := fun i j => by
-    obtain ⟨_, s, e1, e2⟩ := hP i j
-    exact ⟨s, e1, e2⟩
-  choose s e1 e2 using this
-  refine ⟨h, (Matrix.of s).det, ?_, ?_⟩
-  · rw [RingHom.map_det]
-    congr 1
-    ext i j
-    exact e1 i j
-  · show RootHt.Pick.valMap z _ = A.det
-    rw [RingHom.map_det]
-    congr 1
-    ext i j
-    exact e2 i j
+  apply GlobalTheory.CompanionTheory.Ar.Flat.PointCompare.val_det <;> assumption
 
 end Val
 

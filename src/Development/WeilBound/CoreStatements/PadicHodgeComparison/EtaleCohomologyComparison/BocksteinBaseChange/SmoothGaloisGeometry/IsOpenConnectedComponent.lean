@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.BocksteinBaseChange.SmoothGaloisGeometry.IsOpenConnectedComponentOfNoetherianSpace
 public import Development.AbelianVarietyTheory.Definitions.GaloisGeometry.IsMatrixForm
 public import Mathlib.Order.CompletePartialOrder
 public import Development.AbelianVarietyTheory.Definitions.Divisors.GalMapMul
@@ -57,22 +58,7 @@ namespace CrystallineSemistableComparison.GeoC
 
 theorem isOpen_connectedComponent {X : Type*} [TopologicalSpace X] [NoetherianSpace X] (x : X) :
     IsOpen (connectedComponent x) := by
-  have h : (connectedComponent x)ᶜ =
-      ⋃ Z ∈ {Z ∈ irreducibleComponents X | ¬ Z ⊆ connectedComponent x}, Z := by
-    ext y
-    simp only [Set.mem_compl_iff, Set.mem_iUnion, Set.mem_ofPred_eq, exists_prop]
-    constructor
-    · intro hy
-      exact ⟨irreducibleComponent y, ⟨irreducibleComponent_mem_irreducibleComponents y,
-        fun h => hy (h mem_irreducibleComponent)⟩, mem_irreducibleComponent⟩
-    · rintro ⟨Z, ⟨hZ, hZ'⟩, hy⟩ hyx
-      apply hZ'
-      rw [connectedComponent_eq hyx]
-      exact hZ.1.isConnected.subset_connectedComponent hy
-  rw [← isClosed_compl_iff, h]
-  refine Set.Finite.isClosed_biUnion
-    (NoetherianSpace.finite_irreducibleComponents.subset (by exact fun Z hZ => hZ.1)) fun Z hZ => ?_
-  exact isClosed_of_mem_irreducibleComponents Z hZ.1
+  apply CrystallineSemistableComparison.isOpen_connectedComponent_of_noetherianSpace <;> assumption
 
 theorem image_connectedComponent {X : Type*} [TopologicalSpace X] (h : X ≃ₜ X) (x : X) :
     h '' connectedComponent x = connectedComponent (h x) := by

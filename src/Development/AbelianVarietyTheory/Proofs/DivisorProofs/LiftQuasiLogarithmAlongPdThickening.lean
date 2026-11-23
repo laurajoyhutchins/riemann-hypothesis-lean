@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.SymmetricCocycleModIdealEqCoboundaryQuasiLog
 public import Development.AbelianVarietyTheory.Definitions.Divisors.EqZeroOfForallPowDvd
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DiffCoeffsInIdealSubstOfConstantCoeffZero
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DividedInOfQuasiLogarithmStatement
@@ -110,27 +111,7 @@ theorem formalGroupLawCoboundaryTwo_sub (μ : Fin d → MvPowerSeries (Fin d ⊕
 theorem map_formalGroupLawCoboundaryTwo (φ : R →+* S) (μ : Fin d → MvPowerSeries (Fin d ⊕ Fin d) R)
     (hμ : ∀ i, constantCoeff (μ i) = 0) (c : MvPowerSeries (Fin d ⊕ Fin d) R) :
     map φ (cob2 μ c) = cob2 (fun i => map φ (μ i)) (map φ c) := by
-  have h1 : ∀ i, constantCoeff ((x1 : Fin d → MvPowerSeries (Fin d ⊕ (Fin d ⊕ Fin d)) R) i) = 0 :=
-    fun _ => constantCoeff_X _
-  have h2 : ∀ i, constantCoeff ((x2 : Fin d → MvPowerSeries (Fin d ⊕ (Fin d ⊕ Fin d)) R) i) = 0 :=
-    fun _ => constantCoeff_X _
-  have h3 : ∀ i, constantCoeff ((x3 : Fin d → MvPowerSeries (Fin d ⊕ (Fin d ⊕ Fin d)) R) i) = 0 :=
-    fun _ => constantCoeff_X _
-  have m1 : (fun i => map φ ((x1 : Fin d → MvPowerSeries (Fin d ⊕ (Fin d ⊕ Fin d)) R) i)) = x1 :=
-    funext fun _ => map_X _ _
-  have m2 : (fun i => map φ ((x2 : Fin d → MvPowerSeries (Fin d ⊕ (Fin d ⊕ Fin d)) R) i)) = x2 :=
-    funext fun _ => map_X _ _
-  have m3 : (fun i => map φ ((x3 : Fin d → MvPowerSeries (Fin d ⊕ (Fin d ⊕ Fin d)) R) i)) = x3 :=
-    funext fun _ => map_X _ _
-  have mop : ∀ (u v : Fin d → MvPowerSeries (Fin d ⊕ (Fin d ⊕ Fin d)) R),
-      (∀ i, constantCoeff (u i) = 0) → (∀ i, constantCoeff (v i) = 0) →
-      (fun i => map φ (op μ u v i)) =
-        op (fun i => map φ (μ i)) (fun i => map φ (u i)) (fun i => map φ (v i)) :=
-    fun u v hu hv => funext fun i => mvPowerSeriesMap_evalTwoGroups φ (μ i) u v hu hv
-  unfold cob2
-  rw [map_sub, map_add (f := _), map_sub, mvPowerSeriesMap_evalTwoGroups φ c _ _ h2 h3, mvPowerSeriesMap_evalTwoGroups φ c _ _ (const_op μ hμ _ _ h1 h2) h3,
-    mvPowerSeriesMap_evalTwoGroups φ c _ _ h1 (const_op μ hμ _ _ h2 h3), mvPowerSeriesMap_evalTwoGroups φ c _ _ h1 h2, mop _ _ h1 h2, mop _ _ h2 h3,
-    m1, m2, m3]
+  apply GlobalTheory.CocLift.map_formalGroupLawCoboundaryTwo <;> assumption
 
 theorem constantCoeff_coboundaryOne_zero_of_constCoeff (μ : Fin d → MvPowerSeries (Fin d ⊕ Fin d) R) (hμ : ∀ i, constantCoeff (μ i) = 0)
     (f : MvPowerSeries (Fin d) R) (hf : constantCoeff f = 0) : constantCoeff (cob1 μ f) = 0 := by

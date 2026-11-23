@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.EigenPeriodOfLocalGlobal
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.InjPrimeTo
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsPlaceOverMoveValCc
 public import Development.AbelianVarietyTheory.Proofs.CharacterTheory.RootsCharpolyPowEqMapPow
@@ -61,25 +62,7 @@ variable {E Ω : Type} [Field E] [NumberField E] [Field Ω] [Algebra E Ω]
 
 theorem mem_ine_of_wild {A : ValuationSubring Ω} {s : G E Ω}
     (hs : ∀ y : Ω, y ≠ 0 → A.valuation (s y / y - 1) < 1) : s ∈ Ine (F := E) A := by
-  have hv : ∀ y, A.valuation (s y) = A.valuation y := by
-    intro y
-    rcases eq_or_ne y 0 with rfl | hy
-    · simp
-    have h1 : A.valuation (s y / y) = 1 := by
-      have := Valuation.map_one_add_of_lt A.valuation (hs y hy)
-      simpa using this
-    rw [map_div₀, div_eq_one_iff_eq (by simpa using hy)] at h1
-    exact h1
-  refine ⟨?_, fun x hx => ?_⟩
-  · show s • A = A
-    ext x
-    rw [ValuationSubring.mem_pointwise_smul_iff_inv_smul_mem, AlgEquiv.smul_def,
-      ← A.valuation_le_one_iff, ← A.valuation_le_one_iff, ← hv, mul_inv_apply]
-  · rcases eq_or_ne x 0 with rfl | hx0
-    · simp
-    have e : s x - x = (s x / x - 1) * x := by field_simp
-    rw [e, map_mul]
-    exact lt_of_le_of_lt (mul_le_of_le_one_right' hx) (hs x hx0)
+  apply GlobalTheory.TameEig.wild_mem_Ine <;> assumption
 
 theorem tameGenAt_move (c : Ω ≃+* Ω)
     (hc : ∀ x : E, ∃ y : E, c.symm (algebraMap E Ω x) = algebraMap E Ω y)

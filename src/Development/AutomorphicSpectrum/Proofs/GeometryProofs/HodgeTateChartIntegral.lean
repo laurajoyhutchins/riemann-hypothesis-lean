@@ -7,13 +7,11 @@ public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.CompleteInteg
 public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.HodgeTateConstantDividesPSqStatement
 public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.IntegralPointCompleteValuedFieldStatement
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ExistsLieModel
-public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeTateChartAdicStatement
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelExistsUniqueAct
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelFiniteProjectiveStatement
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelIsBaseChangeStatement
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelRankEqGeneric
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TateIsoTorsionTowerStatement
-public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TorsionEmbeddingBaseChangeStatement
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.TorsionTowerWeilPairingStatement
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -56,6 +54,7 @@ import Mathlib.Tactic.NormNum.Ordinal
 import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
+import Development.WeilBound.CoreStatements.HodgeTatePoints.HtatTest
 
 @[expose] public section
 
@@ -159,72 +158,9 @@ theorem reduces_at_point (hPt : PointHT) (E : Type) [Field E] [NumberField E] [I
     ∃ (L' : Type) (_ : AddCommGroup L') (_ : Module O L')
       (P : HTPoint C O (IsCMField.complexConj E).toRingEquiv (algebraMap R O κ) (D.p + D.q) (C ⊗[ℤ] D.La)
         (C ⊗[O] Module.Dual O L'))
-      (io : Dc.om →ₛₗ[algebraMap R O] (C ⊗[O] Module.Dual O L')), Dc.ReducesTo (algebraMap R O) P io := by
-  subst hz
-  have hppos : ∀ m, 0 < p ^ m := fun m => pow_pos (Fact.out : p.Prime).pos m
-  haveI : CharZero O := charZero_of_injective_ringHom hinj
-  obtain ⟨X, hX, hXi⟩ := GlobalTheory.T.tate_iso_torsion_tower E H D S t p O _ I
-  have hroot : ∀ m, ∃ w : Oˣ, algebraMap O (FractionRing O) w = (I.ζ (p ^ m) : (FractionRing O)ˣ) := fun m =>
-    exists_unit_of_pow _ (p ^ m) (hppos m) (I.ζ_prim _ (hppos m)).pow_eq_one
-  choose ζ hζ using hroot
-  have hkinj : Function.Injective (algebraMap O (FractionRing O)) := IsFractionRing.injective O _
-  have hUinj : Function.Injective (Units.map (algebraMap O (FractionRing O) : O →* FractionRing O)) :=
-    Units.map_injective hkinj
-  have hU : ∀ m, Units.map (algebraMap O (FractionRing O) : O →* FractionRing O) (ζ m) = I.ζ (p ^ m) :=
-    fun m => Units.ext (hζ m)
-  have hprim : ∀ m, IsPrimitiveRoot (ζ m) (p ^ m) := fun m =>
-    IsPrimitiveRoot.of_map_of_injective (f := Units.map (algebraMap O (FractionRing O) : O →* FractionRing O))
-      (by rw [hU]; exact I.ζ_prim _ (hppos m)) hUinj
-  have hcompat : ∀ m, ζ (m + 1) ^ p = ζ m := fun m => by
-    apply hUinj
-    rw [map_pow, hU, hU, pow_succ]
-    exact I.ζ_pow _ _ (hppos m) (Fact.out : p.Prime).pos
-  have hsq : (BT.genPt O).hom ≫ spMap (algebraMap R O) = spMap f ≫ (BT.genPt R).hom := by
-    simp only [Over.mk_hom, spMap]
-    rw [← Spec.map_comp, ← Spec.map_comp, ← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp]
-    congr 2
-    exact RingHom.ext fun r => (hf r).symm
-  have hprop' : IsProper (Limits.pullback.snd t.G.hom ((BT.genPt O).hom ≫ spMap (algebraMap R O) ≫ x)) := by
-    rw [← Category.assoc, hsq, Category.assoc]
-    exact isProper_snd_comp _ _ _
-  have hreg : X.PairingRegular D.EF ζ := by
-    refine GlobalTheory.T.torsion_tower_weil_pairing E H S t p O _ D.La X D.EF ζ hprop' ?_
-    intro m a b ga gb hga hgb
-    have e1 : ga = I.ev (p ^ m) a := Over.OverMorphism.ext (hga.trans (hX m a))
-    have e2 : gb = I.ev (p ^ m) b := Over.OverMorphism.ext (hgb.trans (hX m b))
-    rw [e1, e2, map_zpow, hU]
-    exact I.isom (p ^ m) (hppos m) a b
-  haveI : Module.Finite ℤ D.La := hu.finite
-  haveI := finite_levGrp D.La p n (Fact.out : p.Prime).pos
-  have hSep : IsSeparated t.G.hom := t.semi.separated
-  obtain ⟨F, hF1, hF2⟩ := GlobalTheory.T.torsion_embedding_base_change R (LevGrp D.La p n) Γ₀ S t.G x (p ^ n) i hi hSep O (algebraMap R O)
-    (X.Γ n) (X.i n) (X.tors n) (FractionRing R) (algebraMap R _) (RingHom.id _) f
-    (fun s => (Γ₀.pt s).left ≫ i) Function.injective_id (RingHom.id_comp _) (RingHom.ext hf)
-    (fun s => by
-      rw [Category.assoc, hi.isOver, ← Category.assoc, Over.w (Γ₀.pt s)]; rfl)
-    (fun s => by simp)
-    (fun s => by
-      obtain ⟨q, rfl⟩ := Multiplicative.ofAdd.surjective s
-      obtain ⟨a, rfl⟩ := Submodule.Quotient.mk_surjective (LinearMap.range ((p ^ n) • (LinearMap.id : D.La →ₗ[ℤ] D.La))) q
-      change _ = ((X.Γ n).pt (lev p n a)).left ≫ X.i n
-      rw [hX n a, hI2 a]; rfl)
-  obtain ⟨L', iA, iM, ⟨M'⟩⟩ := GlobalTheory.CompanionTheory.Ar.lieModel_exists S t.G O (spMap (algebraMap R O) ≫ x)
-  obtain ⟨ρ', hρ', -⟩ := GlobalTheory.CompanionTheory.Ar.lieModel_exists_unique_act S t.G O (spMap (algebraMap R O) ≫ x) L' M' (𝓞 E)
-    t.act.act t.act.hom t.act.one t.act.mul t.act.add
-  haveI hsm : Smooth t.G.hom := t.semi.smooth
-  have hrank' : 2 * Module.finrank O L' = Module.finrank ℤ D.La := by
-    rw [finrank_lie_eq S t.G R O x L L' M M']; exact hrank
-  obtain ⟨hκ1, -⟩ := GlobalTheory.T.hodge_tate_constant_divides_p_sq C v O hv p R (algebraMap R O) κ hp hκ
-  obtain ⟨P, hP⟩ := hPt p C v O hv hp hO E (IsCMField.complexConj E).toRingEquiv
-    (fun a => IsCMField.complexConj_apply_apply E a) S t.G t.semi _ D.La D.EF (D.p + D.q) u hu X L' M' t.act.act ρ'
-    t.act.hom hρ' hXi hrank' ζ hprim hcompat hreg (algebraMap R O κ) hκ1
-  have hζ₀ : algebraMap R O (ζ₀ : R) = (ζ n : O) := by
-    apply hkinj
-    rw [← hf, ← hI1, hζ n]
-  obtain ⟨io, hio⟩ := GlobalTheory.T.hodge_tate_chart_adic p C v O hv hp hO E (IsCMField.complexConj E).toRingEquiv R K n (D.p + D.q) Ω Dc
-    D.La D.EF u hu S t.G hsm x Γ₀ i hi L M t.act.act ρ hρ j hj π ζ₀ X F L' M' ρ' hρ' ζ (algebraMap R O κ) P hc hπ he
-    hF2 hF1 hζ₀ (hprim n).pow_eq_one hP
-  exact ⟨L', iA, iM, P, io, hio⟩
+      (io : Dc.om →ₛₗ[algebraMap R O] (C ⊗[O] Module.Dual O L')), Dc.ReducesTo (algebraMap R O) P io :=
+  PositivityTheory.HtPt.Htat.TestPts.reduces_at_point hPt E H D p R K n Ω Dc u hu S t x Γ₀ i hi L M ρ hρ j hj π ζ₀ κ
+    hc hπ he hrank hprop hκ C O v hv hp hO hinj f hf z hz I hI1 hI2
 
 end GlobalTheory.CompanionTheory.Ar.HT.TestPts
 

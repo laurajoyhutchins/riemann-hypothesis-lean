@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RiemannianHaarIndependentOfOrthonormalFrame
 public import Formalism.PeriodIntegrals.QuotInv
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.UpperOff
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ClosedMatrixSubgroupTheoremStatement
@@ -69,38 +70,7 @@ theorem volume_image_eq {V W : Type} [NormedAddCommGroup V] [InnerProductSpace �
     [MeasurableSpace V] [BorelSpace V] [MeasurableSpace W] [BorelSpace W]
     (L : V ≃ₗ[ℝ] W) (σ : V →ₗ[ℝ] V) (τ : W →ₗ[ℝ] W) (hσ : ∀ x, σ (σ x) = x) (hτ : ∀ x, τ (τ x) = x)
     (h : ∀ x y, ⟪τ (L x), L y⟫_ℝ = ⟪σ x, y⟫_ℝ) (s : Set V) : volume (L '' s) = volume s := by
-  classical
-  have hfin : Module.finrank ℝ V = Module.finrank ℝ W := L.finrank_eq
-  let e : V ≃ₗᵢ[ℝ] W := (stdOrthonormalBasis ℝ V).equiv (stdOrthonormalBasis ℝ W) (finCongr hfin)
-  let M : V →ₗ[ℝ] V := e.symm.toLinearEquiv.toLinearMap ∘ₗ L.toLinearMap
-  let T : V →ₗ[ℝ] V := e.symm.toLinearEquiv.toLinearMap ∘ₗ τ ∘ₗ e.toLinearEquiv.toLinearMap
-  have hM : ∀ x, e (M x) = L x := fun x => by simp [M]
-  have hT : ∀ x, e (T x) = τ (e x) := fun x => by simp [T]
-
-  have key : LinearMap.adjoint M ∘ₗ T ∘ₗ M = σ := by
-    refine LinearMap.ext fun x => ext_inner_right ℝ fun y => ?_
-    rw [LinearMap.comp_apply, LinearMap.adjoint_inner_left, LinearMap.comp_apply,
-      ← LinearIsometryEquiv.inner_map_map e, hT, hM, hM, h]
-  have hsq : ∀ f : V →ₗ[ℝ] V, (∀ x, f (f x) = x) → LinearMap.det f ^ 2 = 1 := by
-    intro f hf
-    have : f ∘ₗ f = LinearMap.id := LinearMap.ext hf
-    rw [sq, ← LinearMap.det_comp, this, LinearMap.det_id]
-  have hT2 : ∀ x, T (T x) = x := fun x => e.injective (by rw [hT, hT, hτ])
-  have hdet : |LinearMap.det M| = 1 := by
-    have h1 := congrArg LinearMap.det key
-    rw [LinearMap.det_comp, LinearMap.det_comp, det_adjoint'] at h1
-    have h4 : |LinearMap.det M| ^ 4 = 1 := by
-      have hs := hsq σ hσ
-      have ht := hsq T hT2
-      rw [← h1] at hs
-      rw [pow_abs, abs_eq_self.mpr (by positivity)]
-      nlinarith [hs, ht]
-    exact (pow_eq_one_iff_of_nonneg (abs_nonneg _) (by norm_num)).mp h4
-  have himg : L '' s = e '' (M '' s) := by
-    rw [Set.image_image]; exact Set.image_congr fun x _ => (hM x).symm
-  rw [himg, LinearIsometryEquiv.image_eq_preimage_symm,
-    e.symm.measurePreserving.measure_preimage_emb e.symm.toHomeomorph.measurableEmbedding,
-    MeasureTheory.Measure.addHaar_image_linearMap, hdet, ENNReal.ofReal_one, one_mul]
+  apply GlobalTheory.FrameIndep.volume_image_of_form <;> assumption
 
 abbrev EE (m : ℕ) := EuclideanSpace ℝ (Fin m × Fin m × Bool)
 

@@ -72,9 +72,6 @@ theorem residueConst_phi_eq (P : PhiData O l) (f : O⟦X⟧) : residueConst (P.�
     intro a
     first
     | exact P.φ.commutes a
-    | simpa using P.φ.commutes a
-    | simpa [PowerSeries.algebraMap_apply'] using P.φ.commutes a
-    | simpa [PowerSeries.algebraMap_apply] using P.φ.commutes a
   have hX : residueConst (P.φ X) = 0 := by
     have h6 : P.φ (X - C (l : O)) = P.u * (X - C (l : O)) * X ^ (l - 1) := P.6
     rw [map_sub, hCa] at h6
@@ -94,9 +91,6 @@ theorem level_poly_decomposition (P : PhiData O l) (s : ℕ) (hs : 1 ≤ s) :
     intro a
     first
     | exact P.φ.commutes a
-    | simpa using P.φ.commutes a
-    | simpa [PowerSeries.algebraMap_apply'] using P.φ.commutes a
-    | simpa [PowerSeries.algebraMap_apply] using P.φ.commutes a
   have hκC : residueConst (C (l : O)) = 0 := by
     rw [residueConst_apply, PowerSeries.constantCoeff_C]
     exact (IsLocalRing.residue_eq_zero_iff _).2 P.4
@@ -184,8 +178,6 @@ theorem powerSeriesConst_add {W : LocWach PD LL O v n} (Br : PhiBridge W) (F F' 
   funext x
   first
   | exact map_add Br.ι F F'
-  | exact Br.ι.map_add F F'
-  | simp
 
 theorem l_pow_mem_levels_q_pow_ideal {W : LocWach PD LL O v n} (Br : PhiBridge W) (Bq : ℕ) {g : LetA O n}
     (hg : g ∈ Submonoid.closure {x : LetA O n | ∃ k ≥ 1, x = ps W k}) :

@@ -1,5 +1,6 @@
 module
 
+import CompanionTheory.AutomorphicTheory.ProductFormulaTheory.CuspidalExhaustion.JuxtWords
 public import Development.WeilBound.CoreStatements.AutomorphicKernels.LanglandsExhaustion.JuxtDefs
 public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.IrreducibleAdmissibleGL
 public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CuspidalTwistInjectiveStatement
@@ -55,17 +56,7 @@ namespace PositivityTheory.Exh
 variable {k : Type} [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 
 theorem decW_up (Δ : Segment k) : decW (up Δ) = nxt Δ :: decW Δ := by
-  show List.ofFn (fun i : Fin (Δ.len + 1) => (up Δ).term (Fin.rev i)) = _
-  rw [List.ofFn_succ]
-  congr 1
-  simp only [decW]
-  congr 1
-  funext i
-  show Δ.first.nu (((Fin.rev i.succ : Fin (Δ.len + 1)) : ℕ) : ℂ) = Δ.first.nu (((Fin.rev i : Fin Δ.len) : ℕ) : ℂ)
-  have h : ((Fin.rev i.succ : Fin (Δ.len + 1)) : ℕ) = ((Fin.rev i : Fin Δ.len) : ℕ) := by
-    simp only [Fin.val_rev, Fin.val_succ]
-    omega
-  rw [h]
+  apply CompanionTheory.Exh.decW_up <;> assumption
 
 theorem nxt_not_mem (hA : GlobalTheory.Published.IrreducibleAdmissibleGL) (Δ : Segment k) : nxt Δ ∉ decW Δ := by
   intro h
@@ -77,16 +68,7 @@ theorem nxt_not_mem (hA : GlobalTheory.Published.IrreducibleAdmissibleGL) (Δ : 
 
 theorem eq_decW_of_append (hA : GlobalTheory.Published.IrreducibleAdmissibleGL) (Δ : Segment k) (u P Q : List (IrrGL (k := k)))
     (h1 : decW Δ = P ++ Q) (h2 : u ++ [nxt Δ] = P ++ nxt Δ :: Q) : u = decW Δ := by
-  rcases Q.eq_nil_or_concat' with rfl | ⟨Q', q, rfl⟩
-  · rw [h1, List.append_nil]
-    exact (List.append_inj' h2 rfl).1
-  · exfalso
-    have h3 : u ++ [nxt Δ] = (P ++ nxt Δ :: Q') ++ [q] := by simpa using h2
-    have h4 := (List.append_inj' h3 rfl).2
-    have hq : q = nxt Δ := by simpa using h4.symm
-    apply nxt_not_mem hA Δ
-    rw [h1, ← hq]
-    simp
+  apply CompanionTheory.Exh.eq_decW_of_append <;> assumption
 
 end PositivityTheory.Exh
 

@@ -1075,7 +1075,6 @@ theorem antidiagonal_block_apply (n : ℕ) (z : Kˣ) (a b : Fin n) :
   show (if (b : ℕ) = revIn [n] a then
     ((Function.update (fun _ => (1 : Kˣ)) 0 z (blk [n] a) : Kˣ) : K) else 0) = _
   have ha := a.2
-  have hb := b.2
   simp only [revIn, blk, ha, if_true, Function.update_self]
   by_cases h : b = Fin.rev a
   · rw [if_pos h, if_pos]

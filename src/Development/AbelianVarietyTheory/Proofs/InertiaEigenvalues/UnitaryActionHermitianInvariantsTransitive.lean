@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnitaryOrbitNormalFormUnitInvariant
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.FourierMatch
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -68,34 +69,7 @@ def starLin [Unram F E] : E →ₗ[F] E where
     simp only [Algebra.smul_def, RingHom.id_apply, star_mul, star_algebraMap, mul_comm]
 
 theorem fixed_mem_range [Unram F E] {y : E} (hy : star y = y) : ∃ x : F, algebraMap F E x = y := by
-  by_contra hne
-  push_neg at hne
-  have hli : LinearIndependent F ![(1 : E), y] := by
-    rw [LinearIndependent.pair_iff]
-    intro s t hst
-    by_cases ht : t = 0
-    · subst ht
-      simp only [zero_smul, add_zero] at hst
-      exact ⟨(smul_eq_zero.mp hst).resolve_right one_ne_zero, rfl⟩
-    · exfalso
-      apply hne (-(s / t))
-      rw [Algebra.smul_def, Algebra.smul_def, mul_one] at hst
-      have htE : algebraMap F E t ≠ 0 := by simpa using ht
-      rw [map_neg, map_div₀]
-      field_simp
-      linear_combination -hst
-  haveI : FiniteDimensional F E := Module.finite_of_finrank_eq_succ (Unram.finrank_eq (F := F) (E := E))
-  have htop := hli.span_eq_top_of_card_eq_finrank' (by simp [Unram.finrank_eq (F := F) (E := E)])
-  obtain ⟨z, hz⟩ := Unram.star_ne (F := F) (E := E)
-  apply hz
-  have hle : Submodule.span F (Set.range ![(1 : E), y]) ≤ LinearMap.ker (starLin (F := F) (E := E) - LinearMap.id) := by
-    rw [Submodule.span_le]
-    rintro _ ⟨i, rfl⟩
-    fin_cases i
-    · simp [starLin]
-    · simp [starLin, hy]
-  have := hle (htop ▸ Submodule.mem_top : z ∈ Submodule.span F (Set.range ![(1 : E), y]))
-  simpa [starLin, sub_eq_zero] using this
+  apply GlobalTheory.JR.Step.UNormal.exists_algebraMap_of_star_eq <;> assumption
 
 section Gen
 variable {r : ℕ} {K : Type} [CommRing K]

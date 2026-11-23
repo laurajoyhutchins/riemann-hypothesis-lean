@@ -120,10 +120,6 @@ theorem gramSt_fischer {A : Matrix m m ℂ} {B : Matrix m k ℂ} {C : Matrix k m
     have := h.submatrix (e := (Sum.inl : m → m ⊕ k)) Sum.inl_injective
     have e : (fromBlocks A B C D).submatrix Sum.inl Sum.inl = A := by ext; simp
     rwa [e] at this
-  have hD : D.PosDef := by
-    have := h.submatrix (e := (Sum.inr : k → m ⊕ k)) Sum.inr_injective
-    have e : (fromBlocks A B C D).submatrix Sum.inr Sum.inr = D := by ext; simp
-    rwa [e] at this
   have hC : C = Bᴴ := by
     have := (isHermitian_fromBlocks_iff.mp h.1)
     exact this.2.1.symm

@@ -176,35 +176,7 @@ theorem mem_Umax_of_loc (s : SplitPlace L) (x : GA L n) (hx : TrivOutside {s.v} 
     (h1 : ∀ i j, Valued.v (((s.loc n x : GL (Fin n) (s.v.adicCompletion L⁺)) : Matrix (Fin n) (Fin n) (s.v.adicCompletion L⁺)) i j) ≤ 1)
     (h2 : ∀ i j, Valued.v (((s.loc n x⁻¹ : GL (Fin n) (s.v.adicCompletion L⁺)) : Matrix (Fin n) (Fin n) (s.v.adicCompletion L⁺)) i j) ≤ 1) :
     x ∈ Umax L n := by
-  obtain ⟨e, he, he'⟩ := GlobalTheory.SplitSep.exists_sep L s
-  intro i j
-  have hconj : conjAL L ((x.1 : Matrix (Fin n) (Fin n) (AL L)) i j) =
-      (((x⁻¹ : GA L n).1 : GL (Fin n) (AL L)) : Matrix (Fin n) (Fin n) (AL L)) j i := by
-    have hm := x.2
-    simp only [GA, UGroup, Subgroup.mem_mk] at hm
-    have h1 : ((x.1⁻¹ : GL (Fin n) (AL L)) : Matrix (Fin n) (Fin n) (AL L)) = conjT (conjAL L) x.1 :=
-      Units.inv_eq_of_mul_eq_one_right hm
-    simp only [InvMemClass.coe_inv, h1, conjT, Matrix.transpose_apply, Matrix.map_apply]
-  have hz : (x.1 : Matrix (Fin n) (Fin n) (AL L)) i j - (1 : Matrix (Fin n) (Fin n) (AL L)) i j ∈ ALint L := by
-    apply GlobalTheory.TSetFin.mem_ALint_of_local s e he he'
-    · intro w hw
-      have := congrFun (congrFun (hx w (by simpa using hw)) i) j
-      simp only [Matrix.map_apply] at this
-      rw [map_sub, this]
-      by_cases hij : i = j <;> simp [Matrix.one_apply, hij]
-    · have e1 : s.proj ((x.1 : Matrix (Fin n) (Fin n) (AL L)) i j) =
-          ((s.loc n x : GL (Fin n) (s.v.adicCompletion L⁺)) : Matrix (Fin n) (Fin n) (s.v.adicCompletion L⁺)) i j := rfl
-      rw [map_sub, e1]
-      refine (Valuation.map_sub _ _ _).trans (max_le (h1 i j) ?_)
-      by_cases hij : i = j <;> simp [Matrix.one_apply, hij]
-    · have e1 : s.proj ((((x⁻¹ : GA L n).1 : GL (Fin n) (AL L)) : Matrix (Fin n) (Fin n) (AL L)) j i) =
-          ((s.loc n x⁻¹ : GL (Fin n) (s.v.adicCompletion L⁺)) : Matrix (Fin n) (Fin n) (s.v.adicCompletion L⁺)) j i := rfl
-      rw [map_sub, map_sub, hconj, e1]
-      refine (Valuation.map_sub _ _ _).trans (max_le (h2 j i) ?_)
-      by_cases hij : i = j <;> simp [Matrix.one_apply, hij]
-  have := add_mem hz (show (1 : Matrix (Fin n) (Fin n) (AL L)) i j ∈ ALint L by
-    by_cases hij : i = j <;> simp [Matrix.one_apply, hij, Subring.one_mem, Subring.zero_mem])
-  simpa using this
+  apply GlobalTheory.TSetFin.mem_Umax_of_loc <;> assumption
 
 theorem cong_of_loc (s : SplitPlace L) (N : ℕ) (hN : 0 < N) (κ : GAf L n) (hκ : TrivOutside {s.v} κ)
     (h1 : ∃ X : Matrix (Fin n) (Fin n) (s.v.adicCompletion L⁺), IntM X ∧

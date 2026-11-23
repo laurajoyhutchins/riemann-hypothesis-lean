@@ -447,7 +447,6 @@ theorem theoremAAfterOfSteps : TC.TheoremAAfterOfSteps := by
   set C : ℝ := max C₀ CJ with hC
   have hCC0 : C₀ ≤ C := le_max_left _ _
   have hCCJ : CJ ≤ C := le_max_right _ _
-  have hCpos : 0 ≤ C := by linarith
   have hΘ1 : 1 ≤ Θ := le_trans (le_max_right _ _) hC'
   have hΘ3 : 3 * C₁ ≤ Θ := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hC'
   have hΘJ : C'J ≤ Θ := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hC'
@@ -552,7 +551,6 @@ theorem theoremAAfterOfSteps : TC.TheoremAAfterOfSteps := by
       apply mul_le_mul_of_nonneg_right _ (Real.sqrt_nonneg _)
       apply Real.sqrt_le_iff.mpr
       refine ⟨by positivity, ?_⟩
-      have q1 : 0 ≤ 2 ^ D.f * ep := by positivity
       nlinarith
     · apply Finset.sum_le_sum
       intro s hs; rw [Finset.mem_Icc] at hs
@@ -594,7 +592,6 @@ theorem t_DensLeTwo : DensLeTwo := by
   have hy : 0 < ((2 : ℝ) ^ n)⁻¹ := inv_pos.mpr hpos
   have hy1 : ((2 : ℝ) ^ n)⁻¹ * 2 ^ n = 1 := inv_mul_cancel₀ (ne_of_gt hpos)
   have hm := mul_le_mul_of_nonneg_left h' hy.le
-  have hx : 12 * (f : ℝ) * ((2 : ℝ) ^ n)⁻¹ ≤ 2 / 3 := by nlinarith
   have hl := Real.log_two_gt_d9
   have h3 : Real.exp (12 * (f : ℝ) * ((2 : ℝ) ^ n)⁻¹) ≤ Real.exp (Real.log 2) :=
     Real.exp_le_exp.mpr (by linarith)

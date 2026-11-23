@@ -82,11 +82,9 @@ theorem ord_ringEquiv (e : R ≃+* S) (x : R) : Ring.ord R x = Ring.ord S (e x) 
     first
       | exact le_antisymm (Order.krullDim_le_of_strictMono iso iso.strictMono)
           (Order.krullDim_le_of_strictMono iso.symm iso.symm.strictMono)
-      | exact Order.krullDim_eq_of_orderIso iso
   unfold Module.length
   first
     | simp only [h]
-    | congr 1
 
 theorem length_self_ringEquiv (e : R ≃+* S) : Module.length R R = Module.length S S := by
   haveI : RingHomInvPair (e : R →+* S) (e.symm : S →+* R) := RingHomInvPair.of_ringEquiv e
@@ -96,12 +94,9 @@ theorem length_self_ringEquiv (e : R ≃+* S) : Module.length R R = Module.lengt
     first
       | exact le_antisymm (Order.krullDim_le_of_strictMono iso iso.strictMono)
           (Order.krullDim_le_of_strictMono iso.symm iso.symm.strictMono)
-      | exact Order.krullDim_eq_of_orderIso iso
-      | exact iso.krullDim_eq
   unfold Module.length
   first
     | simp only [h]
-    | congr 1
 
 end general
 
@@ -128,8 +123,6 @@ theorem quotQuotComapEquiv_mk (a b : A) (P : PrimeSpectrum (A ⧸ Ideal.span {a}
       Ideal.Quotient.mk _ b := by
   first
     | rfl
-    | simp [quotQuotComapEquiv]
-    | fail
 
 end quot
 
@@ -188,8 +181,6 @@ theorem dim_quot_comap (a : A) (P : PrimeSpectrum (A ⧸ Ideal.span {a})) :
       ringKrullDim (A ⧸ (PrimeSpectrum.comap (Ideal.Quotient.mk (Ideal.span {a})) P).asIdeal) := by
   first
     | exact ringKrullDim_eq_of_ringEquiv (quotQuotComapEquiv a P)
-    | exact (quotQuotComapEquiv a P).ringKrullDim
-    | exact RingEquiv.ringKrullDim (quotQuotComapEquiv a P)
 
 theorem length_loc_quot (a : A) (P : PrimeSpectrum (A ⧸ Ideal.span {a})) :
     length (Localization.AtPrime P.asIdeal)
@@ -255,6 +246,5 @@ theorem length_quot_restrict (a : A) (N : Type v) [AddCommGroup N] [Module (A �
   unfold Module.length
   first
     | simp only [h]
-    | congr 1
 
 end ReciprocityTheory.ChartRestriction.G.AI

@@ -1,5 +1,6 @@
 module
 
+import CompanionTheory.RealGroups.GeneralUnitaryRepresentations.ArchimedeanJacquetSegments.Compact
 public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.Complementary
 public import Development.AbelianVarietyTheory.Definitions.Divisors.EqOfHasValueAtInfinite
 import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
@@ -258,23 +259,7 @@ theorem cc_right (g y w : GL (Fin (d + d)) k) (hw : w ∈ K1 g) : cc g (y * w) =
   rw [e, hh_mul_right _ _ hw.2, hh_mul_right _ _ hw.1]
 
 theorem cc_finite (g : GL (Fin (d + d)) k) : (Set.range (cc (k := k) g)).Finite := by
-  have hc : CompactSpace (KO k (Fin (d + d))) := isCompact_iff_compactSpace.mp GlobalTheory.SplitFlip.isCompact_KO
-  have hl : IsLocallyConstant fun w : KO k (Fin (d + d)) => cc g (w : GL (Fin (d + d)) k) := by
-    rw [IsLocallyConstant.iff_eventually_eq]
-    intro w
-    have ho : IsOpen ((fun y : KO k (Fin (d + d)) => (w : GL (Fin (d + d)) k)⁻¹ * y) ⁻¹' K1 g) :=
-      (isOpen_compact_open_subgroup g).preimage (by fun_prop)
-    refine Filter.mem_of_superset (ho.mem_nhds ?_) fun y hy => ?_
-    · show (w : GL (Fin (d + d)) k)⁻¹ * w ∈ K1 g
-      rw [inv_mul_cancel]
-      exact ⟨one_mem _, by simp⟩
-    · have e : (y : GL (Fin (d + d)) k) = w * ((w : GL (Fin (d + d)) k)⁻¹ * y) := by group
-      show cc g (y : GL (Fin (d + d)) k) = cc g w
-      rw [e, cc_right _ _ _ hy]
-  refine hl.range_finite.subset ?_
-  rintro _ ⟨y, rfl⟩
-  obtain ⟨p, w, hw, rfl⟩ := exists_pw (d := d) y
-  exact ⟨⟨w, hw⟩, (cc_left g p w).symm⟩
+  apply CompanionTheory.RgGu.NR.Compact.cc_finite <;> assumption
 
 theorem ind_val_sum {σ : Representation ℂ (parab k (blk2 d)) W} {ι : Type} (s : Finset ι) (c : ι → ℂ)
     (u : ι → smoothPart (ind (parab k (blk2 d)) σ)) (y : GL (Fin (d + d)) k) :
@@ -313,26 +298,7 @@ def piece (g : GL (Fin (d + d)) k) (v : ℝ) (f : IndSp (blk2 d) τ) : IndSp (bl
 theorem expo (g : GL (Fin (d + d)) k) (f : IndSp (blk2 d) τ) :
     ∃ (m : ℕ) (r : Fin m → ℝ) (u : Fin m → IndSp (blk2 d) τ),
       ∀ s, F τ s g f = ∑ i, ((Real.exp (r i * s) : ℝ) : ℂ) • u i := by
-  classical
-  set S := (cc_finite (k := k) g).toFinset
-  let v : Fin S.card → ℝ := fun i => (S.equivFin.symm i : ℝ)
-  have hv : Function.Injective v := fun i j h => S.equivFin.symm.injective (Subtype.ext h)
-  refine ⟨S.card, fun i => Real.log (v i), fun i => piece τ g (v i) f, fun s => ?_⟩
-  apply Subtype.ext; apply Subtype.ext; funext y
-  rw [ind_val_sum, F_apply]
-  have hy : cc g y ∈ S := (Set.Finite.mem_toFinset _).2 ⟨y, rfl⟩
-  obtain ⟨i0, hi0⟩ : ∃ i0, v i0 = cc g y := ⟨S.equivFin ⟨cc g y, hy⟩, by simp [v]⟩
-  rw [Fintype.sum_eq_single i0]
-  · show _ = ((Real.exp (Real.log (v i0) * s) : ℝ) : ℂ) • (if cc g y = v i0 then f.1.1 (y * g) else 0)
-    rw [if_pos hi0.symm, hi0, smul_smul, ← Complex.ofReal_mul]
-    congr 2
-    have hpos : 0 < cc g y := div_pos (hh_pos _) (hh_pos _)
-    rw [← Real.rpow_def_of_pos hpos]
-    unfold cc
-    rw [Real.div_rpow (hh_pos _).le (hh_pos _).le, div_eq_inv_mul, Real.rpow_neg (hh_pos _).le]
-  · intro i hi
-    show ((Real.exp (Real.log (v i) * s) : ℝ) : ℂ) • (if cc g y = v i then f.1.1 (y * g) else 0) = 0
-    rw [if_neg (fun h => hi (hv (h.symm.trans hi0.symm))), smul_zero]
+  apply CompanionTheory.RgGu.NR.Compact.expo <;> assumption
 
 end PositivityTheory.RgGu.NR.Compact
 

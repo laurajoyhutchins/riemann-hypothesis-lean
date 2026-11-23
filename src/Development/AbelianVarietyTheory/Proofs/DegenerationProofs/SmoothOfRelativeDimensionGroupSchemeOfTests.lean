@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.StdSmoothMvPolynomial
 public import Development.AbelianVarietyTheory.Definitions.Degenerations.IsNormalSchemeSp
 public import Mathlib.AlgebraicGeometry.AffineSpace
 public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.AbelianSchemeProperClosureDataBasicPropertiesStatement
@@ -67,22 +68,7 @@ namespace GlobalTheory
 
 theorem isStandardSmoothOfRelativeDimension_mvPolynomial_fin (R : Type) [CommRing R] (n : ℕ) :
     Algebra.IsStandardSmoothOfRelativeDimension n R (MvPolynomial (Fin n) R) := by
-  let P₀ : Algebra.Presentation R (MvPolynomial (Fin n) R) (Fin n) Empty :=
-    { __ := Algebra.Generators.mvPolynomial R (Fin n)
-      relation := Empty.elim
-      span_range_relation_eq_ker := by
-        rw [Algebra.Generators.ker_mvPolynomial]
-        simp }
-  let P₁ : Algebra.PreSubmersivePresentation R (MvPolynomial (Fin n) R) (Fin n) Empty :=
-    { __ := P₀
-      map := Empty.elim
-      map_inj := fun a => a.elim }
-  let P₂ : Algebra.SubmersivePresentation R (MvPolynomial (Fin n) R) (Fin n) Empty :=
-    { __ := P₁
-      jacobian_isUnit := by
-        rw [Algebra.PreSubmersivePresentation.jacobian_eq_jacobiMatrix_det]
-        simp }
-  exact P₂.isStandardSmoothOfRelativeDimension (by simp [Algebra.Presentation.dimension])
+  apply GlobalTheory.CompanionTheory.Ar.LieInh.stdSmooth_mvPolynomial <;> assumption
 
 theorem smoothOfRelativeDimension_affineSpace_fin (S : Scheme.{0}) (n : ℕ) :
     SmoothOfRelativeDimension n (𝔸(Fin n; S) ↘ S) := by

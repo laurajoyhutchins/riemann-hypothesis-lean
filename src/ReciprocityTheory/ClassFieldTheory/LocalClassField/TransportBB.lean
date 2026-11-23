@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsContinuousBijectiveAbelianizationOfAlgEqui
 public import ReciprocityTheory.ClassFieldTheory.LocalClassField.RecDefs
 public import ReciprocityTheory.ClassFieldTheory.LocalClassField.TransportDefs
 import Mathlib.Algebra.Order.Floor.Extended
@@ -83,23 +84,7 @@ theorem exists_topAb_iso {G H : Type*} [Group G] [TopologicalSpace G] [IsTopolog
     [TopologicalSpace H] [IsTopologicalGroup H] (φ : G ≃* H) (hφ : IsHomeomorph φ) :
     ∃ ψ : TopologicalAbelianization G ≃* TopologicalAbelianization H, IsHomeomorph ψ ∧
       ∀ g : G, ψ (QuotientGroup.mk g) = QuotientGroup.mk (φ g) := by
-  have hc : (commutator G).map (φ : G →* H) = commutator H := by
-    rw [commutator_def, commutator_def, Subgroup.map_commutator, Subgroup.map_top_of_surjective _ φ.surjective]
-  have hmap : (Subgroup.topologicalClosure (commutator G)).map (φ : G →* H) =
-      Subgroup.topologicalClosure (commutator H) := by
-    apply SetLike.coe_injective
-    rw [Subgroup.coe_map, Subgroup.topologicalClosure_coe, Subgroup.topologicalClosure_coe, ← hc, Subgroup.coe_map]
-    exact (hφ.homeomorph φ).image_closure _
-  let ψ := QuotientGroup.congr _ _ φ hmap
-  have h1 : Continuous ψ :=
-    (QuotientGroup.isOpenQuotientMap_mk.isQuotientMap.continuous_iff).2
-      (QuotientGroup.continuous_mk.comp hφ.continuous)
-  have hs : Continuous φ.symm :=
-    (φ.toEquiv.toHomeomorphOfContinuousOpen hφ.continuous hφ.isOpenMap).symm.continuous
-  have h2 : Continuous ψ.symm :=
-    (QuotientGroup.isOpenQuotientMap_mk.isQuotientMap.continuous_iff).2
-      (QuotientGroup.continuous_mk.comp hs)
-  exact ⟨ψ, (Homeomorph.mk ψ.toEquiv h1 h2).isHomeomorph, fun g => rfl⟩
+  apply GlobalTheory.HeckeGal.exists_topAbelianization_mulEquiv <;> assumption
 
 variable {K : Type} [Field K] [ValuativeRel K] [TopologicalSpace K] {p : ℕ} [Fact p.Prime] (m : Model K p)
 

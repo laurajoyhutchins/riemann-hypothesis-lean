@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IsFRepDualStandardUnitaryRep
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJfSSymDefs
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -81,25 +82,7 @@ theorem hpk_mulVec (x : Fin (2 * r + k + 1) → ℂ) (i : Fin (2 * r + k + 1)) :
     · intro h'; exact absurd (Finset.mem_univ _) h'
 
 theorem hpk_symm' : (Hpk k r)ᵀ = Hpk k r := by
-  ext i j
-  simp only [transpose_apply, Hpk]
-  by_cases h1 : j.val < r ∧ j.val + i.val = 2 * r + k
-  · rw [if_pos h1]
-    by_cases h2 : i.val < r ∧ i.val + j.val = 2 * r + k
-    · rw [if_pos h2]
-    · rw [if_neg h2, if_pos ⟨h1.1, by omega⟩]
-  · rw [if_neg h1]
-    by_cases h2 : i.val < r ∧ j.val + i.val = 2 * r + k
-    · rw [if_pos h2, if_pos ⟨h2.1, by omega⟩]
-    · rw [if_neg h2]
-      by_cases h3 : i.val < r ∧ i.val + j.val = 2 * r + k
-      · exact absurd ⟨h3.1, by omega⟩ h2
-      · by_cases h4 : j.val < r ∧ i.val + j.val = 2 * r + k
-        · exact absurd ⟨h4.1, by omega⟩ h1
-        · rw [if_neg h3, if_neg h4]
-          by_cases h5 : i = j
-          · subst h5; rfl
-          · rw [if_neg (fun e => h5 e.2.2.symm), if_neg (fun e => h5 e.2.2)]
+  apply GlobalTheory.DualFRep.gram_transpose <;> assumption
 
 theorem hpk_conjT : (Hpk k r)ᴴ = Hpk k r := by
   ext i j

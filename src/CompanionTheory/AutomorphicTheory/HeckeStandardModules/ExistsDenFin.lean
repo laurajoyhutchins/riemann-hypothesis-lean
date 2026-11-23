@@ -169,7 +169,6 @@ variable (s : SplitPlace L)
 theorem normaliser {ϖ : s.v.adicCompletion L⁺} (hϖ : Valued.v ϖ = WithZero.exp (-1 : ℤ))
     (t : GL (Fin n) (s.v.adicCompletion L⁺)) (ht : ∀ k ∈ KL s n, t * k * t⁻¹ ∈ KL s n) :
     ∃ u ∈ KL s n, ∀ h, t * h * t⁻¹ = u * h * u⁻¹ := by
-  have h0 : ϖ ≠ 0 := fun e => by simp [e] at hϖ; exact WithZero.exp_ne_zero hϖ.symm
   obtain ⟨a, -, k₁, h₁, k₂, h₂, e⟩ := Final.CartanDecomp L⁺ s.v n ϖ
     (show Valued.v ϖ ≤ 1 by rw [hϖ, ← WithZero.exp_zero, WithZero.exp_le_exp]; norm_num) hϖ t
   obtain ⟨d, rfl⟩ : ∃ d, t = k₁ * d * k₂ := ⟨k₁⁻¹ * t * k₂⁻¹, by group⟩

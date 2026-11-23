@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsRigidifiedCubicalSymmetricExtensionNormalB
 public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.UnEqOfFineCharts
 import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.AbelianSchemeProperClosureDataBasicProperties
 public import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsInverseExtensionProperClosure
@@ -205,27 +206,7 @@ theorem ext_gPt {X S : Scheme.{0}} (s : X ⟶ S) [IsSeparated s] {b b' : Sp (OO 
 theorem isPullback_cube {S U : Scheme.{0}} {j : U ⟶ S} {G : Over S} [GrpObj G] [IsCommMonObj G]
     {A : Over U} [GrpObj A] [IsCommMonObj A] {F : A.left ⟶ G.left} (gp : IsGrpPullback A G j F) :
     IsPullback (cubeMapOf gp).F3 (G3 A).hom (G3 G).hom j := by
-  have hp := gp.1
-  have f3 : ∀ i, (cubeMapOf gp).F3 ≫ (x3 G i).left = (x3 A i).left ≫ F := cubeMap_comp_proj_three (cubeMapOf gp)
-  have w : (cubeMapOf gp).F3 ≫ (G3 G).hom = (G3 A).hom ≫ j :=
-    Over.w (lift (pushPt hp.w (x3 A 0)) (lift (pushPt hp.w (x3 A 1)) (pushPt hp.w (x3 A 2))))
-  have ex : ∀ s : PullbackCone (G3 G).hom j, ∃ l : s.pt ⟶ (G3 A).left,
-      l ≫ (cubeMapOf gp).F3 = s.fst ∧ l ≫ (G3 A).hom = s.snd := by
-    intro s
-    let P : Over U := Over.mk s.snd
-    let x : Fin 3 → (P ⟶ A) := fun i => Over.homMk
-      (hp.lift (s.fst ≫ (x3 G i).left) P.hom (by
-        rw [Category.assoc, Over.w]; exact s.condition)) (hp.lift_snd _ _ _)
-    have hx : ∀ i, (x i).left ≫ F = s.fst ≫ (x3 G i).left := fun i => hp.lift_fst _ _ _
-    let l : P ⟶ G3 A := lift (x 0) (lift (x 1) (x 2))
-    have lx : ∀ i, l ≫ x3 A i = x i := fun i => by fin_cases i <;> simp [l, x3]
-    refine ⟨l.left, hom_ext_triple _ fun i => ?_, Over.w l⟩
-    rw [Category.assoc, f3, ← hx, ← lx]
-    exact (Category.assoc _ _ _).symm
-  choose l h₁ h₂ using ex
-  refine ⟨⟨w⟩, ⟨PullbackCone.IsLimit.mk w l h₁ h₂ fun s m m₁ m₂ => hom_ext_triple _ fun i => hp.hom_ext ?_ ?_⟩⟩
-  · rw [Category.assoc, Category.assoc, ← f3, ← Category.assoc, ← Category.assoc, m₁, h₁]
-  · rw [Category.assoc, Category.assoc, Over.w, m₂, h₂]
+  apply GlobalTheory.NormalCubeExt.isPullback_tripleProduct_groupPullback <;> assumption
 
 theorem sum_thε : ∑ I : thK.{0}, thε I = 0 := by decide
 

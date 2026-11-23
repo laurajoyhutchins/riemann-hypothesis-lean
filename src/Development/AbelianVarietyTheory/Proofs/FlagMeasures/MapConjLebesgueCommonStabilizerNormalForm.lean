@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RootSubgroupJacobian.SUpPowEqZero
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsNormalFormStabilizerMeasure
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicStabilizerRadicalStructure
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ContinuousUpperOff
@@ -85,21 +86,7 @@ theorem mulVec_mp {ι : Type*} [Fintype ι] [DecidableEq ι] {g : Matrix ι ι �
   simp
 
 theorem mul_star_mp {a : ℂ} (ha : ‖a‖ = 1) : MeasurePreserving (fun z : ℂ => a * star z) volume volume := by
-  set f : ℂ →ₗ[ℝ] ℂ := (LinearMap.mulLeft ℝ a).comp Complex.conjAe.toLinearEquiv.toLinearMap with hf
-  have hn : Complex.normSq a = 1 := by
-    rw [Complex.normSq_eq_norm_sq, ha]; norm_num
-  have hm : LinearMap.det (LinearMap.mulLeft ℝ a) = Complex.normSq a := by
-    rw [← Algebra.norm_complex_apply, Algebra.norm_apply]
-    rfl
-  have hdet : LinearMap.det f = -1 := by
-    rw [hf, LinearMap.det_comp, hm, Complex.det_conjAe, hn]; norm_num
-  have hfun : (⇑f) = fun z : ℂ => a * star z := by
-    funext z
-    simp [hf]
-  rw [← hfun]
-  refine ⟨f.continuous_of_finiteDimensional.measurable, ?_⟩
-  rw [Measure.map_linearMap_addHaar_eq_smul_addHaar _ (by rw [hdet]; norm_num), hdet]
-  simp
+  apply PI.AmpRootJacW.mp_unitConj1 <;> assumption
 
 theorem normSq_det_of_mem {M : Matrix (Fin (k + 1)) (Fin (k + 1)) ℂ} (hM : M ∈ UH (Hb k)) :
     Complex.normSq M.det = 1 := by

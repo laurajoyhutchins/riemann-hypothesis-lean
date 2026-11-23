@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.HermitianFormsSameSignatureSameSpace
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.Signature
 import Mathlib.Algebra.Order.Floor.Extended
@@ -61,24 +62,7 @@ theorem trace_conj {E : Type} [Field E] [NumberField E] [IsCMField E] (a : E) :
 
 theorem conj_rt {E : Type} [Field E] [NumberField E] [IsCMField E]
     (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) : cc (H.rt : E) = -(H.rt : E) := by
-  have hs : (H.rt : E) ^ 2 = -(H.d : E) := by
-    have := congrArg (fun x : 𝓞 E => (x : E)) H.rt_sq
-    simpa using this
-  have hsq : (cc (H.rt : E)) ^ 2 = (H.rt : E) ^ 2 := by
-    unfold cc
-    rw [← map_pow, hs, map_neg, map_natCast]
-  refine (sq_eq_sq_iff_eq_or_eq_neg.1 hsq).resolve_left fun h1 => ?_
-  obtain ⟨τ⟩ : Nonempty (E →+* ℂ) := inferInstance
-  have h2 := IsCMField.complexEmbedding_complexConj E τ (H.rt : E)
-  unfold cc at h1
-  rw [h1] at h2
-  have h3 : (τ (H.rt : E)) ^ 2 = -(H.d : ℂ) := by
-    rw [← map_pow, hs, map_neg, map_natCast]
-  obtain ⟨r, hr⟩ := Complex.conj_eq_iff_real.1 h2.symm
-  rw [hr] at h3
-  have h4 : r ^ 2 = -(H.d : ℝ) := by exact_mod_cast h3
-  have h5 : (0 : ℝ) < H.d := by exact_mod_cast H.d_prime.pos
-  nlinarith [sq_nonneg r]
+  apply GlobalTheory.OneSpace.cc_rt <;> assumption
 
 theorem cmField_host_element_add_conj_eq_one {E : Type} [Field E] [NumberField E] [IsCMField E]
     (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) : (H.w0 : E) + cc (H.w0 : E) = 1 := by

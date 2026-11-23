@@ -1,5 +1,6 @@
 module
 
+import Mathlib.LinearAlgebra.TensorProduct.Lift
 public import Formalism.LocalRingCardinality.DataExtra
 public import Formalism.LocalRingCardinality.DataParams
 public import Formalism.HarderNarasimhan.HarderNarasimhanProofs.Rerealize
@@ -197,18 +198,8 @@ theorem length_tensor_loc {A : Type*} [CommRing A] (P : Ideal A) [P.IsPrime]
 theorem range_liftBaseChange {A : Type*} [CommRing A] (O : Type*) [CommRing O] [Algebra A O]
     {X W : Type*} [AddCommGroup X] [Module A X] [AddCommGroup W] [Module A W] [Module O W]
     [IsScalarTower A O W] (l : X →ₗ[A] W) :
-    LinearMap.range (l.liftBaseChange O) = Submodule.span O (Set.range l) := by
-  apply le_antisymm
-  · rintro _ ⟨t, rfl⟩
-    induction t using TensorProduct.induction_on with
-    | zero => simp
-    | tmul c x =>
-      rw [LinearMap.liftBaseChange_tmul]
-      exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨x, rfl⟩)
-    | add a b ha hb => rw [map_add (f := _)]; exact Submodule.add_mem _ ha hb
-  · rw [Submodule.span_le]
-    rintro _ ⟨x, rfl⟩
-    exact ⟨1 ⊗ₜ x, by simp⟩
+    LinearMap.range (l.liftBaseChange O) = Submodule.span O (Set.range l) :=
+  LinearMap.range_liftBaseChange O l
 
 theorem length_span_quot {A : Type*} [CommRing A] (O : Type*) [CommRing O] [Algebra A O]
     {V W : Type*} [AddCommGroup V] [Module A V] [AddCommGroup W] [Module A W] [Module O W]

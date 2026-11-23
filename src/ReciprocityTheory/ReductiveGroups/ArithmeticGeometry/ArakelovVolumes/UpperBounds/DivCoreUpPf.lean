@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.BoundedSectionAlgebra
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.WeightFunctionOnFrames
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -75,20 +76,7 @@ variable {r : ℕ} (X : Data E r)
 
 theorem bchar_add (la la' : Wt X.Ψ r) {b : Frame X.Ψ r} (hb : b ∈ Bor X.Ψ r) :
     bchar (la + la') b = bchar la b * bchar la' b := by
-  unfold bchar
-  rw [← Finset.prod_mul_distrib]
-  refine Finset.prod_congr rfl fun τ _ => ?_
-  rw [← Finset.prod_mul_distrib]
-  refine Finset.prod_congr rfl fun i _ => ?_
-  obtain ⟨hdet, htri⟩ := hb τ
-  have hd : (mat b τ).det = ∏ j, mat b τ j j :=
-    Matrix.det_of_upperTriangular (fun a c h => htri a c h)
-  have hne : b τ i i ≠ 0 := by
-    intro h0
-    apply hdet
-    rw [hd]
-    exact Finset.prod_eq_zero (Finset.mem_univ i) h0
-  exact zpow_add₀ hne _ _
+  apply ReciprocityTheory.ChartRestriction.G.FD.BoundedSectionAlgebra.bchar_add <;> assumption
 
 private lemma exp_neg_neg_two_mul_log (P : ℝ) (hP : 0 < P) : Real.exp (-(-2 * Real.log P)) = P ^ 2 := by
   rw [show -(-2 * Real.log P) = Real.log P + Real.log P by ring, Real.exp_add, Real.exp_log hP]

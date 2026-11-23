@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.TensorQuotientTorsionFreeComplete
 public import Mathlib.Algebra.DirectSum.Basic
 public import Mathlib.Data.Nat.Prime.Defs
 public import Mathlib.RingTheory.AdicCompletion.Basic
@@ -75,33 +76,7 @@ theorem isAdicComplete_span_iff {M : Type} [AddCommGroup M] [Module A M] :
       (∀ x : M, (∀ n : ℕ, ∃ z : M, π ^ n • z = x) → x = 0) ∧
       ∀ u : ℕ → M, (∀ n : ℕ, ∃ z : M, π ^ n • z = u n - u (n + 1)) →
         ∃ L : M, ∀ n : ℕ, ∃ z : M, π ^ n • z = u n - L := by
-  constructor
-  · intro h
-    refine ⟨fun x hx => ?_, fun u hu => ?_⟩
-    · refine h.toIsHausdorff.haus x fun n => ?_
-      rw [smodEq_span_iff, sub_zero]
-      exact hx n
-    · have hc : ∀ {m n : ℕ}, m ≤ n →
-          u m ≡ u n [SMOD (Ideal.span {π} ^ m • ⊤ : Submodule A M)] := by
-        intro m n hmn
-        rw [smodEq_span_iff]
-        induction n, hmn using Nat.le_induction with
-        | base => exact ⟨0, by simp⟩
-        | succ k hk ih =>
-          obtain ⟨z, hz⟩ := ih
-          obtain ⟨w, hw⟩ := hu k
-          refine ⟨z + π ^ (k - m) • w, ?_⟩
-          rw [smul_add, smul_smul, ← pow_add, Nat.add_sub_cancel' hk, hz, hw]
-          abel
-      obtain ⟨L, hL⟩ := h.toIsPrecomplete.prec hc
-      exact ⟨L, fun n => (smodEq_span_iff π n _ _).1 (hL n)⟩
-  · rintro ⟨h1, h2⟩
-    haveI : IsHausdorff (Ideal.span {π}) M := ⟨fun x hx => h1 x fun n => by
-      simpa using (smodEq_span_iff π n _ _).1 (hx n)⟩
-    haveI : IsPrecomplete (Ideal.span {π}) M := ⟨fun u hu => by
-      obtain ⟨L, hL⟩ := h2 u fun n => (smodEq_span_iff π n _ _).1 (hu (Nat.le_succ n))
-      exact ⟨L, fun n => (smodEq_span_iff π n _ _).2 (hL n)⟩⟩
-    exact ⟨⟩
+  apply GlobalTheory.XiQuotient.isAdicComplete_iff <;> assumption
 
 variable {π}
 

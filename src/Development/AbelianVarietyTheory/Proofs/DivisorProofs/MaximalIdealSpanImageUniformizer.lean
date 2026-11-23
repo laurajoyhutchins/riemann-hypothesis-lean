@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnitMulPowOfMaximalIdealEqSpan
 public import Mathlib.RingTheory.LocalRing.MaximalIdeal.Defs
 public import Mathlib.RingTheory.Noetherian.Defs
 import Mathlib.Algebra.Order.Floor.Extended
@@ -52,39 +53,7 @@ namespace GlobalTheory
 theorem eq_pow_mul_unit_of_maximalIdeal_eq_span {V : Type} [CommRing V] [IsLocalRing V]
     [IsNoetherianRing V] (T : V) (hm : maximalIdeal V = Ideal.span {T}) (v : V) (hv : v ≠ 0) :
     ∃ (a : ℕ) (c : V), IsUnit c ∧ v = T ^ a * c := by
-  have hK := Ideal.iInf_pow_eq_bot_of_isLocalRing (maximalIdeal V) (maximalIdeal.isMaximal V).ne_top
-  have hex : ∃ n : ℕ, v ∉ Ideal.span {T ^ n} := by
-    by_contra h
-    push_neg at h
-    apply hv
-    have : v ∈ ⨅ n : ℕ, maximalIdeal V ^ n := by
-      rw [Ideal.mem_iInf]
-      intro n
-      rw [hm, Ideal.span_singleton_pow]
-      exact h n
-    rw [hK] at this
-    exact (Ideal.mem_bot).mp this
-  classical
-  have hn₀ : v ∉ Ideal.span {T ^ Nat.find hex} := Nat.find_spec hex
-  have hpos : Nat.find hex ≠ 0 := by
-    intro h0
-    apply hn₀
-    rw [h0, pow_zero, Ideal.span_singleton_one]
-    exact Submodule.mem_top
-  obtain ⟨a, ha⟩ := Nat.exists_eq_succ_of_ne_zero hpos
-  have hmem : v ∈ Ideal.span {T ^ a} := by
-    have := Nat.find_min hex (show a < Nat.find hex by omega)
-    exact not_not.mp this
-  obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp hmem
-  refine ⟨a, c, ?_, by rw [← hc, mul_comm]⟩
-  by_contra hcu
-  have hcm : c ∈ maximalIdeal V := by
-    rw [IsLocalRing.mem_maximalIdeal, mem_nonunits_iff]; exact hcu
-  rw [hm] at hcm
-  obtain ⟨d, hd⟩ := Ideal.mem_span_singleton'.mp hcm
-  apply hn₀
-  rw [ha, Ideal.mem_span_singleton']
-  exact ⟨d, by rw [← hc, ← hd, pow_succ]; ring⟩
+  apply GlobalTheory.Pat.unit_mul_pow_of_maximalIdeal_eq_span <;> assumption
 
 theorem maximalIdeal_eq_span_map_of_fractions (V W : Type) [CommRing V] [IsLocalRing V]
     [IsNoetherianRing V] [CommRing W] [IsLocalRing W] (φ : V →+* W) (T : V)

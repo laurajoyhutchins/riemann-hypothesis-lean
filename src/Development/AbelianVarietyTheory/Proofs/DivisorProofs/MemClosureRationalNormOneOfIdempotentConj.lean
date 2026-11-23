@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.StrongApproximationSL2Adeles
 public import Development.AbelianVarietyTheory.Definitions.Divisors.OneMemH0WeightZero
 public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.NotIsCompactUnivFv
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ClosureNormOneProductsSubgroupPropertiesStatement
@@ -129,21 +130,7 @@ variable {F : Type} [Field F] [NumberField F]
 
 theorem isPlacesIdem_mul_self {S₁ : Finset (InfinitePlace F)} {S₂ : Finset (HeightOneSpectrum (𝓞 F))} {η : AF F}
     (hη : IsPlacesIdem S₁ S₂ η) : η * η = η := by
-  have h1 : fstA F (η * η) = fstA F η := by
-    rw [map_mul]
-    funext w
-    change fstA F η w * fstA F η w = fstA F η w
-    by_cases hw : w ∈ S₁
-    · rw [hη.1 w hw, one_mul]
-    · rw [hη.2.1 w hw, zero_mul]
-  have h2 : sndA F (η * η) = sndA F η := by
-    refine RestrictedProduct.ext _ _ fun u => ?_
-    change evalV F u (sndA F (η * η)) = evalV F u (sndA F η)
-    rw [map_mul, map_mul]
-    by_cases hu : u ∈ S₂
-    · rw [hη.2.2.1 u hu, one_mul]
-    · rw [hη.2.2.2 u hu, zero_mul]
-  exact Prod.ext h1 h2
+  apply GlobalTheory.StrongApproximationSL2.idem_of_isPlacesIdem <;> assumption
 
 theorem rat_mul {a b : F} (x y : ℍ[F, a, b]) : rat (x * y) = rat x * rat y := by
   ext <;> simp [rat] <;> ring

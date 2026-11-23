@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.InducedProductDropZeroFactors
 public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DropHom
 public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.ZelevinskyJacquet.LSegJacquet
 public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.JordanHolderMultiplicityJacquetEqBorelJacquetOfS
@@ -146,23 +147,7 @@ theorem deltaHalf_drop (hm : StrictMono o) (hne : ∀ j, d j ≠ 0 → j ∈ Set
     (g : Levi k fun j => Fin (d j)) :
     deltaHalf k (fun j => Fin (d j)) g =
       deltaHalf k (fun a => Fin (d (o a))) (GlobalTheory.CompanionTheory.FineProd.dropHom (k := k) d o g) := by
-  rw [GlobalTheory.SmGL.deltaHalf_apply, GlobalTheory.SmGL.deltaHalf_apply]
-  symm
-  refine Fintype.prod_of_injective o hm.injective _ _ (fun j hj => ?_) (fun a => ?_)
-  · have hd : d j = 0 := by
-      by_contra hd
-      exact hj (hne j hd)
-    haveI : IsEmpty (Fin (d j)) := by
-      rw [hd]
-      infer_instance
-    have hdet : Matrix.GeneralLinearGroup.det (g j) = 1 := by
-      ext
-      simp [Matrix.GeneralLinearGroup.val_det_apply, Matrix.det_isEmpty]
-    rw [hdet, map_one]
-  · rw [GlobalTheory.CompanionTheory.FineProd.JmDrop.modExp_drop hm hne a]
-    first
-    | rfl
-    | skip
+  apply GlobalTheory.CompanionTheory.FineProd.ProdDrop.deltaHalf_drop <;> assumption
 
 variable {n : Type} [Fintype n] [DecidableEq n]
   {e : (Σ j, Fin (d j)) ≃ n} {e' : (Σ a, Fin (d (o a))) ≃ n}

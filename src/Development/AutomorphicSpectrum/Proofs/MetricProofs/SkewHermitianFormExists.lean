@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.NormSqEqAdaptedFrameSum
 public import GroundTheory.AutomorphicForms.HermitianSpaces
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
 public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.BlockGLSupportedMemMirabolicSupported
@@ -66,27 +67,7 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E]
 
 theorem quadConj_eq_complexConj (x : E) :
     conj (maximalRealSubfield E) E x = IsCMField.complexConj E x := by
-  set K := maximalRealSubfield E
-  set t := IsCMField.complexConj E
-  set y := conj K E x with hy
-  have hyy : conj K E y = x := conj_conj x
-  have fix : ∀ a : E, conj K E a = a → t a = a := by
-    intro a ha
-    obtain ⟨b, rfl⟩ := conj_eq_self_iff.1 ha
-    exact (IsCMField.complexConj_eq_self_iff E _).2 b.2
-  have ha : t (x + y) = x + y := fix _ (by rw [map_add (f := _), hyy, ← hy, add_comm])
-  have hb : t (x * y) = x * y := fix _ (by rw [map_mul, hyy, ← hy, mul_comm])
-  have hz : (t x - x) * (t x - y) = 0 := by
-    have h0 : x * x - (x + y) * x + x * y = 0 := by ring
-    have h1 := congrArg t h0
-    rw [map_add (f := _), map_sub, map_mul, map_mul, ha, hb, map_zero] at h1
-    linear_combination h1
-  rcases mul_eq_zero.1 hz with h | h
-  · have hx : t x = x := sub_eq_zero.1 h
-    have : x ∈ K := (IsCMField.complexConj_eq_self_iff E x).1 hx
-    have h2 : y = x := conj_eq_self_iff.2 ⟨⟨x, this⟩, rfl⟩
-    rw [h2, hx]
-  · exact (sub_eq_zero.1 h).symm
+  apply GlobalTheory.CompanionTheory.Ar.Cusp.Dict.AdaptedLen.conj_eq_complexConj <;> assumption
 
 theorem complexConj_rt (H : Host E) : IsCMField.complexConj E (H.rt : E) = -(H.rt : E) := by
   have hd : (0 : ℝ) < H.d := by exact_mod_cast H.d_prime.pos

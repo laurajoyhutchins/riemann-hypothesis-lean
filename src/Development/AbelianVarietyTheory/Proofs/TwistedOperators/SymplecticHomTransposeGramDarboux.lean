@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsSplitSupportedUnitaryComponent
 public import Formalism.LocalToGlobal.IndefiniteReal.LocalNewformFunction
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -58,24 +59,7 @@ theorem gram_star_eq (V : HSp D) (i j) : star (V.gram i j) = V.gram j i :=
   V.herm.eq (V.frame i) (V.frame j)
 
 theorem gram_det_ne_zero (V : HSp D) : V.gram.det ≠ 0 := by
-  intro h
-  obtain ⟨v, hv, h0⟩ := Matrix.exists_mulVec_eq_zero_iff.2 h
-  apply hv
-  have : V.frame.equivFun.symm v = 0 := by
-    apply V.nondeg.2
-    intro x
-    have hx : x = ∑ i, V.frame.repr x i • V.frame i := (V.frame.sum_repr x).symm
-
-    rw [hx, map_sum, LinearMap.sum_apply]
-    refine Finset.sum_eq_zero fun i _ => ?_
-    have h1 : ∑ j, V.gram i j * v j = 0 := congr_fun h0 i
-    have h2 : V.hT (V.frame i) (V.frame.equivFun.symm v) = ∑ j, V.gram i j * v j := by
-
-      rw [Module.Basis.equivFun_symm_apply, map_sum]
-      refine Finset.sum_congr rfl fun j _ => ?_
-      rw [map_smul, smul_eq_mul, mul_comm]; rfl
-    rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, h2, h1, smul_zero]
-  exact V.frame.equivFun.symm.injective (this.trans (map_zero _).symm)
+  apply GlobalTheory.SplitOnto.gram_det_ne <;> assumption
 
 theorem gram_map_mul_inv (V : HSp D) :
     HMul.hMul (V.gram.map (incA D) : Matrix (Fin V.rank) (Fin V.rank) (AE D)) (V.gram⁻¹.map (incA D) : Matrix (Fin V.rank) (Fin V.rank) (AE D)) = 1 := by

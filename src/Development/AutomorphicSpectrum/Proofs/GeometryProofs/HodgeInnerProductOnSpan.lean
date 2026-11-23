@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeInnerProductPullbackUnique
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.HodgeIPIffHodgeFormConj
 public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.EqZeroOfSumEmbeddingSmul
 public import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.ExistsLinearOfIsMonHom
@@ -74,16 +75,7 @@ section Unif
 variable {A : Over (Sp ℂ)} [GrpObj A] {L : LB A.left} {g : ℕ}
 
 theorem isTangent_one' : IsTangent (1 : epsR ℂ ⟶ A) := by
-  unfold IsTangent
-  have e : (1 : epsR ℂ ⟶ A).left = spMap (algebraMap ℂ (DualNumber ℂ)) ≫ η[A].left := by
-    rw [Hom.one_def, Over.comp_left]
-    congr 1
-  rw [e, ← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
-  have : (TrivSqZeroExt.fstHom ℂ ℂ ℂ).toRingHom.comp (algebraMap ℂ (DualNumber ℂ)) = RingHom.id ℂ := by
-    ext x
-    simp
-  rw [this]
-  simp
+  apply GlobalTheory.CompanionTheory.Ar.HodgeUnique.isTangent_one' <;> assumption
 
 theorem isDiff_one_of_fderiv (u : HolUnif A L g) {U : A.left.Opens} (hU : IsAffineOpen U)
     (h0 : ⊤ ≤ (u.ex 0).left ⁻¹ᵁ U) {w : Fin g → ℂ}
@@ -106,25 +98,7 @@ theorem ex_comp_transl (u : HolUnif A L g) (z y : Fin g → ℂ) : u.ex y ≫ tr
 theorem fderiv_eq_zero_of_isDiff_one (u : HolUnif A L g) {w : Fin g → ℂ} (h : u.IsDiff w (1 : epsR ℂ ⟶ A))
     (z : Fin g → ℂ) {W : A.left.Opens} (hz : ⊤ ≤ (u.ex z).left ⁻¹ᵁ W) (s : Γ(A.left, W)) :
     fderiv ℂ (fun y => valAt' (u.ex y).left W s) z w = 0 := by
-  have hv : IsTangent (1 : epsR ℂ ⟶ A) := isTangent_one'
-  set T := transl u z with hT
-  have h0 : ⊤ ≤ (u.ex 0).left ⁻¹ᵁ (T.left ⁻¹ᵁ W) := by
-    have e : (u.ex 0 ≫ T).left = (u.ex z).left := by rw [hT, ex_comp_transl, add_zero]
-    intro p hp
-    have := hz hp
-    rw [← e] at this
-    exact this
-  have hvU := (tangent_mem_iff (u := u) hv _).2 h0
-  have e1 := h _ hvU ((T.left.app W).hom s)
-  have e2 := GlobalTheory.UnifDifferential.isDiff_one u _ hvU ((T.left.app W).hom s)
-  have e3 : fderiv ℂ (fun y => valAt' (u.ex y).left (T.left ⁻¹ᵁ W) ((T.left.app W).hom s)) 0 w = 0 := by
-    rw [← e1, e2, map_zero]
-  have e4 : (fun y => valAt' (u.ex y).left (T.left ⁻¹ᵁ W) ((T.left.app W).hom s)) =
-      fun y => valAt' (u.ex (z + y)).left W s := by
-    funext y
-    rw [← GlobalTheory.HomLinear.valAt'_comp_left, hT, ex_comp_transl]
-  rw [e4, fderiv_comp_add_left (f := fun y => valAt' (u.ex y).left W s), add_zero] at e3
-  exact e3
+  apply GlobalTheory.CompanionTheory.Ar.HodgeUnique.fderiv_eq_zero_of_isDiff_one <;> assumption
 
 theorem eq_zero_of_isDiff_one (u : HolUnif A L g) {w : Fin g → ℂ} (h : u.IsDiff w (1 : epsR ℂ ⟶ A)) : w = 0 := by
   let pt : (𝟙_ (Over (Sp ℂ))).left := (default : PrimeSpectrum ℂ)
@@ -197,39 +171,7 @@ theorem eq_of_isDiff (u : HolUnif A L g) {v : epsR ℂ ⟶ A} (hv : IsTangent v)
 theorem exists_linear_compare {A' : Over (Sp ℂ)} [GrpObj A'] {L' : LB A'.left} {g' : ℕ} (u : HolUnif A L g)
     (u' : HolUnif A' L' g') (f : A' ⟶ A) [IsMonHom f] :
     ∃ F : (Fin g' → ℂ) →ₗ[ℂ] (Fin g → ℂ), ∀ z, u.ex (F z) = u'.ex z ≫ f := by
-  letI : CommGroup (𝟙_ (Over (Sp ℂ)) ⟶ A) :=
-    { (inferInstance : Group (𝟙_ (Over (Sp ℂ)) ⟶ A)) with
-      mul_comm := fun a b => by
-        obtain ⟨z, rfl⟩ := u.ex_onto a
-        obtain ⟨w, rfl⟩ := u.ex_onto b
-        exact (u.ex_add z w).symm.trans ((congrArg u.ex (add_comm z w)).trans (u.ex_add w z)) }
-  let ex : (Fin g → ℂ) →+ Additive (𝟙_ (Over (Sp ℂ)) ⟶ A) :=
-    AddMonoidHom.mk' (fun z => Additive.ofMul (u.ex z)) u.ex_add
-  let G' : (Fin g' → ℂ) →+ Additive (𝟙_ (Over (Sp ℂ)) ⟶ A) :=
-    AddMonoidHom.mk' (fun z => Additive.ofMul (u'.ex z ≫ f)) (fun z w => by
-      change u'.ex (z + w) ≫ f = (u'.ex z ≫ f) * (u'.ex w ≫ f)
-      rw [u'.ex_add]
-      exact MonObj.mul_comp _ _ f)
-  have hhol := GlobalTheory.HomLinear.isHolTo_ex_comp u' f
-  obtain ⟨U, hU, h0⟩ := exists_affine u
-  have hker : (ex.ker : Set (Fin g → ℂ)) = u.Λ := Set.ext fun z => u.ker z
-  obtain ⟨F, hF, -⟩ := GlobalTheory.existsUnique_linear_lift_of_separating (ex := ex) (G := G') u.ex_onto
-    (hker ▸ isDiscrete_iff_discreteTopology.2 u.discrete)
-    (S := {a | ⊤ ≤ (Additive.toMul a).left ⁻¹ᵁ U})
-    (f := fun (s : Γ(A.left, U)) a => valAt' (Additive.toMul a).left U s)
-    (by rw [← map_zero ex]; exact h0) (by
-      intro a ha b hb h
-      refine Over.OverMorphism.ext (f := Additive.toMul a) (g := Additive.toMul b)
-        (ext_evalPt (R := ℂ) hU ha hb (RingHom.ext fun s => ?_))
-      exact (valAt'_eq_evalPt _ U ha s).symm.trans ((h s).trans (valAt'_eq_evalPt _ U hb s)))
-    (u.hol U 0).1 (by
-      have := (hhol U 0).1
-      simp only [Set.mem_univ, true_and] at this
-      exact this) (fun s => (u.hol U s).2) (fun s => by
-      have := (hhol U s).2
-      simp only [Set.mem_univ, true_and] at this
-      exact this) (fun w hw => eq_zero_of_isDiff_one u (isDiff_one_of_fderiv u hU h0 hw))
-  exact ⟨F, hF⟩
+  apply GlobalTheory.CompanionTheory.Ar.HodgeUnique.exists_linear_compare <;> assumption
 
 end Unif
 
@@ -268,23 +210,7 @@ theorem lft_mul (h : IsGrpPullback A G z φ) (v w : epsAt z ⟶ G) : lft h (v * 
   (lft_unique h (h.2 (epsR ℂ) (lft h v) (lft h w) v w (lft_left h v).symm (lft_left h w).symm).symm).symm
 
 theorem isTangent_lft (h : IsGrpPullback A G z φ) {v : epsAt z ⟶ G} (hv : IsTanAt G z v) : IsTangent (lft h v) := by
-  unfold IsTangent
-  refine h.1.hom_ext ?_ ?_
-  · rw [Category.assoc, lft_left]
-    refine Eq.trans hv ?_
-    have e := one_left_comp h (𝟙_ (Over (Sp ℂ)))
-    rw [Hom.one_def, toUnit_unit, Category.id_comp] at e
-    rw [e, one_left, one_left]
-    simp
-  · rw [Category.assoc]
-    have e1 : (lft h v).left ≫ A.hom = spMap (algebraMap ℂ (DualNumber ℂ)) := Over.w _
-    have e2 : η[A].left ≫ A.hom = 𝟙 _ := by simpa using Over.w η[A]
-    rw [e1, e2, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
-    have : (TrivSqZeroExt.fstHom ℂ ℂ ℂ).toRingHom.comp (algebraMap ℂ (DualNumber ℂ)) = RingHom.id ℂ := by
-      ext x
-      simp
-    rw [this]
-    simp
+  apply GlobalTheory.CompanionTheory.Ar.HodgeUnique.isTangent_lft <;> assumption
 
 theorem exists_map (h : IsGrpPullback A G z φ) {A' : Over (Sp ℂ)} [GrpObj A'] {φ' : A'.left ⟶ G.left}
     (h' : IsGrpPullback A' G z φ') : ∃ f : A' ⟶ A, IsMonHom f ∧ f.left ≫ φ = φ' := by

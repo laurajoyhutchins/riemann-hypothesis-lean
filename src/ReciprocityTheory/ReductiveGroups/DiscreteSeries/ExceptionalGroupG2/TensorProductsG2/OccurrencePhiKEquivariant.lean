@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.OccurrencePhiKEquivariant
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.DatumEmbeddingMemHlam
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.OccATensWordMem
 import Mathlib.Algebra.Order.Floor.Extended
@@ -74,13 +75,7 @@ theorem occurrence_phi_add (dual : Bool)
     (hf : f ∈ tensSub (genSub (smE ε (rreg ε)) (datumV ε Ψ v₀)))
     (hf' : f' ∈ tensSub (genSub (smE ε (rreg ε)) (datumV ε Ψ v₀))) :
     occC2phi dual ε η (f + f') = occC2phi dual ε η f + occC2phi dual ε η f' := by
-  unfold occC2phi
-  have e : (fun c => (((f + f') c : smD ε (rreg ε)) : L2 ε)) =
-      (fun c => ((f c : smD ε (rreg ε)) : L2 ε)) + (fun c => ((f' c : smD ε (rreg ε)) : L2 ε)) := by
-    funext c; simp
-  rw [e, occurrence_coef_add]
-  exact toL2_add_smooth ε (occA_coef_memLp dual (rreg_isURepOn ε) hW η f hη hf)
-    (occA_coef_memLp dual (rreg_isURepOn ε) hW η f' hη hf')
+  apply ReciprocityTheory.ChartRestriction.DS.occurrence_phi_add <;> assumption
 
 theorem occurrence_phi_smul (dual : Bool) (η f : Fin n → smD ε (rreg ε)) (a : ℂ) :
     occC2phi dual ε η (a • f) = a • occC2phi dual ε η f := by

@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.ThetaLifts.Reductions.WeilPairs.RowsStackRight
 public import Mathlib.Algebra.Module.Lattice.Full
 public import Mathlib.NumberTheory.NumberField.Basic
 import Mathlib.Algebra.Order.Floor.Extended
@@ -64,32 +65,6 @@ theorem exists_nat_mul_integral {E : Type} [Field E] [NumberField E] (a : E) :
 theorem exists_nsmul_mem {E : Type} [inst : Field E] [NumberField E] {n : ℕ}
     (Λ : Submodule (NumberField.RingOfIntegers E) (Fin n → E)) (h : Submodule.IsFullLattice E Λ)
     (v : Fin n → E) : ∃ (N : ℕ), (0 : ℕ) < N ∧ N • v ∈ Λ := by
-  have hv : v ∈ Submodule.span E (Λ : Set (Fin n → E)) := by
-    rw [h.span_eq_top]; exact Submodule.mem_top
-  induction hv using Submodule.span_induction with
-  | mem x hx => exact ⟨1, Nat.one_pos, by simpa using hx⟩
-  | zero => exact ⟨1, Nat.one_pos, by simp⟩
-  | add x y _ _ hx hy =>
-    obtain ⟨N, hN, hx⟩ := hx
-    obtain ⟨M, hM, hy⟩ := hy
-    refine ⟨M * N, Nat.mul_pos hM hN, ?_⟩
-    rw [smul_add]
-    refine Λ.add_mem ?_ ?_
-    · rw [mul_smul]; exact nsmul_mem hx M
-    · rw [mul_comm, mul_smul]; exact nsmul_mem hy N
-  | smul a x _ hx =>
-    obtain ⟨N, hN, hx⟩ := hx
-    obtain ⟨M, hM, hint⟩ := exists_nat_mul_integral a
-    refine ⟨M * N, Nat.mul_pos hM hN, ?_⟩
-    obtain ⟨r, hr⟩ : ∃ r : NumberField.RingOfIntegers E,
-        algebraMap (NumberField.RingOfIntegers E) E r = (M : E) * a := ⟨⟨(M : E) * a, hint⟩, rfl⟩
-    have hmem := Λ.smul_mem r hx
-    have e : (M * N) • a • x = r • N • x := by
-      rw [← algebraMap_smul E r (N • x), hr]
-      funext i
-      simp only [Pi.smul_apply, smul_eq_mul, nsmul_eq_mul, Nat.cast_mul, Pi.mul_apply,
-        Pi.natCast_apply]
-      ring
-    rw [e]; exact hmem
+  apply PositivityTheory.ThKW.exists_nsmul_mem <;> assumption
 
 end GlobalTheory.NatMulIntegralNsmul

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.ExistsFormsVanishingComplexPointsFullJets
 public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FRatioSelf
 public import Development.AbelianVarietyTheory.Definitions.Divisors.DetJacMatCoordsEqTransitionJacobianDet
 public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.AlgebraicSardShiftedFunctionsRegularZerosStatement
@@ -71,35 +72,13 @@ theorem evHom_fRatio_eq_zero_iff {X : Scheme.{0}} {p : X ⟶ Sp ℂ} {N n : ℕ}
     {f g : MvPolynomial (Fin (N + 1)) ℂ} (hf : f ∈ grading ℂ N n) (hg : g ∈ grading ℂ N n)
     {z : CxPts p (RingHom.id ℂ)} (hz : z ∈ CxPts.ptsIn p (RingHom.id ℂ) (fOpen ι g)) :
     CxPts.evHom hz (fRatio ι f g hf hg) = 0 ↔ z ∉ CxPts.ptsIn p (RingHom.id ℂ) (fOpen ι f) := by
-  have e : X.basicOpen (fRatio ι f g hf hg) = fOpen ι g ⊓ fOpen ι f := by
-    have e0 : X.basicOpen (fRatio ι f g hf hg) =
-        ι ⁻¹ᵁ (PSpace ℂ N).basicOpen (frac (grading ℂ N) _ f g hf hg le_rfl) :=
-      (Scheme.preimage_basicOpen ι _).symm
-    rw [e0, basicOpen_frac]
-    rfl
-  have h1 := CxPts.mem_ptsIn_basicOpen hz (fRatio ι f g hf hg)
-  rw [e, CxPts.mem_ptsIn_inf, CxPts.ev_eq hz] at h1
-  constructor
-  · intro h0 hf'
-    exact (h1.1 ⟨hz, hf'⟩) h0
-  · intro hn
-    by_contra h0
-    exact hn (h1.2 h0).2
+  apply GlobalTheory.EtProj.Jets.ev_ratio_eq_zero_iff <;> assumption
 
 theorem frac_smul_deg {N n : ℕ} (V : (PSpace ℂ N).Opens) (f g : MvPolynomial (Fin (N + 1)) ℂ)
     (hf : f ∈ grading ℂ N n) (hg : g ∈ grading ℂ N n) (hV : V ≤ Proj.basicOpen (grading ℂ N) g) (c : ℂ)
     (hcf : c • f ∈ grading ℂ N n) :
     frac (grading ℂ N) V (c • f) g hcf hg hV = algebraMap ℂ Γ(PSpace ℂ N, V) c * frac (grading ℂ N) V f g hf hg hV := by
-  refine ext fun x hx => ?_
-  obtain ⟨i, hi⟩ := exists_mem_chart ℂ N x
-  have hW : V ⊓ chart ℂ N i ≤ V := inf_le_left
-  have hxW : x ∈ V ⊓ chart ℂ N i := ⟨hx, hi⟩
-  rw [← ev_resG hW x hxW, ← ev_resG hW x hxW, map_mul, resG_algebraMap, resG_frac, resG_frac,
-    ← formOn_C (hi := (inf_le_right : V ⊓ chart ℂ N i ≤ chart ℂ N i)), formOn]
-  congr 1
-  refine (frac_mul_eq ?_).symm
-  rw [MvPolynomial.smul_eq_C_mul]
-  ring
+  apply GlobalTheory.EtProj.Jets.frac_smul_n <;> assumption
 
 theorem fRatio_add_smul {X : Scheme.{0}} (p : X ⟶ Sp ℂ) {N n : ℕ} (ι : X ⟶ PSpace ℂ N)
     (hp : ι ≫ PSpace.str ℂ N = p) {g h f₀ : MvPolynomial (Fin (N + 1)) ℂ} (hg : g ∈ grading ℂ N n)

@@ -2,7 +2,7 @@ module
 
 public import Development.AutomorphicSpectrum.Statements.GeometryStatements.IsPolLatticePlane
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SemiabelianAdicTorsionTwoStatement
-public import Development.WeilBound.CoreStatements.HodgeTatePoints.ValuationRingOfIntegers
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SemiabelianAdicTorsionThree
 public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.DualOrder
 public import Development.AutomorphicSpectrum.PublishedTheorems.Algebra₂.FarguesHodgeTate
 public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.CompleteIntegersPropertiesStatement
@@ -10,7 +10,7 @@ public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.PolarisedDivi
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.LieModelFreeOverLocalRingStatement
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SemiabelianAdicTorsionFiveStatement
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SemiabelianAdicTorsionFourStatement
-import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SemiabelianAdicTorsionOneStatement
+public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SemiabelianAdicTorsionOneStatement
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
 import Mathlib.Algebra.Order.Interval.Basic
@@ -50,6 +50,8 @@ import Mathlib.Tactic.NormNum.Ordinal
 import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
+
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.PointHTOfFarguesHodgeTateStatement
 
 @[expose] public section
 
@@ -93,21 +95,8 @@ def ordTower (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClosed C] [Char
     der_zero := fun n => (h5 n).2.2.2.2.2
     der_res := h6 }
 
-theorem pointHT (hF : FarguesHodgeTate) : PointHT := by
-  intro p _ C _ _ _ v O _ _ _ hv hp hO E _ _ c hc S _ G _ _ hG y La _ _ EF N u hu X L _ _ M act ρL hmon hact hind
-    hrank ζ hζ hζp hpair κ hκ
-  haveI : Module.Free ℤ La := hu.free
-  haveI : Module.Finite ℤ La := hu.finite
-  haveI : IsLocalRing O := (GlobalTheory.T.complete_integers_properties p C v O hv hp hO).2.1.toIsLocalRing
-  obtain ⟨hLf, hLfin⟩ := lie_free_finite S G hG.smooth O y L M
-  let T := ordTower p C v O hv hp hO S G hG y La X L M
-  have hacts : ∀ a : 𝓞 E, T.Acts (DistribSMul.toAddMonoidHom La a) (ρL a) := by
-    intro a n f g hfg
-    haveI := hmon a
-    exact (GlobalTheory.T.semiabelian_adic_torsion_four p C v O hv hp hO S G hG y La X L M).2 (act a) _ (ρL a) (hind a) (hact a) n f g hfg
-  have hpe : T.PairingExtends EF ζ := fun n =>
-    GlobalTheory.T.exists_prodSpan_torsion_pairing_eq_zeta_pow p C v O hv hp hO S G hG y La X EF ζ (fun n => (hζ n).pow_eq_one) hpair n
-  exact GlobalTheory.T.polarised_divisible_group_exists hF p C v O hv hp hO E c hc La EF N u hu L T ρL ζ κ hacts hrank hζ hζp hpe hκ
+theorem pointHT (hF : FarguesHodgeTate) : PointHT :=
+  GlobalTheory.T.pointHT_of_fargues_hodge_tate hF
 
 end PositivityTheory.HtPt.Ge.Fargues
 

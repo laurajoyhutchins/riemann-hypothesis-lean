@@ -143,7 +143,6 @@ lemma string_bound (hF : KRel ε E) (hU : KUnit ε E) {a b : Fin n} (hab : a ≠
       exact h2
     have hn0 := norm_nonneg ((E a b ^ k) z)
     have hn1 := norm_nonneg ((E a b ^ (k + 1)) z)
-    have hnA := norm_nonneg (E b a ((E a b ^ (k + 1)) z))
     have key : ((k : ℝ) + 1) * (μ b - μ a - k) * ‖(E a b ^ (k + 1)) z‖ ^ 2 ≤
         ‖E b a ((E a b ^ (k + 1)) z)‖ ^ 2 := by
       rcases le_or_gt (((k : ℝ) + 1) * (μ b - μ a - k)) 0 with hc | hc

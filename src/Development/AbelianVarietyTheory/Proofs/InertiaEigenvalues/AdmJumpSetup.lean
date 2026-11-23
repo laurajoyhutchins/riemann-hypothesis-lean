@@ -166,16 +166,11 @@ theorem sz_bounds (L : SizeData₂ D) (P : ParameterChoice' D L) (hP : AdmPar L)
     split_ifs <;> simp
   rw [← hw]
   have hx : 1 < L.sc.x := L.sc.one_lt_alt
-  have hx0 : 0 < L.sc.x := by linarith
   have hb' : 0 < L.sc.b' := by
     unfold Scale.b' Scale.a Scale.X' Scale.b
     positivity
-  have hb : 0 < L.sc.b := Real.exp_pos _
   have hn : (1 : ℝ) ≤ (D.R.n : ℝ) := by
     exact_mod_cast D.R.ord_pos
-  have hw''0 : 0 ≤ L.sc.w'' D.R.n := by
-    unfold Scale.w''
-    exact div_nonneg hb'.le (by positivity)
   have hw''b' : L.sc.w'' D.R.n ≤ L.sc.b' := by
     unfold Scale.w''
     exact div_le_self hb'.le (by nlinarith)
@@ -293,9 +288,6 @@ theorem key_sets (L : SizeData₂ D) (hJb : CloudCentreDistance L) (hJc : jcCond
     push_cast
     rfl
   have ht1 : (1 : ℝ) ≤ D.R.t := L.t_win.1
-  have hS0 : 0 < L.Sc := L.Sc_pos
-  have hη : 0 < L.etaSz := L.etaSz_pos
-  have hkc0 : (0 : ℝ) ≤ kc := by rw [hkR]; linarith
   have hc0 := jumpBlockCentreOffset_coe_real (D := D)
   rw [hzR] at hlo hhi
   cases up

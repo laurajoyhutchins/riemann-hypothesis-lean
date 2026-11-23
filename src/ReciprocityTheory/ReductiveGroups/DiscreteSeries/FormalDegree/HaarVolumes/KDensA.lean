@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.ContinuousRepresentations.Blocks
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.HaarVolumes.TriDens
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PmatIsHermitian
 import Mathlib.Algebra.Order.Floor.Extended
@@ -121,23 +122,7 @@ lemma kdD_injective (ε : Fin n → Bool) : Function.Injective (kdD ε) := by
 
 lemma kd_commJ_iff (ε : Fin n → Bool) (M : Matrix (Fin n) (Fin n) ℂ) :
     M * Jm ε = Jm ε * M ↔ ∀ a b, ε a ≠ ε b → M a b = 0 := by
-  unfold Jm
-  constructor
-  · intro h a b hab
-    have h1 := congrFun (congrFun h a) b
-    rw [mul_diagonal, diagonal_mul] at h1
-    have hne : (if ε b = true then (1 : ℂ) else -1) - (if ε a = true then 1 else -1) ≠ 0 := by
-      revert hab
-      cases ε a <;> cases ε b <;> norm_num
-    have h2 : M a b * ((if ε b = true then (1 : ℂ) else -1) - (if ε a = true then 1 else -1)) = 0 := by
-      rw [mul_sub, h1, mul_comm, sub_self]
-    exact (mul_eq_zero.1 h2).resolve_right hne
-  · intro h
-    ext a b
-    rw [mul_diagonal, diagonal_mul]
-    by_cases hab : ε a = ε b
-    · rw [hab, mul_comm]
-    · rw [h a b hab, zero_mul, mul_zero]
+  apply ReciprocityTheory.ChartRestriction.DS.HW.commJ_iff <;> assumption
 
 lemma kdD_commJ (ε : Fin n → Bool) (v : ∀ s : Bool, Matrix (Fin (kdC ε s)) (Fin (kdC ε s)) ℂ) :
     kdD ε v * Jm ε = Jm ε * kdD ε v := by

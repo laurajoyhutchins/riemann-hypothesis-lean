@@ -1,5 +1,6 @@
 module
 
+import Formalism.LogVandermondeBounds.LogVandermondeProofs.CardStabilizerVector
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LatticeIndices.LeviEmbeddingBlock32
 public import Mathlib.Data.Matrix.ColumnRowPartitioned
 import Mathlib.Algebra.Order.Floor.Extended
@@ -59,46 +60,7 @@ open Formalism.FourierDecayAlt.S3
 section Count
 
 theorem card_lt_pairs (n : ℕ) : Nat.card {p : Fin n × Fin n // p.1 < p.2} = n * (n - 1) / 2 := by
-  classical
-  rw [Nat.card_eq_fintype_card, Fintype.card_subtype]
-  have hoff : ((Finset.univ : Finset (Fin n × Fin n)).filter (fun p => p.1 ≠ p.2)).card = n * (n - 1) := by
-    have h1 : (Finset.univ : Finset (Fin n × Fin n)).filter (fun p => p.1 ≠ p.2) =
-        (Finset.univ : Finset (Fin n)).offDiag := by
-      ext p
-      simp [Finset.mem_offDiag]
-    rw [h1, Finset.offDiag_card, Finset.card_univ, Fintype.card_fin, Nat.mul_sub_one]
-  have hsplit : (Finset.univ : Finset (Fin n × Fin n)).filter (fun p => p.1 ≠ p.2) =
-      (Finset.univ.filter (fun p : Fin n × Fin n => p.1 < p.2)) ∪
-        (Finset.univ.filter (fun p : Fin n × Fin n => p.2 < p.1)) := by
-    ext p
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_union]
-    constructor
-    · intro h
-      exact lt_or_gt_of_ne h
-    · rintro (h | h)
-      · exact h.ne
-      · exact h.ne'
-  have hdisj : Disjoint (Finset.univ.filter (fun p : Fin n × Fin n => p.1 < p.2))
-      (Finset.univ.filter (fun p : Fin n × Fin n => p.2 < p.1)) := by
-    rw [Finset.disjoint_left]
-    intro p hp hq
-    simp only [Finset.mem_filter] at hp hq
-    exact lt_asymm hp.2 hq.2
-  have hswap : (Finset.univ.filter (fun p : Fin n × Fin n => p.2 < p.1)).card =
-      (Finset.univ.filter (fun p : Fin n × Fin n => p.1 < p.2)).card := by
-    apply Finset.card_bij (fun p _ => p.swap)
-    · intro p hp
-      simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.fst_swap, Prod.snd_swap] at hp ⊢
-      exact hp
-    · intro p _ q _ h
-      exact Prod.swap_injective h
-    · intro q hq
-      refine ⟨q.swap, ?_, Prod.swap_swap q⟩
-      simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.fst_swap, Prod.snd_swap] at hq ⊢
-      exact hq
-  rw [hsplit, Finset.card_union_of_disjoint hdisj, hswap] at hoff
-  generalize n * (n - 1) = X at hoff ⊢
-  omega
+  apply Formalism.LogVandermondeBounds.StandardLattice.card_lt_pairs <;> assumption
 
 theorem card_matrix (m n K : Type) [Finite m] [Finite n] :
     Nat.card (Matrix m n K) = Nat.card K ^ (Nat.card m * Nat.card n) := by

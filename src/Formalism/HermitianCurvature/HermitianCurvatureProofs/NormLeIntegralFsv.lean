@@ -105,30 +105,19 @@ theorem norm_le_integral_fsv (φ : ℂ → ℂ) (hφ : Continuous φ) (hi : Meas
   have hint : Integrable (𝓕 φ) := by
     first
       | exact (integrable_comp_smul_iff volume (𝓕 φ) hc).mp hint1
-      | exact (MeasureTheory.integrable_comp_smul_iff (volume : Measure ℂ) (𝓕 φ) hc).mp hint1
-      | exact (Integrable.comp_smul_iff hc).mp hint1
   have hinv : 𝓕⁻ (𝓕 φ) t = φ t := by
     first
       | exact hi.fourier_inversion hint hφ.continuousAt
       | exact hi.fourierInv_fourier_eq hint hφ.continuousAt
-      | exact hφ.fourierInv_fourier_eq hi hint t
-      | exact Continuous.fourierInv_fourier_eq hφ hi hint t
-      | exact hi.fourierInv_fourier hint hφ.continuousAt
-      | exact hφ.fourierInv_fourier hi hint t
-      | exact MeasureTheory.Integrable.fourier_inversion hi hint hφ.continuousAt
   have hb : ‖φ t‖ ≤ ∫ w : ℂ, ‖𝓕 φ w‖ := by
     rw [← hinv]
     first
       | rw [fourierInv_eq]
-      | rw [Real.fourierInv_eq]
-      | rw [fourierInv_eq']
-      | rw [fourierInv_eq_fourier_neg, fourier_eq]
     refine (norm_integral_le_integral_norm _).trans (le_of_eq ?_)
     congr 1
     funext w
     first
       | exact Circle.norm_smul _ _
-      | simp
   have e1 := hmp.integral_comp hme (fun s : ℂ => ‖𝓕 φ ((π⁻¹ : ℝ) • s)‖)
   have e2 := Measure.integral_comp_smul (volume : Measure ℂ) (fun w : ℂ => ‖𝓕 φ w‖) (π⁻¹ : ℝ)
   try dsimp only at e1

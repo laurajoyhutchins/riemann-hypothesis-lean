@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TorusInvariance.TransferInvarianceRestriction
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatJDCapRGrpPRad
 import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
 import Formalism.HermitianCurvature.HermitianCurvatureProofs.WCellMemOmPlus
@@ -330,23 +331,7 @@ end det2
 section pt
 
 theorem hpk_mulVec_eI (a : Fin r) (w : Fin (2 * r + k + 1) → ℂ) : (Hpk k r *ᵥ w) (eI k r a) = w (esI k r a) := by
-  simp only [Matrix.mulVec, dotProduct]
-  rw [Finset.sum_eq_single (esI k r a)]
-  · have : Hpk k r (eI k r a) (esI k r a) = 1 := by
-      have := a.isLt
-      unfold Hpk
-      simp only [eI, esI]
-      split_ifs <;> first | rfl | (exfalso; omega) | (simp_all [Fin.ext_iff] <;> omega)
-    rw [this, one_mul]
-  · intro j _ hj
-    have hj' : j.val ≠ 2 * r + k - a.val := fun e => hj (Fin.ext (by simp only [esI]; omega))
-    have : Hpk k r (eI k r a) j = 0 := by
-      have := a.isLt; have := j.isLt
-      unfold Hpk
-      simp only [eI]
-      split_ifs <;> first | rfl | (exfalso; omega) | (simp_all [Fin.ext_iff] <;> omega)
-    rw [this, zero_mul]
-  · simp
+  apply Formalism.FourierDecayAlt.Q.TInvW.H_eI <;> assumption
 
 variable {c : Fin r → ℂ} {g : Q.Mx k r}
 

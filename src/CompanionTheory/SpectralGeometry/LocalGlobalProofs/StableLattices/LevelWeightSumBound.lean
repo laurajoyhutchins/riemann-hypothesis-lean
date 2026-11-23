@@ -79,8 +79,6 @@ theorem abs_wt_le {n : ℕ} (A : Finset (Pos n)) (c : Fin n) : |wt A c| ≤ n :=
     exact_mod_cast card_first_le A c
   have h2 : (((A.filter fun i => i.1.2 = c).card : ℕ) : ℝ) ≤ n := by
     exact_mod_cast card_second_le A c
-  have h3 : (0 : ℝ) ≤ ((A.filter fun i => i.1.1 = c).card : ℕ) := Nat.cast_nonneg _
-  have h4 : (0 : ℝ) ≤ ((A.filter fun i => i.1.2 = c).card : ℕ) := Nat.cast_nonneg _
   unfold wt
   rw [abs_le]
   constructor <;> linarith
@@ -91,8 +89,6 @@ theorem abs_two_rhoC_le {n : ℕ} (ε : Fin n → Bool) (a : Fin n) :
     exact_mod_cast (card_le_univ _).trans_eq (Fintype.card_fin n)
   have h2 : (((univ.filter fun b => b < a ∧ ε b = ε a).card : ℕ) : ℝ) ≤ n := by
     exact_mod_cast (card_le_univ _).trans_eq (Fintype.card_fin n)
-  have h3 : (0 : ℝ) ≤ ((univ.filter fun b => a < b ∧ ε b = ε a).card : ℕ) := Nat.cast_nonneg _
-  have h4 : (0 : ℝ) ≤ ((univ.filter fun b => b < a ∧ ε b = ε a).card : ℕ) := Nat.cast_nonneg _
   unfold PI.UpqRep.rhoC
   rw [abs_le]
   constructor <;> linarith
@@ -121,7 +117,6 @@ theorem norm_cluster_sum_le (n M : ℕ) (ε : Fin n → Bool) (lev : Fin n → �
   have hsz : ((sz lev M i : ℕ) : ℝ) ≤ n := by
     have : sz lev M i ≤ n := (card_le_univ _).trans_eq (Fintype.card_fin n)
     exact_mod_cast this
-  have hsz0 : (0 : ℝ) ≤ ((sz lev M i : ℕ) : ℝ) := Nat.cast_nonneg _
   have hm : ((|modExp (fun j => Fin (sz lev M j)) i| : ℤ) : ℝ) ≤ n := by
     exact_mod_cast ClusterBound.abs_modExp_le (sz lev M) h i
   have hm0 : (0 : ℝ) ≤ ((|modExp (fun j => Fin (sz lev M j)) i| : ℤ) : ℝ) := by

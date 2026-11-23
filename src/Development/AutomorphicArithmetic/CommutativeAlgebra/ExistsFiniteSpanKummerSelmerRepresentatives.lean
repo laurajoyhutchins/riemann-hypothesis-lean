@@ -68,13 +68,6 @@ private lemma UpperTheory.exists_finite_span_kummerSelmer_representatives.diviso
 theorem UpperTheory.exists_finite_span_kummerSelmer_representatives :
     ∀ (k K : Type) [Field k] [IsAlgClosed k] [Field K] [Algebra k K] [IsFunctionField k K] (q : ℕ) [NeZero q], ∃ (n : ℕ) (v : Fin n → K), ∀ f ∈ SelAll k K q, ∃ g ∈ SelAll k K q, (∃ c : Fin n → k, (g : K) = ∑ i, c i • v i) ∧ ∃ u : Kˣ, f = g * u ^ q := by
   intro k K _ _ _ _ _ q _
-  have hcl : algebraicClosure k K = ⊥ := by
-    rw [eq_bot_iff]
-    intro z hz
-    rw [mem_algebraicClosure_iff] at hz
-    rw [IntermediateField.mem_bot]
-    exact minpoly.mem_range_of_degree_eq_one k z
-      (IsAlgClosed.degree_eq_one_of_irreducible k (minpoly.irreducible hz.isIntegral))
   obtain ⟨x, hxt, hfd⟩ := IsFunctionField.exists_transcendental_finiteDimensional (k := k) (K := K)
   have hd : 0 < Module.finrank (IntermediateField.adjoin k ({x} : Set K)) K := Module.finrank_pos
   obtain ⟨γ, hγ⟩ := Divisor.exists_bound_deg_sub_finrank_L (k := k) (K := K)
@@ -82,9 +75,6 @@ theorem UpperTheory.exists_finite_span_kummerSelmer_representatives :
   set E : Divisor k K := n • poleDivisor x with hE
   have hdegE : (n : ℤ) ≤ Divisor.deg E := by
     rw [hE, map_nsmul, Divisor.deg_poleDivisor hxt, nsmul_eq_mul]
-    have h1 : (1 : ℤ) ≤ (Module.finrank (IntermediateField.adjoin k ({x} : Set K)) K : ℤ) := by
-      exact_mod_cast hd
-    have h2 : (0 : ℤ) ≤ (n : ℤ) := by positivity
     nlinarith
   set V := (q • E).L with hV
   let b := Module.finBasis k V

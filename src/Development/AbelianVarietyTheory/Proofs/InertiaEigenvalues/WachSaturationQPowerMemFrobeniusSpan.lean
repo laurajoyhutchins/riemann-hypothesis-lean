@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LetterSandwichOfFrobMatrices
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.NotFullBot
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.MemSatMOfSmul
 public import Formalism.SharpRestriction.LevelLetterCocycles.DeltaInvariantLattices
@@ -62,33 +63,7 @@ variable {G : Type} [Group G] [TopologicalSpace G] {Qp K₀ K : Type} [Field Qp]
     (W : LocWach PD LL O v n)
 
 theorem isUnit_Q : IsUnit (algebraMap (LetA O n) W.EE W.Q) := by
-  have hq : IsUnit (algebraMap (LetA O n) W.EE W.q) := by
-    have h1 : (letπ : LetA O n) * W.q = (1 + letπ) ^ PD.p - 1 := by
-      funext i
-      simpa [letπ, LocWach.q] using W.q₀_def
-    set x := algebraMap (LetA O n) W.EE letπ with hx
-    obtain ⟨r, hr⟩ := exists_add_pow_prime_eq PD.hp (1 : W.EE) x
-    obtain ⟨u, hu⟩ : IsUnit (x ^ PD.p) := W.EE_π.pow _
-    have := W.EE_complete
-    have hj : ((PD.p : ℕ) : W.EE) ∈ Ideal.jacobson (⊥ : Ideal W.EE) :=
-      IsAdicComplete.le_jacobson_bot (Ideal.span {((PD.p : ℕ) : W.EE)})
-        (Ideal.mem_span_singleton_self _)
-    have h2 := (Ideal.mem_jacobson_bot.1 hj) (x * r * (↑u⁻¹ : W.EE))
-    have h3 : x * algebraMap (LetA O n) W.EE W.q =
-        (((PD.p : ℕ) : W.EE) * (x * r * (↑u⁻¹ : W.EE)) + 1) * u := by
-      rw [hx, ← map_mul, h1, map_sub, map_pow, map_add (f := _), map_one, ← hx, hr, ← hu]
-      have := u.inv_mul
-      linear_combination (-((PD.p : ℕ) : W.EE) * x * r) * this
-    exact isUnit_of_mul_isUnit_right (h3 ▸ h2.mul u.isUnit)
-  have key : ∀ k : ℕ, IsUnit (algebraMap (LetA O n) W.EE ((W.φA ^ k) W.q)) := by
-    intro k
-    induction k with
-    | zero => simpa using hq
-    | succ k ih =>
-      rw [pow_succ', AlgHom.mul_apply]
-      have := W.φE_ext ((W.φA ^ k) W.q)
-      exact this ▸ ih.map W.φE
-  exact key _
+  apply GlobalTheory.WachLettersCompare.isUnit_Q <;> assumption
 
 variable {W}
 

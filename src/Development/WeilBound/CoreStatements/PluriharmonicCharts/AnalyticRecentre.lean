@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.SncChartLocalNormalForm
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ContDiffUncentre
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterRes
 import Mathlib.Algebra.Order.Floor.Extended
@@ -194,28 +195,7 @@ theorem recentre_mem_ball {n : ℕ} (w₀ : Fin n → ℂ) {ρ : ℝ} (hρ : 0 <
 
 theorem exists_perm {n : ℕ} (S : Finset (Fin n)) :
     ∃ π : Equiv.Perm (Fin n), ∀ j, ((π j : Fin n) : ℕ) < S.card ↔ j ∈ S := by
-  classical
-  have hc : S.card ≤ n := by simpa using S.card_le_univ
-  have h1 : Fintype.card {j : Fin n // j ∈ S} = Fintype.card {j : Fin n // (j : ℕ) < S.card} := by
-    rw [Fintype.card_coe, ← Fintype.card_congr (Fin.castLEquiv hc), Fintype.card_fin]
-  have h2 : Fintype.card {j : Fin n // ¬ j ∈ S} = Fintype.card {j : Fin n // ¬ (j : ℕ) < S.card} := by
-    rw [Fintype.card_subtype_compl, Fintype.card_subtype_compl, h1]
-  let e := Fintype.equivOfCardEq h1
-  let e' := Fintype.equivOfCardEq h2
-  let π : Equiv.Perm (Fin n) := ((Equiv.sumCompl (fun j : Fin n => j ∈ S)).symm.trans
-    (e.sumCongr e')).trans (Equiv.sumCompl (fun j : Fin n => (j : ℕ) < S.card))
-  refine ⟨π, fun j => ?_⟩
-  by_cases hj : j ∈ S
-  · have hπ : π j = (e ⟨j, hj⟩ : Fin n) := by
-      simp only [π, Equiv.trans_apply, Equiv.sumCompl_symm_apply_of_pos hj, Equiv.sumCongr_apply,
-        Sum.map_inl, Equiv.sumCompl_apply_inl]
-    rw [hπ]
-    exact iff_of_true (e ⟨j, hj⟩).2 hj
-  · have hπ : π j = (e' ⟨j, hj⟩ : Fin n) := by
-      simp only [π, Equiv.trans_apply, Equiv.sumCompl_symm_apply_of_neg hj, Equiv.sumCongr_apply,
-        Sum.map_inr, Equiv.sumCompl_apply_inr]
-    rw [hπ]
-    exact iff_of_false (e' ⟨j, hj⟩).2 hj
+  apply GlobalTheory.CompanionTheory.Ar.ChartGeo.exists_perm_prefix <;> assumption
 
 private theorem analyticAt_lift_chart_symm {P : Ideal (MRing ι)} {n : ℕ} (R : AnLogRes P ⊤ n) (B : FinHolAtlas n R.X)
     (hAB : R.A.Compatible B) (k : Fin B.n) (x₀ : R.X) {v : Fin n → ℂ} (hv : v ∈ (B.chart k).target)

@@ -4,7 +4,6 @@ public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFor
 public import GroundTheory.AutomorphicForms.RealGroupsLie
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ClosedMatrixSubgroupTheorem
 public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.GlueSmoothOfCompactSupportStatement
-public import Development.WeilBound.CoreStatements.AbelianHeightsDuality.DixmierMalliavin.DecompDirection
 import GroundTheory.AutomorphicForms.DixmierMalliavinSeries
 import GroundTheory.AutomorphicForms.GKModules.SmoothVectors
 import Mathlib.Algebra.Order.Floor.Extended
@@ -45,6 +44,8 @@ import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Tactic.ReduceModChar
 import Mathlib.Topology.Sheaves.Init
+public import GroundTheory.AutomorphicForms.DixmierMalliavin
+import CompanionTheory.AutomorphicTheory.PadicUnitaryWeights.DixmierMalliavin.DixmierMalliavinFactorisationHolds
 
 @[expose] public section
 
@@ -107,41 +108,8 @@ theorem factor_abs {G : Type} [Group G] [TopologicalSpace G] [IsTopologicalGroup
     {V : Set G} (hV : V ∈ 𝓝 1) {f : G → ℂ} (hf : f ∈ CcSmooth fun g => ι g) :
     ∃ (N : ℕ) (g k : Fin N → G → ℂ),
       (∀ i, g i ∈ CcSmooth (fun g => ι g) ∧ k i ∈ CcSmooth (fun g => ι g) ∧ tsupport (g i) ⊆ V ∧
-        tsupport (k i) ⊆ tsupport f) ∧ f = ∑ i, GlobalTheory.AutomorphicL2Unitary.conv μ (g i) (k i) := by
-  let H := ι.toHomUnits.range
-  obtain ⟨𝔤, h⟩ := exists_lie H hι.isClosed_range
-  let e : G ≃* H := MonoidHom.ofInjective hι.injective
-  have he : ∀ g, (((e g : H) : 𝔸ˣ) : 𝔸) = ι g := fun g => rfl
-  have c1 : Continuous e := hι.continuous.subtype_mk _
-  have c2 : Continuous e.symm := hι.isEmbedding.continuous_iff.2 (continuous_subtype_val.congr fun x =>
-    (congrArg Subtype.val (e.apply_symm_apply x)).symm)
-  let E : G ≃ₜ H := ⟨e.toEquiv, c1, c2⟩
-  letI : MeasurableSpace H := borel H
-  haveI : BorelSpace H := ⟨rfl⟩
-  haveI := e.isHaarMeasure_map μ c1 c2
-  have hf' : f ∘ E.symm ∈ CcSmooth (fun x : H => ((x : 𝔸ˣ) : 𝔸)) := by
-    obtain ⟨hc, Φ, hΦ, e'⟩ := hf
-    refine ⟨hc.comp_homeomorph E.symm, Φ, hΦ, fun x => ?_⟩
-    rw [Function.comp_apply, e']
-    exact congrArg (fun y : H => Φ ((y : 𝔸ˣ) : 𝔸)) (e.apply_symm_apply x)
-  have back : ∀ φ : H → ℂ, φ ∈ CcSmooth (fun x : H => ((x : 𝔸ˣ) : 𝔸)) → φ ∘ E ∈ CcSmooth fun g => ι g :=
-    fun φ ⟨hc, Φ, hΦ, e'⟩ => ⟨hc.comp_homeomorph E, Φ, hΦ, fun g => e' _⟩
-  obtain ⟨hs, hc⟩ := (mem_ccSmooth_iff h _).1 hf'
-  obtain ⟨N, φ, ψ, hp, hsum⟩ := factor h (μ.map e) (V := E.symm ⁻¹' V)
-    (E.symm.continuous.continuousAt.preimage_mem_nhds (by rwa [show E.symm 1 = 1 from map_one e.symm])) _ hs hc
-  refine ⟨N, fun i => φ i ∘ E, fun i => ψ i ∘ E, fun i => ⟨back _ ((mem_ccSmooth_iff h _).2 ⟨(hp i).1, (hp i).2.1⟩),
-    back _ ((mem_ccSmooth_iff h _).2 ⟨(hp i).2.2.1, hc.of_isClosed_subset (isClosed_tsupport _) (hp i).2.2.2.2⟩),
-    fun x hx => ?_, fun x hx => ?_⟩, funext fun x => ?_⟩
-  · simpa using (hp i).2.2.2.1 (tsupport_comp_subset_preimage _ E.continuous hx)
-  · simpa using tsupport_comp_subset_preimage _ E.symm.continuous
-      ((hp i).2.2.2.2 (tsupport_comp_subset_preimage _ E.continuous hx))
-  · have := congrFun hsum (E x)
-    rw [Function.comp_apply, E.symm_apply_apply, Finset.sum_apply] at this
-    rw [this, Finset.sum_apply]
-    refine Finset.sum_congr rfl fun i _ => ?_
-    refine (E.measurableEmbedding.integral_map _).trans (integral_congr_ae (.of_forall fun y => ?_))
-    show φ i (e y) * ψ i ((e y)⁻¹ * e x) = φ i (e y) * ψ i (e (y⁻¹ * x))
-    rw [map_mul, map_inv]
+        tsupport (k i) ⊆ tsupport f) ∧ f = ∑ i, GlobalTheory.AutomorphicL2Unitary.conv μ (g i) (k i) :=
+  by apply _root_.CompanionTheory.DM.factor_abs <;> assumption
 
 end PositivityTheory.DM
 

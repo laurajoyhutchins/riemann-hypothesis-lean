@@ -1,5 +1,6 @@
 module
 
+import Formalism.LocalToGlobal.Columns.PolyFn
 public import Formalism.LocalToGlobal.HermitianForms.IsLocBasis
 public import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PolFunApply
 public import Mathlib.Algebra.MvPolynomial.Funext
@@ -102,27 +103,7 @@ theorem exists_det_poly {ι : Type} [Fintype ι] {n : ℕ} :
 theorem eq_of_eval_units {ι : Type} [Fintype ι] {n : ℕ} (Q : MvPolynomial (ι × Fin n × Fin n) ℂ)
     (hQ : ∀ x : ι → Matrix (Fin n) (Fin n) ℂ, (∀ τ, IsUnit (x τ).det) →
       eval (fun k : ι × Fin n × Fin n => x k.1 k.2.1 k.2.2) Q = 0) : Q = 0 := by
-  obtain ⟨D, hD⟩ := exists_det_poly (ι := ι) (n := n)
-  have hQD : Q * D = 0 := by
-    apply MvPolynomial.funext
-    intro x
-    let xm : ι → Matrix (Fin n) (Fin n) ℂ := fun τ a b => x (τ, a, b)
-    rw [map_zero, map_mul]
-    show eval (fun k : ι × Fin n × Fin n => xm k.1 k.2.1 k.2.2) Q *
-      eval (fun k : ι × Fin n × Fin n => xm k.1 k.2.1 k.2.2) D = 0
-    rw [hD]
-    by_cases hu : ∀ τ, IsUnit (xm τ).det
-    · rw [hQ _ hu, zero_mul]
-    · push_neg at hu
-      obtain ⟨τ, hτ⟩ := hu
-      rw [isUnit_iff_ne_zero, not_not] at hτ
-      rw [Finset.prod_eq_zero (Finset.mem_univ τ) hτ, mul_zero]
-  have hD0 : D ≠ 0 := by
-    intro h0
-    have := hD (fun _ => 1)
-    rw [h0, map_zero] at this
-    simp at this
-  exact (mul_eq_zero.mp hQD).resolve_right hD0
+  apply Formalism.L2.Col.eq_zero_of_forall_isUnit <;> assumption
 
 theorem fnOf_inv_iff_twSub_mem : ∀ {E ι : Type} [Field E] [Fintype ι] {n : ℕ} (emb : ι → E →+* ℂ) (M : GL (Fin n) E) (s : ι → ℤ)
     (G : ι → Matrix (Fin n) (Fin n) ℂ) (P0 : MvPolynomial (ι × Fin n × Fin n) ℂ)

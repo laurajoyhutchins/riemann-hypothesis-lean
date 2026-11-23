@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.NormalFormFlagLatticesNearUnderStabiliser
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsIntegerAddStarEqOneOfIsCMUnramStatement
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.FlagPairDefiniteThetaLatticeLeFixedIndexBoundStatement
@@ -547,30 +548,7 @@ private theorem geo_lemma_2 {K : Type} [Field K] [StarRing K] {𝔡 : Ideal (�
 
 theorem star_mem_ipow {𝔡 : Ideal (𝓞 K)} (h : 𝔡 ≠ ⊥) (hs : ∀ x ∈ 𝔡, ∃ y ∈ 𝔡, (y : K) = star (x : K))
     (n : ℤ) {t : K} (ht : t ∈ ipow 𝔡 n) : star t ∈ ipow 𝔡 n := by
-  unfold ipow at ht ⊢
-  rw [FractionalIdeal.mem_coe] at ht ⊢
-  have hI : ((𝔡 : FractionalIdeal (𝓞 K)⁰ K)) ≠ 0 := FractionalIdeal.coeIdeal_ne_zero.2 h
-  have hA : ∀ m : ℕ, ∀ t : K, t ∈ (𝔡 : FractionalIdeal (𝓞 K)⁰ K) ^ m →
-      star t ∈ (𝔡 : FractionalIdeal (𝓞 K)⁰ K) ^ m := by
-    intro m t ht
-    rw [← FractionalIdeal.coeIdeal_pow, FractionalIdeal.mem_coeIdeal] at ht ⊢
-    obtain ⟨x, hx, rfl⟩ := ht
-    obtain ⟨y, hy, e⟩ := geo_lemma_2 hs m x hx
-    exact ⟨y, hy, e⟩
-  have hone : ∀ t : K, t ∈ (1 : FractionalIdeal (𝓞 K)⁰ K) → star t ∈ (1 : FractionalIdeal (𝓞 K)⁰ K) := by
-    intro t ht
-    rw [FractionalIdeal.mem_one_iff] at ht ⊢
-    obtain ⟨x, rfl⟩ := ht
-    have := star_mem_one (K := K) (Submodule.mem_one.2 ⟨x, rfl⟩)
-    exact Submodule.mem_one.1 this
-  obtain ⟨m, rfl | rfl⟩ := Int.eq_nat_or_neg n
-  · rw [zpow_natCast] at ht ⊢
-    exact hA m t ht
-  · rw [zpow_neg, zpow_natCast] at ht ⊢
-    rw [FractionalIdeal.mem_inv_iff (pow_ne_zero m hI)] at ht ⊢
-    intro y hy
-    have h1 := hone _ (ht (star y) (hA m y hy))
-    rwa [star_mul, star_star, mul_comm] at h1
+  apply GlobalTheory.DegCnt.PosJ.star_mem_ipow <;> assumption
 
 end Ideals
 

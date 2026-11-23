@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsotropicSublatticeGramDeterminant
 public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsFundSet
 public import Mathlib.Analysis.CStarAlgebra.Module.Constructions
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsotropicEigencomponentConjugateFormStatement
@@ -275,31 +276,7 @@ theorem conj_comp_injective : Function.Injective (fun s : 𝓞 E →+* ℂ => (s
 
 theorem finrank_eq_two_mul {Ψ : Type} [Fintype Ψ] {σ : Ψ → (𝓞 E →+* ℂ)} (h : IsCMFam σ) :
     Module.finrank ℚ E = 2 * Fintype.card Ψ := by
-  have hΦ : Function.Bijective (Sum.elim σ (fun τ => (starRingEnd ℂ).comp (σ τ)) : Ψ ⊕ Ψ → (𝓞 E →+* ℂ)) := by
-    constructor
-    · rintro (τ | τ) (τ' | τ') e
-      · simp only [Sum.elim_inl] at e
-        rw [h.1 e]
-      · simp only [Sum.elim_inl, Sum.elim_inr] at e
-        exact absurd ⟨τ, e⟩ ((h.2 (σ τ')).1 ⟨τ', rfl⟩)
-      · simp only [Sum.elim_inl, Sum.elim_inr] at e
-        exact absurd ⟨τ', e.symm⟩ ((h.2 (σ τ)).1 ⟨τ, rfl⟩)
-      · simp only [Sum.elim_inr] at e
-        rw [h.1 (conj_comp_injective e)]
-    · intro s
-      by_cases hs : ∃ τ, σ τ = s
-      · obtain ⟨τ, rfl⟩ := hs
-        exact ⟨Sum.inl τ, rfl⟩
-      · have hB : ∃ τ, σ τ = (starRingEnd ℂ).comp s := by
-          by_contra hB
-          exact hs ((h.2 s).2 hB)
-        obtain ⟨τ, hτ⟩ := hB
-        refine ⟨Sum.inr τ, ?_⟩
-        simp only [Sum.elim_inr, hτ]
-        ext a
-        simp
-  have e := (Equiv.ofBijective _ (comp_bijective (E := E))).trans (Equiv.ofBijective _ hΦ).symm
-  rw [← NumberField.Embeddings.card E ℂ, Fintype.card_congr e, Fintype.card_sum, two_mul]
+  apply GlobalTheory.CompanionTheory.Ar.Cusp.IsoCovol.finrank_eq_two_card <;> assumption
 
 end Embeddings
 

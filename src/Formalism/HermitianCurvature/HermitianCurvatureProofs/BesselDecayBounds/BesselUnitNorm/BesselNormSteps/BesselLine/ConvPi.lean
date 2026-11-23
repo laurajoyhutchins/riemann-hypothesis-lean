@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.LaplaceFoundations.UnitaryHaarColumns
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselDecayBounds.BesselUnitNorm.BesselNormSteps.BesselLine.SfiniteMuN
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselDecayBounds.BesselUnitNorm.BesselNormSteps.BesselLine.ConvGrp
 import Mathlib.Algebra.Order.Floor.Extended
@@ -115,22 +116,7 @@ theorem sum_block (F : Fin (2 * r + k + 1) → ℂ) (hF : ∀ l, ¬ inB k r l �
 
 theorem blockW_mul (h₁ h₂ : Matrix (Fin k) (Fin k) ℂ) :
     blockW k r (h₁ * h₂) = blockW k r h₁ * blockW k r h₂ := by
-  ext i j
-  rw [Matrix.mul_apply]
-  by_cases hi : inB k r i
-  · rw [sum_block _ (fun l hl => by rw [blockW_in_out hi hl, zero_mul])]
-    by_cases hj : inB k r j
-    · rw [blockW_in hi hj, Matrix.mul_apply]
-      refine Finset.sum_congr rfl fun m _ => ?_
-      rw [blockW_in hi (eB_inB m), blockW_in (eB_inB m) hj]
-      simp [eB]
-    · rw [blockW_in_out hi hj]
-      exact (Finset.sum_eq_zero fun m _ => by rw [blockW_in_out (eB_inB m) hj, mul_zero]).symm
-  · rw [blockW_out hi, Finset.sum_eq_single i]
-    · rw [blockW_out (h := h₁) hi, if_pos rfl, one_mul, blockW_out (h := h₂) hi]
-    · intro l _ hl
-      rw [blockW_out (h := h₁) hi, if_neg (Ne.symm hl), zero_mul]
-    · simp
+  apply ReciprocityTheory.ChartRestriction.DS.Lap.Base.StandardBasisEmbedding.blockW_mul <;> assumption
 
 theorem hpk_in_col {i m : Fin (2 * r + k + 1)} (hm : inB k r m) : Hpk k r i m = if i = m then 1 else 0 := by
   unfold inB at hm

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BreuilKisinPrismCrystalCoordinates
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsAdicCompleteOfPowLe
 import Development.AbelianVarietyTheory.CrystallinePeriods.RingBasics
 import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
@@ -57,41 +58,7 @@ namespace GlobalTheory.BKGal.PrismTwist
 variable {l : ℕ} [hl : Fact l.Prime] (a : ℕ) [NeZero a] {e : ℕ} [NeZero e] (ϖ : GlobalTheory.BKReal.PiSys l e)
 
 theorem ev_injective : Function.Injective (ϖ.ev a) := by
-  let Q := OCb l ⧸ Ideal.span {ϖ.flat}
-  have hn : ¬ IsUnit ϖ.flat := fun h => ϖ.not_isUnit_teich (h.map (WittVector.teichmuller l))
-  have : Nontrivial Q := Ideal.Quotient.nontrivial_iff.2 (by rwa [Ne, Ideal.span_singleton_eq_top])
-  have : CharP Q l := (CharP.charP_iff_prime_eq_zero hl.out).2 (by
-    rw [← map_natCast (Ideal.Quotient.mk _), CharP.cast_eq_zero, map_zero])
-  let r : Ainf l →+* WittVector l Q := WittVector.map (Ideal.Quotient.mk _)
-  have hr : Function.Injective (r.comp (wA l a).toRingHom) := fun x y h => WittVector.ext fun n =>
-    ((Ideal.Quotient.mk (Ideal.span {ϖ.flat})).comp (Fq.val l a)).injective
-      (congrArg (WittVector.coeff · n) h)
-  have hR : r ϖ.teich = 0 := by
-    change WittVector.map (Ideal.Quotient.mk _) (WittVector.teichmuller l ϖ.flat) = 0
-    rw [WittVector.map_teichmuller, Ideal.Quotient.eq_zero_iff_mem.2 (Ideal.mem_span_singleton_self _),
-      WittVector.teichmuller_zero]
-  have ht : ϖ.teich ≠ 0 := fun h => by
-    have := congrArg (fun w : Ainf l => w.coeff 0) h
-    simp only [PiSys.teich, WittVector.teichmuller_coeff_zero, WittVector.zero_coeff] at this
-    exact ϖ.flat_ne_zero this
-  have key : ∀ n (x : (Wq l a)⟦X⟧), ϖ.ev a x = 0 → coeff n x = 0 := by
-    have h0 : ∀ x : (Wq l a)⟦X⟧, ϖ.ev a x = 0 → constantCoeff x = 0 := fun x hx => by
-      rw [x.eq_X_mul_shift_add_const, map_add (f := _), map_mul, PiSys.ev_X, PiSys.ev_C] at hx
-      have h1 := congrArg r hx
-      rw [map_add (f := _), map_mul, hR, zero_mul, zero_add, map_zero] at h1
-      exact hr (h1.trans (map_zero _).symm)
-    intro n
-    induction n with
-    | zero => exact fun x hx => by simpa using h0 x hx
-    | succ n ih =>
-      intro x hx
-      have h1 := h0 x hx
-      rw [x.eq_X_mul_shift_add_const, h1, map_zero, add_zero, map_mul, PiSys.ev_X] at hx
-      have h2 := ih _ ((mul_eq_zero.1 hx).resolve_left ht)
-      rw [coeff_mk] at h2
-      exact h2
-  refine (injective_iff_map_eq_zero _).2 fun x hx => PowerSeries.ext fun n => ?_
-  rw [key n x hx, map_zero]
+  apply GlobalTheory.BKCoord.ev_injective <;> assumption
 
 theorem σA_frobenius (g : GQ l) (x : Ainf l) :
     Per.σA g (WittVector.frobenius x) = WittVector.frobenius (Per.σA g x) := by

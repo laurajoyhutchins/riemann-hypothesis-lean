@@ -178,7 +178,6 @@ theorem capelli_coefficient_continuity : CoefCC := by
     rw [e, cf, norm_smul]
     have hp : 0 < B.gN g ^ A := Real.rpow_pos_of_pos (lt_of_lt_of_le one_pos (Formalism.FourierDecayAlt.P.BetaSesquilinearity.gN_ge_one hg)) A
     have h2 := hb _ (Submodule.mem_sup_right hu1) _ (Submodule.mem_sup_left hv1) g hg
-    have h5 : 0 ≤ (B.gN g ^ A)⁻¹ := inv_nonneg.2 hp.le
     calc _ ≤ B.gN g ^ A * (C' * Cw * Cv * (B.gN g ^ A)⁻¹ * ‖x₀‖) := by
           gcongr
           exact h2.trans (by gcongr)

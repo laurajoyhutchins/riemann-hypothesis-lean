@@ -89,7 +89,6 @@ theorem PG_mul_apply (k r : ℕ) (M : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r +
   first
     | simp only [Matrix.mul_apply, PG, add_mul, Finset.sum_add_distrib, ite_mul, zero_mul,
         Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, if_true]
-    | simp [Matrix.mul_apply, PG, add_mul, Finset.sum_add_distrib]
 
 theorem val_rev_eq_sub (k r : ℕ) (i : Fin (2 * r + k + 1)) : (Fin.rev i).val = 2 * r + k - i.val := by
   have := i.isLt
@@ -287,10 +286,6 @@ private theorem exists_UJ_umat_eq_of_inUJ {n : ℕ} {ε : Fin n → Bool} (h : M
   have hr : h * (Formalism.REAL.Jm ε * hᴴ * Formalism.REAL.Jm ε) = 1 := by
     first
       | exact mul_eq_one_comm.mp hl
-      | exact Matrix.mul_eq_one_comm.mp hl
-      | exact (mul_eq_one_comm_of_equiv (Equiv.refl _)).mp hl
-      | exact mul_eq_one_symm hl
-      | exact Matrix.mul_eq_one_symm hl
   exact ⟨⟨⟨h, _, hr, hl⟩, hu⟩, rfl⟩
 
 private theorem isClosedEmbedding_umat (k r : ℕ) :
@@ -302,13 +297,11 @@ private theorem isClosedEmbedding_umat (k r : ℕ) :
       (continuous_const.matrix_mul continuous_id.matrix_conjTranspose).matrix_mul continuous_const
     first
       | exact continuous_id.prodMk (MulOpposite.continuous_op.comp h0)
-      | exact continuous_id.prod_mk (MulOpposite.continuous_op.comp h0)
   have hc : Continuous (fun u : Formalism.REAL.UJ (epsG k r) => Formalism.MainNotions.S.umat u) :=
     Units.continuous_val.comp continuous_subtype_val
   have he : IsInducing (fun u : Formalism.REAL.UJ (epsG k r) => Units.embedProduct _ (u : (Mat k r)ˣ)) := by
     first
       | exact Units.isInducing_embedProduct.comp IsInducing.subtypeVal
-      | exact Units.isInducing_embedProduct.comp Topology.IsInducing.subtypeVal
   have hcomp : (fun u : Formalism.REAL.UJ (epsG k r) => Units.embedProduct _ (u : (Mat k r)ˣ)) =
       (fun m : Mat k r => (m, MulOpposite.op (Formalism.REAL.Jm (epsG k r) * mᴴ * Formalism.REAL.Jm (epsG k r)))) ∘
         (fun u : Formalism.REAL.UJ (epsG k r) => Formalism.MainNotions.S.umat u) := by
@@ -450,7 +443,6 @@ private theorem nuG_isOpenPosMeasure {μ : Measure (Mt k r)} (hμ : IsHaarOn (GV
   have h0 := hU.measure_ne_zero (Formalism.REAL.muG (epsG k r)) hne
   first
     | exact smul_ne_zero hc h0
-    | exact mul_ne_zero (ENNReal.coe_ne_zero.2 hc) h0
 
 open scoped Pointwise in
 theorem nuG_inv {μ : Measure (Mt k r)} (hμ : IsHaarOn (GV k r) μ) : (nuG μ).IsInvInvariant := by
@@ -473,7 +465,6 @@ theorem nuG_inv {μ : Measure (Mt k r)} (hμ : IsHaarOn (GV k r) μ) : (nuG μ).
   haveI hFi : IsFiniteMeasureOnCompacts (nuG μ).inv := by
     first
       | infer_instance
-      | exact ⟨fun K hK => by rw [Measure.inv_apply]; exact hK.inv.measure_lt_top⟩
   haveI hLi : (nuG μ).inv.IsMulLeftInvariant := by infer_instance
   obtain ⟨c, hc⟩ : ∃ c : ℝ≥0, (nuG μ).inv = c • nuG μ :=
     ⟨_, Measure.isMulLeftInvariant_eq_smul _ _⟩
@@ -499,11 +490,6 @@ theorem nuG_inv {μ : Measure (Mt k r)} (hμ : IsHaarOn (GV k r) μ) : (nuG μ).
       exact h2.symm
     first
       | exact (ENNReal.mul_left_inj hpos.ne' hfin).1 h3
-      | exact (ENNReal.mul_right_inj hpos.ne' hfin).1 h3
-      | exact ENNReal.mul_right_cancel hpos.ne' hfin h3
-      | exact (ENNReal.mul_eq_mul_left hpos.ne' hfin).1 (by rw [mul_comm, h3, mul_comm])
-      | exact (ENNReal.mul_left_inj hpos.ne' hfin).1 (by rw [mul_comm, h3, mul_comm])
-      | exact (ENNReal.mul_right_inj hpos.ne' hfin).1 (by rw [mul_comm, h3, mul_comm])
   constructor
   rw [hc, ENNReal.coe_eq_one.1 hc1, one_smul]
 
@@ -564,11 +550,9 @@ theorem schur_GV [CompleteSpace H] [Nontrivial H] {μ : Measure (Mt k r)} (hμ :
   constructor
   · first
       | exact hE.integrable_map_iff.2 hi
-      | simpa [Function.comp_def, of_psiG] using hE.integrable_map_iff.2 hi
   · rw [hE.integral_map]
     first
       | exact he
-      | simpa [of_psiG] using he
 
 end
 

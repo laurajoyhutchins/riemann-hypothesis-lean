@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.CharacterNormMatrixInverse.FmatMulInv
 public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.HidaSetting
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -237,42 +238,7 @@ theorem hA_symm (u v : VA I) : hA I v u = sigA I (hA I u v) := by
   ring
 
 theorem hA_int {u v : VA I} (hu : u ∈ I.Lf) (hv : v ∈ I.Lf) : hA I u v ∈ IntAf I.F I.E := by
-  have hz : ∀ w : VA I, hA I w 0 = 0 := by
-    intro w
-    simp only [hA, Formalism.UG.hform, Pi.zero_apply, mul_zero, Finset.sum_const_zero]
-  have hz' : ∀ w : VA I, hA I 0 w = 0 := by
-    intro w
-    simp only [hA, Formalism.UG.hform, Pi.zero_apply, map_zero, zero_mul, Finset.sum_const_zero]
-  have hgen : ∀ x ∈ I.L, ∀ w ∈ I.Lf, hA I (incl I x) w ∈ IntAf I.F I.E := by
-    intro x hx w hw
-    have hw2 : w ∈ Submodule.span (IntAf I.F I.E)
-        (Set.range fun y : I.L => fun i => Formalism.UG.inclE (F := I.F) (Af I.F) ((y : Fin I.n → I.E) i)) := hw
-    clear hw
-    induction hw2 using Submodule.span_induction with
-    | mem w hw' =>
-      obtain ⟨⟨y, hy⟩, rfl⟩ := hw'
-      show hA I (incl I x) (incl I y) ∈ _
-      rw [hA_incl]
-      exact inclE_mem I ((I.L_dual y).1 hy x hx)
-    | zero => rw [hz]; exact (IntAf I.F I.E).zero_mem
-    | add a b _ _ ha hb => rw [hA_add_right]; exact add_mem ha hb
-    | smul c w _ hw' =>
-      show hA I _ ((c : I.E ⊗[I.F] Af I.F) • w) ∈ _
-      rw [hA_smul_right]
-      exact mul_mem c.2 hw'
-  have hu2 : u ∈ Submodule.span (IntAf I.F I.E)
-      (Set.range fun y : I.L => fun i => Formalism.UG.inclE (F := I.F) (Af I.F) ((y : Fin I.n → I.E) i)) := hu
-  clear hu
-  induction hu2 using Submodule.span_induction with
-  | mem w hw' =>
-    obtain ⟨⟨y, hy⟩, rfl⟩ := hw'
-    exact hgen y hy v hv
-  | zero => rw [hz']; exact (IntAf I.F I.E).zero_mem
-  | add a b _ _ ha hb => rw [hA_add_left]; exact add_mem ha hb
-  | smul c w _ hw' =>
-    show hA I ((c : I.E ⊗[I.F] Af I.F) • w) _ ∈ _
-    rw [hA_smul_left]
-    exact mul_mem (sigA_mem I c.2) hw'
+  apply PIW.NormChiNBi.hA_int <;> assumption
 
 theorem hA_sub_right (u v w : VA I) : hA I u (v - w) = hA I u v - hA I u w := by
   simp only [hA, Formalism.UG.hform, Pi.sub_apply, mul_sub, Finset.sum_sub_distrib]

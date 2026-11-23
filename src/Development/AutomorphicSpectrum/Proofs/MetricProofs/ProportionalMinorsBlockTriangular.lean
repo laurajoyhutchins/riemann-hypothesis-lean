@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.FrameChangeUnderFieldMap
 public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.GenericBlockMatrixIsBlockDiag
 public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.MinorDeterminants
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.BlockDiagonalMinorVanishing
@@ -72,21 +73,7 @@ theorem cols_ne_empty {N j : ℕ} (hj : j ≤ N) (i : Fin N) : stepCols N j i �
 
 theorem minor_one_ne {N : ℕ} {I J : Finset (Fin N)} (h : I ≠ J) :
     minorIJ (1 : Matrix (Fin N) (Fin N) ℂ) I J = 0 := by
-  unfold minorIJ
-  split_ifs with e
-  · obtain ⟨a, ha, hb⟩ : ∃ a ∈ I, a ∉ J := by
-      by_contra hc
-      push_neg at hc
-      exact h (Finset.eq_of_subset_of_card_le hc e.ge)
-    obtain ⟨r, hr⟩ : ∃ r, I.orderEmbOfFin e r = a := by
-      have h2 : a ∈ Set.range (I.orderEmbOfFin e) := by
-        rw [Finset.range_orderEmbOfFin]
-        exact ha
-      exact h2
-    refine Matrix.det_eq_zero_of_row_eq_zero r fun c => ?_
-    rw [Matrix.submatrix_apply, hr]
-    exact Matrix.one_apply_ne fun q => hb (q ▸ Finset.orderEmbOfFin_mem _ _ _)
-  · rfl
+  apply GlobalTheory.CompanionTheory.Ar.PB.CovMap.LocImg.FV.minorIJ_one_ne <;> assumption
 
 theorem minor_one_same {N : ℕ} (I : Finset (Fin N)) :
     minorIJ (1 : Matrix (Fin N) (Fin N) ℂ) I I = 1 := by

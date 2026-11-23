@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LazardOneVariableExistsWittLift
 public import Mathlib.Data.Finsupp.Order
 public import Mathlib.Data.Nat.ModEq
 public import Mathlib.Data.Nat.Prime.Defs
@@ -78,24 +79,7 @@ theorem not_dvd_choose_pow_iff (p : ℕ) [hp : Fact p.Prime] (j x : ℕ) :
 
 theorem not_dvd_choose_pow_mul_add (p : ℕ) [hp : Fact p.Prime] :
     ∀ (s A B : ℕ), B < p ^ s → ¬ p ∣ (p ^ s * A + B).choose B := by
-  intro s
-  induction s with
-  | zero =>
-    intro A B hB
-    have : B = 0 := by simpa using hB
-    subst this; simpa using hp.out.not_dvd_one
-  | succ s ih =>
-    intro A B hB hd
-    have h := @Choose.choose_modEq_choose_mod_mul_choose_div_nat (p ^ (s + 1) * A + B) B p _
-    have e0 : p ^ (s + 1) * A + B = B + p * (p ^ s * A) := by ring
-    rw [e0, Nat.add_mul_mod_self_left, Nat.add_mul_div_left _ _ hp.out.pos, Nat.choose_self,
-      one_mul] at h
-    have hB' : B / p < p ^ s := by
-      rw [Nat.div_lt_iff_lt_mul hp.out.pos, ← pow_succ]; exact hB
-    apply ih A (B / p) hB'
-    rw [add_comm (p ^ s * A)]
-    rw [e0] at hd
-    exact (h.dvd_iff dvd_rfl).1 hd
+  apply GlobalTheory.LazardOne.not_dvd_choose_pow_mul_add <;> assumption
 
 theorem prod_choose_single {d : ℕ} (y : Fin d →₀ ℕ) (i : Fin d) (q : ℕ) :
     ∏ k, (y k).choose (Finsupp.single i q k) = (y i).choose q := by

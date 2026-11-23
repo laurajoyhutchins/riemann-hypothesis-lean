@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.LBCorr
 public import Formalism.LocalToGlobal.ProjectiveLattices.ThGerm
 public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermDVal
 import Mathlib.Algebra.Order.Floor.Extended
@@ -71,21 +72,7 @@ variable {X Y Z : Scheme.{0}} (L : LB X) {K K' : Type} [Fintype K] [Fintype K']
 theorem corr_pullGen {φ : K → (Y ⟶ X)} {ε : K → ℤ} {φ' : K' → (Y ⟶ X)} {ε' : K' → ℤ}
     {t : LB.Gen (LB.LinComb L φ ε)} {t' : LB.Gen (LB.LinComb L φ' ε')} (H : LB.Gen.Corr L φ ε φ' ε' t t')
     (h : Z ⟶ Y) : LB.Gen.Corr L _ _ _ _ (LB.pullGen L φ ε t h) (LB.pullGen L φ' ε' t' h) := by
-  intro j j' hj hj' hjj
-  have hc : LB.Coh L φ j := fun k1 k2 e => hj k1 k2 (congrArg (fun f => h ≫ f) e)
-  have hc' : LB.Coh L φ' j' := fun k1 k2 e => hj' k1 k2 (congrArg (fun f => h ≫ f) e)
-  have hx : ∀ k k', φ k = φ' k' → j k = j' k' := fun k k' e => hjj k k' (congrArg (fun f => h ≫ f) e)
-  have E := congrArg Units.val (H j j' hc hc' hx)
-  apply Units.ext
-  simp only [LB.pullGen, res, pullU, Units.coe_map, MonoidHom.coe_coe] at E ⊢
-  apply fn_ext
-  intro y hy
-  have hy1 : h y ∈ LB.wchart L φ j ⊓ LB.wchart L φ' j' :=
-    ⟨Set.mem_iInter.2 fun k => Set.mem_iInter.1 hy.1 k, Set.mem_iInter.2 fun k => Set.mem_iInter.1 hy.2 k⟩
-  erw [gs_res (𝟙 Z) y _ hy, gs_idRes_lemma h _ y hy.1]
-  erw [gs_res (𝟙 Z) y _ hy, gs_idRes_lemma h _ y hy.2]
-  erw [← gs_res h y inf_le_left hy1, ← gs_res h y inf_le_right hy1]
-  exact congrArg _ E
+  apply ReciprocityTheory.ChartRestriction.G.DVR.corr_pullGen <;> assumption
 
 theorem corr_refl {φ : K → (Y ⟶ X)} {ε : K → ℤ} (t : LB.Gen (LB.LinComb L φ ε)) : LB.Gen.Corr L φ ε φ ε t t := by
   intro j j' _ _ hjj

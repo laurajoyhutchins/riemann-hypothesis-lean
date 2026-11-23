@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitLemmaUnitaryGroupEveryResidueOfLie
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsLocalRingOfIdem
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.InvolutiveAlgIdentityProdOfUnitResultantStatement
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.InvolutiveAlgebraProductIdentityStatement
@@ -111,28 +112,7 @@ theorem one_orbit (B : InvAlg K) (hu : B.g * B.σ B.g = 1) (hi : IsIntegral K.O 
     (h : ∀ e ∈ Algebra.adjoin K.O ({B.g} : Set B.A), e * e = e → B.σ e = e → e = 0 ∨ e = 1) :
     (∃ e ∈ Algebra.adjoin K.O ({B.g} : Set B.A), e * e = e ∧ e + B.σ e = 1) ∨
       IsLocalRing (Algebra.adjoin K.O ({B.g} : Set B.A)) := by
-  rcases subsingleton_or_nontrivial B.A with hs | hs
-  · exact Or.inl ⟨0, zero_mem _, Subsingleton.elim _ _, Subsingleton.elim _ _⟩
-  by_cases hid : ∀ e : Algebra.adjoin K.O ({B.g} : Set B.A), e * e = e → e = 0 ∨ e = 1
-  · have : Module.Finite K.O (Algebra.adjoin K.O ({B.g} : Set B.A)) :=
-      Module.Finite.iff_fg.2 hi.fg_adjoin_singleton
-    exact Or.inr (isLocalRing_of_idem (R := K.O) _ hid)
-  push Not at hid
-  obtain ⟨⟨e, he⟩, hee, h0, h1⟩ := hid
-  have hee : e * e = e := congrArg Subtype.val hee
-  have h0 : e ≠ 0 := fun h => h0 (Subtype.ext h)
-  have h1 : e ≠ 1 := fun h => h1 (Subtype.ext h)
-  have he' := adjoin_stable B hu hi he
-  have hee' : B.σ e * B.σ e = B.σ e := by rw [← map_mul, hee]
-  have hm : e * B.σ e = 0 := by
-    refine (h _ (mul_mem he he') ?_ ?_).resolve_right fun h2 => h1 ?_
-    · linear_combination B.σ e * B.σ e * hee + e * hee'
-    · rw [map_mul, B.σ_σ, mul_comm]
-    · linear_combination (1 - e) * h2 + B.σ e * hee
-  refine Or.inl ⟨e, he, hee, (h _ (add_mem he he') ?_ ?_).resolve_left fun h2 => h0 ?_⟩
-  · linear_combination hee + hee' + 2 * hm
-  · rw [map_add (f := _), B.σ_σ, add_comm]
-  · linear_combination e * h2 - hee - hm
+  apply GlobalTheory.UnitLemma.OrbitAll.one_orbit <;> assumption
 
 theorem identity_integral (hL : UnitLemmaLie) (hK : K.Odd) (n : ℕ) : ∀ B₁ B₂ : InvAlg K,
     Module.finrank K.E B₁.A + Module.finrank K.E B₂.A = n → B₁.g * B₁.σ B₁.g = 1 → B₂.g * B₂.σ B₂.g = 1 →

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsLevelSubgroup
 public import Formalism.LocalToGlobal.ProjectiveLattices.EquivariantFiniteGroup
 public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.AdelicUnitaryEqRealMulFiniteSplitStatement
 public import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.RealAdelesCmFieldEquivComplexCmTypeStatement
@@ -91,23 +92,7 @@ theorem exists_lift {A : Type} [CommRing A] {n ι : Type} [Fintype n] [Decidable
 
 theorem gram_det_ne_zero {E : Type} [Field E] [NumberField E] [StarRing E] (S : Formalism.BasicNotions.HSpace E) :
     S.gram.det ≠ 0 := by
-  intro h
-  obtain ⟨v, hv, h0⟩ := Matrix.exists_mulVec_eq_zero_iff.2 h
-  apply hv
-  have hy : S.frame.equivFun.symm v = 0 := by
-    apply S.nondeg.2
-    intro x
-    have hi : ∀ i, S.hT (S.frame i) (S.frame.equivFun.symm v) = 0 := by
-      intro i
-      have := congrFun h0 i
-
-      rw [Module.Basis.equivFun_symm_apply, map_sum]
-      simpa [Matrix.mulVec, dotProduct, Formalism.BasicNotions.HSpace.gram, mul_comm] using this
-
-    rw [← S.frame.sum_repr x, map_sum, LinearMap.sum_apply]
-    refine Finset.sum_eq_zero fun i _ => ?_
-    rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, hi, smul_zero]
-  exact S.frame.equivFun.symm.map_eq_zero_iff.1 hy
+  apply GlobalTheory.RecDict.det_gram_ne_zero <;> assumption
 
 theorem continuous_inf (F E : Type) [Field F] [NumberField F] [Field E] [Algebra F E] :
     Continuous (Algebra.TensorProduct.map (fstA F) (AlgHom.id F E) : AF F ⊗[F] E → Ainf F ⊗[F] E) := by

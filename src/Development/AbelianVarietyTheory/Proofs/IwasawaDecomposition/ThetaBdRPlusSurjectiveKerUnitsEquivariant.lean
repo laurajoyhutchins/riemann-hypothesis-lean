@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AdicCompletionValuationRingCompleteValuationDoma
 public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsCrisP
 public import Development.AbelianVarietyTheory.CrystallinePeriods.RingBasics
 public import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
@@ -63,23 +64,7 @@ theorem factorPow_evalₐ {m n : ℕ} (h : m ≤ n) (y : AdicCompletion I R) :
 
 theorem isUnit_evalₐ (y : AdicCompletion I R) (hy : IsUnit (AdicCompletion.evalₐ I 1 y)) (n : ℕ) :
     IsUnit (AdicCompletion.evalₐ I n y) := by
-  have key : IsUnit (AdicCompletion.evalₐ I (n + 1) y) := by
-    obtain ⟨a, ha⟩ := Ideal.Quotient.mk_surjective (AdicCompletion.evalₐ I (n + 1) y)
-    rw [← factorPow_evalₐ I (show 1 ≤ n + 1 by omega), ← ha] at hy
-    obtain ⟨b, hb⟩ := hy.exists_right_inv
-    obtain ⟨b, rfl⟩ := Ideal.Quotient.mk_surjective b
-    have h1 : a * b - 1 ∈ I ^ 1 := by
-      rw [← Ideal.Quotient.eq]
-      exact hb
-    rw [pow_one] at h1
-    have hn : IsNilpotent (Ideal.Quotient.mk (I ^ (n + 1)) (a * b - 1)) :=
-      ⟨n + 1, by rw [← map_pow, Ideal.Quotient.eq_zero_iff_mem]; exact Ideal.pow_mem_pow h1 _⟩
-    have hu := hn.isUnit_add_one
-    rw [map_sub, map_one, sub_add_cancel, map_mul] at hu
-    rw [← ha]
-    exact isUnit_of_mul_isUnit_left hu
-  rw [← factorPow_evalₐ I (Nat.le_succ n)]
-  exact key.map _
+  apply GlobalTheory.ValCompletion.isUnit_evalₐ <;> assumption
 
 theorem isUnit_of_evalₐ (y : AdicCompletion I R) (hy : IsUnit (AdicCompletion.evalₐ I 1 y)) :
     IsUnit y := by

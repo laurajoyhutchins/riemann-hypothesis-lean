@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.LaplaceEstimates.SmoothMatrixMaps.ContinuousSecondMatrix
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.IsClosedKset
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.ContinuousTorepK
 import Mathlib.Algebra.Order.Floor.Extended
@@ -85,18 +86,7 @@ theorem psiM_K {ε : Fin (2 * r + k + 1) → Bool} {Λ : Fin (2 * r + k + 1) →
   · rw [psiM_zero T μ hg, psiM_zero T μ (fun h => hg ((inUJ_kmul hκ).1 h)), mul_zero]
 
 theorem psiGen_cont (z : Fin (2 * r + k + 1) → ℂ) (c : Fin r → ℂ) : Continuous (Formalism.MainNotions.S.psiGen k r z c) := by
-  unfold Formalism.MainNotions.S.psiGen
-  have h : ∀ a : Fin r, Continuous (fun g : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ =>
-      Formalism.MainNotions.S.ellA k r z g a) := by
-    intro a
-    unfold Formalism.MainNotions.S.ellA
-    split_ifs
-    · exact (continuous_apply _).comp (continuous_apply _)
-    · simp only [Matrix.mulVec, dotProduct]
-      exact continuous_finsetSum _ fun j _ =>
-        (continuous_id.matrix_elem _ j).mul continuous_const
-  refine Complex.continuous_exp.comp (continuous_const.mul (Complex.continuous_ofReal.comp
-    (Complex.continuous_re.comp (continuous_finsetSum _ fun a _ => continuous_const.mul (h a)))))
+  apply ReciprocityTheory.ChartRestriction.DS.Lap.CurveContinuity.psiGen_cont <;> assumption
 
 theorem norm_psiGen (z : Fin (2 * r + k + 1) → ℂ) (c : Fin r → ℂ) (g : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ) :
     ‖Formalism.MainNotions.S.psiGen k r z c g‖ = 1 := by

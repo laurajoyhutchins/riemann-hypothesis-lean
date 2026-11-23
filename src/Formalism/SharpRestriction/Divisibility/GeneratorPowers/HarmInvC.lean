@@ -63,13 +63,11 @@ def sb (b : Fin n) : Fin 1 × Fin d → MvPowerSeries (Fin n × Fin d) S := fun 
 theorem sb_cc (b : Fin n) (p : Fin 1 × Fin d) : MvPowerSeries.constantCoeff (sb (S := S) b p) = 0 := by
   first
   | simp [sb]
-  | exact MvPowerSeries.constantCoeff_X _
 
 theorem rename_col (b : Fin n) (F : MvPowerSeries (Fin 1 × Fin d) S) :
     MvPowerSeries.rename (fun p : Fin 1 × Fin d => ((b, p.2) : Fin n × Fin d)) F = MvPowerSeries.subst (sb b) F := by
   first
   | exact MvPowerSeries.rename_eq_subst _ _
-  | exact (MvPowerSeries.subst_X_comp_eq_rename _ _).symm
   | (rw [MvPowerSeries.rename_eq_subst]; rfl)
   | (rw [← MvPowerSeries.subst_eq_rename]; rfl)
   | (rw [MvPowerSeries.subst_eq_rename]; rfl)
@@ -82,9 +80,6 @@ theorem subst_quadCol (b : Fin n) (r : S) (β : Matrix (Fin d) (Fin d) S) :
     first
     | exact MvPowerSeries.HasSubst.of_constantCoeff_zero h0
     | exact MvPowerSeries.hasSubst_of_constantCoeff_zero h0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' h0
-    | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [h0 s]; exact IsNilpotent.zero)
-    | exact MvPowerSeries.hasSubst_of_constantCoeff_nilpotent (fun s => by rw [h0 s]; exact IsNilpotent.zero)
   have hC : ∀ (c : S) (f : MvPowerSeries (Fin 1 × Fin d) S), MvPowerSeries.C c * f = c • f :=
     fun c f => by rw [MvPowerSeries.smul_eq_C_mul]
   have hC' : ∀ (c : S) (f : MvPowerSeries (Fin n × Fin d) S), MvPowerSeries.C c * f = c • f :=
@@ -116,9 +111,6 @@ private theorem hasSubst_lemma {S σ τ : Type} [CommRing S] [Finite σ] {a : σ
   first
   | exact MvPowerSeries.HasSubst.of_constantCoeff_zero ha
   | exact MvPowerSeries.hasSubst_of_constantCoeff_zero ha
-  | exact MvPowerSeries.HasSubst.of_constantCoeff_zero' ha
-  | exact MvPowerSeries.HasSubst.of_constantCoeff_nilpotent (fun s => by rw [ha s]; exact IsNilpotent.zero)
-  | exact MvPowerSeries.hasSubst_of_constantCoeff_nilpotent (fun s => by rw [ha s]; exact IsNilpotent.zero)
 
 private theorem prod_exp_lemma_2 {S σ ι : Type} [CommRing S] [Algebra ℚ S] (s : Finset ι)
     (x : ι → MvPowerSeries σ S) (hx : ∀ i, MvPowerSeries.constantCoeff (x i) = 0) :

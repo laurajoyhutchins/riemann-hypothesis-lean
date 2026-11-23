@@ -177,10 +177,6 @@ theorem fourier_coefficient_support_of (h3 : FourierCoefficientProperties (E := 
       X.Zb u (e00 X.toData s + B t) x := by
     intro s t
     rw [flow_eq_Zb, Data.Zb_Zb X.toData u hiso]
-  have hdom : ∀ (s : X.Ψ → ℝ) t, X.flow (u 0) (cR X.toData s) (X.Zb u (B t) x) ∈ X.dom := by
-    intro s t
-    rw [hflowZ]
-    exact Data.Zb_dom X.toData u hiso _ (hherm_add _ _ (diag_unit_family_hermitian X.toData s) (hBh t)) hx
   have he00c : Continuous (e00 X.toData) := by
     refine continuous_pi fun τ => continuous_pi fun i => continuous_pi fun k => ?_
     simp only [e00]

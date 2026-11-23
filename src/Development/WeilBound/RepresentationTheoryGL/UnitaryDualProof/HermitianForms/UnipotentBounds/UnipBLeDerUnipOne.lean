@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.SmoothColumnLifts.FinSumFinEquivSymmEq
 public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.StepForm
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -61,25 +62,7 @@ theorem blkAt_apply (n N : ℕ) (h : n ≤ N) (g : GL (Fin n) k) (i j : Fin N) :
     (blkAt k n N h g).val i j =
       if hi : (i : ℕ) < n then (if hj : (j : ℕ) < n then g.val ⟨i, hi⟩ ⟨j, hj⟩ else 0)
       else if i = j then 1 else 0 := by
-  have key : ∀ x : Fin N, (finSumFinEquiv.symm (Fin.cast (Nat.add_sub_cancel' h).symm x) : Fin n ⊕ Fin (N - n)) =
-      if hx : (x : ℕ) < n then Sum.inl ⟨x, hx⟩ else Sum.inr ⟨x - n, by omega⟩ := by
-    intro x
-    split_ifs with hx
-    · have : Fin.cast (Nat.add_sub_cancel' h).symm x = Fin.castAdd (N - n) ⟨x, hx⟩ := Fin.ext rfl
-      rw [this, finSumFinEquiv_symm_apply_castAdd]
-    · have : Fin.cast (Nat.add_sub_cancel' h).symm x = Fin.natAdd n ⟨x - n, by omega⟩ := Fin.ext (by simp; omega)
-      rw [this, finSumFinEquiv_symm_apply_natAdd]
-  simp only [blkAt, glCongr, blkGL, MonoidHom.coe_comp, Function.comp_apply, Units.coe_map]
-  simp [blkHom, reindex_apply]
-  rw [key i, key j]
-  by_cases hi : (i : ℕ) < n
-  · by_cases hj : (j : ℕ) < n <;> simp [hi, hj]
-  · by_cases hj : (j : ℕ) < n
-    · have : i ≠ j := fun e => hi (e ▸ hj)
-      simp [hi, hj, this]
-    · have e : ((⟨i - n, by omega⟩ : Fin (N - n)) = ⟨j - n, by omega⟩) ↔ i = j := by
-        rw [Fin.ext_iff, Fin.ext_iff]; simp only; omega
-      simp only [hi, hj, dite_false, fromBlocks_apply₂₂, Matrix.one_apply, e]
+  apply PositivityTheory.RgUd.Form.U.Lift2.TrM.blkAt_val <;> assumption
 
 
 omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in

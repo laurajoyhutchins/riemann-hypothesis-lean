@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.BigStatementPf
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ArakelovVolumes.UpperBounds.WeightFunctionOnFrames
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -89,20 +90,7 @@ theorem phla_add (X : Data E r) {x : Frame X.Ψ r} (hx : x ∈ X.dom) (la la' : 
 
 theorem phla_nsmul (X : Data E r) {x : Frame X.Ψ r} (hx : x ∈ X.dom) (k : ℕ) (la : Wt X.Ψ r) :
     phla X (k • la) x = k * phla X la x := by
-  have hq := norm_dmin_succ_div_castSucc_pos_of_mem_dom X hx
-  have hpow : X.nfac (k • la) x = X.nfac la x ^ k := by
-    unfold Data.nfac
-    rw [← Finset.prod_pow]
-    refine Finset.prod_congr rfl fun τ _ => ?_
-    rw [← Finset.prod_pow]
-    refine Finset.prod_congr rfl fun i _ => ?_
-    rw [← Real.rpow_natCast, ← Real.rpow_mul (hq τ i).le]
-    congr 1
-    simp only [Pi.smul_apply, nsmul_eq_mul, Int.cast_mul, Int.cast_natCast]
-    ring
-  unfold phla
-  rw [hpow, Real.log_pow]
-  ring
+  apply ReciprocityTheory.ChartRestriction.G.AR.Up.BigC.phla_nsmul <;> assumption
 
 theorem nfac_sq (X : Data E r) {x : Frame X.Ψ r} (hx : x ∈ X.dom) (la : Wt X.Ψ r) :
     X.nfac la x ^ 2 = Real.exp (-phla X la x) := by

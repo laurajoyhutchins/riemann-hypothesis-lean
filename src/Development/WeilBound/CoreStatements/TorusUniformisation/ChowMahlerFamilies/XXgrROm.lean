@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.FundamentalIdealFrobeniusProduct
 public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.StepOrderRes
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -89,36 +90,7 @@ theorem v_eq_of_span (hv : v.Integers R) {a b : R} (h : Ideal.span {a} = Ideal.s
 theorem sq_bound (hv : v.Integers R) {X : Type} (s : Set (X → C)) (l : (X → C) →ₗ[R] C)
     (b : NNReal) (h : ∀ g ∈ s, ∀ g' ∈ s, v (l (g * g')) ≤ b) :
     ∀ g ∈ sqIdeal (Submodule.span R s), v (l g) ≤ b := by
-  have key : ∀ x y : X → C, v (l x) ≤ b → v (l y) ≤ b → v (l (x + y)) ≤ b := by
-    intro x y hx hy
-    rw [map_add (f := _)]
-    exact le_trans (v.map_add _ _) (max_le hx hy)
-  have ksm : ∀ (r : R) (x : X → C), v (l x) ≤ b → v (l (r • x)) ≤ b := by
-    intro r x hx
-    rw [map_smul, Algebra.smul_def, map_mul]
-    exact le_trans (mul_le_of_le_one_left (by positivity) (hv.map_le_one r)) hx
-  have k0 : v (l 0) ≤ b := by simp
-  have step : ∀ g ∈ Submodule.span R s, ∀ g' ∈ Submodule.span R s, v (l (g * g')) ≤ b := by
-    intro g hg g' hg'
-    induction hg using Submodule.span_induction with
-    | mem x hx =>
-      induction hg' using Submodule.span_induction with
-      | mem y hy => exact h x hx y hy
-      | zero => simpa using k0
-      | add y z _ _ hy hz => rw [mul_add]; exact key _ _ hy hz
-      | smul r y _ hy => rw [mul_smul_comm]; exact ksm r _ hy
-    | zero => simpa using k0
-    | add x z _ _ hx hz => rw [add_mul]; exact key _ _ hx hz
-    | smul r x _ hx => rw [smul_mul_assoc]; exact ksm r _ hx
-  intro g hg
-  unfold sqIdeal at hg
-  induction hg using Submodule.span_induction with
-  | mem x hx =>
-    obtain ⟨f, hf, f', hf', rfl⟩ := hx
-    exact step f hf f' hf'
-  | zero => exact k0
-  | add x z _ _ hx hz => exact key _ _ hx hz
-  | smul r x _ hx => exact ksm r _ hx
+  apply GlobalTheory.CompanionTheory.Ar.GR.ROm.sq_bound <;> assumption
 
 variable [Fintype F] [DecidableEq F]
 
@@ -163,41 +135,7 @@ end
 
 theorem digits {p f m : ℕ} (h1 : 1 ≤ m) (h2 : m < p ^ f) :
     ∃ d : Fin f → Fin p, (∃ n, (d n : ℕ) ≠ 0) ∧ ∑ n : Fin f, (d n : ℕ) * p ^ (n : ℕ) = m := by
-  have hp : 0 < p := by
-    rcases Nat.eq_zero_or_pos p with h0 | h0
-    · subst h0
-      rcases f with _ | f <;> simp at h2 <;> omega
-    · exact h0
-  have key : ∀ (g : ℕ) (m : ℕ), m < p ^ g →
-      ∃ d : Fin g → Fin p, ∑ n : Fin g, (d n : ℕ) * p ^ (n : ℕ) = m := by
-    intro g
-    induction g with
-    | zero =>
-      intro m hm
-      refine ⟨Fin.elim0, ?_⟩
-      simp at hm
-      simp [hm]
-    | succ g ih =>
-      intro m hm
-      obtain ⟨d', hd'⟩ := ih (m / p) (by
-        rw [Nat.div_lt_iff_lt_mul hp, ← pow_succ]
-        exact hm)
-      refine ⟨Fin.cons ⟨m % p, Nat.mod_lt _ hp⟩ d', ?_⟩
-      rw [Fin.sum_univ_succ]
-      simp only [Fin.cons_zero, Fin.cons_succ, Fin.val_zero, Fin.val_succ, pow_zero, mul_one]
-      have hs : ∑ x : Fin g, (d' x : ℕ) * p ^ ((x : ℕ) + 1) =
-          (∑ x : Fin g, (d' x : ℕ) * p ^ (x : ℕ)) * p := by
-        rw [Finset.sum_mul]
-        exact Finset.sum_congr rfl (fun x _ => by ring)
-      rw [hs, hd']
-      exact Nat.mod_add_div' m p
-  obtain ⟨d, hd⟩ := key f m h2
-  refine ⟨d, ?_, hd⟩
-  by_contra hne
-  push_neg at hne
-  have hz : ∑ n : Fin f, (d n : ℕ) * p ^ (n : ℕ) = 0 :=
-    Finset.sum_eq_zero (fun n _ => by simp [hne n])
-  omega
+  apply GlobalTheory.CompanionTheory.Ar.GR.ROm.digits <;> assumption
 
 theorem hasLen_quot {C : Type} [Field C] {R : Type} [CommRing R] [Algebra R C]
     (v : Valuation C NNReal) {M : Type} [AddCommGroup M] [Module R M] (φ : R →ₗ[R] M)

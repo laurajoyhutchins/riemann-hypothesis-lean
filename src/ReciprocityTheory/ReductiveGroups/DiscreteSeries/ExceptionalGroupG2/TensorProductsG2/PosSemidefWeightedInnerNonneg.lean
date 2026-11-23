@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.PosSemidefWeightedInnerNonneg
 public import Mathlib.Analysis.InnerProductSpace.Positive
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.EqZeroOfDatumEmbeddingEqZero
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.HasDerivAtInvExpCurveEntry
@@ -73,24 +74,7 @@ theorem onb_sum_inner_independent {E V : Type*} [NormedAddCommGroup E] [InnerPro
     [NormedAddCommGroup V] [InnerProductSpace ℂ V] {ι κ : Type*} [Fintype ι] [Fintype κ]
     (b : OrthonormalBasis ι ℂ E) (c : OrthonormalBasis κ ℂ E) (F G : E →ₗ[ℂ] V) :
     ∑ j, inner ℂ (F (b j)) (G (b j)) = ∑ i, inner ℂ (F (c i)) (G (c i)) := by
-  calc ∑ j, inner ℂ (F (b j)) (G (b j))
-      = ∑ j, ∑ i, inner ℂ (c i) (b j) * inner ℂ (F (b j)) (G (c i)) := by
-        refine Finset.sum_congr rfl fun j _ => ?_
-        have e : G (b j) = ∑ i, inner ℂ (c i) (b j) • G (c i) := by
-          conv_lhs => rw [← c.sum_repr' (b j)]
-
-          simp only [map_sum, map_smul]
-        rw [e, inner_sum]
-        simp only [inner_smul_right]
-    _ = ∑ i, ∑ j, inner ℂ (c i) (b j) * inner ℂ (F (b j)) (G (c i)) := Finset.sum_comm
-    _ = ∑ i, inner ℂ (F (c i)) (G (c i)) := by
-        refine Finset.sum_congr rfl fun i _ => ?_
-        have e : F (c i) = ∑ j, inner ℂ (b j) (c i) • F (b j) := by
-          conv_lhs => rw [← b.sum_repr' (c i)]
-
-          simp only [map_sum, map_smul]
-        rw [e, sum_inner]
-        simp only [inner_smul_left, inner_conj_symm]
+  apply ReciprocityTheory.ChartRestriction.DS.onb_sum_inner_independent <;> assumption
 
 theorem onb_sum_vector_inner_independent {E V : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
     [NormedAddCommGroup V] [InnerProductSpace ℂ V] {ι κ : Type*} [Fintype ι] [Fintype κ]
@@ -130,30 +114,7 @@ theorem k_matrix_columns_orthonormal {ε : Fin n → Bool} (k : S7.KG ε) (e f :
 
 theorem k_twist_vector_inner_preserved (dual : Bool) {ε : Fin n → Bool} {Λ : Fin n → ℝ} (T : S7.KType ε Λ) (k : S7.KG ε)
     (ξ η : Fin n → T.V) : ob2SI (ob2TauF dual T k ξ) (ob2TauF dual T k η) = ob2SI ξ η := by
-  have hc : ∀ e f, ∑ c, starRingEnd ℂ (cond dual (star (S7.toMK k c e)) (S7.toMK k c e)) *
-      cond dual (star (S7.toMK k c f)) (S7.toMK k c f) = if e = f then 1 else 0 := by
-    intro e f
-    cases dual
-    · simpa using k_matrix_columns_orthonormal k e f
-    · have h := congrArg star (k_matrix_columns_orthonormal k e f)
-      simp only [star_sum, star_mul, star_star] at h
-      simp only [cond_true, Complex.star_def, Complex.conj_conj] at h ⊢
-      conv_lhs => arg 2; ext c; rw [mul_comm]
-      rw [h]
-      split_ifs <;> simp
-  unfold ob2SI ob2TauF
-  simp only [sum_inner, inner_sum, inner_smul_left, inner_smul_right, k_type_op_inner_preserved]
-  rw [Finset.sum_comm]
-  refine Finset.sum_congr rfl fun e _ => ?_
-  simp_rw [Finset.mul_sum]
-  rw [Finset.sum_comm]
-  have h1 : ∀ e', ∑ c, cond dual (star (S7.toMK k c e)) (S7.toMK k c e) *
-      ((starRingEnd ℂ) (cond dual (star (S7.toMK k c e')) (S7.toMK k c e')) * inner ℂ (ξ e') (η e)) =
-      (if e' = e then 1 else 0) * inner ℂ (ξ e') (η e) := fun e' => by
-    rw [← hc e' e, Finset.sum_mul]
-    exact Finset.sum_congr rfl fun c _ => by ring
-  rw [Finset.sum_congr rfl fun e' _ => h1 e']
-  simp
+  apply ReciprocityTheory.ChartRestriction.DS.k_twist_vector_inner_preserved <;> assumption
 
 def ob2B (dual : Bool) {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℂ V]
     (Ψ : Matrix (Fin n) (Fin n) ℂ → (V →L[ℂ] V)) (g : Matrix (Fin n) (Fin n) ℂ) :
@@ -190,21 +151,7 @@ open scoped MatrixOrder in
 theorem posSemidef_weighted_inner_nonneg {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℂ V]
     {M : Matrix (Fin n) (Fin n) ℂ} (hM : M.PosSemidef) {R : V →L[ℂ] V} (hR : R.IsPositive)
     (u : Fin n → V) : 0 ≤ ∑ c, ∑ d, M c d * inner ℂ (u c) (R (u d)) := by
-  obtain ⟨S, rfl⟩ := CStarAlgebra.nonneg_iff_eq_star_mul_self.mp hM.nonneg
-  have e : ∑ c, ∑ d, (star S * S) c d * inner ℂ (u c) (R (u d)) =
-      ∑ e, inner ℂ (∑ c, S e c • u c) (R (∑ d, S e d • u d)) := by
-
-    simp only [Matrix.mul_apply, Matrix.star_apply, map_sum, map_smul, sum_inner, inner_sum, inner_smul_left,
-    inner_smul_right, Finset.sum_mul, Finset.mul_sum]
-    conv_lhs => rw [Finset.sum_comm]
-    conv_rhs => rw [Finset.sum_comm]
-    refine Finset.sum_congr rfl fun c _ => ?_
-    conv_rhs => rw [Finset.sum_comm]
-    refine Finset.sum_congr rfl fun d _ => Finset.sum_congr rfl fun e _ => ?_
-    simp only [Complex.star_def]
-    ring
-  rw [e]
-  exact Finset.sum_nonneg fun e _ => hR.inner_nonneg_right _
+  apply ReciprocityTheory.ChartRestriction.DS.posSemidef_weighted_inner_nonneg <;> assumption
 
 theorem vector_inner_smul_right {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℂ V] (ξ η : Fin n → V) (a : ℂ) :
     ob2SI ξ (a • η) = a * ob2SI ξ η := by
@@ -227,21 +174,7 @@ theorem psi_twist_exp_positive (dual : Bool) {ε : Fin n → Bool} {Λ : Fin n �
     (Ψ : Matrix (Fin n) (Fin n) ℂ → (T.V →L[ℂ] T.V)) {Y : Matrix (Fin n) (Fin n) ℂ} (hY : inP ε Y)
     (hR : (Ψ (NormedSpace.exp Y)).IsPositive) (u : Fin n → T.V) :
     0 ≤ ob2SI (ob2B dual Ψ (NormedSpace.exp Y) u) u := by
-  set E := NormedSpace.exp Y with hEdef
-  have hE : E.PosDef := S7.exp_noncompactPart_posDef hY
-  set M : Matrix (Fin n) (Fin n) ℂ := cond dual (E⁻¹)ᵀ E with hMdef
-  have hM : M.PosSemidef := by
-    cases dual
-    · exact hE.posSemidef
-    · exact hE.inv.transpose.posSemidef
-  have hφ : ∀ c d, oa1Phi dual E c d = M c d := by
-    intro c d; cases dual <;> rfl
-  have h0 := posSemidef_weighted_inner_nonneg hM hR u
-  have e : ob2SI (ob2B dual Ψ E u) u = star (∑ c, ∑ d, M c d * inner ℂ (u c) (Ψ E (u d))) := by
-    simp only [ob2SI, ob2B, LinearMap.coe_mk, AddHom.coe_mk, hφ, sum_inner, inner_smul_left, star_sum, star_mul',
-      Complex.star_def, inner_conj_symm]
-  rw [e]
-  exact star_nonneg_iff.mpr h0
+  apply ReciprocityTheory.ChartRestriction.DS.psi_twist_exp_positive <;> assumption
 
 theorem k_matrix_of_one {ε : Fin n → Bool} : S7.toMK (1 : S7.KG ε) = 1 := rfl
 
@@ -260,35 +193,6 @@ theorem psi_pairing_nonneg (dual : Bool) {ε : Fin n → Bool} {lam lam' : Fin n
     0 ≤ ∑ i, ∑ j, starRingEnd ℂ (ob2PsiCoef dual Ψ (ι₀ (stdOrthonormalBasis ℂ T'.V i))
         (ι₀ (stdOrthonormalBasis ℂ T'.V j)) g) *
       inner ℂ (stdOrthonormalBasis ℂ T'.V i) (Ψ' g (stdOrthonormalBasis ℂ T'.V j)) := by
-  rw [psi_pairing_eq_inner]
-  obtain ⟨k0, hk0, Y, hY, rfl⟩ := polar_UJ (show g ∈ UJset ε from hg)
-  obtain ⟨k, rfl⟩ := ffa_Kset hk0
-  have hE : inUJ ε (NormedSpace.exp Y) := by
-    have h1 : NormedSpace.exp Y ∈ UJset ε := by simpa using exp_smul_mem_UJset hY.1 1
-    exact h1
-  have hΨ : Ψ (S7.toMK k * NormedSpace.exp Y) = T.op k * Ψ (NormedSpace.exp Y) := by
-    have := hP.1 k 1 _ hE
-    rwa [k_matrix_of_one, Matrix.mul_one, k_type_op_one, mul_one] at this
-  have hΨ' : Ψ' (S7.toMK k * NormedSpace.exp Y) = T'.op k * Ψ' (NormedSpace.exp Y) := by
-    have := hP'.1 k 1 _ hE
-    rwa [k_matrix_of_one, Matrix.mul_one, k_type_op_one, mul_one] at this
-  set b := stdOrthonormalBasis ℂ T'.V
-  set E := NormedSpace.exp Y
-  have step : ∀ j, ob2SI (ob2B dual Ψ (S7.toMK k * E) (ι₀ (b j))) (ι₀ (Ψ' (S7.toMK k * E) (b j))) =
-      ob2SI (ob2B dual Ψ E (ι₀ (b j))) (ι₀ (Ψ' E (b j))) := by
-    intro j
-    rw [psi_twist_k_mul dual T Ψ k E hΨ, hΨ', ContinuousLinearMap.mul_apply, hK, k_twist_vector_inner_preserved]
-  rw [Finset.sum_congr rfl fun j _ => step j]
-  have hQ := (hpos' Y hY).toLinearMap
-  have hs := hQ.isSymmetric
-  set c := hs.eigenvectorBasis rfl
-  have h := onb_sum_vector_inner_independent b c ((ob2B dual Ψ E).comp ι₀) (ι₀.comp (Ψ' E : T'.V →ₗ[ℂ] T'.V))
-  simp only [LinearMap.comp_apply, ContinuousLinearMap.coe_coe] at h
-  rw [h]
-  refine Finset.sum_nonneg fun i _ => ?_
-  have hc := hs.apply_eigenvectorBasis rfl i
-  simp only [ContinuousLinearMap.coe_coe] at hc
-  rw [hc, map_smul, vector_inner_smul_right]
-  exact mul_nonneg (Complex.zero_le_real.mpr (hQ.nonneg_eigenvalues rfl i)) (psi_twist_exp_positive dual Ψ hY (hpos Y hY) _)
+  apply ReciprocityTheory.ChartRestriction.DS.psi_pairing_nonneg <;> assumption
 
 end ReciprocityTheory.ChartRestriction.DS.G2

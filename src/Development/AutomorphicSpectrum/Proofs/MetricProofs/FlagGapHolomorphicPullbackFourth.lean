@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.CentralCharts.TraceMulReNonneg
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.HasStepCharts
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.SelM
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.GramMatrixSubScalarPosSemidefStatement
@@ -131,31 +132,7 @@ theorem rest : ∀ (e : ℕ) (X : Type) [TopologicalSpace X] (A : FinHolAtlas e 
   exact ⟨h1.differentiableAt (by simp), h2.le⟩
 
 theorem entry : ∀ (N : ℕ) (G : Matrix (Fin N) (Fin N) ℂ) (t : ℝ), G.PosSemidef → (((t : ℝ) : ℂ) • (1 : Matrix (Fin N) (Fin N) ℂ) - G).PosSemidef → ∀ p q, ‖G p q‖ ≤ t := by
-  intro N G t hG hT p q
-  have hd : ∀ a, (G a a).re ≤ t := fun a => by
-    have h := hT.diag_nonneg (i := a)
-    have h' : (0 : ℂ) ≤ ((t : ℝ) : ℂ) - G a a := by
-      simpa [Matrix.sub_apply, Matrix.smul_apply, Matrix.one_apply_eq] using h
-    have := (Complex.le_def.1 h').1
-    simpa using this
-  have hdn : ∀ a, (G a a).im = 0 ∧ 0 ≤ (G a a).re := fun a => by
-    have h := Complex.le_def.1 (hG.diag_nonneg (i := a))
-    exact ⟨by simpa using h.2.symm, by simpa using h.1⟩
-  have hdet := (hG.submatrix ![p, q]).det_nonneg
-  rw [Matrix.det_fin_two] at hdet
-  simp only [Matrix.submatrix_apply, Matrix.cons_val_zero, Matrix.cons_val_one] at hdet
-  have hqp : G q p = star (G p q) := (hG.1.apply q p).symm
-  rw [hqp] at hdet
-  have hre := (Complex.le_def.1 hdet).1
-  have hmul : G p q * star (G p q) = ((‖G p q‖ ^ 2 : ℝ) : ℂ) := by
-    rw [Complex.star_def, Complex.mul_conj, Complex.normSq_eq_norm_sq]
-  rw [hmul] at hre
-  simp only [Complex.sub_re, Complex.mul_re, Complex.ofReal_re, Complex.zero_re, (hdn p).1, (hdn q).1] at hre
-  have ht0 : 0 ≤ t := (hdn p).2.trans (hd p)
-  have hsq : ‖G p q‖ ^ 2 ≤ t ^ 2 := by
-    have := mul_le_mul (hd p) (hd q) (hdn q).2 ht0
-    nlinarith
-  exact (pow_le_pow_iff_left₀ (norm_nonneg _) ht0 two_ne_zero).1 hsq
+  apply AnalyticReference.An.norm_entry_le <;> assumption
 
 theorem detpos : ∀ (k : ℕ) (M : Matrix (Fin k) (Fin k) ℂ) (a : ℝ), 0 < a → (M - (a : ℂ) • (1 : Matrix (Fin k) (Fin k) ℂ)).PosSemidef → 0 < M.det.re := by
   intro k M a ha h

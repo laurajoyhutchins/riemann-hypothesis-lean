@@ -72,8 +72,6 @@ theorem addVal_finset_prod {ι : Type*} (s : Finset ι) (a : ι → R) :
     addVal R (∏ i ∈ s, a i) = ∑ i ∈ s, addVal R (a i) := by
   first
   | (rename_i h_1 h_2 h_3; revert R h_1 h_2 h_3 ι s a; exact @_root_.GlobalTheory.AdditiveValuationProduct.addVal_prod)
-  | exact @_root_.GlobalTheory.AdditiveValuationProduct.addVal_prod
-  | exact _root_.GlobalTheory.AdditiveValuationProduct.addVal_prod
   | (apply _root_.GlobalTheory.AdditiveValuationProduct.addVal_prod <;> assumption)
   | (intros; apply _root_.GlobalTheory.AdditiveValuationProduct.addVal_prod <;> assumption)
   | (intros; apply @_root_.GlobalTheory.AdditiveValuationProduct.addVal_prod <;> first | assumption | infer_instance)
@@ -84,8 +82,6 @@ theorem length_quotient_range_eq_top_of_det_eq_zero [Module.Free R M] [Module.Fi
     Module.length R (M ⧸ LinearMap.range f) = ⊤ := by
   first
   | (rename_i h_1 h_2 h_3 h_5 h_6 h_7 h_8; revert R h_1 h_2 h_3 M h_5 h_6 h_7 h_8 f hf; exact @_root_.GlobalTheory.LengthDualFunctional.main)
-  | exact @_root_.GlobalTheory.LengthDualFunctional.main
-  | exact _root_.GlobalTheory.LengthDualFunctional.main
   | (apply _root_.GlobalTheory.LengthDualFunctional.main <;> assumption)
   | (intros; apply _root_.GlobalTheory.LengthDualFunctional.main <;> assumption)
   | (intros; apply @_root_.GlobalTheory.LengthDualFunctional.main <;> first | assumption | infer_instance)
@@ -96,8 +92,6 @@ theorem length_quotient_eq_addVal_det_equiv [Module.Free R M] [Module.Finite R M
     Module.length R (M ⧸ N) = addVal R (LinearMap.det (N.subtype ∘ₗ (e : M →ₗ[R] N))) := by
   first
   | (rename_i h_1 h_2 h_3 h_5 h_6 h_7 h_8; revert R h_1 h_2 h_3 M h_5 h_6 h_7 h_8 N e; exact @_root_.GlobalTheory.LengthQuotientValuationDet.length_quotient_eq_addVal_det)
-  | exact @_root_.GlobalTheory.LengthQuotientValuationDet.length_quotient_eq_addVal_det
-  | exact _root_.GlobalTheory.LengthQuotientValuationDet.length_quotient_eq_addVal_det
   | (apply _root_.GlobalTheory.LengthQuotientValuationDet.length_quotient_eq_addVal_det <;> assumption)
   | (intros; apply _root_.GlobalTheory.LengthQuotientValuationDet.length_quotient_eq_addVal_det <;> assumption)
   | (intros; apply @_root_.GlobalTheory.LengthQuotientValuationDet.length_quotient_eq_addVal_det <;> first | assumption | infer_instance)
@@ -129,8 +123,6 @@ theorem length_quotient_range_eq_addVal_det_toMatrix {M' : Type*} [AddCommGroup 
     Module.length R (M ⧸ LinearMap.range f) = addVal R (LinearMap.toMatrix b' b f).det := by
   first
   | (rename_i h_1 h_2 h_3 h_5 h_6 h_8 h_9 h_11 h_12; revert R h_1 h_2 h_3 M h_5 h_6 ι h_8 h_9 M' h_11 h_12 b' b f; exact @_root_.GlobalTheory.LengthQuotientSpanValuation.main)
-  | exact @_root_.GlobalTheory.LengthQuotientSpanValuation.main
-  | exact _root_.GlobalTheory.LengthQuotientSpanValuation.main
   | (apply _root_.GlobalTheory.LengthQuotientSpanValuation.main <;> assumption)
   | (intros; apply _root_.GlobalTheory.LengthQuotientSpanValuation.main <;> assumption)
   | (intros; apply @_root_.GlobalTheory.LengthQuotientSpanValuation.main <;> first | assumption | infer_instance)
@@ -177,8 +169,6 @@ theorem signedLength_span_eq_of_det_eq_unit_mul_zpow {a b : ι → V} (ha : Line
     signedLength (Submodule.span R (Set.range a)) (Submodule.span R (Set.range b)) = n := by
   first
   | (rename_i h_1 h_2 h_3 h_5 h_6 h_7 h_9 h_10 h_11 h_12 h_14 h_15; revert R h_1 h_2 h_3 K h_5 h_6 h_7 V h_9 h_10 h_11 h_12 ι h_14 h_15 a b ha g hb ϖ hϖ u n hg; exact @_root_.GlobalTheory.SignedLengthTower.signedLength_span_eq)
-  | exact @_root_.GlobalTheory.SignedLengthTower.signedLength_span_eq
-  | exact _root_.GlobalTheory.SignedLengthTower.signedLength_span_eq
   | (apply _root_.GlobalTheory.SignedLengthTower.signedLength_span_eq <;> assumption)
   | (intros; apply _root_.GlobalTheory.SignedLengthTower.signedLength_span_eq <;> assumption)
   | (intros; apply @_root_.GlobalTheory.SignedLengthTower.signedLength_span_eq <;> first | assumption | infer_instance)

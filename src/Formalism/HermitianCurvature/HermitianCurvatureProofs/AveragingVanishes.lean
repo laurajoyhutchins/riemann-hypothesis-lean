@@ -104,7 +104,6 @@ theorem exp_ne_one {x : ℝ} (h0 : x ≠ 0) (h1 : |x| < 2 * Real.pi) :
   have h2 := congrArg Complex.im hn
   simp at h2
   have hx : x = n * (2 * Real.pi) := by linarith
-  have hpi := Real.pi_pos
   rw [hx, abs_lt] at h1
   rcases lt_trichotomy n 0 with hn0 | hn0 | hn0
   · have h3 : (n : ℝ) ≤ -1 := by exact_mod_cast Int.le_sub_one_of_lt hn0

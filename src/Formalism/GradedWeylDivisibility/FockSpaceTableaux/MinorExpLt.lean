@@ -55,10 +55,6 @@ private theorem cmIdx_val_eq {r n : ℕ} (v : Fin r × Fin n) :
     ((cmIdx r n v : Fin (n * r)) : ℕ) = v.1.val + r * v.2.val := by
   first
   | rfl
-  | (simp only [cmIdx, Equiv.trans_apply, Equiv.prodComm_apply, Prod.fst_swap,
-      Prod.snd_swap, finProdFinEquiv_apply_val]; done)
-  | (simp [cmIdx, finProdFinEquiv_apply_val, Nat.mul_comm, Nat.add_comm]; done)
-  | (simp [cmIdx]; ring)
 
 private theorem col_lt_or_col_eq_row_lt_of_cmIdx_lt {r n : ℕ} {v w : Fin r × Fin n}
     (h : cmIdx r n v < cmIdx r n w) :
@@ -77,19 +73,14 @@ private theorem col_lt_or_col_eq_row_lt_of_cmIdx_lt {r n : ℕ} {v w : Fin r × 
     have hm : r * (w.2.val + 1) ≤ r * v.2.val := by
       first
       | exact Nat.mul_le_mul_left r h1
-      | exact Nat.mul_le_mul_left h1 r
-      | exact Nat.mul_le_mul (le_refl r) h1
     rw [Nat.mul_add, Nat.mul_one] at hm
     first
     | omega
-    | linarith
 
 private theorem domCongr_cmIdx_apply_cmIdx {r n : ℕ} (x : Fin r × Fin n →₀ ℕ) (v : Fin r × Fin n) :
     (Finsupp.domCongr (cmIdx r n) x) (cmIdx r n v) = x v := by
   first
   | (simp [Finsupp.domCongr_apply, Finsupp.equivMapDomain_apply]; done)
-  | (rw [Finsupp.domCongr_apply, Finsupp.equivMapDomain_apply, Equiv.symm_apply_apply])
-  | (simp; done)
 
 private theorem sum_single_castLE_apply' {r n s : ℕ} (τ : Fin s → Fin r) (hs : s ≤ n) (b : Fin r) (t : Fin n) :
     (∑ q : Fin s, Finsupp.single (τ q, Fin.castLE hs q) 1 : Fin r × Fin n →₀ ℕ) (b, t) =
@@ -102,8 +93,6 @@ private theorem sum_single_castLE_apply' {r n s : ℕ} (τ : Fin s → Fin r) (h
       · have hp : (τ ⟨t.val, h⟩, Fin.castLE hs ⟨t.val, h⟩) = (b, t) := by
           first
           | exact Prod.ext hb (Fin.ext rfl)
-          | exact Prod.ext_iff.2 ⟨hb, Fin.ext rfl⟩
-          | (subst hb; rfl)
         rw [if_pos hp, if_pos hb]
       · rw [if_neg, if_neg hb]
         intro he
@@ -132,10 +121,6 @@ private theorem toLex_lt_of_eq_below_of_apply_lt {N : ℕ} (x y : Fin N →₀ �
     (h1 : ∀ j, j < i → x j = y j) (h2 : x i < y i) : toLex x < toLex y := by
   first
   | exact ⟨i, h1, h2⟩
-  | exact Finsupp.Lex.lt_of_forall_lt_of_lt _ _ i h1 h2
-  | (show Finsupp.Lex (· < ·) (· < ·) x y; exact ⟨i, h1, h2⟩)
-  | (show Pi.Lex (· < ·) (· < ·) x y; exact ⟨i, h1, h2⟩)
-  | (rw [Finsupp.lex_def]; exact ⟨i, h1, h2⟩)
 
 private theorem colLex_lt_of_toLex_domCongr_cmIdx_lt {r n : ℕ} {c d : Fin r × Fin n →₀ ℕ}
     (h : toLex (Finsupp.domCongr (cmIdx r n) c) <
@@ -151,7 +136,6 @@ theorem minorExponentLt : MinorExpLt := by
     ext x
     first
     | (rw [h x]; rfl)
-    | simp [h x]
   obtain ⟨q0, hq0, hmin⟩ := (wellFounded_lt (α := Fin s)).has_min {q | σ q ≠ q} hex
   have hq0' : σ q0 ≠ q0 := hq0
   have hfix : ∀ q, q < q0 → σ q = q := fun q hq => by

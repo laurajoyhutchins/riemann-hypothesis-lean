@@ -1,5 +1,6 @@
 module
 
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.BesselDecayBounds.BesselUnitNorm.BesselNormSteps.UnitNorm.UnrealifyRealify
 public import Formalism.PeriodIntegrals.HaarDefs
 public import Mathlib.Analysis.Calculus.Deriv.Basic
 public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
@@ -119,30 +120,7 @@ theorem UH_mul {a b : Mx k r} (ha : a ∈ UH (Hpk k r)) (hb : b ∈ UH (Hpk k r)
 
 theorem exp_mem_UH {X : Mx k r} (hX : InLieHpk k r X) (t : ℝ) :
     NormedSpace.exp ((t : ℂ) • X) ∈ UH (Hpk k r) := by
-  have hH2 := (hpkFacts k r).2.1
-  have hinv : (Hpk k r)⁻¹ = Hpk k r := Matrix.inv_eq_right_inv hH2
-  have hXs : Xᴴ = Hpk k r * (-X) * (Hpk k r)⁻¹ := by
-    rw [hinv]
-    have h1 : Xᴴ * Hpk k r = -(Hpk k r * X) := eq_neg_of_add_eq_zero_left hX
-    calc Xᴴ = Xᴴ * (Hpk k r * Hpk k r) := by rw [hH2, Matrix.mul_one]
-      _ = (Xᴴ * Hpk k r) * Hpk k r := by rw [Matrix.mul_assoc]
-      _ = Hpk k r * (-X) * Hpk k r := by rw [h1]; simp
-  show (NormedSpace.exp ((t : ℂ) • X))ᴴ * Hpk k r * NormedSpace.exp ((t : ℂ) • X) = Hpk k r
-  rw [← Matrix.exp_conjTranspose, Matrix.conjTranspose_smul, hXs]
-  have hst : star (t : ℂ) = (t : ℂ) := Complex.conj_ofReal t
-  rw [hst]
-  have e1 : (t : ℂ) • (Hpk k r * (-X) * (Hpk k r)⁻¹) = Hpk k r * (-((t : ℂ) • X)) * (Hpk k r)⁻¹ := by
-    simp
-  rw [e1, Matrix.exp_conj _ _ ((Matrix.isUnit_iff_isUnit_det _).2 (Hpk_unit k r)), hinv]
-  have e2 : NormedSpace.exp (-((t : ℂ) • X)) * NormedSpace.exp ((t : ℂ) • X) = 1 := by
-    rw [← Matrix.exp_add_of_commute _ _ ((Commute.refl ((t : ℂ) • X)).neg_left)]
-    simp
-  calc Hpk k r * NormedSpace.exp (-((t : ℂ) • X)) * Hpk k r * Hpk k r * NormedSpace.exp ((t : ℂ) • X)
-      = Hpk k r * NormedSpace.exp (-((t : ℂ) • X)) * (Hpk k r * Hpk k r) * NormedSpace.exp ((t : ℂ) • X) := by
-        simp only [Matrix.mul_assoc]
-    _ = Hpk k r * (NormedSpace.exp (-((t : ℂ) • X)) * NormedSpace.exp ((t : ℂ) • X)) := by
-        rw [hH2, Matrix.mul_one, Matrix.mul_assoc]
-    _ = Hpk k r := by rw [e2, Matrix.mul_one]
+  apply PI.WUN.exp_mem_UH <;> assumption
 
 end Grp
 
@@ -157,25 +135,7 @@ def InA (k r : ℕ) (X : Mx k r) : Prop :=
 def InLieN (k r : ℕ) (X : Mx k r) : Prop := InLieHpk k r X ∧ InA k r X
 
 theorem InA.mul {X Y : Mx k r} (hX : InA k r X) (hY : InA k r Y) : InA k r (X * Y) := by
-  constructor
-  · intro a i hai
-    rw [Matrix.mul_apply]
-    apply Finset.sum_eq_zero
-    intro l _
-    by_cases hl : a.val ≤ l.val
-    · rw [hY.1 a l hl, mul_zero]
-    · have hl' : l.val < r := by have := a.2; omega
-      have : l = eI k r ⟨l.val, hl'⟩ := rfl
-      rw [this, hX.1 ⟨l.val, hl'⟩ i (by simp only; omega), zero_mul]
-  · intro i j h1 h2 h3
-    rw [Matrix.mul_apply]
-    apply Finset.sum_eq_zero
-    intro l _
-    by_cases hl : r ≤ l.val
-    · rw [hY.2 l j h1 h2 hl, mul_zero]
-    · have hl' : l.val < r := by omega
-      have : l = eI k r ⟨l.val, hl'⟩ := rfl
-      rw [this, hX.1 ⟨l.val, hl'⟩ i (by simp only; omega), zero_mul]
+  apply PI.WUN.InA.mul <;> assumption
 
 theorem InA.pow {X : Mx k r} (hX : InA k r X) : ∀ n : ℕ, InA k r (X ^ (n + 1)) := by
   intro n
@@ -212,18 +172,7 @@ theorem exp_mem_N {X : Mx k r} (hX : InLieN k r X) : NormedSpace.exp X ∈ Nset 
     exact exp_entry_of_InA i j (fun n => (hX.2.pow n).2 i j h1 h2 h3)
 
 theorem InLieN.add {X Y : Mx k r} (hX : InLieN k r X) (hY : InLieN k r Y) : InLieN k r (X + Y) := by
-  refine ⟨?_, ?_, ?_⟩
-  · show (X + Y)ᴴ * Hpk k r + Hpk k r * (X + Y) = 0
-    have h1 : Xᴴ * Hpk k r + Hpk k r * X = 0 := hX.1
-    have h2 : Yᴴ * Hpk k r + Hpk k r * Y = 0 := hY.1
-    rw [Matrix.conjTranspose_add, Matrix.add_mul, Matrix.mul_add]
-    calc Xᴴ * Hpk k r + Yᴴ * Hpk k r + (Hpk k r * X + Hpk k r * Y)
-        = (Xᴴ * Hpk k r + Hpk k r * X) + (Yᴴ * Hpk k r + Hpk k r * Y) := by abel
-      _ = 0 := by rw [h1, h2, add_zero]
-  · intro a i hai
-    rw [Matrix.add_apply, hX.2.1 a i hai, hY.2.1 a i hai, add_zero]
-  · intro i j h1 h2 h3
-    rw [Matrix.add_apply, hX.2.2 i j h1 h2 h3, hY.2.2 i j h1 h2 h3, add_zero]
+  apply PI.WUN.InLieN.add <;> assumption
 
 theorem InLieN.smul {X : Mx k r} (hX : InLieN k r X) (c : ℝ) : InLieN k r ((c : ℂ) • X) := by
   refine ⟨?_, ?_, ?_⟩

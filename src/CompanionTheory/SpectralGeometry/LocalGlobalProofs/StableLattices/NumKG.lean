@@ -64,87 +64,8 @@ theorem numKG : NumKG := by
   set μ := X - wt B - wt C with hμ
   obtain ⟨hXa, -, hgap⟩ := hG
   obtain ⟨w, hw, hs⟩ := exists_sort ε κ
-  obtain ⟨m, hm, hm2⟩ := hdom w hw
-  have i1 : ∑ a, κ (w a) * μ (w a) ≤ ∑ a, κ (w a) * ν a := by
-    rw [← sub_nonneg, ← Finset.sum_sub_distrib]
-    have e : ∀ a, κ (w a) * ν a - κ (w a) * μ (w a) = ∑ c, ∑ d, (m c d : ℝ) * (κ (w a) * root c d a) := fun a => by
-      have := congrFun hm2 a
-      simp only [Pi.sub_apply, Function.comp, Finset.sum_apply, Pi.smul_apply, smul_eq_mul] at this
-      rw [← mul_sub, this, Finset.mul_sum]
-      refine Finset.sum_congr rfl fun c _ => ?_
-      rw [Finset.mul_sum]
-      exact Finset.sum_congr rfl fun d _ => by ring
-    simp only [e]
-    rw [Finset.sum_comm]
-    refine Finset.sum_nonneg fun c _ => ?_
-    rw [Finset.sum_comm]
-    refine Finset.sum_nonneg fun d _ => ?_
-    rw [← Finset.mul_sum]
-    by_cases h0 : m c d = 0
-    · simp [h0]
-    · refine mul_nonneg (Nat.cast_nonneg _) ?_
-      simp only [root, Pi.sub_apply, mul_sub, Finset.sum_sub_distrib, Pi.single_apply, mul_ite, mul_one, mul_zero,
-        Finset.sum_ite_eq', mem_univ, if_true, sub_nonneg]
-      exact hs c d (hm c d h0).1 (hm c d h0).2
-  let tC : Fin n → Fin n → ℝ := fun a b => 2 * (ind C a b - ind C b a) - sc ε a b
-  have htC : ∀ a b, |tC a b| ≤ if ε a = ε b then 1 else 0 := fun a b => by
-    simp only [tC, ind_eq, sc, sig]
-    rcases lt_trichotomy a b with h | h | h
-    · simp only [dif_pos h, dif_neg h.not_gt, if_pos h]
-      by_cases h1 : (⟨(a, b), h⟩ : Pos n) ∈ C
-      · have : ε a = ε b := hC _ h1
-        simp [h1, this]; norm_num
-      · simp only [h1, if_false]; split_ifs <;> simp
-    · subst h; simp
-    · simp only [dif_pos h, dif_neg h.not_gt, if_pos h, if_neg h.not_gt]
-      by_cases h1 : (⟨(b, a), h⟩ : Pos n) ∈ C
-      · have : ε a = ε b := (hC _ h1).symm
-        simp [h1, this]; norm_num
-      · simp only [h1, if_false]; split_ifs <;> simp
-  have i2 : ∑ a, κ a * (wt C a - rhoC ε a) ≤ ∑ a, κ (w a) * rhoC ε a := by
-    have p1 := pair_eq tC (fun a b => by simp only [tC]; rw [sc_anti ε a b]; ring) κ
-    have p2 := pair_eq (sc ε) (sc_anti ε) fun a => κ (w a)
-    have e : ∀ a, wt C a - rhoC ε a = (∑ b, tC a b) / 2 := fun a => by
-      simp only [tC]
-      rw [wt_eq, rhoC_eq, Finset.sum_sub_distrib (f := fun b => 2 * (ind C a b - ind C b a)), ← Finset.mul_sum]
-      ring
-    simp only [e]
-    simp only [rhoC_eq]
-    have : ∑ a, ∑ b, tC a b * (κ a - κ b) ≤ ∑ a, ∑ b, sc ε a b * (κ (w a) - κ (w b)) := by
-      calc _ ≤ ∑ a, ∑ b, (if ε a = ε b then 1 else 0) * |κ a - κ b| :=
-            Finset.sum_le_sum fun a _ => Finset.sum_le_sum fun b _ => (le_abs_self _).trans (by
-              rw [abs_mul]; exact mul_le_mul_of_nonneg_right (htC a b) (abs_nonneg _))
-        _ = ∑ a, ∑ b, (if ε (w a) = ε (w b) then 1 else 0) * |κ (w a) - κ (w b)| := by
-            rw [← Equiv.sum_comp w]
-            refine Finset.sum_congr rfl fun a _ => ?_
-            rw [← Equiv.sum_comp w]
-        _ = _ := by
-            refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
-            rw [hw, hw, sc, sig]
-            by_cases h : ε a = ε b
-            · rcases lt_trichotomy a b with h1 | h1 | h1
-              · simp [h, h1, abs_of_nonneg (sub_nonneg.2 (hs a b h1 h))]
-              · simp [h1]
-              · simp [h, h1, h1.not_gt, abs_of_nonpos (sub_nonpos.2 (hs b a h1 h.symm))]
-            · simp [h]
-    linarith
-  have hκw : ∀ a, κ (w a) = ν a + rhoC ε a := by
-    have e1 : ∑ a, κ a * κ a = ∑ a, κ (w a) * μ (w a) + ∑ a, κ a * (wt C a - rhoC ε a) := by
-      rw [Equiv.sum_comp w fun a => κ a * μ a, ← Finset.sum_add_distrib]
-      refine Finset.sum_congr rfl fun a _ => ?_
-      simp only [hκ, hμ, Pi.add_apply, Pi.sub_apply, Pi.smul_apply, smul_eq_mul]
-      ring
-    have e2 : ∑ a, κ (w a) * κ (w a) = ∑ a, κ a * κ a := Equiv.sum_comp w fun a => κ a * κ a
-    have e3 : ∑ a, (κ (w a) - (ν a + rhoC ε a)) ^ 2 = ∑ a, κ (w a) * κ (w a) - 2 * ∑ a, κ (w a) * ν a -
-        2 * ∑ a, κ (w a) * rhoC ε a + ∑ a, (ν a + rhoC ε a) * (ν a + rhoC ε a) := by
-      simp only [Finset.mul_sum, ← Finset.sum_sub_distrib, ← Finset.sum_add_distrib]
-      exact Finset.sum_congr rfl fun a _ => by ring
-    have hn' : ∑ a, (ν a + rhoC ε a) * (ν a + rhoC ε a) = ∑ a, κ a * κ a := hn
-    have h0 : ∑ a, (κ (w a) - (ν a + rhoC ε a)) ^ 2 = 0 :=
-      le_antisymm (by linarith) (Finset.sum_nonneg fun _ _ => sq_nonneg _)
-    intro a
-    have := (Finset.sum_eq_zero_iff_of_nonneg fun _ _ => sq_nonneg _).1 h0 a (mem_univ _)
-    exact sub_eq_zero.1 (pow_eq_zero_iff two_ne_zero |>.1 this)
+  have hκw := sorted_weight_eq_of_norm_eq ε κ μ ν C hC w hw hs (hdom w hw)
+    (fun a => by simp only [hκ, hμ, Pi.add_apply, Pi.sub_apply, Pi.smul_apply, smul_eq_mul]; ring) hn
   let t : Fin n → Fin n → ℝ := fun a b =>
     (sig a b - sc ε a b) - 2 * (ind B a b - ind B b a) + sc ε (w.symm a) (w.symm b)
   have hws : ∀ c, ε (w.symm c) = ε c := fun c => by rw [← hw, Equiv.apply_symm_apply]

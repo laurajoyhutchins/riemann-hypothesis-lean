@@ -104,7 +104,6 @@ theorem local_congruence_condition : Formalism.HermitianLatticeCounting.LocalInt
     have e : (y : E) * x = (N : E) * ((y : E) * (x * (1 / (N : E)))) := by
       first
       | field_simp
-      | rw [mul_one_div, mul_div_assoc', mul_div_assoc', mul_div_cancel_left₀ _ hN]
     rw [e, hyz]; simp
   obtain ⟨ha, hc⟩ := h (1 / (T : E)) 0 (one _ (by field_simp)) (zer _ (by simp))
   obtain ⟨hb, hd⟩ := h 0 (1 / (T' : E)) (zer _ (by simp)) (one _ (by field_simp))
@@ -136,9 +135,6 @@ theorem complex_multiplication_root : Formalism.HermitianLatticeCounting.LocalIn
   have hq0 : 0 ≤ q ^ ((Fintype.card (InfinitePlace E) : ℝ) / 2) := (Real.rpow_pos_of_pos hq _).le
   first
   | exact le_of_pow_le_pow_left₀ (by norm_num) h0 key
-  | exact (pow_le_pow_iff_left₀ hq0 h0 (by norm_num)).mp key
-  | exact le_of_pow_le_pow_left (by norm_num) h0 key
-  | exact (pow_le_pow_iff_left hq0 h0 (by norm_num)).mp key
 
 namespace IntegralityLocalGlobal
 
@@ -158,13 +154,10 @@ lemma isInt_coe (y : 𝓞 E) : IsInt (y : E) := by
   first
   | exact y.2
   | exact ⟨y, rfl⟩
-  | exact NumberField.RingOfIntegers.isIntegral_coe y
 lemma isInt_map (σ : E →+* E) {a : E} (ha : IsInt a) : IsInt (σ a) := by
   obtain ⟨x, rfl⟩ := ha
   first
   | exact ⟨⟨σ x, (NumberField.RingOfIntegers.isIntegral_coe x).map σ.toIntAlgHom⟩, rfl⟩
-  | exact ⟨⟨σ x, x.2.map σ.toIntAlgHom⟩, rfl⟩
-  | exact ⟨NumberField.RingOfIntegers.mapRingHom σ x, rfl⟩
 
 lemma locGlob (x : E) (h : ∀ P : Ideal (𝓞 E), P.IsPrime → ∃ y : 𝓞 E, y ∉ P ∧ IsInt ((y : E) * x)) :
     IsInt x := by
@@ -230,7 +223,6 @@ private theorem exists_not_mem_prime_mul_eq_of_locIn {E : Type} [Field E] [Numbe
     haveI := hP
     first
     | exact Ideal.comap_isPrime f P
-    | exact Ideal.IsPrime.comap f
     | infer_instance
   have hMQ : (M : 𝓞 E) ∈ P.comap f := by
     rw [Ideal.mem_comap, map_natCast]; exact hMP
@@ -311,7 +303,6 @@ lemma formEq (a b c d : ℂ) (T T' : ℝ)
   have h4 := h 1 Complex.I
   first
   | simp only [← Complex.normSq_eq_norm_sq] at h1 h2 h3 h4 ⊢
-  | simp only [Complex.sq_norm] at h1 h2 h3 h4 ⊢
   simp only [Complex.normSq_apply, Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im,
     Complex.one_re, Complex.one_im, Complex.zero_re, Complex.zero_im, Complex.I_re,
     Complex.I_im] at h1 h2 h3 h4 ⊢

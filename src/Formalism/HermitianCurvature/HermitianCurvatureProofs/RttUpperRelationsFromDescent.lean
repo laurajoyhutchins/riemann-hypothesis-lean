@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeylConjugationFixedColumn.ReflectionScalarDualIsotropic
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SumDualVectorEqZeta
 public import Mathlib.LinearAlgebra.Lagrange
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CmHalfIntegralGeneratorMemAlgebraicClosure
@@ -689,22 +690,7 @@ lemma weyl_cell_mulVec (c : ℂ) (y : Fin (2 * r + k + 1) → ℂ) :
       ring
 
 lemma weyl_cell_mem_level_group {c : ℂ} (hc : c ≠ 0) : w1 k r l c ∈ Glev k r l.castSucc := by
-  have hc' : conj c ≠ 0 := (map_ne_zero _).2 hc
-  refine ⟨?_, fun a ha => ?_⟩
-  · apply B2x8.mem_UH_of
-    intro u w
-    have h1 : ⟪𝐞, w⟫ = conj ⟪w, 𝐞⟫ := (B2x8.herm_conj _ Hh _ _).symm
-    have h2 : ⟪𝐬, w⟫ = conj ⟪w, 𝐬⟫ := (B2x8.herm_conj _ Hh _ _).symm
-    rw [weyl_cell_mulVec, weyl_cell_mulVec]
-    simp only [B2x8.herm_add_left, B2x8.herm_add_right, B2x8.herm_smul_left, B2x8.herm_smul_right, h_e_e, h_es_es,
-      h_e_es, h_es_e, if_true, h1, h2, map_sub, map_mul, map_inv₀, Complex.conj_conj]
-    field_simp
-    ring
-  · have hne : a ≠ l := fun h' => by
-      rw [h', Fin.val_castSucc] at ha; exact lt_irrefl l.val ha
-    constructor
-    · rw [weyl_cell_mulVec, h_e_e, h_e_es, if_neg hne]; simp
-    · rw [weyl_cell_mulVec, h_es_e, h_es_es, if_neg hne]; simp
+  apply PI.IsotropicReflections.reflection_mem_Glev_castSucc <;> assumption
 
 lemma reflection_mul_mem_lower_level {c : ℂ} (hc : c ≠ 0) {g : Mx k r} (hg : g ∈ Glev k r l.succ) :
     w1 k r l c * g ∈ Glev k r l.castSucc := by

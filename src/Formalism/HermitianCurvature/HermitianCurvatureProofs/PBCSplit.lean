@@ -124,9 +124,6 @@ private lemma entry_lemma_2 (hG : GermData Y U P Q hat) {B : ℝ} (hB0 : 0 ≤ B
   have m1 := mul_le_mul hU1 hU2 (norm_nonneg _) hB0
   have m2 := mul_le_mul hU1 hQ2 (norm_nonneg _) hB0
   have m3 := mul_le_mul hQ1 hQ2 (norm_nonneg _) hB0
-  have n1 := norm_nonneg (U v (h, z) (h', z'))
-  have n2 := norm_nonneg (P v (h, z) (h', z'))
-  have n3 := norm_nonneg (Q v (h, z) (h', z'))
   refine ⟨?_, ?_, ?_⟩ <;> nlinarith
 
 theorem GermData.phiG_bdd (hG : GermData Y U P Q hat) (κ : H → H → ℂ) :

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.GaugedFormalGroupCurveLogarithmsAddSubgroupResca
 public import Formalism.LocalToGlobal.CharacterGerms.RowTieDefs
 public import Formalism.LocalToGlobal.CharacterGerms.ConstMemTypeSetOfNonneg
 public import Formalism.LocalToGlobal.CharacterGerms.NegMem
@@ -65,32 +66,7 @@ theorem coeff_alongCv_congr {σ : Type} [Finite σ] {a a' : σ → PowerSeries C
     (ha : ∀ i, PowerSeries.constantCoeff (a i) = 0) (ha' : ∀ i, PowerSeries.constantCoeff (a' i) = 0) {k : ℕ}
     (h : ∀ i, ∀ m < k, PowerSeries.coeff m (a i) = PowerSeries.coeff m (a' i)) (f : MvPowerSeries σ C) :
     ∀ m < k, PowerSeries.coeff m (alongCv a f) = PowerSeries.coeff m (alongCv a' f) := by
-  intro m hm
-  have hA : MvPowerSeries.HasSubst a := MvPowerSeries.hasSubst_of_constantCoeff_zero ha
-  have hA' : MvPowerSeries.HasSubst a' := MvPowerSeries.hasSubst_of_constantCoeff_zero ha'
-  have hdiff : ∀ i, a i - a' i ∈ Ideal.span {(PowerSeries.X : PowerSeries C) ^ k} := by
-    intro i
-    rw [Ideal.mem_span_singleton, PowerSeries.X_pow_dvd_iff]
-    intro n hn
-    rw [map_sub, h i n hn, sub_self]
-  have hprod : ∀ e : σ →₀ ℕ, PowerSeries.coeff m (e.prod fun s n => a s ^ n) =
-      PowerSeries.coeff m (e.prod fun s n => a' s ^ n) := by
-    intro e
-    have hq : Ideal.Quotient.mk (Ideal.span {(PowerSeries.X : PowerSeries C) ^ k}) (e.prod fun s n => a s ^ n) =
-        Ideal.Quotient.mk (Ideal.span {(PowerSeries.X : PowerSeries C) ^ k}) (e.prod fun s n => a' s ^ n) := by
-      simp only [Finsupp.prod, map_prod, map_pow]
-      refine Finset.prod_congr rfl fun s _ => ?_
-      rw [Ideal.Quotient.eq.2 (hdiff s)]
-    rw [Ideal.Quotient.eq, Ideal.mem_span_singleton, PowerSeries.X_pow_dvd_iff] at hq
-    have hm' := hq m hm
-    rwa [map_sub, sub_eq_zero] at hm'
-  simp only [alongCv]
-  change MvPowerSeries.coeff (Finsupp.single () m) (MvPowerSeries.subst a f) =
-    MvPowerSeries.coeff (Finsupp.single () m) (MvPowerSeries.subst a' f)
-  rw [MvPowerSeries.coeff_subst hA, MvPowerSeries.coeff_subst hA']
-  refine finsum_congr fun e => ?_
-  congr 1
-  exact hprod e
+  apply GlobalTheory.RowLaw.CvGroup.alongCv_congr <;> assumption
 
 theorem coeff_tyS_congr {l : ℕ} (hl : 2 ≤ l) (a b : ℕ → C) (N : ℕ) (hab : ∀ i < N, a i = b i) (m : ℕ)
     (hm : m < l ^ N) : PowerSeries.coeff m (tyS l a) = PowerSeries.coeff m (tyS l b) := by

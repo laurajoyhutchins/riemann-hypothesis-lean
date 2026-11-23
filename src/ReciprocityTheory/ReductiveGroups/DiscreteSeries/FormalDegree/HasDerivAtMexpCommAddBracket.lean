@@ -209,10 +209,6 @@ private theorem hasDerivAt_exp_conj_diag (U U' : Matrix (Fin n) (Fin n) ℂ) (h1
       have hne : x i - x j ≠ 0 := sub_ne_zero.mpr h
       have hreal : (Real.exp (2 * x j) - Real.exp (2 * x i)) / (2 * x j - 2 * x i) =
           Real.exp (x i) * Real.exp (x j) * (Real.sinh (x i - x j) / (x i - x j)) := by
-        have h3 : (2 * x j - 2 * x i) ≠ 0 := by
-          intro h0
-          apply hne
-          linarith
         have ei := Real.exp_pos (x i)
         have ej := Real.exp_pos (x j)
         rw [Real.sinh_eq, Real.exp_neg, Real.exp_sub, two_mul, two_mul, Real.exp_add, Real.exp_add]

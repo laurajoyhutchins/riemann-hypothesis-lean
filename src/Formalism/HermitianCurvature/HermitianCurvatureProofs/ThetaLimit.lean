@@ -393,7 +393,6 @@ theorem limit_L2 : CutoffLimitInL2 := by
       rw [this]; simp
 
 theorem amgm (a b δ : ℝ) (hδ : 0 < δ) : a * b ≤ (a ^ 2 / δ + δ * b ^ 2) / 2 := by
-  have h := sq_nonneg (a - δ * b)
   have : a ^ 2 / δ + δ * b ^ 2 - 2 * (a * b) = (a - δ * b) ^ 2 / δ := by field_simp; ring
   have h2 : 0 ≤ (a - δ * b) ^ 2 / δ := by positivity
   linarith

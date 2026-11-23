@@ -91,9 +91,6 @@ theorem str_eq_str_ker (Dl Γ B : Y →ₗ[ℂ] Y) (hD : ∀ x y, inner ℂ (Dl 
       simpa using this
     exact Subtype.ext (Submodule.disjoint_def.1 hkr.disjoint _ hv' v.2)
   set e := LinearEquiv.ofInjectiveEndo (Dl.restrict hDV) hinj
-  have hsplit : (Γ ∘ₗ B).restrict hV = Γ.restrict hΓV ∘ₗ B.restrict hBV := by
-    ext v
-    rfl
   have hconj : e.conj ((Γ ∘ₗ B).restrict hV) = -((Γ ∘ₗ B).restrict hV) := by
     ext v
     obtain ⟨w, rfl⟩ : ∃ w, v = e w := ⟨e.symm v, (e.apply_symm_apply v).symm⟩

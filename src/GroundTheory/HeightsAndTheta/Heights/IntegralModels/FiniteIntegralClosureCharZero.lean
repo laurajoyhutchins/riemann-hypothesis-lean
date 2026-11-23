@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsDiscreteValuationRingIntegralClosurePadicInt
 public import Mathlib.RingTheory.Jacobson.Ring
 public import GroundTheory.HeightsAndTheta.Heights.IntegralModels.FiniteIntegralClosureLocal
 import Mathlib.Algebra.Order.Floor.Extended
@@ -81,25 +82,7 @@ theorem isJacobsonRing_int : IsJacobsonRing ℤ := by
 
 theorem exists_prime_mem_of_isMaximal (A : Type*) [CommRing A] [Algebra.FiniteType ℤ A]
     (𝔪 : Ideal A) [𝔪.IsMaximal] : ∃ p : ℕ, p.Prime ∧ (p : A) ∈ 𝔪 := by
-  let _ := Ideal.Quotient.field 𝔪
-  have := isJacobsonRing_int
-  have : Algebra.FiniteType ℤ (A ⧸ 𝔪) := inferInstance
-  have : Module.Finite ℤ (A ⧸ 𝔪) := finite_of_finite_type_of_isJacobsonRing ℤ (A ⧸ 𝔪)
-  obtain ⟨p, hp⟩ := CharP.exists (A ⧸ 𝔪)
-  rcases CharP.char_is_prime_or_zero (A ⧸ 𝔪) p with hp' | rfl
-  · refine ⟨p, hp', ?_⟩
-    rw [← Ideal.Quotient.eq_zero_iff_mem, map_natCast]
-    exact CharP.cast_eq_zero _ p
-  · exfalso
-    have : CharZero (A ⧸ 𝔪) := CharP.charP_to_charZero (A ⧸ 𝔪)
-    have hmax := Ideal.isMaximal_under_of_isIntegral_of_isMaximal (R := ℤ) (⊥ : Ideal (A ⧸ 𝔪))
-    have hbot : (⊥ : Ideal (A ⧸ 𝔪)).comap (algebraMap ℤ (A ⧸ 𝔪)) = ⊥ := by
-      rw [← RingHom.ker_eq_comap_bot, RingHom.ker_eq_bot_iff_eq_zero]
-      intro n hn
-      exact_mod_cast (show ((n : ℤ) : A ⧸ 𝔪) = 0 by simpa using hn)
-    change ((⊥ : Ideal (A ⧸ 𝔪)).comap (algebraMap ℤ (A ⧸ 𝔪))).IsMaximal at hmax
-    rw [hbot] at hmax
-    exact Int.not_isField (Ring.isField_iff_maximal_bot.mpr hmax)
+  apply GlobalTheory.exists_prime_natCast_mem_of_finiteType_int <;> assumption
 
 theorem exists_pow_smul_mem_of_isMaximal
     (A : Type*) [CommRing A] [IsDomain A] [CharZero A] [Algebra.FiniteType ℤ A]

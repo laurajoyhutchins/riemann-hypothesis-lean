@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.HodgeTatePoints.RaTlog
 public import Mathlib.Basic.NNReal.Defs
 public import Mathlib.FieldTheory.IsAlgClosed.Basic
 public import Mathlib.NumberTheory.MulChar.Basic
@@ -79,22 +80,7 @@ theorem val_eq_one_of_pow_eq_one {K : Type} [Field K] (v : Valuation K NNReal) {
 
 theorem val_sub_one_pow {K : Type} [Field K] (v : Valuation K NNReal) (p : ℕ) [Fact p.Prime]
     {ζ : K} (hζ : IsPrimitiveRoot ζ p) : v (ζ - 1) ^ (p - 1) = v (p : K) := by
-  have hp : p.Prime := Fact.out
-  have hprod : (p : K) = ∏ μ ∈ primitiveRoots p K, (1 - μ) := by
-    rw [← Polynomial.eval_one_cyclotomic_prime (R := K) (p := p),
-      Polynomial.cyclotomic_eq_prod_X_sub_primitiveRoots hζ, Polynomial.eval_prod]
-    simp
-  have hval : ∀ μ ∈ primitiveRoots p K, v (1 - μ) = v (1 - ζ) := by
-    intro μ hμ
-    have hμ' : IsPrimitiveRoot μ p := (mem_primitiveRoots hp.pos).mp hμ
-    obtain ⟨i, -, rfl⟩ := hζ.eq_pow_of_pow_eq_one hμ'.pow_eq_one
-    obtain ⟨j, -, hj⟩ := hμ'.eq_pow_of_pow_eq_one hζ.pow_eq_one
-    refine le_antisymm (val_one_sub_pow_le v (val_eq_one_of_pow_eq_one v hp.ne_zero
-      hζ.pow_eq_one) i) ?_
-    conv_lhs => rw [← hj]
-    exact val_one_sub_pow_le v (val_eq_one_of_pow_eq_one v hp.ne_zero hμ'.pow_eq_one) j
-  rw [hprod, map_prod, Finset.prod_congr rfl hval, Finset.prod_const, hζ.card_primitiveRoots,
-    Nat.totient_prime hp, Valuation.map_sub_swap]
+  apply PositivityTheory.HtPt.Ra.val_prim <;> assumption
 
 theorem exists_mulShift_eq {F K : Type} [Field F] [Fintype F] [Field K] (ψ₀ ψ : AddChar F K)
     (h₀ : ψ₀ ≠ 1) : ∃ c, ψ = AddChar.mulShift ψ₀ c :=

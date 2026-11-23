@@ -1,5 +1,6 @@
 module
 
+import CompanionTheory.AutomorphicTheory.ThetaDilations.ProdRho
 public import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.CountData
 public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.AdelicHaarMeasureLinearChangeStatement
 import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.AdelicHaarMeasureScalingStatement
@@ -8,7 +9,6 @@ import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.FiniteA
 public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.MobiusActionUpperHalfPlaneStatement
 public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.SL2BruhatDecompositionIdentitiesStatement
 public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.WeilRepresentationQuadraticDatumStatement
-public import Development.WeilBound.CoreStatements.ThetaDilations.SqPosOfNe
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
 import Mathlib.Algebra.Order.Interval.Basic
@@ -57,6 +57,7 @@ import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Tactic.ReduceModChar
 import Mathlib.Topology.Sheaves.Init
+public import Development.WeilBound.CoreStatements.ThetaDilations.IsOpenCoset
 
 @[expose] public section
 
@@ -118,57 +119,6 @@ theorem good_ex [MeasurableSpace (A F)] [BorelSpace (A F)] {lf : Measure (A F)} 
       ∀ c : ℂ, 𝒟 (c • φ) τ = c * 𝒟 φ τ) (γ : SL(2, F)) :
     ∃ T, Impl ψ (hf F) (Bf B) (muF B lf) (Matrix.SpecialLinearGroup.map (algebraMap F (A F)) γ) T ∧
       ∀ φ τ, SB φ → (∀ w, 0 < (τ w).im) → wt M (mob ρ γ τ) * ‖𝒟 (T φ) (mob ρ γ τ)‖ = wt M τ * ‖𝒟 φ τ‖ := by
-  have H := GlobalTheory.T.weil_representation_quadratic_datum F lf hlf h1 ψ hψ ι B hQ.2.2.1 hQ.2.2.2.1
-  have hmob := GlobalTheory.T.mobius_action_upper_half_plane F ρ
-  set G : SL(2, F) → Prop := fun γ => ∃ T,
-    Impl ψ (hf F) (Bf B) (muF B lf) (Matrix.SpecialLinearGroup.map (algebraMap F (A F)) γ) T ∧
-      ∀ φ τ, SB φ → (∀ w, 0 < (τ w).im) → wt M (mob ρ γ τ) * ‖𝒟 (T φ) (mob ρ γ τ)‖ = wt M τ * ‖𝒟 φ τ‖ with hG
-  have gmul : ∀ g g', G g → G g' → G (g * g') := by
-    rintro g g' ⟨T, a1, a2⟩ ⟨T', b1, b2⟩
-    refine ⟨T ∘ T', by rw [map_mul]; exact impl_mul a1 b1, fun φ τ hφ hτ => ?_⟩
-    rw [(hmob τ hτ).2.1, ← b2 φ τ hφ hτ]
-    exact a2 _ _ (b1.1 φ hφ) fun w => ((hmob τ hτ).1 g' w).2
-  have gU : ∀ b, G (nMat b) := fun b => by
-    have e : Matrix.SpecialLinearGroup.map (algebraMap F (A F)) (nMat b) = nMat (algebraMap F (A F) b) := map_nMat _ _
-    refine ⟨_, e ▸ impl_U H _, fun φ τ hφ hτ => ?_⟩
-    rw [(hmob τ hτ).2.2.1, (hD φ τ hφ hτ).1]
-    simp [wt]
-  have gW : G wMat := by
-    have e : Matrix.SpecialLinearGroup.map (algebraMap F (A F)) wMat = wMat := map_wMat _
-    refine ⟨_, e ▸ impl_fou_chiB H, fun φ τ hφ hτ => ?_⟩
-    rw [(hmob τ hτ).2.2.2.2, ← (hD φ τ hφ hτ).2.2.1, norm_mul, (GlobalTheory.T.archimedean_gaussian_fourier F ι M B ρ P hQ τ hτ).2.1,
-      ← mul_assoc, wt, wt, ← Finset.prod_inv_distrib, ← Finset.prod_mul_distrib]
-    congr 1
-    refine Finset.prod_congr rfl fun w _ => ?_
-    rw [Complex.neg_im, Complex.inv_im, neg_div, neg_neg, Real.sqrt_div (hτ w).le, ← Complex.norm_def, div_pow,
-      div_eq_mul_inv]
-  have gD : ∀ a : Fˣ, G (mMat a) := fun a => by
-    have e : Matrix.SpecialLinearGroup.map (algebraMap F (A F)) (mMat a) = mMat (uA a) := map_mMat _ _
-    have hn : (0 : ℝ) < |((Algebra.norm ℚ (a : F) : ℚ) : ℝ)| :=
-      abs_pos.2 (by exact_mod_cast Algebra.norm_ne_zero_iff.2 a.ne_zero)
-    refine ⟨_, e ▸ impl_D H (uA a) (by positivity) (mod_rat hlf h1 hQ.2.1 B a), fun φ τ hφ hτ => ?_⟩
-    have e2 : opD (|((Algebra.norm ℚ (a : F) : ℚ) : ℝ)|⁻¹ ^ M) (uA a : A F) φ =
-        ((|((Algebra.norm ℚ (a : F) : ℚ) : ℝ)|⁻¹ ^ M : ℝ) : ℂ) • opD 1 (algebraMap F (A F) a) φ := by
-      funext u; simp [opD, uA]
-    have hτ' := fun w => ((hmob τ hτ).1 (mMat a) w).2
-    have hs : SB (opD 1 (algebraMap F (A F) a) φ) := sb_opD H 1 (uA a) hφ
-    rw [e2, (hD _ _ hs hτ').2.2.2, (hmob τ hτ).2.2.2.1, (hD φ τ hφ hτ).2.1 a a.ne_zero, norm_mul,
-      Complex.norm_real, Real.norm_of_nonneg (by positivity), ← mul_assoc]
-    congr 1
-    rw [inv_pow, ← div_eq_mul_inv, div_eq_iff (by positivity), ← prod_rho hQ.1 hQ.2.2.2.2.1, wt, wt,
-      ← Finset.prod_pow, ← Finset.prod_mul_distrib]
-    refine Finset.prod_congr rfl fun w _ => ?_
-    rw [← Complex.ofReal_pow, Complex.im_ofReal_mul, Real.sqrt_mul (sq_nonneg _), Real.sqrt_sq_eq_abs, mul_pow, mul_comm]
-  show G γ
-  obtain ⟨d1, -, d3, -⟩ := GlobalTheory.T.SL2_bruhat_decompositions_and_w_inv F γ
-  by_cases hc : γ 1 0 = 0
-  · have ha : γ 0 0 ≠ 0 := fun h0 => by
-      have := γ.det_coe
-      rw [Matrix.det_fin_two, h0, hc] at this
-      simp at this
-    rw [d3 (Units.mk0 _ ha) rfl hc]
-    exact gmul _ _ (gU _) (gD _)
-  · rw [d1 (Units.mk0 _ hc) rfl]
-    exact gmul _ _ (gmul _ _ (gmul _ _ (gU _) (gD _)) gW) (gU _)
+  apply _root_.CompanionTheory.PlacePermOperatorBicommutantSpan.good_ex <;> assumption
 
 end PositivityTheory.PlacePermOperatorBicommutantSpan

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsIsUnitIntegral
 public import Development.WeilBound.ThetaLifts.FrameEstimates.TowerRallisLemma
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -62,35 +63,7 @@ variable {A : Type*} [NormedRing A] [NormedAlgebra ℝ A] [CompleteSpace A]
 
 theorem exists_deriv {g : ℝ → A} (hc : Continuous g) (h0 : g 0 = 1) (ha : ∀ s t, g (s + t) = g s * g t) :
     ∃ Y : A, ∀ t, HasDerivAt g (g t * Y) t := by
-  let G : ℝ → A := fun t => ∫ s in (0 : ℝ)..t, g s
-  have hG : ∀ t, HasDerivAt G (g t) t := fun t => (hc.integral_hasStrictDerivAt 0 t).hasDerivAt
-  have hG0 : G 0 = 0 := intervalIntegral.integral_same
-  have h1 : Tendsto (slope G 0) (𝓝[≠] 0) (𝓝 1) := by
-    have := hasDerivAt_iff_tendsto_slope.1 (hG 0)
-    rwa [h0] at this
-  have h2 : ∀ᶠ h in 𝓝[≠] (0 : ℝ), IsUnit (slope G 0 h) := h1 (Units.isOpen.mem_nhds isUnit_one)
-  obtain ⟨h, hu, hne⟩ := (h2.and self_mem_nhdsWithin).exists
-  have hne' : h ≠ 0 := hne
-  obtain ⟨v, hv⟩ := hu.exists_right_inv
-  rw [slope_def_module, hG0, sub_zero, sub_zero] at hv
-  have hv' : G h * (h⁻¹ • v) = 1 := by rw [mul_smul_comm, ← smul_mul_assoc, hv]
-  set u := h⁻¹ • v
-  have key : ∀ t, g t * G h = G (t + h) - G t := by
-    intro t
-    have e1 : g t * G h = ∫ s in (0 : ℝ)..h, g (t + s) := by
-      simp only [ha]
-      exact ((ContinuousLinearMap.mul ℝ A (g t)).intervalIntegral_comp_comm (hc.intervalIntegrable 0 h)).symm
-    rw [e1, intervalIntegral.integral_comp_add_left, add_zero]
-    exact (intervalIntegral.integral_interval_sub_left (hc.intervalIntegrable _ _) (hc.intervalIntegrable _ _)).symm
-  have e : g = fun t => (G (t + h) - G t) * u := by
-    funext t
-    rw [← key, mul_assoc, hv', mul_one]
-  refine ⟨(g h - 1) * u, fun t => ?_⟩
-  have d := (((hG (t + h)).comp_add_const t h).sub (hG t)).mul_const u
-  have e2 : g t * ((g h - 1) * u) = (g (t + h) - g t) * u := by
-    rw [← mul_assoc, mul_sub, mul_one, ha]
-  rw [e2]
-  exact d.congr_of_eventuallyEq (Eventually.of_forall fun s => congrFun e s)
+  apply GlobalTheory.ExponentialIntegralUnits.exists_hasDerivAt <;> assumption
 
 theorem exists_exp {g : ℝ → A} (hc : Continuous g) (h0 : g 0 = 1) (ha : ∀ s t, g (s + t) = g s * g t) :
     ∃ Y : A, HasDerivAt g Y 0 ∧ ∀ t, g t = NormedSpace.exp (t • Y) := by

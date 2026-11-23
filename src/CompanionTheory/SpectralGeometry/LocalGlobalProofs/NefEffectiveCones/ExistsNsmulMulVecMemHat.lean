@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsNsmulMem
 public import Mathlib.NumberTheory.NumberField.Basic
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -76,29 +77,6 @@ variable {F E : Type} [Field F] [NumberField F] [Field E] [Algebra F E] {n : ℕ
 theorem exists_nsmul_mem_lattice [NumberField E] (L : Submodule (𝓞 E) (Fin n → E))
     (hL : Submodule.span E (L : Set (Fin n → E)) = ⊤) (x : Fin n → E) :
     ∃ m : ℕ, 0 < m ∧ m • x ∈ L := by
-  have hx : x ∈ Submodule.span E (L : Set (Fin n → E)) := hL ▸ Submodule.mem_top
-  induction hx using Submodule.span_induction with
-  | mem x hx => exact ⟨1, one_pos, by simpa using hx⟩
-  | zero => exact ⟨1, one_pos, by simp⟩
-  | add x y _ _ hx hy =>
-    obtain ⟨m, hm, hx⟩ := hx
-    obtain ⟨m', hm', hy⟩ := hy
-    refine ⟨m * m', mul_pos hm hm', ?_⟩
-    rw [smul_add]
-    refine add_mem ?_ ?_
-    · rw [mul_comm, mul_smul]; exact nsmul_mem hx _
-    · rw [mul_smul]; exact nsmul_mem hy _
-  | smul c x _ hx =>
-    obtain ⟨m, hm, hx⟩ := hx
-    obtain ⟨m', hm', r, hr⟩ := exists_nat_mul_integer E c
-    refine ⟨m * m', mul_pos hm hm', ?_⟩
-    have : (m * m') • c • x = r • (m • x) := by
-      funext i
-      change (m * m') • (c * x i) = (r : E) * (m • x i)
-      rw [hr, nsmul_eq_mul, nsmul_eq_mul]
-      push_cast
-      ring
-    rw [this]
-    exact L.smul_mem r hx
+  apply GlobalTheory.IntegralMultipleOfVectors.exists_nsmul_mem <;> assumption
 
 end GlobalTheory.CompanionTheory.HatBound

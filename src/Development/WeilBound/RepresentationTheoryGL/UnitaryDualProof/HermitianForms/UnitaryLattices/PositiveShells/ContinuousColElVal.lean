@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.TransversalSums.ContinuousBlkAtApply
 public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.HermitianForms.UnitaryLattices.DerKer
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -349,36 +350,7 @@ theorem colEl_mul_apply {m N : ℕ} (h : m + 2 ≤ N) (x : Fin (m + 1) → k) (M
 theorem conj_colEl (ψ : AddChar k Circle) {m N : ℕ} (h : m + 2 ≤ N) (x : Fin (m + 1) → k) (u : derUnip k N (m + 2)) :
     ∃ hu : colEl k m N h x * (u : GL (Fin N) k) * (colEl k m N h x)⁻¹ ∈ derUnip k N (m + 2),
       lvlChar k ψ N (m + 2) ⟨_, hu⟩ = lvlChar k ψ N (m + 2) u := by
-  obtain ⟨hu1, hu2⟩ := Subgroup.mem_inf.1 u.2
-  have hrow : ∀ M : Matrix (Fin N) (Fin N) k, ∀ i j : Fin N, m + 1 ≤ (i : ℕ) →
-      ((colEl k m N h x : Matrix (Fin N) (Fin N) k) * M) i j = M i j := by
-    intro M i j hi
-    exact row_one_mul _ _ _ _ fun l => by rw [colEl_val, dif_neg (by omega), add_zero]
-  have hcol : ∀ M : Matrix (Fin N) (Fin N) k, ∀ i j : Fin N, m + 2 ≤ (j : ℕ) →
-      (M * (((colEl k m N h x)⁻¹ : GL (Fin N) k) : Matrix (Fin N) (Fin N) k)) i j = M i j := by
-    intro M i j hj
-    exact col_mul_one _ _ _ _ fun l => by rw [colEl_inv, colEl_val, dif_neg (by omega), add_zero]
-  have hmem : colEl k m N h x * (u : GL (Fin N) k) * (colEl k m N h x)⁻¹ ∈ derUnip k N (m + 2) := by
-    refine Subgroup.mem_inf.2 ⟨Subgroup.mul_mem _ (Subgroup.mul_mem _ (colEl_mem_unipB h x) hu1)
-      (Subgroup.inv_mem _ (colEl_mem_unipB h x)), ?_⟩
-    show ∀ i : Fin N, (i : ℕ) < m + 2 → _
-    intro i hi
-    have hy : ∀ r : Fin N, m + 2 ≤ (r : ℕ) →
-        (((colEl k m N h x)⁻¹ : GL (Fin N) k) : Matrix (Fin N) (Fin N) k).mulVec (Pi.single i 1) r = 0 := by
-      intro r hr
-      rw [mulVec_single_apply, colEl_inv, colEl_val, one_apply_ne (fun e => by rw [e] at hr; omega),
-        dif_neg (by omega), add_zero]
-    rw [Units.val_mul, Units.val_mul, ← mulVec_mulVec, ← mulVec_mulVec, colFix_mulVec hu2 _ hy, mulVec_mulVec,
-      ← Units.val_mul, mul_inv_cancel, Units.val_one, one_mulVec]
-  refine ⟨hmem, ?_⟩
-  show Circle.toUnits (ψ (∑ p : Fin N × Fin N with (p.2 : ℕ) = p.1 + 1 ∧ m + 2 - 1 ≤ (p.1 : ℕ),
-      (colEl k m N h x * (u : GL (Fin N) k) * (colEl k m N h x)⁻¹ : GL (Fin N) k).val p.1 p.2)) =
-    Circle.toUnits (ψ (∑ p : Fin N × Fin N with (p.2 : ℕ) = p.1 + 1 ∧ m + 2 - 1 ≤ (p.1 : ℕ),
-      (u : GL (Fin N) k).val p.1 p.2))
-  congr 2
-  refine Finset.sum_congr rfl fun p hp => ?_
-  obtain ⟨h1, h2⟩ := (Finset.mem_filter.1 hp).2
-  rw [Units.val_mul, Units.val_mul, hcol _ _ _ (by omega), hrow _ _ _ (by omega)]
+  apply PositivityTheory.RgUd.Form.ColumnElementGluing.Glue.colEl_conj_derUnip' <;> assumption
 
 theorem colEl_twKer (ψ : AddChar k Circle) {m N : ℕ} (h : m + 2 ≤ N) {V : Type} [AddCommGroup V] [Module ℂ V]
     (π : Representation ℂ (GL (Fin N) k) V) (x : Fin (m + 1) → k) {v : V}

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AlgebraicDirectionScaledEmbedding
 public import Mathlib.NumberTheory.NumberField.Basic
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -70,36 +71,6 @@ theorem main : ∀ {E : Type} [inst : Field E] [NumberField E] {r : ℕ}
     (Λ : Submodule (NumberField.RingOfIntegers E) (Fin r → E)),
     Submodule.span E (↑Λ : Set (Fin r → E)) = ⊤ →
     ∀ (w : Fin r → E), ∃ (k : ℕ), (0 : ℕ) < k ∧ (↑k : E) • w ∈ Λ := by
-  intro E _ _ r Λ hspan w
-  have hw : w ∈ Submodule.span E (↑Λ : Set (Fin r → E)) := by rw [hspan]; trivial
-
-  have hnat : ∀ (n : ℕ) (v : Fin r → E), v ∈ Λ → (n : E) • v ∈ Λ := by
-    intro n v hv
-    rw [Nat.cast_smul_eq_nsmul]
-    exact Λ.nsmul_mem hv n
-  induction hw using Submodule.span_induction with
-  | mem x hx => exact ⟨1, one_pos, by simpa using hx⟩
-  | zero => exact ⟨1, one_pos, by simp⟩
-  | add x y _ _ hx hy =>
-    obtain ⟨k₁, hk₁, h₁⟩ := hx
-    obtain ⟨k₂, hk₂, h₂⟩ := hy
-    refine ⟨k₁ * k₂, Nat.mul_pos hk₁ hk₂, ?_⟩
-    have e : ((k₁ * k₂ : ℕ) : E) • (x + y) = (k₂ : E) • ((k₁ : E) • x) + (k₁ : E) • ((k₂ : E) • y) := by
-      rw [smul_add, smul_smul, smul_smul]; push_cast; ring_nf
-    rw [e]
-    exact Λ.add_mem (hnat _ _ h₁) (hnat _ _ h₂)
-  | smul a x _ hx =>
-    obtain ⟨k, hk, h⟩ := hx
-    obtain ⟨d, hd, hint⟩ := exists_nat_mul_integral a
-    refine ⟨d * k, Nat.mul_pos hd hk, ?_⟩
-    let c : NumberField.RingOfIntegers E := ⟨(d : E) * a, hint⟩
-    have e : ((d * k : ℕ) : E) • (a • x) = c • ((k : E) • x) := by
-      funext i
-      simp only [Pi.smul_apply, smul_eq_mul]
-      rw [Algebra.smul_def]
-      change _ = ((d : E) * a) * _
-      push_cast; ring
-    rw [e]
-    exact Λ.smul_mem c h
+  apply GlobalTheory.AlgDirMom.exists_nat_smul_mem <;> assumption
 
 end GlobalTheory.NatMulIntegralExists

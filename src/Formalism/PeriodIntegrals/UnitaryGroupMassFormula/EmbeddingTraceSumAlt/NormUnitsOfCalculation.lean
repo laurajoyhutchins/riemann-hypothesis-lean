@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StandardCharacterTrace.SumEmbeddingEqTrace
 public import Formalism.PeriodIntegrals.ScPsiExists
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -60,24 +61,7 @@ namespace PI.ScPsiExists.UnitaryGroupMassFormula
 
 theorem sum_embedding_eq_trace (F : Type) [Field F] [NumberField F] [IsTotallyReal F] (y : F) :
     ∑ v : InfinitePlace F, v.embedding y = algebraMap ℚ ℂ (Algebra.trace ℚ F y) := by
-  rw [trace_eq_sum_embeddings (E := ℂ)]
-  refine Fintype.sum_bijective (fun v : InfinitePlace F => v.embedding.toRatAlgHom) ⟨?_, ?_⟩ _ _ ?_
-  · intro v w h
-    have h' : v.embedding = w.embedding := by
-      have := congrArg AlgHom.toRingHom h
-      simpa [RingHom.toRatAlgHom_toRingHom] using this
-    rw [← InfinitePlace.mk_embedding v, ← InfinitePlace.mk_embedding w, h']
-  · intro σ
-    refine ⟨InfinitePlace.mk (σ : F →+* ℂ), ?_⟩
-    have hr : ComplexEmbedding.IsReal (σ : F →+* ℂ) :=
-      InfinitePlace.isReal_mk_iff.mp (IsTotallyReal.isReal _)
-    apply AlgHom.ext
-    intro x
-    show (InfinitePlace.mk (σ : F →+* ℂ)).embedding x = σ x
-    rw [InfinitePlace.embedding_mk_eq_of_isReal hr]
-    rfl
-  · intro v
-    simp
+  apply PI.StdCharTRWork.sum_embedding_eq_trace <;> assumption
 
 theorem sum_embedding_int (F : Type) [Field F] [NumberField F] [IsTotallyReal F] (c : 𝓞 F) :
     ∃ n : ℤ, ∑ v : InfinitePlace F, v.embedding (algebraMap (𝓞 F) F c) = (n : ℂ) := by

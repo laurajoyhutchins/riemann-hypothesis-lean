@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.AnalyticAtMobiusDetJacobianEq
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ContDiffAtFrameEntry
 public import ReciprocityTheory.AnalyticForms.PlurisubharmonicFunctions.LintegralImageEqLintegralNormSqDetMul
 import Mathlib.Algebra.Order.Floor.Extended
@@ -66,23 +67,7 @@ theorem det_eq_mul_minor_of_col_zero {n : ℕ} (J : Matrix (Fin (n + 1)) (Fin (n
 
 theorem hasDerivAt_mob_line (G : Matrix (Fin 2) (Fin 2) ℂ) (a : ℂ) (h : den G a ≠ 0) :
     HasDerivAt (fun t : ℂ => mob G (a + t)) (mobD G a) 0 := by
-  have hl : HasDerivAt (fun t : ℂ => a + t) 1 0 := by
-    simpa using (hasDerivAt_id (0 : ℂ)).const_add a
-  have hn : HasDerivAt (fun t : ℂ => G 1 0 + G 1 1 * (a + t)) (G 1 1) 0 := by
-    simpa using (hl.const_mul (G 1 1)).const_add (G 1 0)
-  have hd : HasDerivAt (fun t : ℂ => den G (a + t)) (G 0 1) 0 := by
-    simpa [den] using (hl.const_mul (G 0 1)).const_add (G 0 0)
-  have h0 : den G (a + 0) ≠ 0 := by simpa using h
-  have key := hn.div hd h0
-  have e : mobD G a = (G 1 1 * den G (a + 0) - (G 1 0 + G 1 1 * (a + 0)) * G 0 1) / den G (a + 0) ^ 2 := by
-    simp only [add_zero]
-    unfold mobD
-    rw [Matrix.det_fin_two]
-    congr 1
-    unfold den
-    ring
-  rw [e]
-  exact key
+  apply GlobalTheory.CompanionTheory.Ar.PB.FibPt.hasDerivAt_mob_shift <;> assumption
 
 theorem jacC_apply_of_line {D E : ℕ} (F : (Fin D → ℂ) → Fin E → ℂ) (z : Fin D → ℂ)
     (hF : DifferentiableAt ℂ F z) (a : Fin E) (k : Fin D) (c : ℂ)

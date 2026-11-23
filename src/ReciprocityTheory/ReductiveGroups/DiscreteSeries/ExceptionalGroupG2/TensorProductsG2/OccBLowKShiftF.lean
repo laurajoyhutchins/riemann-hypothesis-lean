@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.OccBLowKShiftF
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.HidaSetting
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.StdGap
 public import Mathlib.Analysis.InnerProductSpace.Positive
@@ -121,14 +122,7 @@ theorem occB_pairing_ne (dual : Bool) (hP : IsPsiFor ε lam T Ψ) (hP' : IsPsiFo
     ∃ (ξ ζ : Fin n → T.V) (v' : T'.V), ∫ g : Formalism.REAL.UJ ε,
       starRingEnd ℂ (occPsiCoef dual Ψ ξ ζ (Formalism.MainNotions.S.umat g)) * inner ℂ v₀' (Ψ' (Formalism.MainNotions.S.umat g) v')
         ∂(Formalism.REAL.muG ε) ≠ 0 := by
-  have hΛ : lowK ε lam' = cond dual (lowK ε lam - Pi.single s 1) (lowK ε lam + Pi.single s 1) := by
-    rw [hlam']; exact occB_lowK_shiftF dual ε lam s
-  obtain ⟨ι₀, hι₀, hK⟩ := occB_pieri dual T T' s hΛ
-  by_contra hne
-  push Not at hne
-  have hall := occB_spread dual hP hP' hv₀' hWT hne
-  have hpos0 := occB_trace_pos dual hP hP' hpos hpos' hWT ι₀ hι₀ hK
-  simp only [hall, Finset.sum_const_zero, Complex.zero_re, lt_self_iff_false] at hpos0
+  apply ReciprocityTheory.ChartRestriction.DS.occB_pairing_ne <;> assumption
 
 end Psi
 

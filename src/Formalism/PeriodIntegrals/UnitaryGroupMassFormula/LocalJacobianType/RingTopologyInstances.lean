@@ -67,7 +67,6 @@ theorem oev_one : (1 : Fv F v ⊗[F] E) ∈ OEv (E := E) v := by
   refine ⟨1, Set.mem_univ _, ?_⟩
   first
     | exact map_one _
-    | simp
 
 theorem sc_mul (t : Fv F v) (x : Fv F v ⊗[F] E) : sc (E := E) v t * x = t • x := by
   induction x using TensorProduct.induction_on with
@@ -89,7 +88,6 @@ theorem oev_mul {x y : Fv F v ⊗[F] E} (hx : x ∈ OEv (E := E) v) (hy : y ∈ 
       refine ⟨a' * b', Set.mem_univ _, ?_⟩
       first
         | exact map_mul _ _ _
-        | simp
     | zero => simp
     | add y z _ _ hy hz =>
       rw [mul_add]
@@ -97,7 +95,6 @@ theorem oev_mul {x y : Fv F v ⊗[F] E} (hx : x ∈ OEv (E := E) v) (hy : y ∈ 
     | smul c y _ hy =>
       first
         | rw [mul_smul_comm]
-        | rw [← algebraMap_smul (Fv F v) c y, mul_smul_comm, algebraMap_smul]
       exact Submodule.smul_mem _ c hy
   | zero => simp
   | add x z _ _ hx hz =>
@@ -106,7 +103,6 @@ theorem oev_mul {x y : Fv F v ⊗[F] E} (hx : x ∈ OEv (E := E) v) (hy : y ∈ 
   | smul c x _ hx =>
     first
       | rw [smul_mul_assoc]
-      | rw [← algebraMap_smul (Fv F v) c x, smul_mul_assoc, algebraMap_smul]
     exact Submodule.smul_mem _ c hx
 
 theorem sigR_smul (σ : E →ₐ[F] E) (c : Fv F v) (x : Fv F v ⊗[F] E) :
@@ -120,10 +116,6 @@ private theorem sigR_smulO_lemma (σ : E →ₐ[F] E) (c : v.adicCompletionInteg
     (x : Fv F v ⊗[F] E) : sigR (Fv F v) σ (c • x) = c • sigR (Fv F v) σ x := by
   first
     | rw [← algebraMap_smul (Fv F v) c x, sigR_smul, algebraMap_smul]
-    | (induction x using TensorProduct.induction_on with
-        | zero => simp
-        | tmul a b => simp [sigR, TensorProduct.smul_tmul']
-        | add y z hy hz => simp only [smul_add, map_add (f := _), hy, hz])
 
 theorem oev_sigR (σ : E →ₐ[F] E) {x : Fv F v ⊗[F] E} (hx : x ∈ OEv (E := E) v) :
     sigR (Fv F v) σ x ∈ OEv (E := E) v := by
@@ -135,8 +127,6 @@ theorem oev_sigR (σ : E →ₐ[F] E) {x : Fv F v ⊗[F] E} (hx : x ∈ OEv (E :
     apply Submodule.subset_span
     first
       | exact ⟨NumberField.RingOfIntegers.mapRingHom (σ : E →+* E) a', Set.mem_univ _,
-          by simp [sigR, inclR]⟩
-      | exact ⟨⟨σ a', (a'.isIntegral_coe.map (σ : E →+* E).toIntAlgHom)⟩, Set.mem_univ _,
           by simp [sigR, inclR]⟩
   | zero => simp
   | add x y _ _ hx hy =>

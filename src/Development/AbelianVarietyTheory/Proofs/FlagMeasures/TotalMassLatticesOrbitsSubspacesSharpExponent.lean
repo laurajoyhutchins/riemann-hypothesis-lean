@@ -128,12 +128,6 @@ theorem count_sets (K : Type) [Field K] [NumberField K] (d : ℕ) : 1 ≤ d →
       have hq : qIn P ∣ d := hprod ▸ Finset.dvd_prod_of_mem (fun P => qIn P) hP
       obtain ⟨a, b, -⟩ := hlt _ h2 hq
       have hmem : ((Nat.minFac d : ℕ) : 𝓞 K) ∈ P := by
-        have hP0 : P ≠ ⊥ := by
-          intro h0
-          have : Ideal.absNorm P = 0 := by rw [h0, Ideal.absNorm_bot]
-          rw [hN] at this
-          have := pow_eq_zero_iff (two_ne_zero) |>.1 this
-          omega
         have hdv : Nat.minFac d ∣ Ideal.absNorm P := hN ▸ hpP.trans (dvd_pow_self _ two_ne_zero)
         obtain ⟨Q, hQ, hQu, hQP⟩ := Ideal.exists_isMaximal_dvd_of_dvd_absNorm' hp P hdv
         rw [hmax.eq_of_le hQ.ne_top (Ideal.le_of_dvd hQP)]
@@ -237,7 +231,6 @@ theorem real_eq (d i j : ℕ) (L c : ℝ) (hd : d ≠ 0) (hi : i ≠ 0) :
     congr 1
     push_cast
     ring
-  have hdL : (0 : ℝ) < (d : ℝ) ^ L := by positivity
   rw [e, Real.rpow_add hi', Real.rpow_natCast]
   push_cast
   rw [Real.mul_rpow hd'.le hi'.le]
@@ -335,7 +328,6 @@ theorem main : MaxMass → ∀ (K V : Type) [Field K] [NumberField K] [StarRing 
       rw [hge]
       simp
   · set B : ℝ := mass h₁ I₁ * (de : ℝ) ^ j * (de : ℝ) ^ L with hB
-    have hB0 : 0 ≤ B := by positivity
     have key : ∀ p ∈ A.filter fun I => ∃ U, Q I U,
         orbMass (isom (hRes h (f p))) (latsDisc (R := 𝓞 K) (hRes h (f p)) (de ^ 2)) ≤
           ENNReal.ofReal (B / (p.1 : ℝ) ^ L) := by
@@ -363,9 +355,6 @@ theorem main : MaxMass → ∀ (K V : Type) [Field K] [NumberField K] [StarRing 
           calc _ ≤ ∑ _d ∈ Finset.Icc 1 de, B := by
                 refine Finset.sum_le_sum fun d hd => ?_
                 have hd1 := (Finset.mem_Icc.1 hd).1
-                have hpos : (0 : ℝ) < (d : ℝ) ^ L := by
-                  have : (0 : ℝ) < d := by exact_mod_cast hd1
-                  positivity
                 change ∑ _S ∈ T d, B / (d : ℝ) ^ L ≤ B
                 rw [Finset.sum_const, nsmul_eq_mul]
                 calc _ ≤ (d : ℝ) ^ L * (B / (d : ℝ) ^ L) :=

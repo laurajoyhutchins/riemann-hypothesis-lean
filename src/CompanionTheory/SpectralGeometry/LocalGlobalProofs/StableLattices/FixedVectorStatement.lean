@@ -65,7 +65,6 @@ theorem exists_least_norm_unique {E : Type*} [NormedAddCommGroup E] [InnerProduc
     ring
   have h2 : ‖w - u‖ ^ 2 = ‖w‖ ^ 2 - 2 * inner ℝ w u + ‖u‖ ^ 2 := norm_sub_sq_real w u
   have h4 : inner ℝ w u ≤ ‖w‖ * ‖u‖ := real_inner_le_norm w u
-  have h5 : ‖u‖ ^ 2 ≤ ‖w‖ * ‖u‖ := by linarith
   constructor
   · rcases (norm_nonneg u).eq_or_lt with h0 | h0
     · rw [← h0]; exact norm_nonneg w
@@ -74,7 +73,6 @@ theorem exists_least_norm_unique {E : Type*} [NormedAddCommGroup E] [InnerProduc
     have h6 : ‖w‖ ^ 2 ≤ ‖u‖ ^ 2 := by
       have := norm_nonneg w
       nlinarith
-    have h7 : ‖w - u‖ ^ 2 ≤ 0 := by nlinarith
     have h8 : ‖w - u‖ = 0 := by
       have := norm_nonneg (w - u)
       nlinarith

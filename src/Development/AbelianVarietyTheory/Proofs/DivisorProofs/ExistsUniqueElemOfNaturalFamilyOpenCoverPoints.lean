@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.NatFamilyExistsUnique
 public import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsDatNeZero
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -105,47 +106,6 @@ theorem existsUnique_of_natural : ∀ (R : Type) [CommRing R] (X : Over (Sp R)) 
       (θ : E →ₐ[R] E'), Sm W (D := E) (spOver ψ ≫ y) → τ E' (θ.comp ψ) = θ (τ E ψ)) →
     ∃! d : D, ∀ (E : Type) [CommRing E] [Algebra R E] (ψ : D →ₐ[R] E),
       Sm W (D := E) (spOver ψ ≫ y) → τ E ψ = ψ d := by
-  intro R _ X K W hW D _ _ y τ hτ
-
-  let S : Set D := {s | ∃ i, ∀ p : PrimeSpectrum D, p ∈ PrimeSpectrum.basicOpen s → y.left.base p ∈ W i}
-  have hS : Ideal.span S = ⊤ := by
-    rw [← PrimeSpectrum.iSup_basicOpen_eq_top_iff', eq_top_iff]
-    intro p _
-    have hp : y.left.base p ∈ ⨆ i, W i := by rw [hW]; trivial
-    obtain ⟨i, hi⟩ := TopologicalSpace.Opens.mem_iSup.mp hp
-    obtain ⟨_, ⟨s, rfl⟩, hps, hsub⟩ :=
-      PrimeSpectrum.isTopologicalBasis_basic_opens.exists_subset_of_mem_open
-        (a := p) (u := (y.left ⁻¹ᵁ W i).carrier) hi (y.left ⁻¹ᵁ W i).isOpen
-    simp only [TopologicalSpace.Opens.mem_iSup]
-    exact ⟨s, ⟨i, fun q hq ↦ hsub hq⟩, hps⟩
-  have hψ : ∀ s ∈ S, Sm W (D := Localization.Away s) (spOver (locMap R s) ≫ y) := by
-    rintro s ⟨i, hi⟩
-    refine ⟨i, fun q _ ↦ hi _ ?_⟩
-    show PrimeSpectrum.comap (algebraMap D (Localization.Away s)) q ∈ PrimeSpectrum.basicOpen s
-    rw [PrimeSpectrum.mem_basicOpen]
-    intro h
-    exact q.isPrime.ne_top (Ideal.eq_top_of_isUnit_mem _ h (IsLocalization.Away.algebraMap_isUnit s))
-  have hcomp : ∀ a b : S,
-      IsLocalization.Away.awayToAwayRight (P := Localization.Away (a.1 * b.1)) a.1 b.1 (τ (Localization.Away a.1) (locMap R a.1)) =
-      IsLocalization.Away.awayToAwayLeft (P := Localization.Away (a.1 * b.1)) b.1 a.1 (τ (Localization.Away b.1) (locMap R b.1)) := by
-    intro a b
-    have h1 := hτ _ _ (locMap R a.1) (locR R a.1 b.1) (hψ a.1 a.2)
-    have h2 := hτ _ _ (locMap R b.1) (locL R a.1 b.1) (hψ b.1 b.2)
-    rw [locR_comp] at h1
-    rw [locL_comp] at h2
-    rw [← locR_apply R, ← locL_apply R, ← h1, ← h2]
-  obtain ⟨d, hd, hu⟩ := Localization.existsUnique_algebraMap_eq_of_span_eq_top S hS
-    (fun a ↦ τ (Localization.Away a.1) (locMap R a.1)) hcomp
-  refine ⟨d, ?_, fun d' hd' ↦ hu d' fun a ↦ (hd' _ (locMap R a.1) (hψ a.1 a.2)).symm⟩
-  intro E _ _ φ hφ
-  have hS' : Ideal.span ((φ : D →+* E) '' S) = ⊤ := by
-    rw [← Ideal.map_span, hS, Ideal.map_top]
-  apply Localization.algebraMap_injective_of_span_eq_top _ hS'
-  funext b
-  obtain ⟨b, s, hs, rfl⟩ := b
-  have h1 := hτ _ _ φ (IsScalarTower.toAlgHom R E (Localization.Away (φ s))) hφ
-  have h2 := hτ _ _ (locMap R s) (Localization.awayMapₐ φ s) (hψ s hs)
-  rw [awayMap_comp, h2, ← hd ⟨s, hs⟩, ← locMap_apply R, ← AlgHom.comp_apply, ← awayMap_comp] at h1
-  exact h1.symm
+  apply GlobalTheory.PtExt.natFamily_existsUnique <;> assumption
 
 end GlobalTheory.PtExt.NatGlue

@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.TwoNeZeroV
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.OBas1OfUnitV
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalUnitaryOrbits.OrbAllOfNorm
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerOrbitVolume.LocDensCntRes
@@ -157,39 +158,7 @@ theorem int_of_sc {r : Fv F v} (h : sc (E := E) v r ∈ OEv (E := E) v) : r ∈ 
 
 theorem fix_sc (hcm : IsCMExt F E σ) (s : Fv F v ⊗[F] E) (hs : sigR (Fv F v) σ s = s) :
     ∃ r : Fv F v, s = sc (E := E) v r := by
-  have key : ∀ t : Fv F v ⊗[F] E, ∃ r : Fv F v, t + sigR (Fv F v) σ t = sc (E := E) v r := by
-    intro t
-    induction t using TensorProduct.induction_on with
-    | zero => exact ⟨0, by simp [sc]⟩
-    | tmul a e =>
-      have hfix : σ (e + σ e) = e + σ e := by
-        rw [map_add (f := _), PI.OmLocU.Orb.sigma_invol σ hcm, add_comm]
-      obtain ⟨c, hc⟩ := gr_fix_range σ hcm hfix
-      refine ⟨c • a, ?_⟩
-      have hs1 : sigR (Fv F v) σ (a ⊗ₜ[F] e) = a ⊗ₜ[F] σ e := by
-        simp [sigR, Algebra.TensorProduct.map_tmul]
-      rw [hs1, ← TensorProduct.tmul_add, ← hc, Algebra.algebraMap_eq_smul_one, TensorProduct.tmul_smul,
-        TensorProduct.smul_tmul']
-      rfl
-    | add x y hx hy =>
-      obtain ⟨rx, hx⟩ := hx
-      obtain ⟨ry, hy⟩ := hy
-      refine ⟨rx + ry, ?_⟩
-      rw [map_add (f := _), show x + y + (sigR (Fv F v) σ x + sigR (Fv F v) σ y) =
-        (x + sigR (Fv F v) σ x) + (y + sigR (Fv F v) σ y) by abel, hx, hy]
-      simp [sc, TensorProduct.add_tmul]
-  obtain ⟨r, hr⟩ := key s
-  have h2 : (2 : Fv F v) ≠ 0 := by
-    intro h
-    apply two_ne_zero (α := F)
-    apply (algebraMap F (Fv F v)).injective
-    rw [map_ofNat, map_zero]
-    exact h
-  refine ⟨(1 / 2 : Fv F v) * r, ?_⟩
-  have e : sc (E := E) v ((1 / 2 : Fv F v) * r) = (1 / 2 : Fv F v) • sc (E := E) v r := by
-    simp only [sc]
-    rw [TensorProduct.smul_tmul', smul_eq_mul]
-  rw [e, ← hr, hs, ← two_smul (Fv F v) s, smul_smul, one_div, inv_mul_cancel₀ h2, one_smul]
+  apply PI.OmLocU.UnN.fix_sc <;> assumption
 
 theorem fix_int_sc (hcm : IsCMExt F E σ) {s : Fv F v ⊗[F] E} (hs0 : s ∈ OEv (E := E) v)
     (hs : sigR (Fv F v) σ s = s) : ∃ r ∈ v.adicCompletionIntegers F, s = sc (E := E) v r := by

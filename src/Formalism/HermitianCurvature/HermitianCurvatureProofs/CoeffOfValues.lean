@@ -91,15 +91,6 @@ theorem poly_integral (μ : Measure X) (d : ℕ) (I : ℝ → X → E) (T : X �
   set C : Fin (d + 1) → X → E := fun n x => ∑ m, W n m • I ((m : ℕ) : ℝ) x with hC
   have hCint : ∀ n, Integrable (C n) μ := fun n =>
     integrable_finsetSum _ fun m _ => (hI _).smul (W n m)
-  have hCeq : ∀ n, ∫ x, C n x ∂μ = ∑ m, W n m • ∫ x, I ((m : ℕ) : ℝ) x ∂μ := by
-    intro n
-    show ∫ x, ∑ m, W n m • I ((m : ℕ) : ℝ) x ∂μ = _
-    have := integral_finsetSum (μ := μ) Finset.univ (f := fun m x => W n m • I ((m : ℕ) : ℝ) x)
-      (fun m _ => (hI _).smul (W n m))
-    rw [this]
-    apply Finset.sum_congr rfl
-    intro m _
-    rw [integral_smul]
 
   have hae : ∀ᵐ x ∂μ, (∀ y : ℝ, I y x = ∑ n : Fin (d + 1), ((y : ℂ) ^ (n : ℕ)) • C n x) ∧ C (Fin.last d) x = T x := by
     filter_upwards [hP] with x ⟨c, hc, hcx⟩

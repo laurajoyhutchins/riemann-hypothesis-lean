@@ -84,7 +84,6 @@ theorem isotropicNormalFormFull_statement : IsotropicNormalFormFull := by
   have hVs : ∀ (b : Fin m) (q : Fin (2 * (m + 1) + k + 1)), m + 1 + k < q.val →
       Vc b q = if (NFOne.sg k (m + 1) q).val = (i.succAbove b).val then 1 else 0 := by
     intro b q hq
-    have hqv := q.isLt
     simp only [Vc, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
     by_cases hqi : (NFOne.sg k (m + 1) q).val = i.val
     · have hq' : q = esI k (m + 1) i := by ext; rw [sg_val'] at hqi; simp [esI]; omega
@@ -162,7 +161,6 @@ theorem isotropicNormalFormFull_statement : IsotropicNormalFormFull := by
   have hpres := herm_unitary n1 hn1.1
   have u_star : ∀ p : Fin (2 * (m + 1) + k + 1), m + 1 + k < p.val → u p = 0 := by
     intro p hp
-    have hpv := p.isLt
     have hpe : p = esI k (m + 1) ⟨2 * (m + 1) + k - p.val, by omega⟩ := by ext; simp [esI]; omega
     have e := herm_bvec_eI (k := k) u (⟨2 * (m + 1) + k - p.val, by omega⟩ : Fin (m + 1))
     rw [hpe, ← e, ← hpres, hnu, hn1.2.1, herm_bvec_eI]
@@ -322,7 +320,6 @@ theorem isotropicNormalFormFull_statement : IsotropicNormalFormFull := by
     simp only [ystar, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, bvec, Pi.single_apply]
     by_cases hp : m + 1 + k < p.val
     · rw [if_pos hp]
-      have hpv := p.isLt
       by_cases hpi : (NFOne.sg k (m + 1) p).val = i.val
       · have hpe : p = esI k (m + 1) i := by ext; rw [sg_val'] at hpi; simp [esI]; omega
         rw [hpe, hyi _ (Fin.succAbove_ne i a'')]

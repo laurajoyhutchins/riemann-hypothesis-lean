@@ -1,5 +1,6 @@
 module
 
+import CompanionTheory.AutomorphicTheory.JacobiDiagonalBounds.NFModel
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SquareIntegrableGammaZetabarInv
 public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
 public import Mathlib.CategoryTheory.Category.Basic
@@ -7579,21 +7580,7 @@ variable {P L} (hTT : 0 ≤ P.TT) (hL : IsModelLevel P (DQ P) L)
 include hL
 
 theorem fns_sc : ∀ x ∈ L.fns, ∃ w, x = sc P (DQ P) w := by
-  obtain ⟨hp, hpb, hc, hci, hcb, hcbi, hz, hzi, hzb, hzbi, hg, hgi, hn, hns, -⟩ := hL
-  intro x hx
-  simp only [LevelData.fns, Set.mem_union, Set.mem_range, Set.mem_insert_iff, Set.mem_singleton_iff] at hx
-  rcases hx with ((((⟨l, rfl⟩ | ⟨l, rfl⟩) | ⟨l, rfl⟩) | ⟨l, rfl⟩) | h)
-  · exact ⟨(DQ P).cP l, by rw [hc]; rfl⟩
-  · exact ⟨(DQ P).ciP l, by rw [hci]; rfl⟩
-  · exact ⟨(DQ P).cbP l, by rw [hcb]; rfl⟩
-  · exact ⟨(DQ P).cbiP l, by rw [hcbi]; rfl⟩
-  · rcases h with rfl | rfl | rfl | rfl | rfl | rfl
-    · exact ⟨(DQ P).zP, by rw [hz]; rfl⟩
-    · exact ⟨(DQ P).ziP, by rw [hzi]; rfl⟩
-    · exact ⟨(DQ P).zbP, by rw [hzb]; rfl⟩
-    · exact ⟨(DQ P).zbiP, by rw [hzbi]; rfl⟩
-    · exact ⟨(DQ P).ggP P.TT, by rw [hg]; rfl⟩
-    · exact ⟨(DQ P).ggiP P.TT, by rw [hgi]; rfl⟩
+  apply Formalism.FourierDecayAlt.P.NormalFormRelations.fns_sc <;> assumption
 
 theorem kap_letters (f : M.Ty P → ℂ) (y : ℂ) :
     la L y * kap P (DQ P) f = kap P (DQ P) f * la L y ∧ lb L y * kap P (DQ P) f = kap P (DQ P) f * lb L y := by

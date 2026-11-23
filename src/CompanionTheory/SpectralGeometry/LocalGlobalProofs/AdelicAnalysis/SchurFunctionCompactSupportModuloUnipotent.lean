@@ -98,7 +98,6 @@ lemma continuous_ker (b : ℝ) : Continuous (ker b : V → ℝ) := by
 lemma ker_le {b : ℝ} (hb : 0 < b) (w : V) :
     ker b w ≤ (Real.pi / b) ^ ((Module.finrank ℝ V : ℝ) / 2) := by
   unfold ker
-  have hp := Real.pi_pos
   refine mul_le_of_le_one_right (by positivity) ?_
   rw [Real.exp_le_one_iff]
   have : 0 ≤ Real.pi ^ 2 / b * ‖w‖ ^ 2 := by positivity
@@ -113,11 +112,9 @@ lemma integrable_gauss {b : ℝ} (hb : 0 < b) :
   simp [Complex.norm_exp, ← Complex.ofReal_pow]
 
 lemma integrable_ker {b : ℝ} (hb : 0 < b) : Integrable (ker b : V → ℝ) volume := by
-  have hp := Real.pi_pos
   exact (integrable_gauss (V := V) (b := Real.pi ^ 2 / b) (by positivity)).const_mul _
 
 lemma integral_ker {b : ℝ} (hb : 0 < b) : ∫ w : V, ker b w = 1 := by
-  have hp := Real.pi_pos
   unfold ker
   rw [integral_const_mul, GaussianFourier.integral_rexp_neg_mul_sq_norm (by positivity),
     ← Real.mul_rpow (by positivity) (by positivity)]
@@ -128,7 +125,6 @@ lemma integral_ker {b : ℝ} (hb : 0 < b) : ∫ w : V, ker b w = 1 := by
 lemma gauss_inner {b : ℝ} (hb : 0 < b) (u : V) :
     ∫ x : V, Complex.exp (-(b : ℂ) * (‖x‖ : ℂ) ^ 2 +
       (2 * (Real.pi : ℂ) * Complex.I) * ((inner ℝ u x : ℝ) : ℂ)) = (ker b u : ℂ) := by
-  have hp := Real.pi_pos
   rw [GaussianFourier.integral_cexp_neg_mul_sq_norm_add (by simpa using hb)]
   unfold ker
   push_cast

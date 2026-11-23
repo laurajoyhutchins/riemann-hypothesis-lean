@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.IdempotentEmbeddingsCard
 public import Mathlib.NumberTheory.NumberField.Basic
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.PlaceDivisors.StAvDefs
 import Mathlib.Algebra.AffineMonoid.Basic
@@ -154,48 +155,4 @@ open UpperTheory.TraceSumEquivalence in
 theorem UpperTheory.trace_form_decomposition_CMDatum :
     ∀ (E : Type) [Field E] [NumberField E] (p : ℕ) [Fact p.Prime] (C : Type) [Field C] [IsAlgClosed C] [CharZero C] (v : Valuation C NNReal) (O : Type) [CommRing O] [Algebra O C], v.Integers O → ∀ [Algebra ℤ_[p] O] (e : ℤ_[p] ⊗[ℤ] 𝓞 E), e * e = e →
       Nonempty (Fin (Module.finrank ℤ_[p] (LinearMap.range (LinearMap.mulLeft ℤ_[p] e))) ≃ Emb (O := O) e) ∧ Nat.card (𝓞 E →+* O) = Module.finrank ℚ E := by
-  intro E _ _ p _ C _ _ _ v O _ _ hv _ e he
-  classical
-  obtain ⟨Φ, hΦ⟩ := UpperTheory.TraceSumEquivalence.exists_equiv E C v O hv
-  have hcard : Nat.card (𝓞 E →+* O) = Module.finrank ℚ E := by
-    rw [← Nat.card_congr Φ, Nat.card_eq_fintype_card, AlgHom.card]
-  refine ⟨?_, hcard⟩
-  haveI : IsDomain O := hv.hom_inj.isDomain _
-  let f := LinearMap.mulLeft ℤ_[p] e
-  have hf : IsIdempotentElem f := by
-    show f * f = f
-    ext z
-    simp [f, ← mul_assoc, he]
-  have htr : LinearMap.trace ℤ_[p] _ f = (Module.finrank ℤ_[p] (LinearMap.range f) : ℤ_[p]) :=
-    ((LinearMap.isProj_range_iff_isIdempotentElem f).mpr hf).trace
-  have hsum := UpperTheory.TraceSumEquivalence.trace_eq_sum E p C O Φ hΦ e
-  have hval : ∀ σ, algebraMap O C (tauExt (Φ σ) e) = if Φ σ ∈ Emb (O := O) e then 1 else 0 := by
-    intro σ
-    have hid : IsIdempotentElem (tauExt (Φ σ) e) := by
-      show _ * _ = _
-      rw [← map_mul, he]
-    rcases IsIdempotentElem.iff_eq_zero_or_one.mp hid with h | h
-    · have hn : Φ σ ∉ Emb (O := O) e := by
-        show ¬ (tauExt (Φ σ) e = 1)
-        rw [h]
-        exact zero_ne_one
-      rw [if_neg hn, h, map_zero]
-    · have hm : Φ σ ∈ Emb (O := O) e := h
-      rw [if_pos hm, h, map_one]
-  have hsum' : ((Module.finrank ℤ_[p] (LinearMap.range f) : ℕ) : C) =
-      ((Finset.univ.filter (fun σ => Φ σ ∈ Emb (O := O) e)).card : C) := by
-    have h := hsum
-    change algebraMap O C (algebraMap ℤ_[p] O (LinearMap.trace ℤ_[p] _ f)) = _ at h
-    rw [htr, map_natCast, map_natCast] at h
-    rw [h]
-    simp only [hval]
-    rw [Finset.sum_boole]
-  have hn := Nat.cast_injective hsum'
-  haveI : Finite (𝓞 E →+* O) := Finite.of_equiv _ Φ
-  have hEmb : Nat.card (Emb (O := O) e) =
-      (Finset.univ.filter (fun σ => Φ σ ∈ Emb (O := O) e)).card := by
-    calc Nat.card (Emb (O := O) e) = Nat.card {σ // Φ σ ∈ Emb (O := O) e} :=
-          (Nat.card_congr (Φ.subtypeEquiv (fun σ => Iff.rfl))).symm
-      _ = Fintype.card {σ // Φ σ ∈ Emb (O := O) e} := Nat.card_eq_fintype_card
-      _ = _ := Fintype.card_subtype _
-  exact ⟨(finCongr (hn.trans hEmb.symm)).trans (Finite.equivFin _).symm⟩
+  apply GlobalTheory.EmbCount.card_emb <;> assumption

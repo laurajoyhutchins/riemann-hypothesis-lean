@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LeftQuotientCovolumeWithDensityDetNormSq
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.IsLatMeasurableConst
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsScalarStableLatticeAutomorphismFundamental
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsScalarStableLatticeAutomorphismFundamentalStatement
@@ -413,27 +414,7 @@ theorem detNorm_aut_mul (hE : IsTotallyComplex E) {Λ : Submodule (𝓞 E) (Fin 
   simp_rw [h3, norm_mul, mul_pow, Finset.prod_mul_distrib, hprod, one_mul]
 
 theorem haarGL_restrict (hj : 1 ≤ j) : (haarGL E j).restrict {g | 0 < detNorm E j g} = haarGL E j := by
-  have hm : MeasurableSet {g : MatInf E j | ¬ 0 < detNorm E j g} :=
-    (measurableSet_lt measurable_const measurable_detNorm).compl
-  refine Measure.restrict_eq_self_of_ae_mem ?_
-  rw [ae_iff]
-  show haarGL E j {g | ¬ 0 < detNorm E j g} = 0
-  have key : (volume : Measure (InfinitePlace E → Fin j → Fin j → ℂ)).withDensity
-      (fun x => ENNReal.ofReal ((∏ w, ‖(Matrix.of (x w)).det‖ ^ 2)⁻¹ ^ j))
-      {x | ¬ 0 < ∏ w, ‖(Matrix.of (x w)).det‖ ^ 2} = 0 := by
-    have hm2 : MeasurableSet
-        {x : InfinitePlace E → Fin j → Fin j → ℂ | ¬ 0 < ∏ w, ‖(Matrix.of (x w)).det‖ ^ 2} := hm
-    rw [withDensity_apply _ hm2, ← lintegral_indicator hm2]
-    have hz : {x : InfinitePlace E → Fin j → Fin j → ℂ | ¬ 0 < ∏ w, ‖(Matrix.of (x w)).det‖ ^ 2}.indicator
-        (fun x => ENNReal.ofReal ((∏ w, ‖(Matrix.of (x w)).det‖ ^ 2)⁻¹ ^ j)) = 0 := by
-      funext x
-      refine Set.indicator_apply_eq_zero.2 fun hx => ?_
-      have h0 : ∏ w, ‖(Matrix.of (x w)).det‖ ^ 2 = 0 :=
-        le_antisymm (not_lt.1 hx) (Finset.prod_nonneg fun w _ => sq_nonneg _)
-      rw [h0, _root_.inv_zero, zero_pow (by omega), ENNReal.ofReal_zero]
-    rw [hz]
-    exact lintegral_zero
-  exact key
+  apply GlobalTheory.DetSlab.restrict_pos <;> assumption
 
 theorem exists_dom (hE : IsTotallyComplex E) (hj : 1 ≤ j) {Λ : Submodule (𝓞 E) (Fin j → E)}
     (hΛ : Submodule.IsFullLattice E Λ) {N κ : ℝ} (hN : 0 < N) (hκ : 0 < κ) :

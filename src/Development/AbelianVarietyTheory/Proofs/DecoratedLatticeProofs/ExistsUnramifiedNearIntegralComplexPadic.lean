@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsMemWpNormSubLtOne
 public import Formalism.LocalToGlobal.TorsionIntegrality.CMGoodModels.Statement
 public import Mathlib.NumberTheory.Padics.RingHoms
 import Mathlib.Algebra.Order.Floor.Extended
@@ -104,39 +105,7 @@ theorem exists_monic (x : PadicAlgCl l) (hx : ‖x‖ ≤ 1) : ∃ q : ℤ_[l][X
 
 theorem exists_pow_near_one (x : PadicAlgCl l) (hx : ‖x‖ = 1) :
     ∃ m : ℕ, 0 < m ∧ ‖x ^ m - 1‖ < 1 := by
-  obtain ⟨q, hqm, hq⟩ := exists_monic x hx.le
-  have hq1 : q ≠ 1 := by rintro rfl; simp at hq
-  set d := q.natDegree
-  let r : ℕ → ℤ_[l][X] := fun k => (Polynomial.X ^ k) %ₘ q
-  have hr : ∀ k, aeval x (r k) = x ^ k := by
-    intro k
-    have h := congrArg (aeval x) (modByMonic_add_div (Polynomial.X ^ k : ℤ_[l][X]) q)
-    simpa [hq] using h
-  have hdeg : ∀ k, (r k).natDegree < d := fun k => natDegree_modByMonic_lt _ hqm hq1
-  let F : ℕ → (Fin d → ZMod l) := fun k i => PadicInt.toZMod ((r k).coeff i)
-  obtain ⟨i, j, hij, hF⟩ := Finite.exists_ne_map_eq_of_infinite F
-  have key : ∀ a b : ℕ, F a = F b → a < b → ∃ m : ℕ, 0 < m ∧ ‖x ^ m - 1‖ < 1 := by
-    intro a b hab hlt
-    have hsm : ‖x ^ b - x ^ a‖ < 1 := by
-      rw [← hr b, ← hr a, ← map_sub]
-      apply norm_aeval_lt x hx.le
-      ext n
-      rw [Polynomial.coeff_map, Polynomial.coeff_sub, map_sub, Polynomial.coeff_zero]
-      by_cases hn : n < d
-      · have := congrFun hab ⟨n, hn⟩
-        rw [sub_eq_zero]
-        exact this.symm
-      · rw [coeff_eq_zero_of_natDegree_lt (lt_of_lt_of_le (hdeg b) (not_lt.1 hn)),
-          coeff_eq_zero_of_natDegree_lt (lt_of_lt_of_le (hdeg a) (not_lt.1 hn))]
-        simp
-    refine ⟨b - a, Nat.sub_pos_of_lt hlt, ?_⟩
-    have e : x ^ b - x ^ a = x ^ a * (x ^ (b - a) - 1) := by
-      rw [mul_sub, ← pow_add, Nat.add_sub_cancel' hlt.le, mul_one]
-    rw [e, norm_mul, norm_pow, hx, one_pow, one_mul] at hsm
-    exact hsm
-  rcases lt_or_gt_of_ne hij with h | h
-  · exact key i j hF h
-  · exact key j i hF.symm h
+  apply GlobalTheory.ResidueRoot.exists_pow_alg <;> assumption
 
 theorem frob_inj (z : PadicAlgCl l) (hz : ‖z‖ ≤ 1) (h : ‖z ^ l - 1‖ < 1) : ‖z - 1‖ < 1 := by
   have hp := (Fact.out : l.Prime)
@@ -173,31 +142,7 @@ theorem one_le_norm_prod (s : Multiset ℂ_[l]) (h : ∀ a ∈ s, 1 ≤ ‖a‖)
 
 theorem exists_root_near (x : ℂ_[l]) (m : ℕ) (hm : 0 < m) (h : ‖x ^ m - 1‖ < 1) :
     ∃ ζ : ℂ_[l], ζ ^ m = 1 ∧ ‖x - ζ‖ < 1 := by
-  set P : ℂ_[l][X] := Polynomial.X ^ m - Polynomial.C 1
-  have hPm : P.Monic := by
-    simpa [P] using (monic_X_pow_sub_C (1 : ℂ_[l]) hm.ne')
-  have hcard : Multiset.card P.roots = P.natDegree := IsAlgClosed.card_roots_eq_natDegree
-  have hprod := prod_multiset_X_sub_C_of_monic_of_roots_card_eq hPm hcard
-  have hev := congrArg (eval x) hprod
-  rw [eval_multiset_prod, Multiset.map_map] at hev
-  by_contra hne
-  push_neg at hne
-  have hall : ∀ a ∈ P.roots, 1 ≤ ‖x - a‖ := by
-    intro a ha
-    apply hne a _
-    have := (mem_roots hPm.ne_zero).1 ha
-    simpa [P, sub_eq_zero] using this
-  have := one_le_norm_prod (P.roots.map fun a => x - a) (by
-    intro b hb
-    obtain ⟨a, ha, rfl⟩ := Multiset.mem_map.1 hb
-    exact hall a ha)
-  have e : (Multiset.map (eval x ∘ fun a => Polynomial.X - Polynomial.C a) P.roots).prod = (P.roots.map fun a => x - a).prod := by
-    congr 1
-    exact Multiset.map_congr rfl (fun a _ => by simp)
-  rw [e] at hev
-  rw [hev] at this
-  simp [P] at this
-  linarith
+  apply GlobalTheory.ResidueRoot.exists_root <;> assumption
 
 theorem exists_near_kur : ∀ (l : ℕ) [Fact l.Prime] (x : ℂ_[l]), ‖x‖ ≤ 1 →
     ∃ y ∈ MaximalUnramifiedExtension l, ‖y‖ ≤ 1 ∧ ‖x - y‖ < 1 := by

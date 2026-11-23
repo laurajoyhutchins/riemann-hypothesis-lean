@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.CasimirCoefficients.ExpInPPosDef
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.DatumEmbeddingMemHlam
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PmatIsHermitian
 import Mathlib.Algebra.Order.Floor.Extended
@@ -78,37 +79,7 @@ theorem ffa_continuousOn {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
 end Smooth
 
 theorem ffa_Kset {k : Matrix (Fin n) (Fin n) ℂ} (hk : k ∈ Kset ε) : ∃ k' : S7.KG ε, S7.toMK k' = k := by
-  obtain ⟨hu, hc⟩ := hk
-  have hs : star k * k = 1 := by
-    first
-    | exact unitary.star_mul_self_of_mem hu
-    | exact Unitary.star_mul_self_of_mem hu
-    | exact (Matrix.mem_unitaryGroup_iff'.1 hu)
-  have hu' : kᴴ * k = 1 := by simpa [Matrix.star_eq_conjTranspose] using hs
-  have hUJ : k ∈ UJset ε := by
-    show kᴴ * Jm ε * k = Jm ε
-    rw [Matrix.mul_assoc, ← hc, ← Matrix.mul_assoc, hu', Matrix.one_mul]
-  have hJ : (Jm ε).det ≠ 0 := by
-    rw [Jm, Matrix.det_diagonal]
-    refine Finset.prod_ne_zero_iff.2 fun a _ => ?_
-    split_ifs <;> norm_num
-  have hdet : IsUnit k.det := by
-    rw [isUnit_iff_ne_zero]
-    intro h0
-    have h := congrArg Matrix.det (show kᴴ * Jm ε * k = Jm ε from hUJ)
-    rw [Matrix.det_mul, Matrix.det_mul, h0, mul_zero] at h
-    exact hJ h.symm
-  obtain ⟨y, hy⟩ : ∃ y : Formalism.REAL.UJ ε, Formalism.MainNotions.S.umat y = k :=
-    ⟨⟨Matrix.nonsingInvUnit k hdet, hUJ⟩, rfl⟩
-  refine ⟨⟨y, ?_⟩, ?_⟩
-  · first
-    | exact (show S7.toM y ∈ Kset ε from by rw [show S7.toM y = k from hy]; exact ⟨hu, hc⟩)
-    | exact (show Formalism.MainNotions.S.umat y ∈ Kset ε from by rw [hy]; exact ⟨hu, hc⟩)
-    | (unfold S7.KG; exact ⟨hu, hc⟩)
-  · first
-    | exact hy
-    | (unfold S7.toMK; exact hy)
-    | simpa [S7.toMK, S7.toM] using hy
+  apply ReciprocityTheory.ChartRestriction.DS.S7.exists_toMK <;> assumption
 
 theorem ffa_UJ_lift {g : Matrix (Fin n) (Fin n) ℂ} (hg : g ∈ UJset ε) :
     ∃ y : Formalism.REAL.UJ ε, Formalism.MainNotions.S.umat y = g := by

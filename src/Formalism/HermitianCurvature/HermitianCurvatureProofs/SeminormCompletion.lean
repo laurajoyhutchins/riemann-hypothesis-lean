@@ -183,7 +183,6 @@ theorem corollary_u2_of_parts_holds : GermExpansionHypothesisFromComponents := b
   intro k p s ρ Wp Wq _ _ _ _ _ _ ι _ U hOk A₀ hA₀
   have hOk2 := hOk
   obtain ⟨hd, hs1, _, _, hDD, hχ, hχε, _, _, ho, hκ, hAB, hmm, hn3, hC2⟩ := hOk
-  have hC1 : (0 : ℝ) ≤ C₁ := Nat.cast_nonneg _
   have hle : C₂ * s ^ 2 ≤ C₂ * (p + s + ρ + 1) ^ 2 :=
     Nat.mul_le_mul_left C₂ (Nat.pow_le_pow_left (by omega) 2)
   obtain ⟨hb1, _, _, _, hb5⟩ := hBud (p + s + ρ) (C₂ * s ^ 2) U.mmB U.o (U.κ + (p + s) * U.o) U.As

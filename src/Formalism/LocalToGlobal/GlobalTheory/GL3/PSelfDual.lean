@@ -1,5 +1,6 @@
 module
 
+import Formalism.LocalToGlobal.ProjectiveLattices.LevelPb
 public import Formalism.LocalToGlobal.GlobalTheory.GL3.PIopNorm
 public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.CanonicalTranslateJets
 public import Formalism.LocalToGlobal.GlobalTheory.GL3.PHfTrace
@@ -517,25 +518,7 @@ theorem embedding_sqrt_neg_d : D.host.φ₀ (D.host.sqd) = Complex.I * (Real.sqr
   D.host.φ₀_mem
 
 theorem finrank_K : Module.finrank ℚ D.host.K = 2 := by
-  set s := D.host.sqd
-  have hs := s_sq D
-  have hd := d_pos D
-  have hmon : (X ^ 2 + C (D.host.d : ℚ)).Monic := monic_X_pow_add_C _ two_ne_zero
-  have hev : aeval s (X ^ 2 + C (D.host.d : ℚ)) = 0 := by
-    rw [map_add (f := _), map_pow, aeval_X, aeval_C, hs]
-    simp
-  have hirr : Irreducible (X ^ 2 + C (D.host.d : ℚ)) := by
-    apply irreducible_of_degree_le_three_of_not_isRoot
-    · rw [natDegree_X_pow_add_C]; simp
-    · intro r hr
-      simp only [IsRoot, eval_add, eval_pow, eval_X, eval_C] at hr
-      nlinarith [sq_nonneg r]
-  have hint : IsIntegral ℚ s := ⟨_, hmon, by rw [← aeval_def]; exact hev⟩
-  have hmin : minpoly ℚ s = X ^ 2 + C (D.host.d : ℚ) :=
-    (minpoly.eq_of_irreducible_of_monic hirr hev hmon).symm
-  have := IntermediateField.adjoin.finrank hint
-  rw [hmin, natDegree_X_pow_add_C] at this
-  exact this
+  apply Formalism.L2.Pj.LPb.finrank_K <;> assumption
 
 theorem cc_basis (cc : Ideal (𝓞 D.host.K)) (hcc : cc ≠ ⊥) :
     ∃ c1 ∈ cc, ∃ c2 ∈ cc, (∀ c ∈ cc, ∃ m n : ℤ, c = (m : 𝓞 D.host.K) * c1 + (n : 𝓞 D.host.K) * c2) ∧

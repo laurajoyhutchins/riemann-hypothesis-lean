@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.LazardBinomialNormUltrametric
 public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.EndOmega
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -56,25 +57,7 @@ variable {K : Type} [NormedField K] [IsUltrametricDist K]
 
 theorem norm_natCast_coprime_eq_one (l u : ℕ) (hp : l.Prime) (hl1 : ‖(l : K)‖ < 1) (hu : ¬ l ∣ u) :
     ‖(u : K)‖ = 1 := by
-  have hcop : Nat.Coprime u l := Nat.Coprime.symm ((Nat.Prime.coprime_iff_not_dvd hp).mpr hu)
-  refine le_antisymm (IsUltrametricDist.norm_natCast_le_one K u) (not_lt.mp fun h => ?_)
-  have hb := Nat.gcd_eq_gcd_ab u l
-  rw [hcop.gcd_eq_one] at hb
-  have hK := congrArg (fun z : ℤ => (z : K)) hb
-  push_cast at hK
-  have h1 : ‖(u : K) * (Nat.gcdA u l : K)‖ < 1 := by
-    rw [norm_mul]
-    calc ‖(u : K)‖ * ‖(Nat.gcdA u l : K)‖ ≤ ‖(u : K)‖ * 1 :=
-          mul_le_mul_of_nonneg_left (IsUltrametricDist.norm_intCast_le_one K _) (norm_nonneg _)
-      _ < 1 := by simpa using h
-  have h2 : ‖(l : K) * (Nat.gcdB u l : K)‖ < 1 := by
-    rw [norm_mul]
-    calc ‖(l : K)‖ * ‖(Nat.gcdB u l : K)‖ ≤ ‖(l : K)‖ * 1 :=
-          mul_le_mul_of_nonneg_left (IsUltrametricDist.norm_intCast_le_one K _) (norm_nonneg _)
-      _ < 1 := by simpa using hl1
-  have h3 := IsUltrametricDist.norm_add_le_max ((u : K) * (Nat.gcdA u l : K)) ((l : K) * (Nat.gcdB u l : K))
-  rw [← hK, norm_one] at h3
-  exact absurd h3 (not_le.mpr (max_lt h1 h2))
+  apply GlobalTheory.Honda.Lazard.norm_natCast_eq_one_of_not_dvd <;> assumption
 
 theorem pow_le_norm_natCast (l : ℕ) (hp : l.Prime) (hl1 : ‖(l : K)‖ < 1) (k : ℕ) (hk : 1 ≤ k) :
     ‖(l : K)‖ ^ (k - 1) ≤ ‖(k : K)‖ := by

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.VolumeFundamentalDomainStdRealBasis
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsTransition
 public import Mathlib.Data.Matrix.ColumnRowPartitioned
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.PeriodHermitianTypeCompatibility
@@ -105,26 +106,7 @@ theorem star_hermForm {g : ℕ} {M : Matrix (Fin g) (Fin g) ℂ} (hM : M.IsHermi
 
 theorem posDef_of_hermForm {g : ℕ} {M : Matrix (Fin g) (Fin g) ℂ} (hM : M.IsHermitian)
     (hpos : ∀ z : Fin g → ℂ, z ≠ 0 → 0 < (hermForm M z z).re) : M.PosDef := by
-  refine ⟨hM, fun x hx => ?_⟩
-  have hx' : star (⇑x) ≠ 0 := by
-    intro h0
-    apply hx
-    ext i
-    simpa using congrFun h0 i
-  have h1 := hpos (star ⇑x) hx'
-  have h2 : (starRingEnd ℂ) (hermForm M (star ⇑x) (star ⇑x)) = hermForm M (star ⇑x) (star ⇑x) :=
-    star_hermForm hM _ _
-  have h3 : (x.sum fun i xi => x.sum fun j xj => star xi * M i j * xj) =
-      ∑ i, ∑ j, star (x i) * M i j * x j := by
-    rw [Finsupp.sum_fintype x (fun i xi => x.sum fun j xj => star xi * M i j * xj)
-      (fun i => by simp [Finsupp.sum])]
-    refine Finset.sum_congr rfl fun i _ => ?_
-    exact Finsupp.sum_fintype x (fun j xj => star (x i) * M i j * xj) (fun j => by simp)
-  have h4 : ∑ i, ∑ j, star (x i) * M i j * x j = hermForm M (star ⇑x) (star ⇑x) := by
-    rw [hermForm_eq_sum]
-    simp
-  rw [h3, h4, Complex.lt_def]
-  exact ⟨by simpa using h1, by simp [Complex.conj_eq_iff_im.mp h2]⟩
+  apply GlobalTheory.UnimodVol.posDef_of_hermForm <;> assumption
 
 theorem fromCols_block {I : Type} [Fintype I] {p q : ℕ} (A : Matrix I (Fin p) ℂ) (B : Matrix I (Fin q) ℂ)
     (G₁ : Matrix (Fin p) (Fin p) ℂ) (G₂ : Matrix (Fin q) (Fin q) ℂ) :

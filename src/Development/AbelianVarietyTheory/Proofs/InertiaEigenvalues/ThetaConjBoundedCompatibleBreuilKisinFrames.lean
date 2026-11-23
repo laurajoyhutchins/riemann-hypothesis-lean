@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.BreuilKisinDescentCoefficientsAinfModPow
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.TrivIsCr
 import Development.AbelianVarietyTheory.CrystallinePeriods.RingBasics
 import Development.AbelianVarietyTheory.CrystallinePeriods.RingIface
@@ -143,23 +144,7 @@ theorem th_zl (z : ℤ_[l]) :
 
 theorem pow_dvd_of_inclW (k : ℕ) (a : Ainf l) (h : ((l : ℕ) : WCb l) ^ k ∣ inclW l a) :
     ((l : ℕ) : Ainf l) ^ k ∣ a := by
-  induction k generalizing a with
-  | zero => simp
-  | succ k ih =>
-    obtain ⟨c, hc⟩ := h
-    have h0 : a.coeff 0 = 0 := by
-      have h1 : (inclW l a).coeff 0 = 0 := by
-        rw [hc, pow_succ', mul_assoc]; exact coeff_zero_l_mul _
-      change algebraMap (OCb l) (Cb l) (a.coeff 0) = 0 at h1
-      exact (map_eq_zero_iff _ (IsFractionRing.injective (OCb l) (Cb l))).1 h1
-    obtain ⟨b, rfl⟩ := ainf_exists_l_mul_of_coeff_zero a h0
-    have hl0 : ((l : ℕ) : WCb l) ≠ 0 := fun h => by
-      have h1 := congrArg (fun x : WCb l => x.coeff 1) h
-      simp [WittVector.coeff_p] at h1
-    have hb : ((l : ℕ) : WCb l) ^ k ∣ inclW l b := by
-      refine ⟨c, mul_left_cancel₀ hl0 ?_⟩
-      rw [← mul_assoc, ← pow_succ', ← hc, map_mul, map_natCast]
-    exact pow_succ' ((l : ℕ) : Ainf l) k ▸ mul_dvd_mul_left _ (ih b hb)
+  apply GlobalTheory.CoefDescent.pow_dvd_of_pow_dvd_inclW <;> assumption
 
 theorem bounded_compat : ∀ (l : ℕ) [Fact l.Prime] (K : FinExt l) (bk : BK K) (τ : Ainf l), bk.IsPer τ → ∀ (N : ℕ), ∃ Bd : ℝ, ∀ (N' d d' n : ℕ) (ρ : ↥(GK K) → Matrix (Fin d) (Fin d) (ℤ_[l])) (ρ' : ↥(GK K) → Matrix (Fin d') (Fin d') (ℤ_[l])) (F : Frame bk N' d ρ) (F' : Frame bk N d' ρ') (Y : Matrix (Fin d) (Fin d) (Ainf l)) (Y' : Matrix (Fin d') (Fin d') (Ainf l)), N' = N → Y.map (inclW l) = inclW l τ ^ N • F.T → Y'.map (inclW l) = inclW l τ ^ N • F'.T → ∀ (g : ↥(GK K)) (U : Matrix (Fin d) (Fin d) (ℂ_[l])) (U' : Matrix (Fin d') (Fin d') (ℂ_[l])), U * Y.map ((Per.θD l).comp (aDp l)) = Y.map ((Per.θD l).comp (aDp l)) * (F.ε g).map ((Per.θD l).comp (aDp l)) → U' * Y'.map ((Per.θD l).comp (aDp l)) = Y'.map ((Per.θD l).comp (aDp l)) * (F'.ε g).map ((Per.θD l).comp (aDp l)) → (∀ i j, ‖U i j‖ ≤ Bd) ∧ (∀ i j, ‖U' i j‖ ≤ Bd) ∧ ∀ (Pi : Matrix (Fin d) (Fin d') (ℤ_[l])) (R : Matrix (Fin d) (Fin d') (bk.S)), (∀ g i j, (l : ℤ_[l]) ^ n ∣ (Pi * ρ' g - ρ g * Pi) i j) → (∀ i j, (l : WCb l) ^ n ∣ (zW Pi * F'.T - F.T * R.map bk.evW) i j) → ∀ i j, ‖(U * Pi.map (fun x => algebraMap (Om l) ℂ_[l] (zOm l x)) - Pi.map (fun x => algebraMap (Om l) ℂ_[l] (zOm l x)) * U') i j‖ ≤ Bd * ((l : ℝ) ^ n)⁻¹ := by
   intro l _ K bk τ hτ N

@@ -48,129 +48,30 @@ public import Mathlib.Data.Matrix.Basis
 
 @[expose] public section
 
-noncomputable def UpperTheory.Reformulated.B.Qi38.Irr :
-    {R : Type} →
-      [inst : CommRing R] →
-        {H : Type} →
-          [inst_1 : Group H] →
-            {n : Type} →
-              [inst_2 : Fintype n] →
-                [inst_3 : DecidableEq n] →
-                  @MonoidHom H (Matrix n n R)
-                      (@MulOneClass.toMulOne H
-                        (@Monoid.toMulOneClass H (@DivInvMonoid.toMonoid H (@Group.toDivInvMonoid H inst_1))))
-                      (@Matrix.instMulOneOfFintypeOfDecidableEqOfAddCommMonoid n R inst_2 inst_3
-                        (@MulOneClass.toMulOne R
-                          (@MulZeroOneClass.toMulOneClass R
-                            (@instMulZeroOneClassOfSemiring R
-                              (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst)))))
-                        (@Semiring.toAddCommMonoid R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst)))) →
-                    Prop :=
-    fun {R : Type} [inst : CommRing R] {H : Type} [inst_1 : Group H] {n : Type} [inst_2 : Fintype n]
-        [inst_3 : DecidableEq n]
-        (r :
-          @MonoidHom H (Matrix n n R)
-            (@MulOneClass.toMulOne H (@Monoid.toMulOneClass H (@DivInvMonoid.toMonoid H (@Group.toDivInvMonoid H inst_1))))
-            (@Matrix.instMulOneOfFintypeOfDecidableEqOfAddCommMonoid n R inst_2 inst_3
-              (@MulOneClass.toMulOne R
-                (@MulZeroOneClass.toMulOneClass R
-                  (@instMulZeroOneClassOfSemiring R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst)))))
-              (@Semiring.toAddCommMonoid R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))))) ↦
-      @Eq
-        (@Submodule R (Matrix n n R) (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))
-          (@Matrix.addCommMonoid n n R
-            (@Semiring.toAddCommMonoid R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))))
-          (@Matrix.module n n R R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))
-            (@Semiring.toAddCommMonoid R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst)))
-            (@Semiring.toModule R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst)))))
-        (@Submodule.span R (Matrix n n R) (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))
-          (@Matrix.addCommMonoid n n R
-            (@Semiring.toAddCommMonoid R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))))
-          (@Matrix.module n n R R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))
-            (@Semiring.toAddCommMonoid R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst)))
-            (@Semiring.toModule R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))))
-          (@Set.range (Matrix n n R) H
-            (@DFunLike.coe
-              (@MonoidHom H (Matrix n n R)
-                (@MulOneClass.toMulOne H
-                  (@Monoid.toMulOneClass H (@DivInvMonoid.toMonoid H (@Group.toDivInvMonoid H inst_1))))
-                (@Matrix.instMulOneOfFintypeOfDecidableEqOfAddCommMonoid n R inst_2 inst_3
-                  (@MulOneClass.toMulOne R
-                    (@MulZeroOneClass.toMulOneClass R
-                      (@instMulZeroOneClassOfSemiring R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst)))))
-                  (@Semiring.toAddCommMonoid R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst)))))
-              H (fun (x : H) ↦ Matrix n n R)
-              (@MonoidHom.instFunLike H (Matrix n n R)
-                (@MulOneClass.toMulOne H
-                  (@Monoid.toMulOneClass H (@DivInvMonoid.toMonoid H (@Group.toDivInvMonoid H inst_1))))
-                (@Matrix.instMulOneOfFintypeOfDecidableEqOfAddCommMonoid n R inst_2 inst_3
-                  (@MulOneClass.toMulOne R
-                    (@MulZeroOneClass.toMulOneClass R
-                      (@instMulZeroOneClassOfSemiring R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst)))))
-                  (@Semiring.toAddCommMonoid R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst)))))
-              r)))
-        (@Top.top
-          (@Submodule R (Matrix n n R) (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))
-            (@Matrix.addCommMonoid n n R
-              (@Semiring.toAddCommMonoid R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))))
-            (@Matrix.module n n R R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))
-              (@Semiring.toAddCommMonoid R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst)))
-              (@Semiring.toModule R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst)))))
-          (@Submodule.instTop R (Matrix n n R) (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))
-            (@Matrix.addCommMonoid n n R
-              (@Semiring.toAddCommMonoid R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))))
-            (@Matrix.module n n R R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))
-              (@Semiring.toAddCommMonoid R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst)))
-              (@Semiring.toModule R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))))))
+namespace UpperTheory.Reformulated.B.Qi38
 
-@[reducible] noncomputable def UpperTheory.Reformulated.B.Qi38.modFun : {O M ι : Type} → [inst : CommRing O] → [inst_1 : AddCommGroup M] → [Module O M] → Module O (ι → M) := fun {O M ι} [CommRing O] [AddCommGroup M] [Module O M] => Pi.Function.module ι O M
-attribute [local instance] UpperTheory.Reformulated.B.Qi38.modFun
+noncomputable def Irr : {R : Type} →
+  [inst : CommRing R] →
+    {H : Type} →
+      [inst_1 : Group H] → {n : Type} → [inst_2 : Fintype n] → [inst_3 : DecidableEq n] → (H →* Matrix n n R) → Prop :=
+  fun {R} [CommRing R] {H} [Group H] {n} [Fintype n] [DecidableEq n] r => Submodule.span R (Set.range ⇑r) = ⊤
 
-noncomputable def UpperTheory.Reformulated.B.Qi38.mapRep : {R R' : Type} →
+@[reducible] noncomputable def modFun : {O M ι : Type} →
+  [inst : CommRing O] → [inst_1 : AddCommGroup M] → [Module O M] → Module O (ι → M) :=
+  fun {O M ι} [CommRing O] [AddCommGroup M] [Module O M] => Pi.Function.module ι O M
+
+attribute [local instance] modFun
+
+noncomputable def mapRep : {R R' : Type} →
   [inst : CommRing R] →
     [inst_1 : CommRing R'] →
       {H : Type} →
         [inst_2 : Group H] →
           {n : Type} →
-            [inst_3 : Fintype n] → [inst_4 : DecidableEq n] → (R →+* R') → (H →* Matrix n n R) → H →* Matrix n n R' := fun {R R' : Type} [inst : CommRing R] [inst_1 : CommRing R'] {H : Type} [inst_2 : Group H] {n : Type}
-        [inst_3 : Fintype n] [inst_4 : DecidableEq n]
-        (f :
-          @RingHom R R' (@Semiring.toNonAssocSemiring R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst)))
-            (@Semiring.toNonAssocSemiring R' (@CommSemiring.toSemiring R' (@CommRing.toCommSemiring R' inst_1))))
-        (r :
-          @MonoidHom H (Matrix n n R)
-            (@MulOneClass.toMulOne H (@Monoid.toMulOneClass H (@DivInvMonoid.toMonoid H (@Group.toDivInvMonoid H inst_2))))
-            (@Matrix.instMulOneOfFintypeOfDecidableEqOfAddCommMonoid n R inst_3 inst_4
-              (@MulOneClass.toMulOne R
-                (@MulZeroOneClass.toMulOneClass R
-                  (@instMulZeroOneClassOfSemiring R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst)))))
-              (@Semiring.toAddCommMonoid R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))))) ↦
-      @MonoidHom.comp H (Matrix n n R) (Matrix n n R')
-        (@MulOneClass.toMulOne H (@Monoid.toMulOneClass H (@DivInvMonoid.toMonoid H (@Group.toDivInvMonoid H inst_2))))
-        (@MulOneClass.toMulOne (Matrix n n R)
-          (@MulZeroOneClass.toMulOneClass (Matrix n n R)
-            (@NonAssocSemiring.toMulZeroOneClass (Matrix n n R)
-              (@Matrix.nonAssocSemiring n R
-                (@Semiring.toNonAssocSemiring R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))) inst_3
-                inst_4))))
-        (@MulOneClass.toMulOne (Matrix n n R')
-          (@MulZeroOneClass.toMulOneClass (Matrix n n R')
-            (@NonAssocSemiring.toMulZeroOneClass (Matrix n n R')
-              (@Matrix.nonAssocSemiring n R'
-                (@Semiring.toNonAssocSemiring R' (@CommSemiring.toSemiring R' (@CommRing.toCommSemiring R' inst_1))) inst_3
-                inst_4))))
-        (@RingHom.toMonoidHom (Matrix n n R) (Matrix n n R')
-          (@Matrix.nonAssocSemiring n R
-            (@Semiring.toNonAssocSemiring R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst))) inst_3 inst_4)
-          (@Matrix.nonAssocSemiring n R'
-            (@Semiring.toNonAssocSemiring R' (@CommSemiring.toSemiring R' (@CommRing.toCommSemiring R' inst_1))) inst_3
-            inst_4)
-          (@RingHom.mapMatrix n R R' inst_3 inst_4
-            (@Semiring.toNonAssocSemiring R (@CommSemiring.toSemiring R (@CommRing.toCommSemiring R inst)))
-            (@Semiring.toNonAssocSemiring R' (@CommSemiring.toSemiring R' (@CommRing.toCommSemiring R' inst_1))) f))
-        r
+            [inst_3 : Fintype n] → [inst_4 : DecidableEq n] → (R →+* R') → (H →* Matrix n n R) → H →* Matrix n n R' :=
+  fun {R R'} [CommRing R] [CommRing R'] {H} [Group H] {n} [Fintype n] [DecidableEq n] f r => f.mapMatrix.toMonoidHom.comp r
 
-private theorem UpperTheory.Reformulated.B.Qi38.aux {Γ E E' : Type} [Field E] [Field E'] (f : E →+* E') {n : Nat}
+private theorem aux {Γ E E' : Type} [Field E] [Field E'] (f : E →+* E') {n : Nat}
     (r : Γ → Matrix (Fin n) (Fin n) E) (hr : Submodule.span E (Set.range r) = ⊤)
     (N : Submodule E' (Fin n → E'))
     (hN : ∀ g v, v ∈ N → ((r g).map f).mulVec v ∈ N) : N = ⊥ ∨ N = ⊤ := by
@@ -211,198 +112,12 @@ private theorem UpperTheory.Reformulated.B.Qi38.aux {Γ E E' : Type} [Field E] [
     · simp [hk]
   rwa [h2] at h1
 
-theorem UpperTheory.Reformulated.B.Qi38.irr_map :
-    ∀ {Γ E E' : Type} [inst : Group Γ] [inst_1 : Field E] [inst_2 : Field E']
-      (f :
-        @RingHom E E'
-          (@Semiring.toNonAssocSemiring E
-            (@DivisionSemiring.toSemiring E (@Semifield.toDivisionSemiring E (@Field.toSemifield E inst_1))))
-          (@Semiring.toNonAssocSemiring E'
-            (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2)))))
-      {n : Nat}
-      (r :
-        @MonoidHom Γ (Matrix (Fin n) (Fin n) E)
-          (@MulOneClass.toMulOne Γ (@Monoid.toMulOneClass Γ (@DivInvMonoid.toMonoid Γ (@Group.toDivInvMonoid Γ inst))))
-          (@Matrix.instMulOneOfFintypeOfDecidableEqOfAddCommMonoid (Fin n) E (Fin.fintype n) (instDecidableEqFin n)
-            (@MulOneClass.toMulOne E
-              (@MulZeroOneClass.toMulOneClass E
-                (@instMulZeroOneClassOfSemiring E
-                  (@DivisionSemiring.toSemiring E (@Semifield.toDivisionSemiring E (@Field.toSemifield E inst_1))))))
-            (@Semiring.toAddCommMonoid E
-              (@DivisionSemiring.toSemiring E (@Semifield.toDivisionSemiring E (@Field.toSemifield E inst_1)))))),
-      @UpperTheory.Reformulated.B.Qi38.Irr E (@Field.toCommRing E inst_1) Γ inst (Fin n) (Fin.fintype n) (instDecidableEqFin n) r →
-        ∀
-          (N :
-            @Submodule E' (Fin n → E')
-              (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2)))
-              (@Pi.addCommMonoid (Fin n) (fun (a : Fin n) ↦ E') fun (i : Fin n) ↦
-                @Semiring.toAddCommMonoid E'
-                  (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2))))
-              (@UpperTheory.Reformulated.B.Qi38.modFun E' E' (Fin n) (@Field.toCommRing E' inst_2)
-                (@Ring.toAddCommGroup E' (@DivisionRing.toRing E' (@Field.toDivisionRing E' inst_2)))
-                (@Semiring.toModule E'
-                  (@CommSemiring.toSemiring E' (@CommRing.toCommSemiring E' (@Field.toCommRing E' inst_2)))))),
-          (∀ (g : Γ) (v : Fin n → E'),
-              @Membership.mem (Fin n → E')
-                  (@Submodule E' (Fin n → E')
-                    (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2)))
-                    (@Pi.addCommMonoid (Fin n) (fun (a : Fin n) ↦ E') fun (i : Fin n) ↦
-                      @Semiring.toAddCommMonoid E'
-                        (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2))))
-                    (@UpperTheory.Reformulated.B.Qi38.modFun E' E' (Fin n) (@Field.toCommRing E' inst_2)
-                      (@Ring.toAddCommGroup E' (@DivisionRing.toRing E' (@Field.toDivisionRing E' inst_2)))
-                      (@Semiring.toModule E'
-                        (@CommSemiring.toSemiring E' (@CommRing.toCommSemiring E' (@Field.toCommRing E' inst_2))))))
-                  (@SetLike.instMembership
-                    (@Submodule E' (Fin n → E')
-                      (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2)))
-                      (@Pi.addCommMonoid (Fin n) (fun (a : Fin n) ↦ E') fun (i : Fin n) ↦
-                        @Semiring.toAddCommMonoid E'
-                          (@DivisionSemiring.toSemiring E'
-                            (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2))))
-                      (@UpperTheory.Reformulated.B.Qi38.modFun E' E' (Fin n) (@Field.toCommRing E' inst_2)
-                        (@Ring.toAddCommGroup E' (@DivisionRing.toRing E' (@Field.toDivisionRing E' inst_2)))
-                        (@Semiring.toModule E'
-                          (@CommSemiring.toSemiring E' (@CommRing.toCommSemiring E' (@Field.toCommRing E' inst_2))))))
-                    (Fin n → E')
-                    (@Submodule.setLike E' (Fin n → E')
-                      (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2)))
-                      (@Pi.addCommMonoid (Fin n) (fun (a : Fin n) ↦ E') fun (i : Fin n) ↦
-                        @Semiring.toAddCommMonoid E'
-                          (@DivisionSemiring.toSemiring E'
-                            (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2))))
-                      (@UpperTheory.Reformulated.B.Qi38.modFun E' E' (Fin n) (@Field.toCommRing E' inst_2)
-                        (@Ring.toAddCommGroup E' (@DivisionRing.toRing E' (@Field.toDivisionRing E' inst_2)))
-                        (@Semiring.toModule E'
-                          (@CommSemiring.toSemiring E' (@CommRing.toCommSemiring E' (@Field.toCommRing E' inst_2)))))))
-                  N v →
-                @Membership.mem (Fin n → E')
-                  (@Submodule E' (Fin n → E')
-                    (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2)))
-                    (@Pi.addCommMonoid (Fin n) (fun (a : Fin n) ↦ E') fun (i : Fin n) ↦
-                      @Semiring.toAddCommMonoid E'
-                        (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2))))
-                    (@UpperTheory.Reformulated.B.Qi38.modFun E' E' (Fin n) (@Field.toCommRing E' inst_2)
-                      (@Ring.toAddCommGroup E' (@DivisionRing.toRing E' (@Field.toDivisionRing E' inst_2)))
-                      (@Semiring.toModule E'
-                        (@CommSemiring.toSemiring E' (@CommRing.toCommSemiring E' (@Field.toCommRing E' inst_2))))))
-                  (@SetLike.instMembership
-                    (@Submodule E' (Fin n → E')
-                      (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2)))
-                      (@Pi.addCommMonoid (Fin n) (fun (a : Fin n) ↦ E') fun (i : Fin n) ↦
-                        @Semiring.toAddCommMonoid E'
-                          (@DivisionSemiring.toSemiring E'
-                            (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2))))
-                      (@UpperTheory.Reformulated.B.Qi38.modFun E' E' (Fin n) (@Field.toCommRing E' inst_2)
-                        (@Ring.toAddCommGroup E' (@DivisionRing.toRing E' (@Field.toDivisionRing E' inst_2)))
-                        (@Semiring.toModule E'
-                          (@CommSemiring.toSemiring E' (@CommRing.toCommSemiring E' (@Field.toCommRing E' inst_2))))))
-                    (Fin n → E')
-                    (@Submodule.setLike E' (Fin n → E')
-                      (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2)))
-                      (@Pi.addCommMonoid (Fin n) (fun (a : Fin n) ↦ E') fun (i : Fin n) ↦
-                        @Semiring.toAddCommMonoid E'
-                          (@DivisionSemiring.toSemiring E'
-                            (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2))))
-                      (@UpperTheory.Reformulated.B.Qi38.modFun E' E' (Fin n) (@Field.toCommRing E' inst_2)
-                        (@Ring.toAddCommGroup E' (@DivisionRing.toRing E' (@Field.toDivisionRing E' inst_2)))
-                        (@Semiring.toModule E'
-                          (@CommSemiring.toSemiring E' (@CommRing.toCommSemiring E' (@Field.toCommRing E' inst_2)))))))
-                  N
-                  (@Matrix.mulVec (Fin n) (Fin n) E'
-                    (@NonUnitalNonAssocRing.toNonUnitalNonAssocSemiring E'
-                      (@NonUnitalNonAssocCommRing.toNonUnitalNonAssocRing E'
-                        (@NonUnitalCommRing.toNonUnitalNonAssocCommRing E'
-                          (@CommRing.toNonUnitalCommRing E' (@Field.toCommRing E' inst_2)))))
-                    (Fin.fintype n)
-                    (@DFunLike.coe
-                      (@MonoidHom Γ (Matrix (Fin n) (Fin n) E')
-                        (@MulOneClass.toMulOne Γ
-                          (@Monoid.toMulOneClass Γ (@DivInvMonoid.toMonoid Γ (@Group.toDivInvMonoid Γ inst))))
-                        (@Matrix.instMulOneOfFintypeOfDecidableEqOfAddCommMonoid (Fin n) E' (Fin.fintype n)
-                          (instDecidableEqFin n)
-                          (@MulOneClass.toMulOne E'
-                            (@MulZeroOneClass.toMulOneClass E'
-                              (@instMulZeroOneClassOfSemiring E'
-                                (@CommSemiring.toSemiring E' (@CommRing.toCommSemiring E' (@Field.toCommRing E' inst_2))))))
-                          (@Semiring.toAddCommMonoid E'
-                            (@CommSemiring.toSemiring E' (@CommRing.toCommSemiring E' (@Field.toCommRing E' inst_2))))))
-                      Γ (fun (x : Γ) ↦ Matrix (Fin n) (Fin n) E')
-                      (@MonoidHom.instFunLike Γ (Matrix (Fin n) (Fin n) E')
-                        (@MulOneClass.toMulOne Γ
-                          (@Monoid.toMulOneClass Γ (@DivInvMonoid.toMonoid Γ (@Group.toDivInvMonoid Γ inst))))
-                        (@Matrix.instMulOneOfFintypeOfDecidableEqOfAddCommMonoid (Fin n) E' (Fin.fintype n)
-                          (instDecidableEqFin n)
-                          (@MulOneClass.toMulOne E'
-                            (@MulZeroOneClass.toMulOneClass E'
-                              (@instMulZeroOneClassOfSemiring E'
-                                (@CommSemiring.toSemiring E' (@CommRing.toCommSemiring E' (@Field.toCommRing E' inst_2))))))
-                          (@Semiring.toAddCommMonoid E'
-                            (@CommSemiring.toSemiring E' (@CommRing.toCommSemiring E' (@Field.toCommRing E' inst_2))))))
-                      (@UpperTheory.Reformulated.B.Qi38.mapRep E E' (@Field.toCommRing E inst_1) (@Field.toCommRing E' inst_2) Γ inst
-                        (Fin n) (Fin.fintype n) (instDecidableEqFin n) f r)
-                      g)
-                    v)) →
-            Or
-              (@Eq
-                (@Submodule E' (Fin n → E')
-                  (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2)))
-                  (@Pi.addCommMonoid (Fin n) (fun (a : Fin n) ↦ E') fun (i : Fin n) ↦
-                    @Semiring.toAddCommMonoid E'
-                      (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2))))
-                  (@UpperTheory.Reformulated.B.Qi38.modFun E' E' (Fin n) (@Field.toCommRing E' inst_2)
-                    (@Ring.toAddCommGroup E' (@DivisionRing.toRing E' (@Field.toDivisionRing E' inst_2)))
-                    (@Semiring.toModule E'
-                      (@CommSemiring.toSemiring E' (@CommRing.toCommSemiring E' (@Field.toCommRing E' inst_2))))))
-                N
-                (@Bot.bot
-                  (@Submodule E' (Fin n → E')
-                    (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2)))
-                    (@Pi.addCommMonoid (Fin n) (fun (a : Fin n) ↦ E') fun (i : Fin n) ↦
-                      @Semiring.toAddCommMonoid E'
-                        (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2))))
-                    (@UpperTheory.Reformulated.B.Qi38.modFun E' E' (Fin n) (@Field.toCommRing E' inst_2)
-                      (@Ring.toAddCommGroup E' (@DivisionRing.toRing E' (@Field.toDivisionRing E' inst_2)))
-                      (@Semiring.toModule E'
-                        (@CommSemiring.toSemiring E' (@CommRing.toCommSemiring E' (@Field.toCommRing E' inst_2))))))
-                  (@Submodule.instBot E' (Fin n → E')
-                    (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2)))
-                    (@Pi.addCommMonoid (Fin n) (fun (a : Fin n) ↦ E') fun (i : Fin n) ↦
-                      @Semiring.toAddCommMonoid E'
-                        (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2))))
-                    (@UpperTheory.Reformulated.B.Qi38.modFun E' E' (Fin n) (@Field.toCommRing E' inst_2)
-                      (@Ring.toAddCommGroup E' (@DivisionRing.toRing E' (@Field.toDivisionRing E' inst_2)))
-                      (@Semiring.toModule E'
-                        (@CommSemiring.toSemiring E' (@CommRing.toCommSemiring E' (@Field.toCommRing E' inst_2))))))))
-              (@Eq
-                (@Submodule E' (Fin n → E')
-                  (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2)))
-                  (@Pi.addCommMonoid (Fin n) (fun (a : Fin n) ↦ E') fun (i : Fin n) ↦
-                    @Semiring.toAddCommMonoid E'
-                      (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2))))
-                  (@UpperTheory.Reformulated.B.Qi38.modFun E' E' (Fin n) (@Field.toCommRing E' inst_2)
-                    (@Ring.toAddCommGroup E' (@DivisionRing.toRing E' (@Field.toDivisionRing E' inst_2)))
-                    (@Semiring.toModule E'
-                      (@CommSemiring.toSemiring E' (@CommRing.toCommSemiring E' (@Field.toCommRing E' inst_2))))))
-                N
-                (@Top.top
-                  (@Submodule E' (Fin n → E')
-                    (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2)))
-                    (@Pi.addCommMonoid (Fin n) (fun (a : Fin n) ↦ E') fun (i : Fin n) ↦
-                      @Semiring.toAddCommMonoid E'
-                        (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2))))
-                    (@UpperTheory.Reformulated.B.Qi38.modFun E' E' (Fin n) (@Field.toCommRing E' inst_2)
-                      (@Ring.toAddCommGroup E' (@DivisionRing.toRing E' (@Field.toDivisionRing E' inst_2)))
-                      (@Semiring.toModule E'
-                        (@CommSemiring.toSemiring E' (@CommRing.toCommSemiring E' (@Field.toCommRing E' inst_2))))))
-                  (@Submodule.instTop E' (Fin n → E')
-                    (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2)))
-                    (@Pi.addCommMonoid (Fin n) (fun (a : Fin n) ↦ E') fun (i : Fin n) ↦
-                      @Semiring.toAddCommMonoid E'
-                        (@DivisionSemiring.toSemiring E' (@Semifield.toDivisionSemiring E' (@Field.toSemifield E' inst_2))))
-                    (@UpperTheory.Reformulated.B.Qi38.modFun E' E' (Fin n) (@Field.toCommRing E' inst_2)
-                      (@Ring.toAddCommGroup E' (@DivisionRing.toRing E' (@Field.toDivisionRing E' inst_2)))
-                      (@Semiring.toModule E'
-                        (@CommSemiring.toSemiring E' (@CommRing.toCommSemiring E' (@Field.toCommRing E' inst_2)))))))) := by
+theorem irr_map : ∀ {Γ E E' : Type} [inst : Group Γ] [inst_1 : Field E]
+  [inst_2 : Field E'] (f : E →+* E') {n : ℕ} (r : Γ →* Matrix (Fin n) (Fin n) E),
+  Irr r →
+    ∀ (N : Submodule E' (Fin n → E')),
+      (∀ (g : Γ), ∀ v ∈ N, ((mapRep f r) g).mulVec v ∈ N) → N = ⊥ ∨ N = ⊤ := by
   intro Γ E E' _ _ _ f n r hr N hN
-  exact UpperTheory.Reformulated.B.Qi38.aux f (fun g => r g) hr N hN
+  exact aux f (fun g => r g) hr N hN
+
+end UpperTheory.Reformulated.B.Qi38

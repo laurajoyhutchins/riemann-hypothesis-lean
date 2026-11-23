@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.LocalOrderTensorPadicFreeAlmostAll
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsScalarTowerCenAlgebra
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.BijectiveIffIsUnitDet
 public import Mathlib.Algebra.Central.Defs
@@ -68,38 +69,7 @@ namespace GlobalTheory.LocAzumaya
 theorem exists_den_coords : ∀ (F B : Type) [Field F] [NumberField F] [Ring B] [Algebra F B] (Λ : Subring B),
     Module.Finite ℤ Λ → ∀ (ι : Type) [Fintype ι] (e : Module.Basis ι F B),
     ∃ D : ℕ, 0 < D ∧ ∀ x ∈ Λ, ∀ k, IsIntegral ℤ ((D : F) * e.repr x k) := by
-  intro F B _ _ _ _ Λ hfin ι _ e
-  classical
-  obtain ⟨n, s, hs⟩ := Module.Finite.exists_fin (R := ℤ) (M := Λ)
-  obtain ⟨D, hD, hDi⟩ := GlobalTheory.SepModel.exists_nat_integral
-    (Finset.univ.image fun p : Fin n × ι => e.repr (s p.1 : B) p.2)
-  refine ⟨D, hD, fun x hx => ?_⟩
-  have key : ∀ y : Λ, y ∈ Submodule.span ℤ (Set.range s) →
-      ∀ k, IsIntegral ℤ ((D : F) * e.repr (y : B) k) := by
-    intro y hy
-    induction hy using Submodule.span_induction with
-    | mem z hz =>
-      obtain ⟨j, rfl⟩ := hz
-      intro k
-      exact hDi _ (Finset.mem_image.2 ⟨(j, k), Finset.mem_univ _, rfl⟩)
-    | zero => intro k; simpa using isIntegral_zero
-    | add y z _ _ hy hz =>
-      intro k
-      simpa [mul_add] using (hy k).add (hz k)
-    | smul a y _ hy =>
-      intro k
-      have : (D : F) * e.repr ((a • y : Λ) : B) k = (a : F) * ((D : F) * e.repr (y : B) k) := by
-        have hc : ((a • y : Λ) : B) = (a : F) • (y : B) := by
-          have h0 : ((a • y : Λ) : B) = a • (y : B) := rfl
-          rw [h0, zsmul_eq_mul, Algebra.smul_def, map_intCast]
-        rw [hc]
-        simp only [map_smul, Finsupp.smul_apply, smul_eq_mul]
-        ring
-      rw [this]
-      have ha : IsIntegral ℤ (a : F) := by simpa using (isIntegral_algebraMap : IsIntegral ℤ (algebraMap ℤ F a))
-      exact ha.mul (hy k)
-  intro k
-  exact key ⟨x, hx⟩ (by rw [hs]; trivial) k
+  apply GlobalTheory.LocMatrix.exists_den <;> assumption
 theorem exists_coords_of_mem_locOrder : ∀ (ℓ : ℕ) [Fact ℓ.Prime] (F B : Type) [Field F] [NumberField F] [Ring B] [Algebra F B] [Algebra ℚ B]
     [IsScalarTower ℚ F B] (Λ : Subring B) (ι : Type) [Fintype ι] (e : Module.Basis ι F B),
     (∀ i, e i ∈ Λ) → (∀ x ∈ Λ, ∀ k, (1 : ℚ_[ℓ]) ⊗ₜ[ℚ] e.repr x k ∈ cenOrder ℓ F) →

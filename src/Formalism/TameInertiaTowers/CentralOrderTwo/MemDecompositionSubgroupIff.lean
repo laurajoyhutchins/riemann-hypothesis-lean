@@ -1,5 +1,6 @@
 module
 
+import Formalism.TameInertiaTowers.CentralOrderTwo.OrderOfThreeUnitsTwoPow
 public import Formalism.TameInertiaTowers.StatementGroup
 public import Mathlib.NumberTheory.LegendreSymbol.ZModChar
 public import Mathlib.RingTheory.IntegralDomain
@@ -167,29 +168,7 @@ private lemma exists_five_pow_two_pow_eq_one_add (m : ℕ) : ∃ t : ℕ, 5 ^ (2
     ring
 
 lemma orderOf_five_units_two_pow (k : ℕ) : orderOf (u5 (k + 2)) = 2 ^ k := by
-  have hpow : ∀ N j : ℕ, u5 N ^ j = 1 ↔ 5 ^ j ≡ 1 [MOD 2 ^ N] := by
-    intro N j
-    rw [← ZMod.natCast_eq_natCast_iff, Units.ext_iff]
-    simp [u5]
-  cases k with
-  | zero =>
-    rw [pow_zero, orderOf_eq_one_iff, ← pow_one (u5 (0 + 2)), hpow]
-    decide
-  | succ m =>
-    apply orderOf_eq_prime_pow
-    · rw [hpow]
-      obtain ⟨t, ht⟩ := exists_five_pow_two_pow_eq_one_add m
-      rw [ht]
-      intro h
-      have h2 := (Nat.modEq_iff_dvd' (by omega)).1 h.symm
-      rw [Nat.add_sub_cancel_left, show m + 1 + 2 = (m + 2) + 1 by ring, pow_succ] at h2
-      have h3 := Nat.dvd_of_mul_dvd_mul_left (by positivity) h2
-      omega
-    · rw [hpow]
-      obtain ⟨t, ht⟩ := exists_five_pow_two_pow_eq_one_add (m + 1)
-      rw [ht]
-      exact ((Nat.modEq_iff_dvd' (by omega)).2
-        (by rw [Nat.add_sub_cancel_left]; exact dvd_mul_right _ _)).symm
+  apply Formalism.TwoAdicCyclotomicDecomposition.AdmissibleUnits.orderOf_five_units_two_pow <;> assumption
 
 lemma unitsMap_five_mod_four (n : ℕ) (h : 4 ∣ 2 ^ n) : ZMod.unitsMap h (u5 n) = 1 := by
   apply Units.ext

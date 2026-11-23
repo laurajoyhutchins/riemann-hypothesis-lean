@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.UniformEnergyBoundOfSection
 public import GroundTheory.HeightsAndTheta.Heights.AnalyticLimit.Objects
 public import GroundTheory.HeightsAndTheta.Heights.Regularisation.Statements
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocalDensityInclusionExclusionStatement
@@ -72,18 +73,7 @@ open GroundTheory.Heights₂.Heights.AnalyticLimit (TailLogBound tail)
 theorem tailLogBound_congr_φ {e : ℕ} {X : Type} [TopologicalSpace X] (A : FinHolAtlas e X)
     (Yo : Set X) (r : X → ℝ) {Φ Ψ : Fin e → LocPot X} (h : ∀ i, (Φ i).φ = (Ψ i).φ) (CE : ℝ)
     (H : TailLogBound A Yo r Φ CE) : TailLogBound A Yo r Ψ CE := by
-  have hD : locDens A Φ = locDens A Ψ := by
-    funext j y
-    simp only [locDens, h]
-  intro R₀ hR
-  obtain ⟨h1, h2⟩ := H R₀ hR
-  refine ⟨?_, ?_⟩
-  · unfold MIntegrable at h1 ⊢
-    rw [← hD]
-    exact h1
-  · unfold mInt integralWith at h2 ⊢
-    rw [← hD]
-    exact h2
+  apply _root_.GlobalTheory.CompanionTheory.Ar.Giv.tailLogBound_of_phi_eq <;> assumption
 
 theorem isPsh_reassoc {e : ℕ} {X : Type} [TopologicalSpace X] (A : FinHolAtlas e X)
     (a Θ : LocPot X) (v : X → ℝ) (h : IsPsh A (a + LocPot.ofFun v + Θ)) :

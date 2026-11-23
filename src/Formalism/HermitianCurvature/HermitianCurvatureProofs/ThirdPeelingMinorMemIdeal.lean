@@ -94,7 +94,6 @@ theorem dpsi_e_w (k r : ℕ) (z' : Fin (2 * r + k + 1) → ℂ) (p : ℕ) (hp : 
     dpsiP k r z' (pe k r p) (wI k r w) = if p + 1 = r then z' (wI k r w) else 0 := by
   have h1 : min p (2 * r + k) = p := by omega
   have hw : (wI k r w).val = r + w.val := rfl
-  have hwk := w.isLt
   simp only [dpsiP, pe_val, h1, hw]
   rw [if_neg (by omega), if_pos (by omega)]
 
@@ -203,7 +202,6 @@ theorem second_peeling_identity : PeelingCovector := by
       have := l.isLt
       apply hT_of _ _ _ (fun w => dpsiP k (m + 1) z' (pe k (m + 1) l.val) (wI k (m + 1) w))
       · intro w
-        have hw := w.isLt
         have hne : pe k (m + 1) l.val ≠ wI k (m + 1) w := by
           intro h2; have h3 := congrArg Fin.val h2; rw [pe_lt (by omega)] at h3; simp only [wI] at h3; omega
         rw [tm_offdiag _ _ hne]

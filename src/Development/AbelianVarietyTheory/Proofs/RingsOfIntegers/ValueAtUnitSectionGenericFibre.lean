@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ValueExpansionOfChartExpansion
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DivCalc
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.UniformisationConclusion
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.PullExp
@@ -69,28 +70,7 @@ theorem sval_of_secScal {X Y Y' Z : Scheme.{0}} {L : LB X} {K K' : Type} [Fintyp
     {s₂ : LB.Sec (LB.LinComb L φ₂ ε₂)} {h : Y' ⟶ Y} {c : Γ(Y', ⊤)} (H : GeneratorPullback.SecScal L φ₁ ε₁ s₁ φ₂ ε₂ s₂ h c)
     (r : Z ⟶ Y') (z : Z) {J} (hJ : Good L z J) :
     sval s₂ (r ≫ h) z J = gs r z ⊤ c * sval s₁ r z J := by
-  have hj : ∀ q : K ⊕ K', Sum.elim (fun k => J (r ≫ φ₁ k)) (fun k => J ((r ≫ h) ≫ φ₂ k)) q =
-      J (r ≫ Sum.elim φ₁ (fun k => h ≫ φ₂ k) q) := by
-    intro q
-    cases q with
-    | inl q => rfl
-    | inr q => exact congrArg J (Category.assoc _ _ _)
-  have key := H (fun k => J (r ≫ φ₁ k)) (fun k => J ((r ≫ h) ≫ φ₂ k))
-    (fun q₁ q₂ hq => by rw [hj, hj, hq])
-  have m₂ := hJ.mem φ₂ (r ≫ h)
-  have m : r z ∈ L.wchart φ₁ (fun k => J (r ≫ φ₁ k)) ⊓
-      L.wchart (fun k => h ≫ φ₂ k) (fun k => J ((r ≫ h) ≫ φ₂ k)) := by
-    refine ⟨hJ.mem φ₁ r, ?_⟩
-    have e₃ : (fun k => J ((r ≫ h) ≫ φ₂ k)) = (fun k => J (r ≫ (fun k => h ≫ φ₂ k) k)) :=
-      funext fun k => congrArg J (Category.assoc _ _ _)
-    rw [e₃]
-    exact hJ.mem (fun k => h ≫ φ₂ k) r
-  have e := congrArg (gs r z _) key
-  rw [gs_mul r z _ m] at e
-  unfold resTop at e
-  rw [gs_res r z _ m, gs_res r z _ m] at e
-  have p := gs_pull r h z _ m₂ (s₂.f fun k => J ((r ≫ h) ≫ φ₂ k))
-  exact p.symm.trans (e.trans (congrArg (gs r z ⊤ c * ·) (gs_res r z _ m _)))
+  apply GlobalTheory.UU.sval_of_secScal <;> assumption
 
 theorem isUnit_cst_generic {V : Type} [CommRing V] [IsDomain V] (y : Spec (CommRingCat.of (FractionRing V)))
     {c : V} (hc : c ≠ 0) : IsUnit (cst (jK V) y c) := by

@@ -64,7 +64,6 @@ def FrameThresholdBound : Prop :=
 theorem pow_bound (C x : ℝ) (n : ℕ) (hx : 0 ≤ x) (hC : 28 * Real.exp 1 ≤ C) :
     Real.exp 1 * (28 * x) ^ n ≤ C * (C * x) ^ n := by
   have he1 : (1 : ℝ) ≤ Real.exp 1 := by linarith [Real.add_one_le_exp (1 : ℝ)]
-  have hC28 : (28 : ℝ) ≤ C := by nlinarith
   have heC : Real.exp 1 ≤ C := by nlinarith
   have hpow : (28 * x) ^ n ≤ (C * x) ^ n := pow_le_pow_left₀ (by positivity) (by nlinarith) n
   exact mul_le_mul heC hpow (by positivity) (by linarith)

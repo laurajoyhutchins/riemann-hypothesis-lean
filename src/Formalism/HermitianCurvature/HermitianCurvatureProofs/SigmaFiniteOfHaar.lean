@@ -213,7 +213,6 @@ open Formalism.FourierDecayAlt.Q.QRR in
 theorem exists_pat (p q : Fin (2 * r + k + 1)) (h : C3.InNp k r p q) :
     ∃ l : Fin r, Pat k r l (Matrix.single p q (1 : ℂ)) := by
   obtain ⟨hpq, hW⟩ := h
-  have hq := q.isLt
   by_cases hp : p.val < r
   · by_cases hq2 : q.val ≤ 2 * r + k - p.val
     · exact ⟨⟨p.val, hp⟩, pat_single _ p q 1 (Or.inl ⟨rfl, hpq, hq2⟩)⟩

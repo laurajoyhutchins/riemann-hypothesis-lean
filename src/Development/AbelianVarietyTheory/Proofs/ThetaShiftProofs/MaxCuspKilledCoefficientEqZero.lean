@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.CuspFlowEqTorusAction
 public import Formalism.LocalToGlobal.ProjectiveLattices.ArchimedeanQuadraticData.MaximalCuspKernels.MaxCuspsSt
 public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.CountableOfIsAddFundamentalDomain
 public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.CuspFlowEqTorusActionStatement
@@ -88,28 +89,7 @@ theorem coefFn_eq_cubeCoeff {Ω : Type} {N : ℕ} (act : (Fin N → ℝ) → Ω 
 theorem herm_comb {E : Type} [Field E] [NumberField E] [IsCMField E] {r ρ : ℕ} {X : Data E r}
     (cu : CuspFD X ρ) (η : Fin ρ → E) :
     herm X.Gm (∑ a, η a • cu.e a) (∑ a, η a • cu.e a) = 0 := by
-  have key : herm X.Gm (∑ a, η a • cu.e a) (∑ a, η a • cu.e a) =
-      ∑ a, ∑ b, η a * cc (η b) * herm X.Gm (cu.e a) (cu.e b) := by
-
-    simp only [herm, cc, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, map_sum, map_mul,
-    Finset.mul_sum, Finset.sum_mul]
-    calc _ = ∑ k, ∑ b, ∑ l, ∑ a, η a * cu.e a k * X.Gm k l *
-            (IsCMField.complexConj E (η b) * IsCMField.complexConj E (cu.e b l)) :=
-          Finset.sum_congr rfl fun k _ => Finset.sum_comm
-      _ = ∑ b, ∑ k, ∑ a, ∑ l, η a * cu.e a k * X.Gm k l *
-            (IsCMField.complexConj E (η b) * IsCMField.complexConj E (cu.e b l)) := by
-          rw [Finset.sum_comm]
-          exact Finset.sum_congr rfl fun b _ => Finset.sum_congr rfl fun k _ => Finset.sum_comm
-      _ = ∑ b, ∑ a, ∑ k, ∑ l, η a * cu.e a k * X.Gm k l *
-            (IsCMField.complexConj E (η b) * IsCMField.complexConj E (cu.e b l)) :=
-          Finset.sum_congr rfl fun b _ => Finset.sum_comm
-      _ = _ := by
-          rw [Finset.sum_comm]
-          refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ =>
-            Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun l _ => ?_
-          ring
-  rw [key]
-  simp [cu.iso]
+  apply GlobalTheory.CuspFlow.herm_comb_eq_zero <;> assumption
 
 theorem coefFn_eq_zero_of_killed : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (r ρ : ℕ) (X : Data E r), (∀ cu : CuspFD X ρ, ∃ bs, IsZBasis X cu bs) → ∀ (la : Wt X.Ψ r), (∀ (cu : CuspFD X ρ) (β : Matrix (Fin ρ) (Fin ρ) E), β ∈ zGam X cu → ∀ γ ∈ X.Γ, (γ : Matrix (Fin r) (Fin r) E) = zMatE X cu.e β → X.χ la γ = 1) → ∀ (c : ℝ) (P : Frame X.Ψ r → ℂ), P ∈ X.SSgt la c → ∀ (cu : CuspFD X ρ) (χ : Matrix (Fin ρ) (Fin ρ) E), IsExpoFD X cu χ → KilledFD X cu χ c → ∀ x ∈ X.dom, coefFn (zAct X cu) (phZ X cu χ) P x = 0 := by
   intro E _ _ _ r ρ X hbas la hchi c P hP cu χ hχ hK x hx

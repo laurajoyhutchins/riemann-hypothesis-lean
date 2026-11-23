@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DeRhamFiniteAndFiltrationBounded
 public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.DpZeroRight
 public import Mathlib.Algebra.Exact.Basic
 public import Mathlib.RingTheory.Noetherian.Defs
@@ -105,22 +106,7 @@ theorem sq_inj (hba : ∀ T, b.S T ≤ a.S T) (T : C) :
 theorem sq_exact (hba : ∀ T, b.S T ≤ a.S T) (hcb : ∀ T, c.S T ≤ b.S T) (T : C) :
     Function.Exact ((sqLe (a := b) (b := c) (a' := a) (b' := c) hba fun _ => le_rfl).τ T)
       ((sqLe (a := a) (b := c) (a' := a) (b' := b) (fun _ => le_rfl) hcb).τ T) := by
-  intro x
-  obtain ⟨x', hx, rfl⟩ := sqM_rep a c T x
-  constructor
-  · intro h
-    have h' : (Ideal.Quotient.mk (b.S T) x') = 0 := congrArg Subtype.val h
-    exact ⟨sqMk b c x' (Ideal.Quotient.eq_zero_iff_mem.1 h'), rfl⟩
-  · rintro ⟨y, hy⟩
-    obtain ⟨y', hy', rfl⟩ := sqM_rep b c T y
-    have e : (Ideal.Quotient.mk (c.S T) y') = Ideal.Quotient.mk (c.S T) x' := congrArg Subtype.val hy
-    refine Subtype.ext ?_
-    change Ideal.Quotient.mk (b.S T) x' = 0
-    rw [Ideal.Quotient.eq_zero_iff_mem]
-    have := Ideal.Quotient.eq.1 e
-    have h2 := hcb T this
-    have h3 := (b.S T).sub_mem hy' h2
-    simpa using h3
+  apply GlobalTheory.CompanionTheory.KFin.sq_exact <;> assumption
 
 theorem sq_surj (hcb : ∀ T, c.S T ≤ b.S T) (T : C) :
     Function.Surjective ((sqLe (a := a) (b := c) (a' := a) (b' := b) (fun _ => le_rfl) hcb).τ T) := by
@@ -131,17 +117,7 @@ theorem sq_surj (hcb : ∀ T, c.S T ≤ b.S T) (T : C) :
 theorem sq_les (hba : ∀ T, b.S T ≤ a.S T) (hcb : ∀ T, c.S T ≤ b.S T) (n : ℕ) :
     Function.Exact ((sqLe (a := b) (b := c) (a' := a) (b' := c) hba fun _ => le_rfl).pull n)
       ((sqLe (a := a) (b := c) (a' := a) (b' := b) (fun _ => le_rfl) hcb).pull n) := by
-  obtain ⟨δ, -, -, e, -⟩ := CrystallineSemistableComparison.P.les
-    (sqLe (a := b) (b := c) (a' := a) (b' := c) hba fun _ => le_rfl).hom
-    (sqLe (a := a) (b := c) (a' := a) (b' := b) (fun _ => le_rfl) hcb).hom
-    (fun n x y h => funext fun s => sq_inj hba _ (congrFun h s))
-    (fun n y => ⟨fun hy => ⟨fun s => ((sq_exact hba hcb _ (y s)).1 (congrFun hy s)).choose,
-        funext fun s => ((sq_exact hba hcb _ (y s)).1 (congrFun hy s)).choose_spec⟩, by
-      rintro ⟨x, rfl⟩
-      funext s
-      exact (sq_exact hba hcb _ _).2 ⟨_, rfl⟩⟩)
-    (fun n y => ⟨fun s => (sq_surj hcb _ (y s)).choose, funext fun s => (sq_surj hcb _ (y s)).choose_spec⟩)
-  exact e n
+  apply GlobalTheory.CompanionTheory.KFin.sq_les <;> assumption
 
 theorem finite_dev [IsNoetherianRing R] (a : ℕ → IdF A) (hanti : ∀ k l, k ≤ l → ∀ T, (a l).S T ≤ (a k).S T) (s n : ℕ)
     (hgr : ∀ r, r < s → Module.Finite R (CH.H (sq (a r) (a (r + 1))) n)) :

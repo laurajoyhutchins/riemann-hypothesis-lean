@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.SesquilinearFractions.SesqSesquilinearSkewHermitian
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHodgeGram
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsHolPeriods
 public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.EigProjRegNeZero
@@ -143,27 +144,7 @@ theorem matrix_eq_zero_of_im {g : ℕ} {La : Type} [AddCommGroup La] (P : La →
 
 theorem trace_mul_sesq (D : Datum H) (a : 𝓞 E) (x y : D.La) :
     Algebra.trace ℚ E ((a : E) * sesq D x y) = ((D.EF (a • x) y : ℤ) : ℚ) := by
-  classical
-  have e1 : a • x = ∑ k, ((RingOfIntegers.basis E).repr a k) • (RingOfIntegers.basis E k • x) := by
-    conv_lhs => rw [← (RingOfIntegers.basis E).sum_repr a]
-    rw [Finset.sum_smul]
-    refine Finset.sum_congr rfl fun k _ => ?_
-    rw [smul_assoc]
-
-  rw [e1, map_sum, LinearMap.sum_apply, sesq, Finset.mul_sum, map_sum]
-  push_cast
-  refine Finset.sum_congr rfl fun k _ => ?_
-  have e2 : (a : E) * (((D.EF (RingOfIntegers.basis E k • x) y : ℤ) : E) * HT.dualInt E k) =
-      ((D.EF (RingOfIntegers.basis E k • x) y : ℤ) : ℚ) • (HT.dualInt E k * (a : E)) := by
-    rw [Rat.smul_def]
-    push_cast
-    ring
-  have e3 : D.EF (((RingOfIntegers.basis E).repr a k) • (RingOfIntegers.basis E k • x)) y =
-      ((RingOfIntegers.basis E).repr a k) * D.EF (RingOfIntegers.basis E k • x) y := by
-    rw [map_zsmul, LinearMap.smul_apply, smul_eq_mul]
-  rw [e2, map_smul, ← HT.LatTest.repr_eq_trace, e3]
-  push_cast
-  rw [smul_eq_mul, mul_comm]
+  apply GlobalTheory.CompanionTheory.Ar.Fl.trace_mul_sesq_eq_form <;> assumption
 
 theorem sesq_smul_left (D : Datum H) (a : 𝓞 E) (x y : D.La) :
     sesq D (a • x) y = (a : E) * sesq D x y := by

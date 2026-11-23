@@ -168,7 +168,6 @@ theorem majorant_estimate : C2.Majorant := by
 
 theorem norm_of_inverse : C2.NormInv := by
   intro k r g hg
-  have hH := GBasic.Hpk_herm k r
   have hsq := GBasic.Hpk_sq k r
   have hg' : gᴴ * Hpk k r * g = Hpk k r := hg
 

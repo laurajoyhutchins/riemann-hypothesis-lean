@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.FormalGroupNatMulSeriesEvalOpenDiscProperties
 public import Development.AbelianVarietyTheory.Definitions.Jets.PowerSeriesHasSumAt
 public import Mathlib.FieldTheory.IsAlgClosed.Basic
 public import Mathlib.Topology.MetricSpace.Ultra.Basic
@@ -58,24 +59,7 @@ namespace GlobalTheory.ConvSer
 
 theorem intg_nMul_of_intg (K : Type) [NormedField K] [IsUltrametricDist K] (F : FormalGroup K)
     (hF : Intg F.toPowerSeries) (n : ℕ) : Intg (nMul F n) := by
-  obtain ⟨-, -, -, -, hX, -, hsub, -⟩ := GlobalTheory.T.mvPowerSeries_integral_bounded_closure K Unit
-  induction n with
-  | zero =>
-    rw [nMul_zero]
-    intro ν
-    simp
-  | succ n ih =>
-    rw [nMul_succ]
-    have hc : PowerSeries.constantCoeff (nMul F n) = 0 := ((GlobalTheory.T.formalGroupNatMulSeries_properties K F).1 n).1
-    refine (hsub (Fin 2) ![nMul F n, PowerSeries.X] F.toPowerSeries ?_ ?_).1 hF
-    · intro j
-      fin_cases j
-      · exact ih
-      · exact (hX ()).1
-    · intro j
-      fin_cases j
-      · exact hc
-      · exact PowerSeries.constantCoeff_X
+  apply GlobalTheory.ConvSer.intg_nMul_for_point <;> assumption
 
 theorem exists_torsion_tower (K : Type) [NormedField K] [IsUltrametricDist K] [CompleteSpace K]
     [IsAlgClosed K] [CharZero K] (p : ℕ) [Fact p.Prime] (F : FormalGroup K)

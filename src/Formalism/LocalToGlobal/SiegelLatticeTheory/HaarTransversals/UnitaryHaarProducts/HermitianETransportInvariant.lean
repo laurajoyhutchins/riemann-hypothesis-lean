@@ -258,7 +258,6 @@ theorem hA_e_prA (y : VA X.B.I) (a : Fin D.R.rS) : hA X.B.I (incl X.B.I (X.eR a)
   have key : ∀ v w : VA X.B.I, hA X.B.I v w = hAlin X v w := fun v w => by
     first
     | rfl
-    | simp [hAlin]
   rw [key, prA_apply]
 
   simp only [map_sub, map_sum, map_smul, smul_eq_mul]
@@ -340,7 +339,6 @@ theorem natsmul_eq (c : ℕ) (y : VA X.B.I) :
     ((c : X.B.I.E ⊗[X.B.I.F] Af X.B.I.F) • y) = c • y := by
   first
   | exact Nat.cast_smul_eq_nsmul _ c y
-  | simp
 
 theorem natsmul_mem {N : Submodule (IntAf X.B.I.F X.B.I.E) (VA X.B.I)} (c : ℕ) {y : VA X.B.I} (hy : y ∈ N) :
     (c : X.B.I.E ⊗[X.B.I.F] Af X.B.I.F) • y ∈ N := by
@@ -351,7 +349,6 @@ theorem intsmul_mem {N : Submodule (IntAf X.B.I.F X.B.I.E) (VA X.B.I)} {t : X.B.
     (ht : t ∈ IntAf X.B.I.F X.B.I.E) {y : VA X.B.I} (hy : y ∈ N) : t • y ∈ N := by
   first
   | exact N.smul_mem ⟨t, ht⟩ hy
-  | simpa using N.smul_mem ⟨t, ht⟩ hy
 
 theorem mL_le_Lf : mL X.B.I X.B.g ≤ X.B.I.Lf := by
   unfold mL
@@ -1065,21 +1062,18 @@ theorem nxt_rv (v : InfinitePlace X.B.I.F) (a : Fin D.R.rS) :
   first
   | (unfold nxt; split_ifs <;> rfl)
   | (unfold nxt; split <;> rfl)
-  | rfl
 
 theorem nxt_incl (a : Fin D.R.rS) :
     incl X.B.I (nxt X.eR (X.zR u) a) = nxt (fun b => incl X.B.I (X.eR b)) (incl X.B.I (X.zR u)) a := by
   first
   | (unfold nxt; split_ifs <;> rfl)
   | (unfold nxt; split <;> rfl)
-  | rfl
 
 theorem algebraMap_tens (x : X.B.I.F) :
     algebraMap X.B.I.F (X.B.I.E ⊗[X.B.I.F] Af X.B.I.F) x =
       Formalism.UG.inclE (F := X.B.I.F) (Af X.B.I.F) (algebraMap X.B.I.F X.B.I.E x) := by
   first
   | rfl
-  | simp [Formalism.UG.inclE, Algebra.TensorProduct.algebraMap_apply]
 
 theorem psiProd_holds : PsiProd X u := by
   intro ν hν _ _
@@ -1306,7 +1300,6 @@ theorem hE_sub_PW_self (y y' : Fin X.B.I.n → X.B.I.E) :
   calc hE X y y' = hE X (PW X u y + (y - PW X u y)) (PW X u y' + (y' - PW X u y')) := by
         first
         | (congr 1 <;> abel)
-        | simp
     _ = hE X (PW X u y) (PW X u y') + hE X (y - PW X u y) (y' - PW X u y') := by
         rw [hE_add_left, hE_add_right, hE_add_right]
         simp only [h1, h2, add_zero, zero_add]
@@ -1415,8 +1408,6 @@ theorem Hm_mulVec (G : Matrix (Fin X.B.I.n) (Fin X.B.I.n) X.B.I.E) (y : Fin X.B.
     Hm (X := X) (u := u) G *ᵥ y = Hf (X := X) (u := u) G y := by
   first
   | (rw [Hm, LinearMap.toMatrix'_mulVec]; rfl)
-  | rw [Hm, LinearMap.toMatrix'_mulVec]
-  | simp [Hm, Hl]
 
 theorem Hm_fix (G : Matrix (Fin X.B.I.n) (Fin X.B.I.n) X.B.I.E) (y : Fin X.B.I.n → X.B.I.E)
     (hy : PW X u y = 0) : Hm (X := X) (u := u) G *ᵥ y = y := by
@@ -1460,7 +1451,6 @@ theorem HGL_mem {G G' : Matrix (Fin X.B.I.n) (Fin X.B.I.n) X.B.I.E} (h : SRat (u
     HGL h ∈ Formalism.UG.UJ (starRingEnd X.B.I.E) X.B.I.J := by
   first
   | exact unit_of_form X _ h.hE_H
-  | simp [Formalism.UG.UJ, HGL_coe, unit_of_form X _ h.hE_H]
 
 end Levi
 
@@ -1688,7 +1678,6 @@ theorem fmat_ratGA_inv (H : GL (Fin X.B.I.n) X.B.I.E) (hH : H ∈ Formalism.UG.U
         (Formalism.UG.inclE (F := X.B.I.F) (Af X.B.I.F)) := by
   first
   | rfl
-  | simp [ratGA, ratFin]
 
 end Emb
 

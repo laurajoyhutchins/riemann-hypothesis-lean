@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.MonicPolynomialsHaveRootsIntegralClosureAlgClosu
 public import Development.EtaleCohomology.EtaleSheaves.EtaleDegreeZeroCohomologyEquivLocallyConstantFun
 import Mathlib.Algebra.AffineMonoid.Basic
 import Mathlib.Algebra.Order.Floor.Extended
@@ -56,23 +57,7 @@ theorem inj_sub (P : Type) [CommRing P] [IsDomain P] :
 
 theorem aic_integralClosure (P : Type) [CommRing P] [IsDomain P] :
     AIC (integralClosure P (AlgebraicClosure (FractionRing P))) := by
-  intro p hp hdeg
-  have hdeg' : (p.map (algebraMap (integralClosure P (AlgebraicClosure (FractionRing P))) (AlgebraicClosure (FractionRing P)))).degree ≠ 0 := by
-    rw [Polynomial.degree_map_eq_of_injective (inj_sub P)]
-    intro h
-    rw [Polynomial.degree_eq_natDegree hp.ne_zero] at h
-    norm_cast at h
-    omega
-  obtain ⟨a, ha⟩ := IsAlgClosed.exists_root _ hdeg'
-  have hTa : IsIntegral (integralClosure P (AlgebraicClosure (FractionRing P))) a :=
-    ⟨p, hp, by simpa [Polynomial.IsRoot, Polynomial.eval_map_algebraMap, Polynomial.aeval_def] using ha⟩
-  have hPa : IsIntegral P a := isIntegral_trans a hTa
-  have ha' : Polynomial.eval₂ (algebraMap (integralClosure P (AlgebraicClosure (FractionRing P))) (AlgebraicClosure (FractionRing P))) a p = 0 := by
-    simpa [Polynomial.IsRoot, Polynomial.eval_map_algebraMap, Polynomial.aeval_def] using ha
-  refine ⟨⟨a, hPa⟩, ?_⟩
-  apply inj_sub P
-  rw [map_zero, ← Polynomial.eval₂_at_apply]
-  exact ha'
+  apply GlobalTheory.aic_integralClosure_algebraicClosure <;> assumption
 
 theorem inj_P (P : Type) [CommRing P] [IsDomain P] :
     Function.Injective (algebraMap P (integralClosure P (AlgebraicClosure (FractionRing P)))) := by

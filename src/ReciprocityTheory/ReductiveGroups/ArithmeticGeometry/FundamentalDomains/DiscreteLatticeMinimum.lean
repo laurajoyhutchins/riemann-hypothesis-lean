@@ -321,11 +321,6 @@ theorem covering (hD3 : IntegerApproximationCount (E := E)) (hep : 0 < ep0) (d :
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [sub_smul, ← Int.cast_smul_eq_zsmul ℝ]
   rw [hdiff]
-  have hlam0 : 0 < Y.k0 * Real.sqrt ep0 / Y.NA := by
-    have h1 := Y.minWeight_pos
-    have h2 : (0 : ℝ) < Y.NA := by exact_mod_cast Y.NA_pos
-    have h3 := Real.sqrt_pos.mpr hep
-    positivity
   calc ‖∑ i, (c i - round (c i)) • y i‖ ≤ ∑ i, ‖(c i - round (c i)) • y i‖ := norm_sum_le _ _
     _ ≤ ∑ _i : Fin (finrank ℝ (VT (X := Y.toData) z ξ)), (1 / 2) *
         ((finrank ℝ (VT (X := Y.toData) z ξ) : ℝ) ^ 2 / (Y.k0 * Real.sqrt ep0 / Y.NA)) := by

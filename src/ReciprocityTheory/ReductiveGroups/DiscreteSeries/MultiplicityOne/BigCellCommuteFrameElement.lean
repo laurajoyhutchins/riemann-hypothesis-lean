@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JInvGroupA
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.MulVecApplyOfRow
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.StDefs
 import Mathlib.Algebra.Order.Floor.Extended
@@ -92,19 +93,7 @@ lemma gbar_one : gbar k r γ 1 = 1 := by
     Matrix.mul_nonsing_inv _ hE]
 
 lemma gbar_gbar (g : Mat k r) : gbar k r γ (gbar k r γ g) = g := by
-  unfold gbar
-  have h1 : (embWb k r γ)⁻¹ * (embWb k r γ * ((embWb k r γ)⁻¹ * g * embWb k r γ).map (starRingEnd ℂ) *
-      (embWb k r γ)⁻¹) * embWb k r γ = ((embWb k r γ)⁻¹ * g * embWb k r γ).map (starRingEnd ℂ) := by
-    simp only [Matrix.mul_assoc, Matrix.nonsing_inv_mul_cancel_left _ _ hE, Matrix.nonsing_inv_mul _ hE,
-      Matrix.mul_one]
-  rw [h1]
-  have h2 : (((embWb k r γ)⁻¹ * g * embWb k r γ).map (starRingEnd ℂ)).map (starRingEnd ℂ) =
-      (embWb k r γ)⁻¹ * g * embWb k r γ := by
-    ext i j
-    rw [Matrix.map_apply, Matrix.map_apply, Complex.conj_conj]
-  rw [h2]
-  simp only [Matrix.mul_assoc, Matrix.mul_nonsing_inv_cancel_left _ _ hE, Matrix.mul_nonsing_inv _ hE,
-    Matrix.mul_one]
+  apply ReciprocityTheory.ChartRestriction.DS.Mult1.InvGrp.gbar_gbar <;> assumption
 
 lemma gbar_mul_inv {x : Mat k r} (hx : IsUnit x.det) : gbar k r γ x * gbar k r γ x⁻¹ = 1 := by
   rw [← gbar_mul γ hE, Matrix.mul_nonsing_inv _ hx, gbar_one γ hE]

@@ -1,5 +1,6 @@
 module
 
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutJDHatJDRInvEig
 public import Formalism.LocalToGlobal.GroupLattices.FockModels.FlatModels.Letter
 public import Formalism.SharpRestriction.GrowthBounds.ObjSeg
 public import Formalism.GradedWeylDivisibility.FinalD
@@ -251,33 +252,7 @@ theorem theta_Hd_le (R : Type) [CommRing R] (m d : ℕ) (vec : Bool) :
 
 theorem exists_succAbove {m : ℕ} (I : Fin m → Fin (m + 1)) (hI : StrictMono I) :
     ∃ c : Fin (m + 1), I = c.succAbove := by
-  classical
-  have hinj := hI.injective
-  have hcard : (Finset.univ \ Finset.univ.image I).card = 1 := by
-    first
-      | rw [Finset.card_sdiff (Finset.subset_univ _), Finset.card_image_of_injective _ hinj]
-      | rw [Finset.card_sdiff_of_subset (Finset.subset_univ _), Finset.card_image_of_injective _ hinj]
-    simp
-  obtain ⟨c, hc⟩ := Finset.card_eq_one.1 hcard
-  refine ⟨c, (StrictMono.range_inj hI (Fin.strictMono_succAbove c)).1 ?_⟩
-  rw [Fin.range_succAbove]
-  ext x
-  simp only [Set.mem_range, Set.mem_compl_iff, Set.mem_singleton_iff]
-  constructor
-  · rintro ⟨y, rfl⟩ hy
-    have h1 : I y ∈ Finset.univ \ Finset.univ.image I := by
-      rw [hc, hy]
-      exact Finset.mem_singleton_self _
-    simp at h1
-  · intro hx
-    by_contra hne
-    have h1 : x ∈ Finset.univ \ Finset.univ.image I := by
-      simp only [Finset.mem_sdiff, Finset.mem_univ, Finset.mem_image, true_and]
-      intro hex
-      apply hne
-      simpa using hex
-    rw [hc] at h1
-    exact hx (Finset.mem_singleton.1 h1)
+  apply Formalism.FourierDecayAlt.P.CutMP.InvEig.smono_succAbove <;> assumption
 
 theorem minor_pre (R : Type) [CommRing R] (m : ℕ) (hm : 1 ≤ m) (vec : Bool) (s : ℕ) (hs : s ≤ m + 1)
     (I : Fin s → Fin (m + 1)) (hI : StrictMono I) (h : s = 0 ∨ s = s0 m vec) :

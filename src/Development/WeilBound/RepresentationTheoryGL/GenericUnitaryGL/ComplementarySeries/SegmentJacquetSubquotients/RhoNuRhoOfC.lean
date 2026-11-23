@@ -1,5 +1,6 @@
 module
 
+import CompanionTheory.RealGroups.GeneralUnitaryRepresentations.ArchimedeanJacquetSegments.SegmentSubquotients.RhoNuRhoOfC
 public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.Complementary
 public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.ComplementarySeries.SegmentJacquetSubquotients.HasFiniteLengthJacSub
 public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.MirabolicDerivatives.SegmentCuspLines.CuspLinesIrr
@@ -72,39 +73,7 @@ open RedC in
 
 theorem redCl_ofC (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k]
     (h1 : SomeRed k) (h2 : CuspUnit k) (h3 : GlobalTheory.BZSeg.CuspPairIrr k) : RedCl k := by
-  intro y hy N hd hirr
-  obtain ⟨ρ, z, hρ, hu, rfl⟩ := h2 y hy
-  obtain ⟨s, hs0, hs⟩ := h1 ρ hρ hu
-  have hpos : 0 < ρ.1 := hρ.1
-  have hs2 : s = 1 / 2 := by
-    by_contra hne
-    have hd0 : ∑ a, (![ρ.nu (-(s : ℂ)), ρ.nu (s : ℂ)] a).1 = ∑ a, (![ρ.nu (-(s : ℂ)), ρ.nu (s : ℂ)] a).1 := rfl
-    refine hs _ hd0 (h3 _ _ _ hd0 (hρ.nu _) (hρ.nu _) ?_ ?_)
-    · intro e
-      rw [IrrGL.nu_nu, show -(s : ℂ) + 1 = ((-s + 1 : ℝ) : ℂ) by push_cast; ring] at e
-      have := (IrrGL.nu_ofReal_inj hpos).1 e
-      exact hne (by linarith)
-    · intro e
-      rw [IrrGL.nu_nu, show -(s : ℂ) = ((-s : ℝ) : ℂ) by push_cast; ring,
-        show (s : ℂ) + 1 = ((s + 1 : ℝ) : ℂ) by push_cast; ring] at e
-      have := (IrrGL.nu_ofReal_inj hpos).1 e
-      linarith
-  set t : ℂ := -((z : ℂ) + 1 / 2) with ht
-  have key : (fun a => (![ρ.nu (z : ℂ), (ρ.nu (z : ℂ)).nu 1] a).nu t) = ![ρ.nu (-(s : ℂ)), ρ.nu (s : ℂ)] := by
-    funext a
-    fin_cases a
-    · simp only [Fin.zero_eta, Matrix.cons_val_zero]
-      rw [IrrGL.nu_nu, hs2, ht]
-      congr 1
-      push_cast
-      ring
-    · simp only [Fin.mk_one, Matrix.cons_val_one, Matrix.cons_val_fin_one, Matrix.head_cons]
-      rw [IrrGL.nu_nu, IrrGL.nu_nu, hs2, ht]
-      congr 1
-      push_cast
-      ring
-  obtain ⟨hd', hiff⟩ := irr_congr key hd
-  exact hs N hd' (hiff.1 (irr_tw _ hd t hirr))
+  apply CompanionTheory.RgGu.NR.redCl_ofC <;> assumption
 
 theorem rhoNuRho_ofC (h : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k],
     RedCl k) : PositivityTheory.Pf1.SegRepC.SegTwo.RhoNuRhoReducible := by

@@ -1,5 +1,6 @@
 module
 
+import Formalism.GL3MeanSquares.GenusMeanAsymptotics.UnimodularClassRepresentatives.AlgebraMapNeZeroOfMemHcompl
 public import Formalism.PeriodIntegrals.HermitianGenusExtension.SemilocalHermitianLattices.ExistsNormOneOfPair
 public import Formalism.HermitianLattices.StatementMass
 public import Formalism.PeriodIntegrals.HermitianGenusExtension.SemilocalHermitianLattices.MassSt
@@ -86,21 +87,7 @@ theorem hcompl_eq_closure (p : Ideal (𝓞 K)) :
 
 theorem mem_hcompl_iff {p : Ideal (𝓞 K)} (hp : p.IsPrime) (s : 𝓞 K) :
     s ∈ Formalism.HermitianLatticesTheory.hcompl (K := K) p ↔ s ∉ p ∧ s ∉ Formalism.HermitianLatticesTheory.conjIdeal (K := K) p := by
-  rw [hcompl_eq_closure, mem_conjIdeal_iff]
-  constructor
-  · intro hs
-    induction hs using Submonoid.closure_induction with
-    | mem x hx => exact hx
-    | one =>
-      refine ⟨fun h => hp.ne_top ((Ideal.eq_top_iff_one _).2 h), ?_⟩
-      rw [map_one]
-      exact fun h => hp.ne_top ((Ideal.eq_top_iff_one _).2 h)
-    | mul x y _ _ hx hy =>
-      refine ⟨fun h => (hp.mem_or_mem h).elim hx.1 hy.1, ?_⟩
-      rw [map_mul]
-      exact fun h => (hp.mem_or_mem h).elim hx.2 hy.2
-  · intro h
-    exact Submonoid.subset_closure h
+  apply Formalism.HermitianLattices.Ext.L3.WA.mem_hcompl_iff <;> assumption
 
 theorem conjO_mem_hcompl {p : Ideal (𝓞 K)} {s : 𝓞 K} (hs : s ∈ Formalism.HermitianLatticesTheory.hcompl (K := K) p) :
     conjO K s ∈ Formalism.HermitianLatticesTheory.hcompl (K := K) p := by

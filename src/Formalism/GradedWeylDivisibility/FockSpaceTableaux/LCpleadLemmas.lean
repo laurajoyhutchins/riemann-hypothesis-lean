@@ -1,5 +1,6 @@
 module
 
+import Formalism.GradedWeylDivisibility.FockSpaceTableaux.LCpeelLemmas
 public import Formalism.GradedWeylDivisibility.StatementC
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -69,24 +70,7 @@ theorem lcplead_weight_apply {r n : ℕ} (l j : Fin n) (hlj : l ≠ j) (d : Fin 
     (b : Fin r) (t : Fin n) :
     Finsupp.weight (pairW l j) d (b, t) =
       if t = l then d (b, l) + d (b, j) else if t = j then 0 else d (b, t) := by
-  classical
-  rw [Finsupp.weight_apply, Finsupp.sum_fintype _ _ (by simp), Finsupp.finsetSum_apply]
-  simp only [Finsupp.smul_apply, pairW_apply, smul_eq_mul]
-  split_ifs with h1 h2
-  · subst h1
-    rw [Fintype.sum_eq_add (b, t) (b, j) (by simp [hlj])]
-    · simp [hlj]
-    · rintro ⟨a, s⟩ ⟨ha1, ha2⟩
-      by_cases hs : s = j <;> simp_all [Prod.ext_iff]
-  · subst h2
-    refine Finset.sum_eq_zero fun x _ => ?_
-    obtain ⟨a, s⟩ := x
-    by_cases hs : s = t <;> simp_all [Prod.ext_iff]
-  · rw [Fintype.sum_eq_single (b, t)]
-    · simp [h2]
-    · rintro ⟨a, s⟩ hx
-      have h1' : l ≠ t := Ne.symm h1
-      by_cases hs : s = j <;> simp_all [Prod.ext_iff]
+  apply Formalism.GradedWeylDivisibility.lcpeel_weight_apply <;> assumption
 
 section
 variable {B : Type*} [CommRing B] {r n : ℕ} {l j : Fin n}

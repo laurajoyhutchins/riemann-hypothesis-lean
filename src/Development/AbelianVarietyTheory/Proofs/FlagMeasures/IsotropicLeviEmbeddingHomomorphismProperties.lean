@@ -90,59 +90,43 @@ theorem u_ee : uEmb k r u (eI k r a) (eI k r b) = u a b := by
   simp only [uEmb, dif_pos h]
   rfl
 theorem u_em : uEmb k r u (eI k r a) (mI k r n) = 0 := by
-  have ha := a.2
   have va : (eI k r a).val = a.val := rfl
-  have vsa : (esI k r a).val = 2 * r + k - a.val := rfl
-  have hn := n.2
   have vn : (mI k r n).val = r + n.val := rfl
   simp only [uEmb]
   split_ifs <;> simp_all [Fin.ext_iff] <;> omega
 theorem u_es : uEmb k r u (eI k r a) (esI k r b) = 0 := by
-  have ha := a.2
   have va : (eI k r a).val = a.val := rfl
-  have vsa : (esI k r a).val = 2 * r + k - a.val := rfl
-  have hb := b.2
   have vb : (eI k r b).val = b.val := rfl
   have vsb : (esI k r b).val = 2 * r + k - b.val := rfl
   simp only [uEmb]
   split_ifs <;> simp_all [Fin.ext_iff] <;> omega
 theorem u_me : uEmb k r u (mI k r m) (eI k r b) = 0 := by
-  have hm := m.2
   have vm : (mI k r m).val = r + m.val := rfl
   have hb := b.2
   have vb : (eI k r b).val = b.val := rfl
-  have vsb : (esI k r b).val = 2 * r + k - b.val := rfl
   simp only [uEmb]
   split_ifs <;> simp_all [Fin.ext_iff] <;> omega
 theorem u_mm : uEmb k r u (mI k r m) (mI k r n) = if m = n then 1 else 0 := by
-  have hm := m.2
   have vm : (mI k r m).val = r + m.val := rfl
-  have hn := n.2
   have vn : (mI k r n).val = r + n.val := rfl
   simp only [uEmb]
   split_ifs <;> simp_all [Fin.ext_iff] <;> omega
 theorem u_ms : uEmb k r u (mI k r m) (esI k r b) = 0 := by
   have hm := m.2
   have vm : (mI k r m).val = r + m.val := rfl
-  have hb := b.2
   have vb : (eI k r b).val = b.val := rfl
   have vsb : (esI k r b).val = 2 * r + k - b.val := rfl
   simp only [uEmb]
   split_ifs <;> simp_all [Fin.ext_iff] <;> omega
 theorem u_se : uEmb k r u (esI k r a) (eI k r b) = 0 := by
-  have ha := a.2
   have va : (eI k r a).val = a.val := rfl
   have vsa : (esI k r a).val = 2 * r + k - a.val := rfl
   have hb := b.2
   have vb : (eI k r b).val = b.val := rfl
-  have vsb : (esI k r b).val = 2 * r + k - b.val := rfl
   simp only [uEmb]
   split_ifs <;> simp_all [Fin.ext_iff] <;> omega
 theorem u_sm : uEmb k r u (esI k r a) (mI k r n) = 0 := by
-  have ha := a.2
-  have va : (eI k r a).val = a.val := rfl
   have vsa : (esI k r a).val = 2 * r + k - a.val := rfl
-  have hn := n.2
   have vn : (mI k r n).val = r + n.val := rfl
   simp only [uEmb]
   split_ifs <;> simp_all [Fin.ext_iff] <;> omega
@@ -233,10 +217,8 @@ theorem mI_inj : mI k r m = mI k r n ↔ m = n := by
   · intro h
     rw [h]
 theorem esI_inj : esI k r a = esI k r b ↔ a = b := by
-  have ha := a.2
   have va : (eI k r a).val = a.val := rfl
   have vsa : (esI k r a).val = 2 * r + k - a.val := rfl
-  have hb := b.2
   have vb : (eI k r b).val = b.val := rfl
   have vsb : (esI k r b).val = 2 * r + k - b.val := rfl
   constructor
@@ -249,8 +231,6 @@ theorem esI_inj : esI k r a = esI k r b ↔ a = b := by
 theorem eI_ne_mI : eI k r a ≠ mI k r m := by
   have ha := a.2
   have va : (eI k r a).val = a.val := rfl
-  have vsa : (esI k r a).val = 2 * r + k - a.val := rfl
-  have hm := m.2
   have vm : (mI k r m).val = r + m.val := rfl
   intro h
   have h' := congrArg Fin.val h
@@ -259,7 +239,6 @@ theorem eI_ne_mI : eI k r a ≠ mI k r m := by
 theorem eI_ne_esI : eI k r a ≠ esI k r b := by
   have ha := a.2
   have va : (eI k r a).val = a.val := rfl
-  have vsa : (esI k r a).val = 2 * r + k - a.val := rfl
   have hb := b.2
   have vb : (eI k r b).val = b.val := rfl
   have vsb : (esI k r b).val = 2 * r + k - b.val := rfl
@@ -278,11 +257,9 @@ theorem mI_ne_esI : mI k r m ≠ esI k r b := by
   rw [vm, vsb] at h'
   omega
 theorem mI_ne_eI : mI k r m ≠ eI k r a := by
-  have hm := m.2
   have vm : (mI k r m).val = r + m.val := rfl
   have ha := a.2
   have va : (eI k r a).val = a.val := rfl
-  have vsa : (esI k r a).val = 2 * r + k - a.val := rfl
   intro h
   have h' := congrArg Fin.val h
   rw [vm, va] at h'
@@ -293,7 +270,6 @@ theorem esI_ne_eI : esI k r b ≠ eI k r a := by
   have vsb : (esI k r b).val = 2 * r + k - b.val := rfl
   have ha := a.2
   have va : (eI k r a).val = a.val := rfl
-  have vsa : (esI k r a).val = 2 * r + k - a.val := rfl
   intro h
   have h' := congrArg Fin.val h
   rw [vsb, va] at h'

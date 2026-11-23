@@ -1,5 +1,6 @@
 module
 
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ConjugationInvarianceEverySetting
 public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
 public import Formalism.FormalDegreeBessel.FinalG
 import Mathlib.Algebra.Module.StablyFree.Basic
@@ -206,29 +207,7 @@ lemma H_lev_iL (k r' : ℕ) (i : Fin (2 * r' + k + 1)) : Hpk k (1 + r') (levPos 
 
 lemma H_lev_lev (k r' : ℕ) (i j : Fin (2 * r' + k + 1)) :
     Hpk k (1 + r') (levPos k 1 r' i) (levPos k 1 r' j) = Hpk k r' i j := by
-  have hi := i.isLt
-  have hj := j.isLt
-  have hij : levPos k 1 r' i = levPos k 1 r' j ↔ i = j := by
-    rw [Fin.ext_iff, Fin.ext_iff, lev_val, lev_val]
-    exact ⟨fun h => by omega, fun h => by omega⟩
-  have e1 : ((levPos k 1 r' i).val < 1 + r' ∧
-      (levPos k 1 r' i).val + (levPos k 1 r' j).val = 2 * (1 + r') + k) ↔
-      (i.val < r' ∧ i.val + j.val = 2 * r' + k) := by
-    rw [lev_val, lev_val]
-    exact ⟨fun ⟨h1, h2⟩ => ⟨by omega, by omega⟩, fun ⟨h1, h2⟩ => ⟨by omega, by omega⟩⟩
-  have e2 : ((levPos k 1 r' j).val < 1 + r' ∧
-      (levPos k 1 r' i).val + (levPos k 1 r' j).val = 2 * (1 + r') + k) ↔
-      (j.val < r' ∧ i.val + j.val = 2 * r' + k) := by
-    rw [lev_val, lev_val]
-    exact ⟨fun ⟨h1, h2⟩ => ⟨by omega, by omega⟩, fun ⟨h1, h2⟩ => ⟨by omega, by omega⟩⟩
-  have e3 : (1 + r' ≤ (levPos k 1 r' i).val ∧ (levPos k 1 r' i).val ≤ 1 + r' + k ∧
-      levPos k 1 r' i = levPos k 1 r' j) ↔ (r' ≤ i.val ∧ i.val ≤ r' + k ∧ i = j) := by
-    rw [hij, lev_val]
-    exact ⟨fun ⟨h1, h2, h3⟩ => ⟨by omega, by omega, h3⟩, fun ⟨h1, h2, h3⟩ => ⟨by omega, by omega, h3⟩⟩
-  have e4 : (levPos k 1 r' i).val = 1 + r' + k ↔ i.val = r' + k := by
-    rw [lev_val]
-    exact ⟨fun h => by omega, fun h => by omega⟩
-  exact if_congr e1 rfl (if_congr e2 rfl (if_congr e3 (if_congr e4 rfl rfl) rfl))
+  apply Formalism.FourierDecayAlt.P.B2x4.Hpk_levPos <;> assumption
 
 lemma hermitian_matrix_mul_first (k r' : ℕ) (u : Fin (2 * (1 + r') + k + 1) → ℂ) : (Hpk k (1 + r') *ᵥ u) (i0 k r') = u (iL k r') := by
   simp [mulVec, dotProduct, hermitian_form_first_basis]

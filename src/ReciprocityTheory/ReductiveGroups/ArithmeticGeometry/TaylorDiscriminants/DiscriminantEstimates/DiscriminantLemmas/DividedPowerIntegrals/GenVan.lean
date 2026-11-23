@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.DiscriminantEstimates.DiscriminantLemmas.WickFormula.GenVan
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.DiscriminantEstimates.DiscriminantLemmas.DividedPowerIntegrals.GenDefs
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -83,29 +84,7 @@ theorem pderiv_mem_lowDeg {f : ι → σ} {t : ℕ} (k : σ) {R : MvPolynomial �
 
 theorem pderiv_mem_lowDeg_of_succ {f : ι → σ} {t : ℕ} (i : ι) {R : MvPolynomial σ K}
     (h : R ∈ lowDeg f (t + 1)) : pderiv (f i) R ∈ lowDeg f t := by
-  rw [mem_lowDeg] at h
-
-  rw [R.as_sum, map_sum]
-  refine Submodule.sum_mem _ (fun m hm => ?_)
-  rw [pderiv_monomial]
-  by_cases h0 : m (f i) = 0
-  · rw [h0]
-    simp
-  · rw [mem_lowDeg]
-    intro m' hm'
-    rw [Finset.mem_singleton.mp (support_monomial_subset hm')]
-    have hlt := h m hm
-    have key : ∑ i', (m - Finsupp.single (f i) 1 : σ →₀ ℕ) (f i') + 1 ≤ ∑ i', m (f i') := by
-      classical
-      rw [← Finset.add_sum_erase _ _ (Finset.mem_univ i), ← Finset.add_sum_erase _ _ (Finset.mem_univ i)]
-      have h1 : (m - Finsupp.single (f i) 1 : σ →₀ ℕ) (f i) + 1 = m (f i) := by
-        rw [Finsupp.tsub_apply, Finsupp.single_eq_same]
-        omega
-      have h2 : ∑ x ∈ Finset.univ.erase i, (m - Finsupp.single (f i) 1 : σ →₀ ℕ) (f x) ≤
-          ∑ x ∈ Finset.univ.erase i, m (f x) :=
-        Finset.sum_le_sum (fun x _ => by rw [Finsupp.tsub_apply]; exact Nat.sub_le _ _)
-      omega
-    omega
+  apply PI.WickFormula.Gen.pderiv_mem_lowDeg_of_succ <;> assumption
 
 theorem pow_apply_eq_zero_of_lowDeg (D : Module.End K (MvPolynomial σ K)) (f : ι → σ)
     (hD : ∀ t R, R ∈ lowDeg f (t + 1) → D R ∈ lowDeg f t) :

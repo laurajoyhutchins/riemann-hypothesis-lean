@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RelevantCarrierNonempty.InSCarrierNonempty
 public import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.CellDef
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -198,24 +199,7 @@ theorem geo_fvec_perp (F : FlagG S r T) (p : Fin (r + 1)) : F.fvec p ∈ perpS S
 
 theorem geo_coefX (F : FlagG S r T) (a : Fin r) (c : E) (y : S.V) (hy : y ∈ F.Xa a.val) :
     F.coefX (c • F.e a + y) a = c := by
-  classical
-  unfold FlagG.Xa at hy
-  obtain ⟨l, hl, rfl⟩ := (Finsupp.mem_span_image_iff_linearCombination (R := E)).1 hy
-  have hmem : c • F.e a + Finsupp.linearCombination E F.e l ∈ Submodule.span E (Set.range F.e) := by
-    refine Submodule.add_mem _ (Submodule.smul_mem _ _ (Submodule.subset_span ⟨a, rfl⟩)) ?_
-    exact Submodule.span_mono (Set.image_subset_range _ _)
-      ((Finsupp.mem_span_image_iff_linearCombination (R := E)).2 ⟨l, hl, rfl⟩)
-  have hla : l a = 0 := by
-    by_contra hne
-    rw [Finsupp.mem_supported] at hl
-    have := hl (Finset.mem_coe.2 (Finsupp.mem_support_iff.2 hne))
-    simp at this
-  have heq : F.e_indep.repr ⟨_, hmem⟩ = Finsupp.single a c + l := by
-    apply F.e_indep.repr_eq
-    simp [Finsupp.linearCombination_single]
-  unfold FlagG.coefX
-  rw [dif_pos hmem, heq]
-  simp [hla]
+  apply PI.UnitaryGroupMassFormula.InSRelevantW.coefX_single_add <;> assumption
 
 variable {j : ℕ} (hj : j ≤ r + 1)
 

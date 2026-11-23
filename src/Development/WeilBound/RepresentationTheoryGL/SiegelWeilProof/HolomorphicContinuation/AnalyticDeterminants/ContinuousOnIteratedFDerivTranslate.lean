@@ -530,62 +530,12 @@ theorem transpose (hI : InfInv) (F1 F2 : M2 n → ℂ) (χ1 χ2 : M2 n → ℂ) 
 theorem iteratedFDeriv_left_mul (F : M2 n → ℂ) (U : Set (M2 n)) (hU : IsOpen U) (hF : ContDiffOn ℂ ∞ F U) (M x : M2 n)
     (hx : M * x ∈ U) (N : ℕ) (v : Fin N → M2 n) :
     iteratedFDeriv ℂ N (fun y => F (M * y)) x v = iteratedFDeriv ℂ N F (M * x) (fun i => M * v i) := by
-  let g : M2 n →L[ℂ] M2 n := (LinearMap.mulLeft ℂ M).toContinuousLinearMap
-  have hpre : IsOpen (g ⁻¹' U) := hU.preimage g.continuous
-  have hx' : x ∈ g ⁻¹' U := hx
-  have key := g.iteratedFDerivWithin_comp_right hF hU.uniqueDiffOn hpre.uniqueDiffOn hx' (i := N)
-    (by exact_mod_cast le_top)
-  have e1 : iteratedFDerivWithin ℂ N (F ∘ g) (g ⁻¹' U) x = iteratedFDeriv ℂ N (F ∘ g) x :=
-    iteratedFDerivWithin_of_isOpen N hpre hx'
-  have e2 : iteratedFDerivWithin ℂ N F U (g x) = iteratedFDeriv ℂ N F (g x) :=
-    iteratedFDerivWithin_of_isOpen N hU hx
-  have key2 : iteratedFDeriv ℂ N (F ∘ g) x =
-      (iteratedFDeriv ℂ N F (g x)).compContinuousLinearMap fun _ => g := by
-    rw [← e1, ← e2]
-    exact key
-  have hfg : (fun y => F (M * y)) = F ∘ g := rfl
-  rw [hfg, key2]
-  rfl
+  apply PositivityTheory.Rg.Sw.LVs.left_mul' <;> assumption
 
 theorem continuousOn_iteratedFDeriv_translate (F : M2 n → ℂ) (U : Set (M2 n)) (hU : IsOpen U) (hF : ContDiffOn ℂ ∞ F U)
     (Kg : Type) [TopologicalSpace Kg] (ι : Kg → M2 n) (hι : Continuous ι) (c : Kg → ℂ) (hc : Continuous c) (N : ℕ) :
     ContinuousOn (fun y : Kg × M2 n => iteratedFDeriv ℂ N (fun x => F (ι y.1 * x) * c y.1) y.2)
       (Set.univ ×ˢ {x | ∀ k, ι k * x ∈ U}) := by
-  let Lm : M2 n →L[ℂ] (M2 n →L[ℂ] M2 n) :=
-    (LinearMap.toContinuousLinearMap.toLinearMap ∘ₗ LinearMap.mul ℂ (M2 n)).toContinuousLinearMap
-  have key : ∀ y ∈ Set.univ ×ˢ {x | ∀ k, ι k * x ∈ U},
-      iteratedFDeriv ℂ N (fun x => F (ι y.1 * x) * c y.1) y.2 =
-        c y.1 • ContinuousMultilinearMap.compContinuousLinearMapContinuousMultilinear ℂ
-          (fun _ : Fin N => M2 n) (fun _ => M2 n) ℂ (fun _ => Lm (ι y.1))
-          (iteratedFDeriv ℂ N F (ι y.1 * y.2)) := by
-    rintro ⟨k, x⟩ ⟨-, hx⟩
-    have hx' : ι k * x ∈ U := hx k
-    have hcd : ContDiffAt ℂ N (fun z => F (ι k * z)) x := by
-      have h1 : ContDiffAt ℂ ∞ F (Lm (ι k) x) := hF.contDiffAt (hU.mem_nhds hx')
-      exact (h1.comp x (Lm (ι k)).contDiff.contDiffAt).of_le (by exact_mod_cast le_top)
-    have hfun : (fun z => F (ι k * z) * c k) = c k • (fun z => F (ι k * z)) := by
-      funext z
-      simp [mul_comm]
-    simp only
-    rw [hfun, iteratedFDeriv_const_smul_apply hcd]
-    congr 1
-    ext v
-    rw [iteratedFDeriv_left_mul F U hU hF (ι k) x hx' N v]
-    rfl
-  refine ContinuousOn.congr ?_ key
-  refine ContinuousOn.smul (hc.comp continuous_fst).continuousOn ?_
-  have hD : ContinuousOn (iteratedFDeriv ℂ N F) U := by
-    have := hF.continuousOn_iteratedFDerivWithin (m := N) (by exact_mod_cast le_top) hU.uniqueDiffOn
-    exact this.congr (fun y hy => (iteratedFDerivWithin_of_isOpen N hU hy).symm)
-  have h1 : ContinuousOn (fun y : Kg × M2 n => iteratedFDeriv ℂ N F (ι y.1 * y.2))
-      (Set.univ ×ˢ {x | ∀ k, ι k * x ∈ U}) :=
-    hD.comp ((hι.comp continuous_fst).mul continuous_snd).continuousOn (fun y hy => hy.2 y.1)
-  have h2 : Continuous (fun y : Kg × M2 n =>
-      ContinuousMultilinearMap.compContinuousLinearMapContinuousMultilinear ℂ
-        (fun _ : Fin N => M2 n) (fun _ => M2 n) ℂ (fun _ => Lm (ι y.1))) :=
-    (ContinuousMultilinearMap.compContinuousLinearMapContinuousMultilinear ℂ
-        (fun _ : Fin N => M2 n) (fun _ => M2 n) ℂ).cont.comp
-      (continuous_pi fun _ => Lm.continuous.comp (hι.comp continuous_fst))
-  exact h2.continuousOn.clm_apply h1
+  apply PositivityTheory.Rg.Sw.LVs.cont_translate' <;> assumption
 
 end PositivityTheory.Rg.Sw.LVs

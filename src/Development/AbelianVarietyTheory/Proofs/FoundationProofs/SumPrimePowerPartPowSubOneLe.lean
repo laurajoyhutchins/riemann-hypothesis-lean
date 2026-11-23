@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SumLeProdOfTwoLeNat
 public import Mathlib.Basic.Real.Basic
 public import Mathlib.Data.Nat.PadicValNat
 public import Mathlib.Data.Nat.PrimeFin
@@ -64,21 +65,7 @@ namespace GlobalTheory.BadShare
 
 theorem sum_le_prod_of_two_le {ι : Type*} (s : Finset ι) (f : ι → ℕ) (h : ∀ i ∈ s, 2 ≤ f i) :
     ∑ i ∈ s, f i ≤ ∏ i ∈ s, f i := by
-  induction s using Finset.induction_on with
-  | empty => simp
-  | insert a s ha ih =>
-    rw [Finset.sum_insert ha, Finset.prod_insert ha]
-    have ha2 := h a (Finset.mem_insert_self a s)
-    have ih' := ih (fun i hi => h i (Finset.mem_insert_of_mem hi))
-    rcases s.eq_empty_or_nonempty with rfl | ⟨b, hb⟩
-    · simp
-    · have hne : ∏ i ∈ s, f i ≠ 0 := Finset.prod_ne_zero_iff.mpr fun i hi => by
-        have := h i (Finset.mem_insert_of_mem hi)
-        omega
-      have hP : 2 ≤ ∏ i ∈ s, f i :=
-        (h b (Finset.mem_insert_of_mem hb)).trans
-          (Nat.le_of_dvd (Nat.pos_of_ne_zero hne) (Finset.dvd_prod_of_mem f hb))
-      nlinarith
+  apply GlobalTheory.BadShare.sum_le_prod_of_two_le_nat <;> assumption
 
 private theorem prod_prime_pow_dvd_of_forall_dvd (s : Finset ℕ) (e : ℕ → ℕ) (M : ℕ)
     (hp : ∀ l ∈ s, l.Prime) (hd : ∀ l ∈ s, l ^ e l ∣ M) : ∏ l ∈ s, l ^ e l ∣ M := by

@@ -143,9 +143,7 @@ theorem thresholds_second_corollary_holds : GermThresholds := by
   have hn3 : (n : ℝ) ≤ (n : ℝ) ^ 3 := by
     simpa using pow_le_pow_right₀ hnR (show 1 ≤ 3 by norm_num)
   have hAs1 : (1 : ℝ) ≤ As := by nlinarith
-  have hnA : (n : ℝ) ≤ As := by linarith
   have hR : (1 : ℝ) + 3 * r ≤ ((r : ℝ) + 1) ^ 3 := by nlinarith [sq_nonneg (r : ℝ)]
-  have hP : (1 : ℝ) ≤ ((r : ℝ) + 1) ^ 3 := by linarith
   have hPA : 0 ≤ ((r : ℝ) + 1) ^ 3 * (As : ℝ) := by positivity
   have key : ((r : ℝ) + 1) ^ 3 * (As : ℝ) ≤ c * ((r : ℝ) + 1) ^ 3 * (As : ℝ) := by
     nlinarith
@@ -158,7 +156,6 @@ theorem thresholds_second_corollary_holds : GermThresholds := by
   · have e3 : (As : ℝ) ≤ ((r : ℝ) + 1) ^ 3 * As := by nlinarith
     linarith
   · have e1 : (s : ℝ) ^ 2 ≤ ((r : ℝ) + 1) ^ 3 := by nlinarith [mul_le_mul hsR hsR hs0 hr0]
-    have hC0 : (0 : ℝ) ≤ C₁ := Nat.cast_nonneg _
     have e2 : (C₁ : ℝ) * s ^ 2 ≤ c * ((r : ℝ) + 1) ^ 3 :=
       calc (C₁ : ℝ) * s ^ 2 ≤ c * s ^ 2 := mul_le_mul_of_nonneg_right hC (by positivity)
         _ ≤ c * ((r : ℝ) + 1) ^ 3 := mul_le_mul_of_nonneg_left e1 (by linarith)
@@ -169,7 +166,6 @@ theorem thresholds_second_corollary_holds : GermThresholds := by
 theorem powerMatch : PowerMatch := by
   intro m M β t D V _ _ Φ hM ht
   obtain ⟨M', rfl⟩ : ∃ M', M = M' + 2 := ⟨M - 2, by omega⟩
-  have hnt : ‖t‖ ≠ 0 := norm_ne_zero_iff.mpr ht
   have key : ((‖t‖ ^ (m + 1))⁻¹ * ‖t‖ ^ ((m + 1) * (M' + 2 + m)) * ‖D / t ^ (m + 1)‖ ^ M' : ℝ) =
       ‖D‖ ^ M' * ‖t‖ ^ ((m + 1) ^ 2) := by
     rw [norm_div, norm_pow, div_pow]

@@ -127,7 +127,6 @@ theorem exists_gl_sub {R : Type} [CommRing R] (s : R →+* R) (hs : ∀ y, s (s 
       (∀ i j, (g : Matrix (Fin m) (Fin m) R) i j ∈ O) ∧
       ∀ i j, ((g⁻¹ : GL (Fin m) R) : Matrix (Fin m) (Fin m) R) i j ∈ O := by
   let σO : O →+* O := (s.comp O.subtype).codRestrict O (fun y => hO y y.2)
-  have hσO : ∀ y : O, ((σO y : O) : R) = s (y : R) := fun y => rfl
   have lift : ∀ (P : Matrix (Fin m) (Fin m) R) (iP : ∀ i j, P i j ∈ O), (∃ w ∈ O, P.det * w = 1) →
       ∃ Q : Matrix (Fin m) (Fin m) O, Q.map O.subtype = P ∧ IsUnit Q.det := by
     intro P iP ⟨w, hw, hPw⟩

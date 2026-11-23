@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.TaylorDiscriminants.WickVanishing.ChartSer
 public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.FormalEvSecondPointOfXZero
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsLieBasis
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniversalCharts.DualLiftInjective
@@ -467,30 +468,6 @@ private theorem prod_ofFn_eq_apply_of_forall_ne_eq_one {M : Type*} [Monoid M] (n
 
 theorem comb_single {v : Fin d → (Geo.Tor.epsR R ⟶ G)} (hv : ∀ j, v j = spMap (dualLift (Pi.single j 1)) ≫ x 1) (i : Fin d) :
     Geo.Tor.IsLieComb (Pi.single i 1) v (v i) := by
-  have h1 : Geo.Tor.epsScaleR (1 : R) = RingHom.id (DualNumber R) :=
-    RingHom.ext fun z => TrivSqZeroExt.ext (by simp [Geo.Tor.epsScaleR]) (by simp [Geo.Tor.epsScaleR])
-  have h0 : Geo.Tor.epsScaleR (0 : R) =
-      (algebraMap R (DualNumber R)).comp (TrivSqZeroExt.fstHom R R R).toRingHom :=
-    RingHom.ext fun z => TrivSqZeroExt.ext (by simp [Geo.Tor.epsScaleR, TrivSqZeroExt.algebraMap_eq_inl])
-      (by simp [Geo.Tor.epsScaleR, TrivSqZeroExt.algebraMap_eq_inl])
-  refine ⟨fun j => if j = i then v j else 1, fun j => ?_, ?_⟩
-  · by_cases hj : j = i
-    · subst hj
-      simp only [if_true, Pi.single_eq_same, h1]
-      show _ = Spec.map (CommRingCat.ofHom (RingHom.id _)) ≫ _
-      rw [CommRingCat.ofHom_id, Spec.map_id, Category.id_comp]
-    · show (if j = i then v j else 1).left = _
-      have ht0 : Geo.Tor.IsTangent (v j) := by
-        rw [hv j]
-        exact (basis_of_chart hx).1 j
-      have ht : Spec.map (CommRingCat.ofHom (TrivSqZeroExt.fstHom R R R).toRingHom) ≫ (v j).left = η[G].left := ht0
-      rw [if_neg hj, Pi.single_eq_of_ne hj, h0]
-      show _ = Spec.map (CommRingCat.ofHom ((algebraMap R (DualNumber R)).comp
-        (TrivSqZeroExt.fstHom R R R).toRingHom)) ≫ (v j).left
-      rw [CommRingCat.ofHom_comp, Spec.map_comp, Category.assoc, ht]
-      rfl
-  · rw [prod_ofFn_eq_apply_of_forall_ne_eq_one hx d _ i fun j hj => if_neg hj]
-    show v i = if i = i then v i else 1
-    rw [if_pos rfl]
+  apply ReciprocityTheory.ChartRestriction.G.Chart.comb_single <;> assumption
 
 end GlobalTheory.ChartJet

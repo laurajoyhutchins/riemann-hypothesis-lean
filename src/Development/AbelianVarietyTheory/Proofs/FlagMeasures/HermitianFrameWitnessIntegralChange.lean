@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.NormAdditiveCharacterTypePrimeEqOne
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.AtBase
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsInnerLatticeVectorAnisotropicStatement
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsUnipotentAddIsotropicToAnisotropicStatement
@@ -90,22 +91,7 @@ lemma frame_projection_last_eq_self (Fr : FrameD H r) : Fr.prF (Fr.f (Fin.last r
 
 lemma frame_mem (Fr : FrameD H r) {L : Submodule M.L.O (H.Wb Fr.f)} (hL : Fr.IsInner L) (b : Fin (r + 1)) :
     Fr.f b ∈ Fr.LamStd L := by
-  apply Submodule.subset_span
-  rcases Fin.eq_castSucc_or_eq_last b with ⟨a, rfl⟩ | rfl
-  · refine ⟨fun c => ?_, fun c => ?_, ⟨0, ?_, ?_⟩⟩
-    · rw [Fr.h_es]; split_ifs
-      · exact M.L.O.one_mem
-      · exact M.L.O.zero_mem
-    · show H.h (Fr.f a.castSucc) (Fr.f c.castSucc) ∈ _
-      rw [Fr.h_iso _ _ (Or.inl (Fin.castSucc_lt_last a).ne)]; exact M.L.O.zero_mem
-    · exact (prF_e Fr a).symm
-    · rw [map_zero]; exact L.zero_mem
-  · obtain ⟨xz, hxz, hxL, _⟩ := hL.2.2
-    refine ⟨fun c => ?_, fun c => ?_, ⟨xz, ?_, hxL⟩⟩
-    · rw [H.h_herm (Fr.es c) _, Fr.h_sz, map_zero]; exact M.L.O.zero_mem
-    · show H.h (Fr.f (Fin.last r)) (Fr.f c.castSucc) ∈ _
-      rw [Fr.h_iso _ _ (Or.inr (Fin.castSucc_lt_last c).ne)]; exact M.L.O.zero_mem
-    · rw [hxz]; exact (frame_projection_last_eq_self Fr).symm
+  apply Formalism.MainNotions.BridgeLemma.f_mem_LamStd <;> assumption
 
 end
 

@@ -68,7 +68,6 @@ theorem reduce_of_equiv {K : Type} [CommRing K] [TopologicalSpace K] {W : Type} 
       ∃ (a : Kˣ) (z : Fin 1 → Fin M → K), (a : K) • y ∈ Ω ∧ z ∈ Ω ∧ z 0 ⬝ᵥ ((a : K) • y) 0 = 1 := by
   classical
   let e : K ≃ₜ (W → ℂ) := hΦ.homeomorph
-  have he : ∀ x, e x = Φ x := fun _ => rfl
   let H : (Fin 1 → Fin M → K) ≃ₜ (Fin 1 → Fin M → W → ℂ) :=
     Homeomorph.piCongrRight fun _ => Homeomorph.piCongrRight fun _ => e
   let P : Set (Fin 1 → Fin M → W → ℂ) :=

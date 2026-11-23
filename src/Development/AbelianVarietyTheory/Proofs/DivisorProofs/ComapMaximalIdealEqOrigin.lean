@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNoetherianModelOfDivisorOfConstants
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TorsorsTrivial
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.OriginIdeal
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsZModTorsorFiniteProjectiveBaseChange
@@ -458,22 +459,7 @@ namespace GlobalTheory.KeyOriginBC
 
 theorem mem_originIdeal_iff {R : Type} [CommRing R] [IsLocalRing R] (p : R[X]) :
     p ∈ GlobalTheory.KeyOriginCut.originIdeal R ↔ p.coeff 0 ∈ maximalIdeal R := by
-  unfold GlobalTheory.KeyOriginCut.originIdeal
-  constructor
-  · intro h
-    obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 h
-    rw [Polynomial.coeff_add]
-    have hb0 : b.coeff 0 = 0 := by
-      obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.1 hb
-      simp
-    rw [hb0, add_zero]
-    exact (Ideal.mem_map_C_iff.1 ha) 0
-  · intro h
-    have hp : p = Polynomial.C (p.coeff 0) + (p - Polynomial.C (p.coeff 0)) := by ring
-    rw [hp]
-    refine Ideal.add_mem _ (Ideal.mem_sup_left (Ideal.mem_map_of_mem _ h)) (Ideal.mem_sup_right ?_)
-    obtain ⟨r, hr⟩ := Polynomial.X_dvd_sub_C (p := p)
-    rw [hr]; exact Ideal.mul_mem_right _ _ (Ideal.subset_span rfl)
+  apply GlobalTheory.VertUnitsNoeth.mem_originIdeal_iff' <;> assumption
 
 theorem comap_ideal₁_eq_origin {T O : Type} [CommRing T] [IsLocalRing T] [CommRing O] [IsLocalRing O] [Algebra T O] [Algebra T[X] O]
   [IsScalarTower T T[X] O]

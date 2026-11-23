@@ -290,7 +290,6 @@ theorem critical_cutoff_spec : Formalism.FourierDecayAlt.G.CritCutSpec := by
       have e : z - z' = -(x 0 - z) + (x 0 - z') := by ring
       rw [e]
       exact (norm_add_le _ _).trans (by rw [norm_neg])
-    have h5 : 2 * δ ≤ ‖x 0 - z'‖ := by linarith
     refine Finset.prod_eq_zero (Finset.mem_univ (0 : Fin (m + 1))) (smooth_cutoff_eq_zero_of_two_le ?_)
     rw [le_div_iff₀ (by positivity)]
     nlinarith
@@ -420,7 +419,6 @@ theorem product_lower_bound : Formalism.FourierDecayAlt.G.ProdLower := by
   obtain ⟨d, hd, hD⟩ := exists_lower hK h0
   set R' : ℝ := max R 1 with hR'
   have hR1 : 1 ≤ R' := le_max_right _ _
-  have hR0 : 0 < R' := lt_of_lt_of_le one_pos hR1
   set Cm : ℝ := ((m : ℝ) + 1) * ((m : ℝ) * ((m : ℝ) + 1) ^ m) with hCm
   have hCm0 : 0 ≤ Cm := by positivity
   set Ce : ℝ := (m : ℝ) * ((m : ℝ) + 1) ^ m with hCe
@@ -479,7 +477,6 @@ theorem product_lower_bound : Formalism.FourierDecayAlt.G.ProdLower := by
   have h5 : d / 2 ≤ ‖P‖ * L := by
     have := hD D hDK
     linarith
-  have hRpow : 0 < R' ^ (m + 1) := by positivity
   constructor
   · have hinv : ‖t‖ ^ ε = W⁻¹ := by rw [hW, Real.rpow_neg hT.le, inv_inv]
     rw [hinv, ← div_eq_mul_inv, div_le_iff₀ hW0, div_le_iff₀ (by positivity)]

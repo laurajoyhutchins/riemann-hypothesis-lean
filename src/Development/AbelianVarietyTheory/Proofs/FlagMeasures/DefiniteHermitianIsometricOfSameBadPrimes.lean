@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MaximalHermitianLatticeBadPrimesIffGramDet
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.ChartGen
 public import Formalism.HermitianLattices.StatementMass
 public import Mathlib.RingTheory.DedekindDomain.AdicValuation.Valuation
@@ -113,48 +114,7 @@ theorem star_mem_locR {P : Ideal (𝓞 K)} (hP : P.IsMaximal) (hc : conjIdeal (K
 theorem valuation_star (v : IsDedekindDomain.HeightOneSpectrum (𝓞 K))
     (hc : conjIdeal (K := K) v.asIdeal = v.asIdeal) (a : K) :
     v.valuation K (star a) = v.valuation K a := by
-  have le1 : ∀ a : K, v.valuation K a ≤ 1 → v.valuation K (star a) ≤ 1 := fun a ha =>
-    (mem_locR_iff v hc _).1 (star_mem_locR v.isMaximal hc ((mem_locR_iff v hc _).2 ha))
-  have mono : ∀ a b : K, b ≠ 0 → v.valuation K a ≤ v.valuation K b →
-      v.valuation K (star a) ≤ v.valuation K (star b) := by
-    intro a b hb hab
-    have hb' : v.valuation K b ≠ 0 := by simpa using hb
-    have hb'' : v.valuation K (star b) ≠ 0 := by simpa using hb
-    have := le1 (a / b) (by rw [map_div₀]; exact div_le_one_of_le₀ hab zero_le')
-    rw [star_div₀, map_div₀] at this
-    exact (div_le_one₀ (zero_lt_iff.2 hb'')).1 this
-  obtain ⟨π, hπ⟩ := v.valuation_exists_uniformizer K
-  have π0 : π ≠ 0 := by
-    rintro rfl
-    rw [map_zero] at hπ
-    exact WithZero.exp_ne_zero hπ.symm
-  have s0 : v.valuation K (star π) ≠ 0 := by simpa using π0
-  obtain ⟨n, hn⟩ : ∃ n : ℤ, v.valuation K (star π) = WithZero.exp n :=
-    ⟨_, (WithZero.exp_log s0).symm⟩
-  have gen : ∀ (a : K) (m : ℤ), v.valuation K a = WithZero.exp m →
-      v.valuation K (star a) = WithZero.exp (-m * n) := by
-    intro a m hm
-    have a0 : a ≠ 0 := by
-      rintro rfl
-      rw [map_zero] at hm
-      exact WithZero.exp_ne_zero hm.symm
-    have e1 : v.valuation K (π ^ (-m)) = v.valuation K a := by
-      rw [map_zpow₀, hπ, ← WithZero.exp_zsmul, hm]; simp
-    have e2 : v.valuation K (star (π ^ (-m))) = WithZero.exp (-m * n) := by
-      rw [star_zpow₀, map_zpow₀, hn, ← WithZero.exp_zsmul]; simp
-    rw [← e2]
-    exact le_antisymm (mono _ _ (zpow_ne_zero _ π0) e1.ge) (mono _ _ a0 e1.le)
-  have h1 := gen _ _ hn
-  rw [star_star, hπ, WithZero.exp_inj] at h1
-  have h2 : n ≤ 0 := by
-    have := le1 π (by rw [hπ, ← WithZero.exp_zero, WithZero.exp_le_exp]; norm_num)
-    rwa [hn, ← WithZero.exp_zero, WithZero.exp_le_exp] at this
-  have h3 : n = -1 := by nlinarith
-  rcases eq_or_ne a 0 with rfl | a0
-  · simp
-  · have : v.valuation K a ≠ 0 := by simpa using a0
-    have h4 := gen a _ (WithZero.exp_log this).symm
-    rw [h4, h3]; simp [WithZero.exp_log this]
+  apply GlobalTheory.MaxLatDet.val_star <;> assumption
 
 theorem normUnit_iff (v : IsDedekindDomain.HeightOneSpectrum (𝓞 K))
     (hc : conjIdeal (K := K) v.asIdeal = v.asIdeal) {x : K} {m : ℤ}

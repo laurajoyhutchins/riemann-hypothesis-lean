@@ -1,5 +1,6 @@
 module
 
+import Formalism.FlagUnipotentLattices.MinkowskiFactorialBounds.BlockMinorSumCounterexample
 public import Formalism.FlagUnipotentLattices.UnipotentStabiliserCharacterisation
 public import Formalism.FormalDegreeBessel.StatementG
 public import Mathlib.Analysis.Fourier.FourierTransform
@@ -158,36 +159,7 @@ lemma integrableOn_Ioi_truncated_power_moment {K L : ℝ} (hK : 2 < K) (hL : 0 <
   exact Integrable.const_mul (integrableOn_Ioi_rpow_of_lt (by linarith) hL) _
 
 lemma gl_e3Integral : Formalism.HermitianLatticeCounting.ExpansionTerms.CutoffIntegralFormula := by
-  intro K L hK hL
-  have hK0 : 0 ≤ K := by linarith
-  have hU : Set.Ioi (0 : ℝ) = Set.Ioc 0 L ∪ Set.Ioi L := (Set.Ioc_union_Ioi_eq_Ioi hL.le).symm
-  constructor
-  · rw [gl_radial_integrable (fun y => TruncationCutoff K L y), hU]
-    exact (integrableOn_Ioc_truncated_power_moment hK0).union (integrableOn_Ioi_truncated_power_moment hK hL)
-  · rw [gl_radial_integral (fun y => TruncationCutoff K L y), hU,
-      setIntegral_union (Set.Ioc_disjoint_Ioi le_rfl) measurableSet_Ioi (integrableOn_Ioc_truncated_power_moment hK0)
-        (integrableOn_Ioi_truncated_power_moment hK hL),
-      setIntegral_congr_fun measurableSet_Ioc (fun y hy => gl_cut_le hK0 hy.1 hy.2),
-      setIntegral_congr_fun measurableSet_Ioi (fun y hy => gl_cut_gt hK0 hL hy),
-      integral_const_mul, integral_Ioi_rpow_of_lt (by linarith : 1 - K < -1) hL,
-      ← intervalIntegral.integral_of_le hL.le, integral_id]
-    have e : L ^ K * L ^ (1 - K + 1) = L ^ 2 := by
-      rw [← Real.rpow_add hL, ← Real.rpow_natCast]
-      congr 1
-      push_cast
-      ring
-    have hK2 : K - 2 ≠ 0 := by linarith [hK]
-    have hK3 : 1 - K + 1 ≠ 0 := by
-      intro h
-      apply hK2
-      linarith
-    have e2 : L ^ K * (-L ^ (1 - K + 1) / (1 - K + 1)) = L ^ 2 / (K - 2) := by
-      rw [← e]
-      field_simp
-      ring
-    rw [e2]
-    field_simp
-    ring
+  apply Formalism.HermitianLatticeCounting.P.cutoff_integral_formula <;> assumption
 
 theorem sup_bound_of_truncated_integral : Formalism.HermitianLatticeCounting.ExpansionTerms.LemSSupBound := lemSSupBound_of gl_e3Integral
 

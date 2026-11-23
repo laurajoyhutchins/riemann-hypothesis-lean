@@ -67,7 +67,6 @@ theorem exists_isUnif : ∀ (L : Type) [NontriviallyNormedField L] [IsUltrametri
   have hxpos : 0 < ‖x‖ := norm_pos_iff.mpr hx0
   have hy : 1 < ‖p‖⁻¹ := (one_lt_inv₀ hp0).mpr hp1
   obtain ⟨n, hn1, hn2⟩ := exists_mem_Ico_zpow hxpos hy
-  have hyn : 0 < ‖p‖⁻¹ ^ n := zpow_pos (inv_pos.mpr hp0) n
   set w : L := p ^ (-n) * x⁻¹ with hw
   have hwn : ‖w‖ = ‖p‖⁻¹ ^ n / ‖x‖ := by
     rw [hw, norm_mul, norm_inv, norm_zpow, _root_.inv_zpow', div_eq_mul_inv]

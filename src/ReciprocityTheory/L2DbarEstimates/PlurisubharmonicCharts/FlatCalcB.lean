@@ -98,12 +98,6 @@ theorem denominator_ne_zero_on_set {n : ℕ} {Y : Type u} [TopologicalSpace Y] [
 
 theorem fc_isOpen_O {n : ℕ} {Y : Type u} [TopologicalSpace Y] [T2Space Y] [SecondCountableTopology Y] [MeasurableSpace Y] [BorelSpace Y] {ι : Type*} {La : Type*} [AddCommGroup La] (A : WeightedAtlas n Y ι La) {L : La} {N : ℕ} {w : Fin N → ι → Y → ℂ} {w0 : ι → Y → ℂ} {s : Fin n → ι → Y → ℂ} {De : MvPolynomial (Fin n) ℂ} (hD : A.D0 L w w0 s) (i : ι) :
     IsOpen ((A.chart i).target ∩ (A.chart i).symm ⁻¹' A.Mset w0 s De) := by
-  have secS : ∀ k i j y, y ∈ (A.chart i).source → y ∈ (A.chart j).source →
-      s k i y = A.g L i j y * s k j y := by
-    intro k i j y hi hj
-    have hs := hD.sec_s k
-    unfold WeightedAtlas.IsSec WeightedAtlas.IsSecOn at hs
-    exact hs.2 i j y trivial hi hj
   have secW : ∀ i j y, y ∈ (A.chart i).source → y ∈ (A.chart j).source →
       w0 i y = A.g L i j y * w0 j y := by
     intro i j y hi hj
@@ -157,18 +151,6 @@ theorem fc_isOpen_O {n : ℕ} {Y : Type u} [TopologicalSpace Y] [T2Space Y] [Sec
 
 theorem fc_zLoc_contDiffOn {n : ℕ} {Y : Type u} [TopologicalSpace Y] [T2Space Y] [SecondCountableTopology Y] [MeasurableSpace Y] [BorelSpace Y] {ι : Type*} {La : Type*} [AddCommGroup La] (A : WeightedAtlas n Y ι La) {L : La} {N : ℕ} {w : Fin N → ι → Y → ℂ} {w0 : ι → Y → ℂ} {s : Fin n → ι → Y → ℂ} {De : MvPolynomial (Fin n) ℂ} (hD : A.D0 L w w0 s) (i : ι) :
     ContDiffOn ℂ ∞ (A.zLoc w0 s i) ((A.chart i).target ∩ (A.chart i).symm ⁻¹' A.Mset w0 s De) := by
-  have secS : ∀ k i j y, y ∈ (A.chart i).source → y ∈ (A.chart j).source →
-      s k i y = A.g L i j y * s k j y := by
-    intro k i j y hi hj
-    have hs := hD.sec_s k
-    unfold WeightedAtlas.IsSec WeightedAtlas.IsSecOn at hs
-    exact hs.2 i j y trivial hi hj
-  have secW : ∀ i j y, y ∈ (A.chart i).source → y ∈ (A.chart j).source →
-      w0 i y = A.g L i j y * w0 j y := by
-    intro i j y hi hj
-    have hs := hD.isSection_denom
-    unfold WeightedAtlas.IsSec WeightedAtlas.IsSecOn at hs
-    exact hs.2 i j y trivial hi hj
   have hw : DifferentiableOn ℂ (w0 i ∘ (A.chart i).symm) (A.chart i).target := by
     have hs := hD.isSection_denom
     unfold WeightedAtlas.IsSec WeightedAtlas.IsSecOn at hs

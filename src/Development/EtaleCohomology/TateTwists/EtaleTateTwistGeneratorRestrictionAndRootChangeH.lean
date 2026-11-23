@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.TateTwistSectionsLocallyGenerated
 public import Development.EtaleCohomology.TateTwists.EtaleTateTwistLocalGenerationAndRootCompatOfPart
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -75,26 +76,7 @@ theorem res_twGen (q : ℕ) (j : ℤ) {V U : Scheme.{0}} (g : V ⟶ U) (ζ : Pri
 theorem twGen_pow (q : ℕ) [NeZero q] (j : ℤ) {V : Scheme.{0}} (ζ ξ : Prim q Γ(V, ⊤)) (a : (ZMod q)ˣ)
     (h : ξ.1 = ζ.1 ^ (a : ZMod q).val) :
     twGen j ξ = ((a ^ j : (ZMod q)ˣ) : ZMod q).val • twGen j ζ := by
-  have hrel : (Submodule.Quotient.mk (Finsupp.single ξ 1) : (twF q j).obj Γ(V, ⊤)) =
-      Submodule.Quotient.mk (Finsupp.single ζ (ULift.up ((a ^ j : (ZMod q)ˣ) : ZMod q))) := by
-    rw [Submodule.Quotient.eq]
-    exact Submodule.subset_span ⟨ζ, ξ, a, h, rfl⟩
-  have hs : (Finsupp.single ζ (ULift.up ((a ^ j : (ZMod q)ˣ) : ZMod q)) : Prim q Γ(V, ⊤) →₀ ULift.{1} (ZMod q)) =
-      ((a ^ j : (ZMod q)ˣ) : ZMod q).val • Finsupp.single ζ 1 := by
-    rw [Finsupp.smul_single]
-    congr 1
-    apply ULift.ext
-    simp only [nsmul_eq_mul, mul_one]
-    exact (ZMod.natCast_zmod_val _).symm
-  have key : ∀ (n : ℕ) (x y : (twF q j).obj Γ(V, ⊤)), x = n • y →
-      ofRings.sec (twF q j) V x = n • ofRings.sec (twF q j) V y := by
-    rintro n x y rfl
-    exact map_nsmul _ _ _
-  refine key _ _ _ ?_
-  show (Submodule.Quotient.mk (Finsupp.single ξ 1) : (_ ⧸ twRel q j Γ(V, ⊤))) =
-    _ • (Submodule.Quotient.mk (Finsupp.single ζ 1) : (_ ⧸ twRel q j Γ(V, ⊤)))
-  rw [hrel, hs]
-  exact map_nsmul (Submodule.mkQ _) _ _
+  apply GlobalTheory.TwSec.twGen_rel <;> assumption
 
 end LateralTheory.EtaleFoundations.GenIsoSurjRootPf
 

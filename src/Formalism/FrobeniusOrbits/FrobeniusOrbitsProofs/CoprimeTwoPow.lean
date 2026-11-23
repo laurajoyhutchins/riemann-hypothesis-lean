@@ -160,7 +160,6 @@ lemma order_le (e : ℕ) (x : HGrp e) (j : ℕ) : orderOf x ≤ 2 ^ j ↔ x ^ (2
     have h0 : orderOf x ∣ Nat.card (HGrp e) := by
       first
         | exact orderOf_dvd_natCard x
-        | exact orderOf_dvd_card
     rwa [card_H] at h0
   constructor
   · intro h
@@ -172,8 +171,6 @@ lemma order_le (e : ℕ) (x : HGrp e) (j : ℕ) : orderOf x ≤ 2 ^ j ↔ x ^ (2
       have hlt : 2 ^ j < 2 ^ i := by
         first
           | exact Nat.pow_lt_pow_right (by norm_num) hc
-          | exact pow_lt_pow_right₀ (by norm_num) hc
-          | exact Nat.pow_lt_pow_of_lt (by norm_num) hc
       exact absurd h (not_le.mpr hlt)
     rw [← orderOf_dvd_iff_pow_eq_one, hi]
     exact Nat.pow_dvd_pow 2 hij
@@ -184,7 +181,6 @@ lemma order_le_card (e : ℕ) (x : HGrp e) : orderOf x ≤ 2 ^ e := by
   have h0 : orderOf x ∣ Nat.card (HGrp e) := by
     first
       | exact orderOf_dvd_natCard x
-      | exact orderOf_dvd_card
   rw [card_H] at h0
   exact Nat.le_of_dvd (by positivity) h0
 
@@ -231,7 +227,6 @@ private lemma orderOf_hcl_u5_eq_two_pow (e : ℕ) : orderOf (hcl e (u5 (e + 2)))
     have h0 : orderOf (hcl e (u5 (e + 2))) ∣ Nat.card (HGrp e) := by
       first
       | exact orderOf_dvd_natCard _
-      | exact orderOf_dvd_card
     rwa [card_H] at h0
   obtain ⟨i, hie, hi⟩ := (Nat.dvd_prime_pow Nat.prime_two).1 hd
   rw [hi]
@@ -256,14 +251,12 @@ private lemma orderOf_hcl_u5_eq_two_pow (e : ℕ) : orderOf (hcl e (u5 (e + 2)))
       have h8 := (ind 5 h5 3 (by norm_num) j).1 (Or.inl (by rw [e3]; exact h'))
       first
         | norm_num at h8
-        | omega
     · have h' := congrArg Units.val h
       rw [Units.val_pow_eq_pow_val, hv, Units.val_neg, Units.val_one, ← Int.cast_pow, cast_eq_neg_one] at h'
       push_cast at h'
       have h8 := (ind 5 h5 3 (by norm_num) j).1 (Or.inr (by rw [e3]; exact h'))
       first
         | norm_num at h8
-        | omega
   · rw [show i = e by omega]
 
 theorem hostGroup : HostGroup := by
@@ -277,7 +270,6 @@ theorem hostGroup : HostGroup := by
     first
       | (rw [Nat.card_eq_fintype_card]; rfl)
       | (rw [Nat.card_eq_fintype_card]; decide)
-      | simp
   have hfin : Finite (HGrp e) := Nat.finite_of_card_ne_zero (by rw [card_H]; positivity)
   have h5 := orderOf_hcl_u5_eq_two_pow e
   unfold GG Psi cc sg chD G0 c0
@@ -308,14 +300,12 @@ theorem hostGroup : HostGroup := by
       first
         | (rw [← ofMul_zpow, zpow_natCast, hg, ofMul_one])
         | (rw [natCast_zsmul, ← ofMul_pow, hg, ofMul_one])
-        | simp [← ofMul_zpow, hg]
     let f1 : ZMod (2 ^ e) →+ Additive (HGrp e) := ZMod.lift (2 ^ e) ⟨f0, hf0⟩
     let f : Multiplicative (ZMod (2 ^ e)) →* HGrp e :=
       { toFun := fun x => Additive.toMul (f1 (Multiplicative.toAdd x))
         map_one' := by
           first
             | simp
-            | rfl
         map_mul' := fun x y => by
           first
             | simp
@@ -342,7 +332,6 @@ theorem hostGroup : HostGroup := by
       rw [← hk]
       first
         | rfl
-        | simp [← ofMul_zpow]
     have hbij : Function.Bijective f := by
       haveI : NeZero (2 ^ e) := ⟨by positivity⟩
       have hc : Nat.card (Multiplicative (ZMod (2 ^ e))) ≤ Nat.card (HGrp e) := by
@@ -350,7 +339,6 @@ theorem hostGroup : HostGroup := by
         rw [Nat.card_zmod, card_H]
       first
         | exact hsurj.bijective_of_nat_card_le hc
-        | exact (Function.Surjective.bijective_of_nat_card_le hsurj hc)
     exact ⟨MulEquiv.ofBijective f hbij, hf1⟩
 
 theorem hostOrders : HostOrders := by
@@ -406,7 +394,6 @@ theorem hostOrders : HostOrders := by
           have h0 : orderOf g.2 ∣ Nat.card (HGrp e) := by
             first
               | exact orderOf_dvd_natCard _
-              | exact orderOf_dvd_card
           rwa [card_H] at h0
         obtain ⟨i, -, hi⟩ := (Nat.dvd_prime_pow Nat.prime_two).1 hd2
         have hi0 : i = 0 := by

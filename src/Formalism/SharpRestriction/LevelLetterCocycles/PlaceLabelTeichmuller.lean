@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.Divisibility.PrimeDegreeVariant
 public import Formalism.SharpRestriction.LevelLetterCocycles.ArithmeticCylinders
 public import Formalism.PadicSubsetSums.CentralIdempotents.GaloisIrreducibility
 public import Formalism.CyclotomicNorms.NonsquarefreeBounds.NonsquarefreeMonicBoundHolds
@@ -89,24 +90,7 @@ theorem tens_coeff (a : ∀ i, MonoidAlgebra ℂ (G i)) (g : ∀ i, G i) :
 
 theorem conv_coeff {H : Type} [Group H] [Fintype H] (x y : MonoidAlgebra ℂ H) (g : H) :
     (x * y).coeff g = ∑ h, x.coeff h * y.coeff (h⁻¹ * g) := by
-  classical
-  rw [MonoidAlgebra.coeff_mul, Finsupp.sum_fintype]
-  · refine Finset.sum_congr rfl (fun h _ => ?_)
-    rw [Finsupp.sum_fintype]
-    · rw [Finset.sum_eq_single (h⁻¹ * g)]
-      · simp
-      · intro b _ hb
-        rw [if_neg]
-        intro hh
-        apply hb
-        rw [← hh]
-        simp
-      · intro hb
-        exact absurd (Finset.mem_univ _) hb
-    · intro i
-      simp
-  · intro i
-    simp
+  apply Formalism.MainNotions.PrimeDegreeVariant.Ten.conv_coeff <;> assumption
 
 theorem tens_mul (a b : ∀ i, MonoidAlgebra ℂ (G i)) :
     tens a * tens b = tens (fun i => a i * b i) := by

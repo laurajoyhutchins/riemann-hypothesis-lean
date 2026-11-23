@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Definitions.Divisors.ExistsValuedHeckeCharRamified
 public import Development.AbelianVarietyTheory.Definitions.Divisors.IsFinSetSplitPlacesCoprimeConductor
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -49,24 +50,7 @@ namespace GlobalTheory.CMTypeNorm
 
 theorem place_bijective {K : Type} [Field K] [NumberField K] {I : Type} {φ : I → K →+* ℂ} (h : GlobalTheory.CMVal.IsCMType φ) :
     Function.Bijective fun i => InfinitePlace.mk (φ i) := by
-  constructor
-  · intro i j hij
-    obtain ⟨k, -, hk⟩ := h (φ j)
-    have hj : j = k := hk j (Or.inl rfl)
-    have hi : i = k := by
-      apply hk i
-      rcases InfinitePlace.mk_eq_iff.mp hij with h1 | h1
-      · exact Or.inl h1.symm
-      · exact Or.inr h1.symm
-    rw [hi, hj]
-  · intro w
-    obtain ⟨k, hk, -⟩ := h w.embedding
-    refine ⟨k, ?_⟩
-    show InfinitePlace.mk (φ k) = w
-    rw [← InfinitePlace.mk_embedding w, InfinitePlace.mk_eq_iff]
-    rcases hk with h1 | h1
-    · exact Or.inl h1.symm
-    · exact Or.inr h1.symm
+  apply GlobalTheory.CMVal.Model.IsCMType.bijective <;> assumption
 
 theorem prod_norm_sq_eq_absNorm :
     ∀ (K : Type) [Field K] [NumberField K] [NumberField.IsTotallyComplex K] (I : Type) [Fintype I] (φ : I → K →+* ℂ),

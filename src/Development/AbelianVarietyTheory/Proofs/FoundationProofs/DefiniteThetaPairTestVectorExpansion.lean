@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.OmEqPullOfVacuum
 public import Development.AbelianVarietyTheory.Definitions.Foundations.NormSumPairRankZeroOfCurveCoordNorm
 public import Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelaf
 public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsLatticeOfAdelicPointStatement
@@ -382,22 +383,7 @@ theorem Wd_diff (x : VC D N N') {F : VC D N N' → ℂ} (hF : Differentiable ℂ
 
 theorem Wd_comm (a x : VC D N N') (m : ℤ) (h : (Hf D T a x).im = m) (F : VC D N N' → ℂ) :
     Wd D T a (Wd D T x F) = Wd D T x (Wd D T a F) := by
-  funext z
-  have h1 : Hf D T x a = Hf D T a x - 2 * m * Complex.I := by
-    rw [Hf_conj a x]
-    apply Complex.ext <;> simp [h]
-    ring
-  have h2 : Complex.exp (-(Real.pi : ℂ) * Hf D T (z + x) a - (Real.pi : ℂ) * Hf D T a a / 2) *
-      Complex.exp (-(Real.pi : ℂ) * Hf D T z x - (Real.pi : ℂ) * Hf D T x x / 2) =
-      Complex.exp (-(Real.pi : ℂ) * Hf D T (z + a) x - (Real.pi : ℂ) * Hf D T x x / 2) *
-      Complex.exp (-(Real.pi : ℂ) * Hf D T z a - (Real.pi : ℂ) * Hf D T a a / 2) := by
-    rw [← Complex.exp_add, ← Complex.exp_add, Complex.exp_eq_exp_iff_exists_int]
-    refine ⟨m, ?_⟩
-    rw [Hf_add_left, Hf_add_left, h1]
-    ring
-  simp only [Wd, U]
-  rw [add_right_comm z a x]
-  linear_combination (-(wdPh D T a * wdPh D T x * F (z + x + a))) * h2
+  apply _root_.GlobalTheory.NormSum.RatExtend.Wd_comm <;> assumption
 
 theorem Wd_add (x : VC D N N') (F G : VC D N N' → ℂ) : Wd D T x (F + G) = Wd D T x F + Wd D T x G := by
   funext z; simp only [Wd, U, Pi.add_apply]; ring

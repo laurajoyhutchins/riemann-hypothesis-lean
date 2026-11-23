@@ -116,11 +116,9 @@ lemma kernel (Q D : ℝ) (hQ : 0 < Q) (hD : 0 < D) (c : ℂ) (s : ℝ) :
   have hmeas : Measurable (fun w : ℂ => ENNReal.ofReal ((Q * ‖w‖ ^ 2 + D) ^ (-s / 2))) := by
     first
     | fun_prop
-    | measurability
   have hmeas2 : Measurable (fun w : ℂ => ENNReal.ofReal ((1 + ‖w‖ ^ 2) ^ (-s / 2))) := by
     first
     | fun_prop
-    | measurability
   have h2 := lint_smul (volume : Measure ℂ) hmeas htpos.ne'
   beta_reduce at h2
   rw [Complex.finrank_real_complex] at h2
@@ -152,8 +150,6 @@ lemma cons_symm {p : ℕ} (q : ℂ × (Fin p → ℂ)) :
   rw [MeasurableEquiv.piFinSuccAbove_symm_apply]
   first
   | exact Fin.insertNth_zero' q.1 q.2
-  | simp [Fin.insertNthEquiv, Fin.insertNth_zero']
-  | rfl
 
 lemma split_cons {p : ℕ} {R : Type*} [MeasureSpace R] [SFinite (volume : Measure R)]
     (G : (Fin (p + 1) → ℂ) × R → ℝ≥0∞) (hG : Measurable G) :
@@ -166,7 +162,6 @@ lemma split_cons {p : ℕ} {R : Type*} [MeasureSpace R] [SFinite (volume : Measu
         ((MeasurableEquiv.piFinSuccAbove (fun _ : Fin (p + 1) => ℂ) 0).symm (w, q.1), q.2)) := by
       first
       | exact ((MeasurableEquiv.measurable _).comp (measurable_const.prodMk measurable_fst)).prodMk measurable_snd
-      | exact ((MeasurableEquiv.measurable _).comp (measurable_const.prod_mk measurable_fst)).prod_mk measurable_snd
     simpa only [cons_symm] using hm
   calc ∫⁻ z, G z = ∫⁻ x : Fin (p + 1) → ℂ, ∫⁻ r : R, G (x, r) := MeasureTheory.lintegral_prod _ hG.aemeasurable
     _ = ∫⁻ y : ℂ × (Fin p → ℂ), (∫⁻ r : R, G ((MeasurableEquiv.piFinSuccAbove (fun _ : Fin (p + 1) => ℂ) 0).symm y, r))
@@ -191,8 +186,6 @@ lemma split_cons' {p : ℕ} {R : Type*} [MeasureSpace R] [SFinite (volume : Meas
       ((MeasurableEquiv.piFinSuccAbove (fun _ : Fin (p + 1) => ℂ) 0).symm (x.1, x.2.1), x.2.2)) := by
     first
     | exact ((MeasurableEquiv.measurable _).comp (measurable_fst.prodMk (measurable_fst.comp measurable_snd))).prodMk
-        (measurable_snd.comp measurable_snd)
-    | exact ((MeasurableEquiv.measurable _).comp (measurable_fst.prod_mk (measurable_fst.comp measurable_snd))).prod_mk
         (measurable_snd.comp measurable_snd)
   have h2 := hG.comp hm
   simp only [cons_symm] at h2
@@ -289,8 +282,6 @@ lemma base_pt (m : ℕ) (v : ℝ) (hv : 0 < v) (x : Xp 0 m) :
 lemma volume_univ_fin_zero : (volume : Measure (Fin 0 → ℂ)) Set.univ = 1 := by
   first
   | simp [MeasureTheory.volume_pi, MeasureTheory.Measure.pi_univ]
-  | (rw [MeasureTheory.volume_pi, MeasureTheory.Measure.pi_univ]; simp)
-  | simp
 
 lemma ch_base (m : ℕ) (ν : Fin 1 → ℝ) (hν : 0 < ν 0) : CHInt 0 m ν < ∞ := by
   have hv := hν
@@ -309,11 +300,9 @@ lemma ch_base (m : ℕ) (ν : Fin 1 → ℝ) (hν : 0 < ν 0) : CHInt 0 m ν < �
   have hm1 : Measurable fun u : Fin m → ℂ => ENNReal.ofReal ((1 + ‖u‖ ^ 2) ^ (-(2 * ((m : ℝ) + ν 0 / 2)) / 2)) := by
     first
     | fun_prop
-    | measurability
   have hm2 : Measurable fun b : ℝ => ENNReal.ofReal ((1 + ‖b‖ ^ 2) ^ (-(1 + ν 0 / 2) / 2)) := by
     first
     | fun_prop
-    | measurability
   have hprod : ∫⁻ y : (Fin m → ℂ) × ℝ, ENNReal.ofReal ((1 + ‖y.1‖ ^ 2) ^ (-(2 * ((m : ℝ) + ν 0 / 2)) / 2)) *
       ENNReal.ofReal ((1 + ‖y.2‖ ^ 2) ^ (-(1 + ν 0 / 2) / 2)) < ∞ := by
     rw [MeasureTheory.Measure.volume_eq_prod, MeasureTheory.lintegral_prod_mul hm1.aemeasurable hm2.aemeasurable]

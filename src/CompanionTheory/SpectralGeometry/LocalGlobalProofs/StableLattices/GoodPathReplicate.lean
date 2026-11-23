@@ -183,7 +183,6 @@ theorem blocks_good (χ : Fin n → ℂ) (m : Fin n → ℕ) (f : Fin n → ℝ)
         have hre : (χ r).re = (χ a).re + j + 1 := by
           have := congrArg Complex.re he
           simpa using this
-        have hj0 : (0 : ℝ) ≤ j := Nat.cast_nonneg j
         have hm := hmono a r (by linarith)
         have hm' : (m a : ℝ) ≤ m r := by exact_mod_cast hm
         have := hlt r hrl
@@ -217,7 +216,6 @@ theorem num (χ : Fin n → ℂ) (B : ℝ) : ∃ C δ : ℝ, 0 < δ ∧ ∀ N₀
   obtain ⟨e1, he1, hE1⟩ := exists_pos_lower (fun p : Fin n × Fin n => x p.2 - x p.1)
   obtain ⟨κ, hκ, hK⟩ := exists_pos_lower
     (fun p : Finset (Fin n) × Finset (Fin n) => -(∑ i ∈ p.1, x i - ∑ i ∈ p.2, x i))
-  have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
   obtain ⟨ε, hε, hε1, hε2⟩ : ∃ ε : ℝ, 0 < ε ∧ ε * (n + 1) ≤ e1 ∧ ε * (2 * n ^ 2 + 2) ≤ κ := by
     refine ⟨min (e1 / (n + 1)) (κ / (2 * n ^ 2 + 2)), lt_min (by positivity) (by positivity), ?_, ?_⟩
     · exact (le_div_iff₀ (by positivity)).1 (min_le_left _ _)
@@ -354,7 +352,6 @@ theorem num (χ : Fin n → ℂ) (B : ℝ) : ∃ C δ : ℝ, 0 < δ ∧ ∀ N₀
     have hxa := abs_le.1 (hxM a)
     have h1 := hfl a
     have h2 : N * c a ≤ N * (2 * M + 1 + ε * n) := mul_le_mul_of_nonneg_left (hc2 a) hNp
-    have hm0 : (0 : ℝ) ≤ m a := Nat.cast_nonneg _
     have h3 : M ≤ N * M := by nlinarith
     refine abs_le.2 ⟨?_, ?_⟩
     · nlinarith

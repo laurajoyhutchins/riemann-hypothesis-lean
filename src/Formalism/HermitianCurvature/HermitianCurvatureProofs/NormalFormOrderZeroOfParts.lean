@@ -2015,8 +2015,6 @@ theorem off_contra {δ δ' : ℕ → ℤ} {ρ σ : M.Ty P} (h : Off δ ρ σ) {m
 theorem box_down {δ : ℕ → ℤ} {ρ σ : M.Ty P} (h : Off δ ρ σ) {l : ℕ} (hl : l ∈ Icc 1 (P.k - 1)) (hδ : δ l = -1) :
     ∃ τ, M.Up P l τ ρ := by
   rw [Finset.mem_Icc] at hl
-  have hρ : 1 ≤ ((ρ ⟨l - 1, by omega⟩ : Fin _) : ℕ) := by
-    have := h ⟨l - 1, by omega⟩; simp only [show l - 1 + 1 = l by omega, hδ] at this; omega
   refine ⟨fun i => if hi : (i : ℕ) + 1 = l then ⟨(ρ i : ℕ) - 1, by have := (ρ i).isLt; omega⟩ else ρ i, ?_⟩
   intro i
   by_cases hi : (i : ℕ) + 1 = l

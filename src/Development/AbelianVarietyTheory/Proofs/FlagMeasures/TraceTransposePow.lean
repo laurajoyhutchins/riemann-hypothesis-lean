@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.PhiCentreEigenfunctionDiscreteSeries
 public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SmoothAddSmul
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.PosPartUnitaryMul
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ScalarOfMultOne
@@ -261,22 +262,7 @@ private lemma matrix_of_pow_succ_apply_eq_sum_prod {A : Type} [Ring A] (E : Fin 
 
 lemma sum_cycWord {A : Type} [Ring A] (E : Fin n → Fin n → A) (m : ℕ) :
     ∑ a : Fin (m + 1) → Fin n, ((cycWord a).map fun p => E p.1 p.2).prod = ∑ c, (Matrix.of E ^ (m + 1)) c c := by
-  simp_rw [matrix_of_pow_succ_apply_eq_sum_prod E m]
-  rw [Finset.sum_comm]
-  refine Finset.sum_congr rfl fun a _ => ?_
-  rw [Finset.sum_ite_eq]
-  simp only [Finset.mem_univ, if_true, cycWord, List.map_ofFn]
-  congr 1
-  refine List.ofFn_inj.mpr ?_
-  funext t
-  simp only [Function.comp_apply]
-  by_cases ht : t = Fin.last m
-  · subst ht
-    simp [Fin.snoc_last]
-  · have hs : t.succ = (finRotate (m + 1) t).castSucc := by
-      ext
-      simp [Fin.val_add_one_of_lt (Fin.lt_last_iff_ne_last.2 ht)]
-    rw [hs, Fin.snoc_castSucc, Fin.snoc_castSucc]
+  apply GlobalTheory.PhiEigenfun.sum_cycWord <;> assumption
 
 
 open GlobalTheory.CapelliCentral in

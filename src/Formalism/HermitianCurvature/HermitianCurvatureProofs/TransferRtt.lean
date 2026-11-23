@@ -1,5 +1,6 @@
 module
 
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.CoordinateCommuteRaisingConstant
 public import Formalism.HermitianCurvature.StatementM
 public import Mathlib.LinearAlgebra.Dual.Defs
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.EulerZetaGammaInvIdentity
@@ -342,51 +343,7 @@ theorem gauss_rtt (D : ℂ) (hD0 : D ≠ 0) (hD1 : D ≠ 1) (hD2 : D ≠ -1) (τ
             (!![d' + m' * τ' * l', m' * τ'; τ' * l', τ'] : Matrix (Fin 2) (Fin 2) B) i n -
           (!![d' + m' * τ' * l', m' * τ'; τ' * l', τ'] : Matrix (Fin 2) (Fin 2) B) k j *
             (!![d + m * τ * l, m * τ; τ * l, τ] : Matrix (Fin 2) (Fin 2) B) i n := by
-  have hm1 : D - 1 ≠ 0 := sub_ne_zero.mpr hD1
-  have hp1 : D + 1 ≠ 0 := by intro h; exact hD2 (by linear_combination h)
-  have r1 : l' * τ = τ * l' - D⁻¹ • -(τ * (l - l')) := solve_right hD0 D1
-  have r2 : l * τ' = τ' * l - D⁻¹ • -(τ' * (l - l')) := solve_right hD0 D1s
-  have r3 : l' * d = d * l' - D⁻¹ • (d * (l - l')) := solve_right hD0 D2
-  have r4 : l * d' = d' * l - D⁻¹ • (d' * (l - l')) := solve_right hD0 D2s
-  have r5 : τ * m' = m' * τ + D⁻¹ • ((m - m') * τ) := solve_left hD0 E1
-  have r6 : τ' * m = m * τ' + D⁻¹ • ((m - m') * τ') := solve_left hD0 TwistedContraction
-  have r7 : d * m' = m' * d + D⁻¹ • -((m - m') * d) := solve_left hD0 E2
-  have r8 : d' * m = m * d' + D⁻¹ • -((m - m') * d') := solve_left hD0 E2VanishingOtherColumns
-  have s1 : τ' * (l' * (m * τ)) = τ' * (m * (l' * τ)) - D⁻¹ • (d' * τ - τ' * d) := by
-    have := solve_right hD0 D4
-    simpa only [mul_assoc] using this
-  have s2 : τ * (l * (m' * τ')) = τ * (m' * (l * τ')) - D⁻¹ • (τ * d' - d * τ') := by
-    have := solve_right hD0 D4s
-    simpa only [mul_assoc] using this
-  have o1 : l' * l = (D - 1)⁻¹ • ((D + 1) • (l * l') - l * l - l' * l') := by
-    have h : (D - 1) • (l' * l) = (D + 1) • (l * l') - l * l - l' * l' := by
-      have h2 : D • (l * l') - D • (l' * l) = l * l - l * l' - l' * l + l' * l' := by
-        rw [← smul_sub, D3]; noncomm_ring
-      rw [sub_smul, add_smul, one_smul, one_smul]
-      have h3 : D • (l' * l) = D • (l * l') - (l * l - l * l' - l' * l + l' * l') := by rw [← h2]; abel
-      rw [h3]; abel
-    rw [← h, smul_smul, inv_mul_cancel₀ hm1, one_smul]
-  have o2 : m' * m = (D + 1)⁻¹ • ((D - 1) • (m * m') + m * m + m' * m') := by
-    have h : (D + 1) • (m' * m) = (D - 1) • (m * m') + m * m + m' * m' := by
-      have h2 : D • (m * m') - D • (m' * m) = -(m * m - m * m' - m' * m + m' * m') := by
-        rw [← smul_sub, E3]; noncomm_ring
-      rw [sub_smul, add_smul, one_smul, one_smul]
-      have h3 : D • (m' * m) = D • (m * m') + (m * m - m * m' - m' * m + m' * m') := by
-        have : D • (m' * m) = D • (m * m') - (D • (m * m') - D • (m' * m)) := by abel
-        rw [this, h2]; abel
-      rw [h3]; abel
-    rw [← h, smul_smul, inv_mul_cancel₀ hp1, one_smul]
-  intro i j k n
-  fin_cases i <;> fin_cases j <;> fin_cases k <;> fin_cases n <;>
-  simp only [Fin.zero_eta, Fin.mk_one, Fin.isValue, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
-    Matrix.cons_val_one, Matrix.cons_val_fin_one, Matrix.empty_val', Matrix.head_cons, Matrix.head_fin_const,
-    mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, smul_add, smul_sub, smul_neg, smul_smul,
-    smul_mul_assoc, mul_smul_comm, mul_assoc,
-    s1, s2, mul_assoc_four_right s1, mul_assoc_four_right s2,
-    r1, r2, r3, r4, r5, r6, r7, r8, assoc_var r1, assoc_var r2, assoc_var r3, assoc_var r4,
-    assoc_var r5, assoc_var r6, assoc_var r7, assoc_var r8, o1, o2, assoc_var o1, assoc_var o2,
-    c1, c2, c3, c4, assoc_var c1, assoc_var c2, assoc_var c3, assoc_var c4]
-  all_goals (match_scalars <;> field_simp <;> ring)
+  apply Formalism.FourierDecayAlt.P.MAx1.ModelAlgebraRelations.GA.gauss_rtt <;> assumption
 
 end Gauss
 
@@ -448,51 +405,7 @@ theorem rootB {I : Finset ℕ} {ρ : ℕ → ℂ} {q w : ℂ[X]} {N : ℕ → �
     (hinj : ∀ i ∈ I, ∀ j ∈ I, ρ i = ρ j → i = j) {l j0 : ℕ} (hl : l ∈ I) (hj0 : j0 ∈ I) (hne : j0 ≠ l)
     (hρ : ρ j0 + 1 = ρ l) (hq : (X + C (ρ l)) ^ 2 ∣ q) (hN0 : N j0 = 0) :
     w.eval (-ρ l) = N l * ∏ j ∈ I.erase l, (ρ j - ρ l) := by
-  set ρ1 : ℕ → ℂ := fun i => ρ i + 1 with hρ1
-  have hx1 : pX I ρ1 = (X + C (ρ l)) * pX (I.erase j0) ρ1 := by
-    rw [pX_erase I ρ1 hj0, hρ1]; simp only [hρ]
-  have hF : pX (I.erase j0) ρ1 = (X + C (ρ l + 1)) * pX ((I.erase j0).erase l) ρ1 :=
-    pX_erase _ _ (Finset.mem_erase.2 ⟨hne.symm, hl⟩)
-  have hE : pX (I.erase l) ρ1 = (X + C (ρ l)) * pX ((I.erase j0).erase l) ρ1 := by
-    rw [pX_erase (I.erase l) ρ1 (Finset.mem_erase.2 ⟨hne, hj0⟩), Finset.erase_right_comm, hρ1]; simp only [hρ]
-  have hdiv : (X + C (ρ l)) ^ 2 ∣ q + ∑ m ∈ I.erase l, C (N m) * (pX (I.erase m) ρ * pX (I.erase m) ρ1) := by
-    refine dvd_add hq (Finset.dvd_sum fun m hm => ?_)
-    by_cases hm0 : m = j0
-    · rw [hm0, hN0]; simp
-    · have hm' := Finset.mem_erase.1 hm
-      rw [pX_erase (I.erase m) ρ (Finset.mem_erase.2 ⟨fun e => hm'.1 e.symm, hl⟩),
-        pX_erase (I.erase m) ρ1 (Finset.mem_erase.2 ⟨fun e => hm0 e.symm, hj0⟩)]
-      have : (ρ1 j0) = ρ l := hρ
-      rw [this]
-      exact ⟨C (N m) * (pX ((I.erase m).erase l) ρ * pX ((I.erase m).erase j0) ρ1), by ring⟩
-  obtain ⟨Aq, hA⟩ := hdiv
-  have h2 : w * pX I ρ1 = (q + ∑ m ∈ I.erase l, C (N m) * (pX (I.erase m) ρ * pX (I.erase m) ρ1)) +
-      C (N l) * (pX (I.erase l) ρ * pX (I.erase l) ρ1) := by
-    have := h
-    unfold W1 at this
-    rw [this, ← Finset.add_sum_erase I _ hl]; ring
-  rw [hA, hx1, hE] at h2
-  have h3 : w * pX (I.erase j0) ρ1 = (X + C (ρ l)) * Aq + C (N l) * (pX (I.erase l) ρ * pX ((I.erase j0).erase l) ρ1) := by
-    apply mul_left_cancel₀ (monic_X_add_C (ρ l)).ne_zero
-    linear_combination h2
-  rw [hF] at h3
-  have h4 := congrArg (Polynomial.eval (-ρ l)) h3
-  simp only [eval_mul, eval_add, eval_X, eval_C, pX_eval] at h4
-  have hG : ∏ j ∈ (I.erase j0).erase l, (-ρ l + ρ1 j) ≠ 0 := by
-    rw [Finset.prod_ne_zero_iff]
-    intro j hj h0
-    have hj' := Finset.mem_erase.1 hj
-    have hj'' := Finset.mem_erase.1 hj'.2
-    apply hj''.1
-    apply hinj j hj''.2 j0 hj0
-    have : ρ1 j = ρ j + 1 := rfl
-    rw [this] at h0
-    linear_combination h0 - hρ
-  have e2 : ∏ j ∈ I.erase l, (-ρ l + ρ j) = ∏ j ∈ I.erase l, (ρ j - ρ l) :=
-    Finset.prod_congr rfl (fun j _ => by ring)
-  rw [e2] at h4
-  apply mul_right_cancel₀ hG
-  linear_combination h4
+  apply Formalism.FourierDecayAlt.P.MAx1.ModelAlgebraRelations.WB.rootB <;> assumption
 
 theorem add_low {p r : ℂ[X]} (hp : p.Monic) (hr : r.natDegree + 1 < p.natDegree) :
     (p + r).Monic ∧ (p + r).natDegree = p.natDegree ∧ (p + r).nextCoeff = p.nextCoeff := by
@@ -524,116 +437,14 @@ theorem quad {I : Finset ℕ} {ρ : ℕ → ℂ} (hinj : ∀ i ∈ I, ∀ j ∈ 
     ∃ c0 : ℂ, ∀ u : ℂ, w.eval u = (∏ i ∈ I, (u + ρ i)) *
       (c * (u ^ 2 + (q1.nextCoeff - ∑ i ∈ I, (ρ i + 1) - ∑ i ∈ I, ρ i) * u) + c0) +
       ∑ l ∈ I, (N l - Nd l) * ∏ j ∈ I.erase l, (u + ρ j) := by
-  set ρ1 : ℕ → ℂ := fun i => ρ i + 1 with hρ1
-  set S1 : ℂ[X] := ∑ l ∈ I, C (N l) * (pX (I.erase l) ρ * pX (I.erase l) ρ1) with hS1
-  set S2 : ℂ[X] := ∑ l ∈ I, C (N l - Nd l) * pX (I.erase l) ρ with hS2
-  have hcc : (C c⁻¹ * C c : ℂ[X]) = 1 := by rw [← C_mul, inv_mul_cancel₀ hc, C_1]
-  have dS1 : (C c⁻¹ * S1).natDegree ≤ I.card + I.card := by
-    refine (natDegree_C_mul_le _ _).trans (natDegree_sum_le_of_forall_le _ _ fun l _ => ?_)
-    refine (natDegree_C_mul_le _ _).trans (natDegree_mul_le.trans ?_)
-    rw [pX_natDegree, pX_natDegree]
-    exact add_le_add (Finset.card_erase_le) (Finset.card_erase_le)
-  have dS2 : (-(C c⁻¹ * S2)).natDegree ≤ I.card := by
-    rw [natDegree_neg]
-    refine (natDegree_C_mul_le _ _).trans (natDegree_sum_le_of_forall_le _ _ fun l _ => ?_)
-    refine (natDegree_C_mul_le _ _).trans ?_
-    rw [pX_natDegree]
-    exact Finset.card_erase_le
-  have hM : (C c⁻¹ * w) * pX I ρ1 = q1 + C c⁻¹ * S1 := by
-    have := h
-    unfold W1 at this
-    calc (C c⁻¹ * w) * pX I ρ1 = C c⁻¹ * (w * pX I ρ1) := by ring
-      _ = C c⁻¹ * (C c * q1 + S1) := by rw [this]
-      _ = (C c⁻¹ * C c) * q1 + C c⁻¹ * S1 := by ring
-      _ = q1 + C c⁻¹ * S1 := by rw [hcc, one_mul]
-  obtain ⟨m1, m2, m3⟩ := add_low (p := q1) (r := C c⁻¹ * S1) hq1 (by omega)
-  rw [← hM] at m1 m2 m3
-  have hw1 : (C c⁻¹ * w).Monic := Monic.of_mul_monic_right (pX_monic I ρ1) m1
-  rw [hw1.natDegree_mul (pX_monic I ρ1), pX_natDegree] at m2
-  rw [hw1.nextCoeff_mul (pX_monic I ρ1), pX_nextCoeff] at m3
-  obtain ⟨r1, r2, r3⟩ := add_low (p := C c⁻¹ * w) (r := -(C c⁻¹ * S2)) hw1 (by omega)
-  have hdvd : pX I ρ ∣ C c⁻¹ * w + -(C c⁻¹ * S2) := by
-    apply pX_dvd hinj
-    intro l hl
-    have : S2.eval (-ρ l) = (N l - Nd l) * ∏ j ∈ I.erase l, (ρ j - ρ l) := by
-      rw [hS2, eval_finsetSum, Finset.sum_eq_single l]
-      · rw [eval_mul, eval_C, pX_eval]
-        congr 1
-        exact Finset.prod_congr rfl (fun j _ => by ring)
-      · intro m _ hml
-        rw [eval_mul, eval_C, pX_eval, Finset.prod_eq_zero (i := l) (Finset.mem_erase.2 ⟨fun h => hml h.symm, hl⟩) (by ring)]
-        simp
-      · intro h; exact absurd hl h
-    simp only [eval_add, eval_neg, eval_mul, eval_C, this, hroot l hl]
-    ring
-  obtain ⟨Q, hQ⟩ := hdvd
-  rw [hQ] at r1 r2 r3
-  have hQm : Q.Monic := Monic.of_mul_monic_left (pX_monic I ρ) r1
-  rw [(pX_monic I ρ).natDegree_mul hQm, pX_natDegree] at r2
-  rw [(pX_monic I ρ).nextCoeff_mul hQm, pX_nextCoeff] at r3
-  have hQd : Q.natDegree = 2 := by omega
-  have hQ2 : Q.coeff 2 = 1 := by rw [← hQd]; exact hQm
-  have hQ1 : Q.coeff 1 = Q.nextCoeff := by rw [nextCoeff_of_natDegree_pos (by omega), hQd]
-  refine ⟨c * Q.coeff 0, fun u => ?_⟩
-  have hQe : Q.eval u = Q.coeff 0 + Q.nextCoeff * u + u ^ 2 := by
-    rw [eval_eq_sum_range, hQd]
-    simp [Finset.sum_range_succ, hQ2, hQ1]
-  have hS2e : S2.eval u = ∑ l ∈ I, (N l - Nd l) * ∏ j ∈ I.erase l, (u + ρ j) := by
-    rw [hS2, eval_finsetSum]
-    exact Finset.sum_congr rfl (fun l _ => by rw [eval_mul, eval_C, pX_eval])
-  have h5 := congrArg (Polynomial.eval u) hQ
-  simp only [eval_add, eval_neg, eval_mul, eval_C, pX_eval, hQe, hS2e] at h5
-  rw [← hS2e] at h5 ⊢
-  have hn : Q.nextCoeff = q1.nextCoeff - ∑ i ∈ I, (ρ i + 1) - ∑ i ∈ I, ρ i := by
-    have : ∑ i ∈ I, ρ1 i = ∑ i ∈ I, (ρ i + 1) := rfl
-    rw [this] at m3
-    linear_combination r3 + m3
-  rw [← hn]
-  have : w.eval u = c * (c⁻¹ * w.eval u) := by field_simp
-  rw [this]
-  have h6 : c⁻¹ * w.eval u = (∏ i ∈ I, (u + ρ i)) * (Q.coeff 0 + Q.nextCoeff * u + u ^ 2) + c⁻¹ * S2.eval u := by
-    linear_combination h5
-  rw [h6]
-  field_simp
-  ring
+  apply Formalism.FourierDecayAlt.P.MAx1.ModelAlgebraRelations.WB.quad <;> assumption
 
 theorem absH {I : Finset ℕ} {ρ : ℕ → ℂ} {q w : ℂ[X]} {N : ℕ → ℂ} (Nd : ℕ → ℂ) (h : W1 I ρ q w N) (Qf : ℂ → ℂ)
     (hw : ∀ u, w.eval u = (∏ i ∈ I, (u + ρ i)) * Qf u + ∑ l ∈ I, (N l - Nd l) * ∏ j ∈ I.erase l, (u + ρ j))
     (u : ℂ) (h0 : ∀ i ∈ I, u + ρ i ≠ 0) (h1 : ∀ i ∈ I, u + ρ i + 1 ≠ 0) :
     q.eval u / ((∏ i ∈ I, (u + ρ i)) * ∏ i ∈ I, (u + (ρ i + 1))) =
       Qf u + ∑ l ∈ I, (N l / (u + ρ l + 1) - Nd l / (u + ρ l)) := by
-  have hx0 : ∏ i ∈ I, (u + ρ i) ≠ 0 := Finset.prod_ne_zero_iff.2 h0
-  have hx1 : ∏ i ∈ I, (u + (ρ i + 1)) ≠ 0 :=
-    Finset.prod_ne_zero_iff.2 (fun i hi => by rw [← add_assoc]; exact h1 i hi)
-  have s1 : ∑ l ∈ I, N l * ((∏ j ∈ I.erase l, (u + ρ j)) * ∏ j ∈ I.erase l, (u + (ρ j + 1))) =
-      ((∏ i ∈ I, (u + ρ i)) * ∏ i ∈ I, (u + (ρ i + 1))) * ∑ l ∈ I, N l / ((u + ρ l) * (u + ρ l + 1)) := by
-    rw [Finset.mul_sum]
-    refine Finset.sum_congr rfl fun l hl => ?_
-    rw [← Finset.mul_prod_erase I (fun i => u + ρ i) hl, ← Finset.mul_prod_erase I (fun i => u + (ρ i + 1)) hl]
-    have a0 := h0 l hl
-    have a1 := h1 l hl
-    have a2 : u + (ρ l + 1) = u + ρ l + 1 := by ring
-    rw [a2]
-    field_simp
-  have s2 : ∑ l ∈ I, (N l - Nd l) * ∏ j ∈ I.erase l, (u + ρ j) =
-      (∏ i ∈ I, (u + ρ i)) * ∑ l ∈ I, (N l - Nd l) / (u + ρ l) := by
-    rw [Finset.mul_sum]
-    refine Finset.sum_congr rfl fun l hl => ?_
-    rw [← Finset.mul_prod_erase I (fun i => u + ρ i) hl]
-    have a0 := h0 l hl
-    field_simp
-  have s3 : ∑ l ∈ I, (N l / (u + ρ l + 1) - Nd l / (u + ρ l)) =
-      ∑ l ∈ I, (N l - Nd l) / (u + ρ l) - ∑ l ∈ I, N l / ((u + ρ l) * (u + ρ l + 1)) := by
-    rw [← Finset.sum_sub_distrib]
-    refine Finset.sum_congr rfl fun l hl => ?_
-    have a0 := h0 l hl
-    have a1 := h1 l hl
-    field_simp
-    ring
-  have e1 := h.eval u
-  rw [s1, hw u, s2] at e1
-  rw [div_eq_iff (mul_ne_zero hx0 hx1), s3]
-  linear_combination -e1
+  apply Formalism.FourierDecayAlt.P.MAx1.ModelAlgebraRelations.WB.absH <;> assumption
 
 theorem weighted_sum_difference_identity {I : Finset ℕ} {ρ : ℕ → ℂ} {q w : ℂ[X]} {N : ℕ → ℂ} (Nd : ℕ → ℂ) (h : W1 I ρ q w N) (c s c0 : ℂ)
     (hw : ∀ u, w.eval u = (∏ i ∈ I, (u + ρ i)) * (c * (u ^ 2 + s * u) + c0) +
@@ -709,77 +520,7 @@ theorem q_eval (P : Par) (u : ℂ) : (C (-((P.T : ℂ) * P.T')) * q1P P).eval u 
 theorem model_root (P : Par) (hP : P.OK) (π : Ty P) (l : ℕ) (hl : l ∈ Icc 1 (P.k - 1)) :
     (wNum P π /ₘ coordinatePolynomial P π).eval (-(rc P π l)) = (((Nrm P l π : ℝ) : ℂ) - ((NrmDown P l π : ℝ) : ℂ)) *
       ∏ j ∈ (Icc 1 (P.k - 1)).erase l, (rc P π j - rc P π l) := by
-  have hl' := Finset.mem_Icc.1 hl
-  by_cases hdeg : ∃ j0 ∈ (Icc 1 (P.k - 1)).erase l, rho P π j0 + 1 = rho P π l
-  · obtain ⟨j0, hj0, hρ⟩ := hdeg
-    have hj0' := Finset.mem_erase.1 hj0
-    have hNd : NrmDown P l π = 0 := by
-      unfold NrmDown
-      have hz : ∏ j ∈ (Icc 1 (P.k - 1)).erase l, (rho P π j - rho P π l + 1) = 0 :=
-        Finset.prod_eq_zero hj0 (by linarith)
-      rw [hz, zero_mul, div_zero]
-    have hN0 : Nrm P j0 π = 0 := by
-      unfold Nrm
-      have hz : ∏ j ∈ (Icc 1 (P.k - 1)).erase j0, (rho P π j - rho P π j0 - 1) = 0 :=
-        Finset.prod_eq_zero (Finset.mem_erase.2 ⟨fun e => hj0'.1 e.symm, hl⟩) (by linarith)
-      rw [hz, mul_zero, div_zero]
-    have hI := Mx3.tyInterlaces P hP π
-    have hlt : l < j0 := by
-      by_contra hcon
-      have : j0 < l := lt_of_le_of_ne (not_lt.1 hcon) hj0'.1
-      have := Mx3.rho_inj P hP π j0 l hj0'.2 hl this
-      linarith
-    have o := (Mx3.ord P.k P.u P.u' (rho P π) hI l hl).2.2.2 j0 hj0'.2 hlt
-    have b := hI l hl
-    have hu : P.u (l + 1) = rho P π l - 1 / 2 := by linarith [o.1, b.2.2.1]
-    have hu' : P.u' (l + 1) = rho P π l - 1 / 2 := by linarith [o.2, b.2.2.2]
-    have hq : (X + C (rc P π l)) ^ 2 ∣ C (-((P.T : ℂ) * P.T')) * q1P P := by
-      apply Dvd.dvd.mul_left
-      have hm : l + 1 ∈ Icc 1 P.k := Finset.mem_Icc.2 ⟨by omega, by omega⟩
-      have hd := Finset.dvd_prod_of_mem
-        (fun i => ((X + C (1 / 2 + (P.u i : ℂ))) * (X + C (1 / 2 + (P.u' i : ℂ))) : ℂ[X])) hm
-      have e1 : (1 / 2 + (P.u (l + 1) : ℂ)) = rc P π l := by rw [hu]; unfold rc; push_cast; ring
-      have e2 : (1 / 2 + (P.u' (l + 1) : ℂ)) = rc P π l := by rw [hu']; unfold rc; push_cast; ring
-      simp only [e1, e2] at hd
-      rw [pow_two]
-      exact hd
-    have := rootB (weight_model_identity P hP π) (rc_inj P hP π) hl hj0'.2 hj0'.1
-      (by unfold rc; exact_mod_cast hρ) hq (by simp only [hN0]; simp)
-    rw [this, hNd]; simp
-  · push Not at hdeg
-    have hA1 : ∏ j ∈ (Icc 1 (P.k - 1)).erase l, (rho P π j - rho P π l + 1) ≠ 0 := by
-      rw [Finset.prod_ne_zero_iff]
-      intro j hj h0
-      exact hdeg j hj (by linarith)
-    have hA0 : ∏ j ∈ (Icc 1 (P.k - 1)).erase l, (rho P π j - rho P π l) ≠ 0 := by
-      rw [Finset.prod_ne_zero_iff]
-      intro j hj h0
-      have hj' := Finset.mem_erase.1 hj
-      apply hj'.1
-      apply rc_inj P hP π j hj'.2 l hl
-      unfold rc
-      have : rho P π j = rho P π l := by linarith
-      rw [this]
-    have hk : NrmDown P l π * ((∏ j ∈ (Icc 1 (P.k - 1)).erase l, (rho P π j - rho P π l + 1)) *
-        ∏ j ∈ (Icc 1 (P.k - 1)).erase l, (rho P π j - rho P π l)) = -I.qpoly P.k P.T P.T' P.u P.u' (-rho P π l) := by
-      unfold NrmDown
-      exact div_mul_cancel₀ _ (mul_ne_zero hA1 hA0)
-    have hk' := congrArg (fun x : ℝ => (x : ℂ)) hk
-    simp only [Complex.ofReal_mul, Complex.ofReal_prod, Complex.ofReal_sub, Complex.ofReal_add, Complex.ofReal_neg,
-      Complex.ofReal_one] at hk'
-    have hA1c : ∏ j ∈ (Icc 1 (P.k - 1)).erase l, (rc P π j - rc P π l + 1) ≠ 0 := by
-      have := hA1
-      unfold rc
-      intro h0
-      apply this
-      exact_mod_cast h0
-    refine rootA (fun l => ((NrmDown P l π : ℝ) : ℂ)) (weight_model_identity P hP π) hl hA1c ?_
-    rw [q_eval]
-    have hr := (Mx3.realPoints P π (-rho P π l)).2
-    have e : (((-rho P π l : ℝ)) : ℂ) = -(rc P π l) := by unfold rc; push_cast; ring
-    rw [e] at hr
-    rw [hr]
-    exact hk'
+  apply Formalism.FourierDecayAlt.P.MAx1.ModelAlgebraRelations.WB.model_root <;> assumption
 
 theorem s_eq (P : Par) (hP : P.OK) (π : Ty P) :
     (q1P P).nextCoeff - ∑ i ∈ Icc 1 (P.k - 1), (rc P π i + 1) - ∑ i ∈ Icc 1 (P.k - 1), rc P π i =
@@ -842,22 +583,7 @@ theorem scalar_partial_fraction_identity (P : Par) (hP : P.OK) (π : Ty P) (u v 
       (((Nrm P j π : ℝ) : ℂ) / ((u + (rho P π j : ℂ) + 1) * (v + (rho P π j : ℂ) + 1)) -
         ((NrmDown P j π : ℝ) : ℂ) / ((u + (rho P π j : ℂ)) * (v + (rho P π j : ℂ))))) =
       qC P v / (xC P π v * xC P π (v + 1)) - qC P u / (xC P π u * xC P π (u + 1)) := by
-  have hc : -((P.T : ℂ) * P.T') ≠ 0 := by
-    have h1 : (P.T : ℂ) ≠ 0 := by exact_mod_cast hP.T_pos.ne'
-    have h2 : (P.T' : ℂ) ≠ 0 := by exact_mod_cast hP.T'_pos.ne'
-    exact neg_ne_zero.2 (mul_ne_zero h1 h2)
-  obtain ⟨c0, hw⟩ := quad (rc_inj P hP π) (q_polynomial_monic P) (natDegree_q1_polynomial P hP) hc
-    (fun l => ((NrmDown P l π : ℝ) : ℂ)) (weight_model_identity P hP π) (model_root P hP π)
-  rw [s_eq P hP π] at hw
-  have h := weighted_sum_difference_identity (fun l => ((NrmDown P l π : ℝ) : ℂ)) (weight_model_identity P hP π) _ _ c0 hw u v
-    (good0 hu π) (good1 hu π) (good0 hv π) (good1 hv π)
-  rw [q_eval, q_eval, ← coordinate_product_eq, ← coordinate_product_eq, ← x_eval_shift_prod, ← x_eval_shift_prod] at h
-  rw [← h]
-  have hT : (P.TT : ℂ) = (P.T : ℂ) * P.T' := by unfold Par.TT; push_cast; ring
-  rw [hT]
-  have : ∀ j, (rho P π j : ℂ) = rc P π j := fun _ => rfl
-  simp only [this]
-  ring
+  apply Formalism.FourierDecayAlt.P.MAx1.ModelAlgebraRelations.WB.scalar_partial_fraction_identity <;> assumption
 
 end
 

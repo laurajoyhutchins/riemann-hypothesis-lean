@@ -1,7 +1,6 @@
 module
 
 public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HasLenOfLatLen
-public import Development.AutomorphicSpectrum.Proofs.TwistedProofs.CosetSurjectiveOfLevi
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
 import Mathlib.Algebra.Order.Interval.Basic
@@ -40,10 +39,13 @@ import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Topology.Sheaves.Init
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryBlockTriangularLeviPartUnitary
+public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.UnitaryLeviNormalizesUnipotentRadical
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.UnitaryIwasawaCosetSurjOfLeviElementExists
 
 @[expose] public section
 
 open GlobalTheory.InertZeta
 
-theorem _root_.GlobalTheory.T.coset_surjective_of_levi : LeviExists → CosetSurj := by
-  first | exact @GlobalTheory.CompanionTheory.InertCoset.cosetSurj | exact GlobalTheory.CompanionTheory.InertCoset.cosetSurj | (intros; apply GlobalTheory.CompanionTheory.InertCoset.cosetSurj <;> assumption)
+theorem _root_.GlobalTheory.T.coset_surjective_of_levi : LeviExists → CosetSurj :=
+  @_root_.GlobalTheory.InertZeta.cosetSurj_of_leviExists

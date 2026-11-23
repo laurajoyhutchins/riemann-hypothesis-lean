@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.HNormA
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.HeightTheory.TheoremA
 public import ReciprocityTheory.SemistableReduction.ComapInclusionIsLocalHom
 import Mathlib.Algebra.Order.Floor.Extended
@@ -60,18 +61,7 @@ open NumberField IsLocalRing
 namespace ValuationResidueLemmas
 
 theorem wt_add_eq_zero {a b : WithTop ℤ} (ha : 0 ≤ a) (hb : 0 ≤ b) (h : a + b = 0) : a = 0 := by
-  induction a using WithTop.recTopCoe with
-  | top => simp at h
-  | coe x =>
-    induction b using WithTop.recTopCoe with
-    | top => simp at h
-    | coe y =>
-      have hx : (0 : ℤ) ≤ x := by exact_mod_cast ha
-      have hy : (0 : ℤ) ≤ y := by exact_mod_cast hb
-      have hxy : x + y = 0 := by exact_mod_cast h
-      have hx0 : x = 0 := by omega
-      rw [hx0]
-      rfl
+  apply ReciprocityTheory.ChartRestriction.G.T0.HNm.wt_add_eq_zero <;> assumption
 
 theorem wt_pos {a b : WithTop ℤ} (ha : 0 ≤ a) (hb : 0 < b) : 0 < a + b := by
   calc (0 : WithTop ℤ) < b := hb

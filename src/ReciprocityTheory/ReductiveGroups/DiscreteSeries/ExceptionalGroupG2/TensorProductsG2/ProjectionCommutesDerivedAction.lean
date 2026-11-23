@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.ProjectionCommutesDerivedAction
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.OccATensWordMem
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.DatumEmbeddingMemHlam
 import Mathlib.Algebra.Order.Floor.Extended
@@ -91,48 +92,11 @@ variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] {ε : Fin 
 theorem layer_k_stable (hσ : IsURepOn (UJset ε) σ) (hD : IsDerivedOn ε σ D E) {V : Submodule ℂ D}
     (hVs : IsKStableSub ε E V) (hVK : ∀ k ∈ Kset ε, ∀ v ∈ V, ∃ w ∈ V, (w : H) = σ k v) :
     ∀ j, ∀ k ∈ Kset ε, ∀ x ∈ layer ε E V j, ∃ y ∈ layer ε E V j, (y : H) = σ k x := by
-  intro j
-  induction j with
-  | zero => exact hVK
-  | succ j ih =>
-    intro k hk
-    let Tk : Submodule ℂ D :=
-      { carrier := {x | ∃ y ∈ layer ε E V (j + 1), (y : H) = σ k x}
-        add_mem' := by
-          rintro x x' ⟨y, hy, e⟩ ⟨y', hy', e'⟩
-          exact ⟨y + y', Submodule.add_mem _ hy hy', by simp [e, e']⟩
-        zero_mem' := ⟨0, Submodule.zero_mem _, by simp⟩
-        smul_mem' := by
-          rintro c x ⟨y, hy, e⟩
-          exact ⟨c • y, Submodule.smul_mem _ c hy, by simp [e]⟩ }
-    suffices hle : layer ε E V (j + 1) ≤ Tk from fun x hx => hle hx
-    show layer ε E V j ⊔ _ ≤ Tk
-    refine sup_le (fun x hx => ?_) (iSup_le fun a => iSup_le fun b => iSup_le fun _ => ?_)
-    · obtain ⟨y, hy, e⟩ := ih k hk x hx
-      exact ⟨y, layer_le_succ j hy, e⟩
-    · rw [Submodule.map_le_iff_le_comap]
-      intro x hx
-      obtain ⟨y, hy, e⟩ := ih k hk x hx
-      have h := derived_adK hσ hD hk (Matrix.single a b (1 : ℂ)) x
-      rw [tset_actM_single] at h
-      have hyx : (⟨σ k (x : H), hD.kStable k hk x x.2⟩ : D) = y := Subtype.ext e.symm
-      rw [hyx] at h
-      refine ⟨(actM E (k * Matrix.single a b 1 * kᴴ)) y, ?_, h.symm⟩
-      simp only [actM, LinearMap.sum_apply, LinearMap.smul_apply]
-      exact Submodule.sum_mem _ fun a' _ => Submodule.sum_mem _ fun b' _ =>
-        Submodule.smul_mem _ _ (apply_mem_layer_succ hD.glRep hVs a' b' hy)
+  apply ReciprocityTheory.ChartRestriction.DS.layer_k_stable <;> assumption
 
 theorem tensor_generated_mem_layer (hE : IsGlRep E) {V : Submodule ℂ D} (hVs : IsKStableSub ε E V)
     {f : Fin n → D} (hf : f ∈ tensSub (genSub E V)) : ∃ j, ∀ c, f c ∈ layer ε E V j := by
-  rw [tset_mem] at hf
-  have hdir : Directed (· ≤ ·) (fun k => layer ε E V k) :=
-    fun i j => ⟨max i j, layer_mono (le_max_left i j), layer_mono (le_max_right i j)⟩
-  have hc : ∀ c, ∃ j, f c ∈ layer ε E V j := fun c => by
-    have := hf c
-    rw [genSub_eq_iSup_layer hE hVs] at this
-    exact (Submodule.mem_iSup_of_directed _ hdir).mp this
-  choose j hj using hc
-  exact ⟨Finset.univ.sup j, fun c => layer_mono (Finset.le_sup (Finset.mem_univ c)) (hj c)⟩
+  apply ReciprocityTheory.ChartRestriction.DS.tensor_generated_mem_layer <;> assumption
 
 theorem occurrence_coef_add (dual : Bool) (η f f' : Fin n → H) :
     occCoef dual σ η (f + f') = occCoef dual σ η f + occCoef dual σ η f' := by

@@ -218,18 +218,12 @@ theorem jd_arith (C2 C3 C5 R n N A₀ : ℝ) (hC2 : 0 ≤ C2) (hR : 0 ≤ R) (hn
       _ ≤ |C5| * X := mul_le_mul_of_nonneg_left hXa' (abs_nonneg C5)
   have e4 : 0 ≤ |C5| * X := mul_nonneg (abs_nonneg _) hX0
   have e4' : 0 ≤ |C3| * X := mul_nonneg (abs_nonneg _) hX0
-  have hA2 : (8 * C2 + |C3| + |C5|) * X ≤ A₀ := by
-    have e : (8 * C2 + |C3| + |C5|) * X = (8 * C2 + |C3| + |C5|) * (R + 1) ^ 4 * (N * n ^ 2 + n ^ 3) := by
-      rw [hX]; ring
-    rw [e]; exact hA
-  have hsplit : (8 * C2 + |C3| + |C5|) * X = 2 * C2 * X + 6 * C2 * X + |C3| * X + |C5| * X := by ring
   have e6 : 0 ≤ 6 * C2 * X := by positivity
   constructor
   · intro i o hi ho
     have e1 : (i + 1) * (C2 * (R + 1) * n) ≤ (2 * N + 2) * (C2 * (R + 1) * n) := mul_le_mul_of_nonneg_right hi hdm0
     have e5 : 6 * R * o ≤ 6 * C2 * X := by
       have h1 : R * o ≤ R * (C2 * n) := mul_le_mul_of_nonneg_left ho hR
-      have h2 : R * (C2 * n) = C2 * (R * n) := by ring
       have h3 : C2 * (R * n) ≤ C2 * X := mul_le_mul_of_nonneg_left hXc hC2
       linarith
     have e : C3 * (R + 1) * n ^ 2 + 6 * R * o + C2 * (R + 1) * n + i * (C2 * (R + 1) * n) =

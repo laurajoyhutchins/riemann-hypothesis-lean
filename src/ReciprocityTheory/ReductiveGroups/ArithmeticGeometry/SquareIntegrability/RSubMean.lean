@@ -72,10 +72,6 @@ lemma rsm_pow_gauss (k : ℕ) :
     | (have h := integral_rpow_mul_exp_neg_rpow (two_pos : (0 : ℝ) < 2) hk
        simp only [Real.rpow_natCast, Real.rpow_two] at h
        exact h)
-    | (have h := integral_rpow_mul_exp_neg_mul_rpow (two_pos : (0 : ℝ) < 2) hk one_pos
-       simp only [Real.rpow_natCast, Real.rpow_two, neg_mul, one_mul, Real.one_rpow] at h
-       rw [h]
-       norm_num)
 
 lemma rsm_pow_gauss_int (k : ℕ) :
     IntegrableOn (fun y : ℝ => y ^ k * Real.exp (-y ^ 2)) (Ioi 0) := by
@@ -89,10 +85,6 @@ lemma rsm_pow_gauss_int (k : ℕ) :
 lemma rsm_finrank (N : ℕ) : Module.finrank ℝ (EuclideanSpace ℂ (Fin N)) = 2 * N := by
   first
     | rw [finrank_real_of_complex, finrank_euclideanSpace, Fintype.card_fin]
-    | rw [finrank_real_of_complex, finrank_euclideanSpace_fin]
-    | rw [← Module.finrank_mul_finrank ℝ ℂ (EuclideanSpace ℂ (Fin N)), Complex.finrank_real_complex,
-        finrank_euclideanSpace, Fintype.card_fin]
-    | simp [finrank_real_of_complex]
 
 lemma rsm_gauss_total (N : ℕ) :
     ∫ z : EuclideanSpace ℂ (Fin N), Real.exp (-‖z‖ ^ 2) = Real.pi ^ N := by
@@ -105,9 +97,6 @@ lemma rsm_gauss_integrable (N : ℕ) :
     Integrable (fun z : EuclideanSpace ℂ (Fin N) => Real.exp (-‖z‖ ^ 2)) := by
   first
     | exact Integrable.of_integral_ne_zero (by rw [rsm_gauss_total]; positivity)
-    | (have h := GaussianFourier.integrable_rexp_neg_mul_sq_norm (V := EuclideanSpace ℂ (Fin N)) one_pos
-       simp only [neg_mul, one_mul] at h
-       exact h)
 
 lemma rsm_tail (N : ℕ) (hN : 1 ≤ N) :
     ∫ y in Ioi (0 : ℝ), y ^ (2 * N - 1) *
@@ -147,7 +136,6 @@ lemma rsm_tail (N : ℕ) (hN : 1 ≤ N) :
       have hq : (1 : ℝ) ≤ y ^ 2 / (2 * N) := by
         first
           | exact (one_le_div (by positivity)).mpr hy2
-          | (rw [le_div_iff₀ (by positivity)]; linarith)
       calc y ^ (2 * N - 1) * Real.exp (-y ^ 2) = y ^ (2 * N - 1) * Real.exp (-y ^ 2) * 1 := by ring
         _ ≤ y ^ (2 * N - 1) * Real.exp (-y ^ 2) * (y ^ 2 / (2 * N)) :=
           mul_le_mul_of_nonneg_left hq ha
@@ -175,8 +163,6 @@ lemma rsm_ball_mass (N : ℕ) :
       intro z
       first
         | exact Subsingleton.elim z 0
-        | exact PiLp.ext (fun i => i.elim0)
-        | (ext i; exact i.elim0)
     have hb : ∀ r : ℝ, 0 ≤ r → closedBall (0 : EuclideanSpace ℂ (Fin 0)) r = univ := by
       intro r hr
       ext z
@@ -187,9 +173,6 @@ lemma rsm_ball_mass (N : ℕ) :
   · haveI : Nontrivial (EuclideanSpace ℂ (Fin N)) := by
       first
         | exact Module.nontrivial_of_finrank_pos (R := ℝ) (by rw [rsm_finrank]; omega)
-        | exact FiniteDimensional.nontrivial_of_finrank_pos (R := ℝ) (by rw [rsm_finrank]; omega)
-        | exact Module.finrank_pos_iff.mp (by rw [rsm_finrank]; omega)
-        | infer_instance
     have hsum : (∫ z in closedBall (0 : EuclideanSpace ℂ (Fin N)) (Real.sqrt (2 * N)), Real.exp (-‖z‖ ^ 2))
         + (∫ z in (closedBall (0 : EuclideanSpace ℂ (Fin N)) (Real.sqrt (2 * N)))ᶜ, Real.exp (-‖z‖ ^ 2))
         = ∫ z : EuclideanSpace ℂ (Fin N), Real.exp (-‖z‖ ^ 2) :=
@@ -232,7 +215,6 @@ lemma rsm_mean (N : ℕ) (F : EuclideanSpace ℂ (Fin N) → ℂ) (hF : Differen
   have hd : Differentiable ℂ h := by
     first
       | exact (hF.comp (differentiable_id.smul_const z)).pow 2
-      | (rw [hh]; fun_prop)
   have hc := (hd.diffContOnCl (s := Metric.ball (0 : ℂ) 1)).two_pi_i_inv_smul_circleIntegral_sub_inv_smul
     (Metric.mem_ball_self one_pos)
   have hI : (∮ w in C(0, 1), (w - 0)⁻¹ • h w)
@@ -248,8 +230,6 @@ lemma rsm_mean (N : ℕ) (F : EuclideanSpace ℂ (Fin N) → ℂ) (hF : Differen
   have hnorm : ‖(2 * (Real.pi : ℂ) * Complex.I)⁻¹‖ * ‖Complex.I‖ = (2 * Real.pi)⁻¹ := by
     first
       | simp [abs_of_pos Real.pi_pos]
-      | (simp [abs_of_pos Real.pi_pos]; ring)
-      | (simp [Complex.norm_real, Real.norm_eq_abs, abs_of_pos Real.pi_pos])
   have hle : ‖∫ θ in (0 : ℝ)..2 * Real.pi, h (circleMap 0 1 θ)‖
       ≤ ∫ θ in (0 : ℝ)..2 * Real.pi, ‖F (circleMap 0 1 θ • z)‖ ^ 2 := by
     refine (intervalIntegral.norm_integral_le_integral_norm (by positivity)).trans (le_of_eq ?_)
@@ -284,7 +264,6 @@ lemma rsm_rot_int (N : ℕ) (F : EuclideanSpace ℂ (Fin N) → ℂ) (u : ℂ) (
   have hemb : MeasurableEmbedding (rsmRot N u hu) := by
     first
       | exact (rsmRot N u hu).toHomeomorph.measurableEmbedding
-      | exact (rsmRot N u hu).toContinuousLinearEquiv.toHomeomorph.measurableEmbedding
   have hpre : (rsmRot N u hu) ⁻¹' closedBall 0 r = closedBall 0 r := by
     ext z
     simp [hcoe, norm_smul, hu]
@@ -310,7 +289,6 @@ lemma rsm_prod_int (N : ℕ) (F : EuclideanSpace ℂ (Fin N) → ℂ) (hF : Cont
       Real.exp (-‖p.1‖ ^ 2) * ‖F (circleMap 0 1 p.2 • p.1)‖ ^ 2 := by
     first
       | exact (Real.continuous_exp.comp ((continuous_fst.norm.pow 2).neg)).mul ((hF.comp hc).norm.pow 2)
-      | fun_prop
   rw [Measure.prod_restrict]
   exact (hg.continuousOn.integrableOn_compact ((isCompact_closedBall 0 r).prod isCompact_Icc)).mono_set
     (Set.prod_mono subset_rfl Set.Ioc_subset_Icc_self)

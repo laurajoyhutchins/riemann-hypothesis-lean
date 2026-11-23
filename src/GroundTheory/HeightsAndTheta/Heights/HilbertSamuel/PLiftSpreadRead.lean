@@ -1,5 +1,6 @@
 module
 
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PChartLatQCech
 public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsKodairaGeneric
 public import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PGenOnFibres
 import Mathlib.Algebra.Order.Floor.Extended
@@ -183,24 +184,7 @@ theorem cellMon_ne {I : ∀ k, Finset (ι k)} (hI : ∀ k, ∀ i ∈ I k, y ⟨k
 variable (y) in
 theorem aeval_div_mem (c : ∀ k, ι k) {g : MRingOver ℚ ι} {d : K → ℕ} (hg : IsMultiHomog g d) :
     aeval y g / ∏ k, y ⟨k, c k⟩ ^ d k ∈ chartRingQ y c := by
-  classical
-
-  rw [g.as_sum, map_sum, Finset.sum_div]
-  refine Subalgebra.sum_mem _ fun m hm => ?_
-  rw [aeval_monomial, mul_div_assoc]
-  refine Subalgebra.mul_mem _ (Subalgebra.algebraMap_mem _ _) ?_
-  have key : m.prod (fun p e => y p ^ e) / ∏ k, y ⟨k, c k⟩ ^ d k = ∏ p, (y p / y ⟨p.1, c p.1⟩) ^ m p := by
-    rw [Finsupp.prod_fintype _ _ (by simp)]
-    simp only [div_pow]
-    rw [Finset.prod_div_distrib]
-    congr 1
-    rw [Fintype.prod_sigma]
-    refine Finset.prod_congr rfl fun k _ => ?_
-    dsimp only
-    rw [Finset.prod_pow_eq_pow_sum, hg m hm k]
-  rw [key]
-  exact Subalgebra.prod_mem _ fun p _ => Subalgebra.pow_mem _
-    (Algebra.subset_adjoin (Set.mem_range_self (f := fun p : Σ k, ι k => y p / y ⟨p.1, c p.1⟩) p)) _
+  apply GroundTheory.Heights₂.Heights.HilbertSamuel.ChartLatQCech.aeval_div_memQ <;> assumption
 
 theorem quotPart_mem (c : ∀ k, ι k) {d : K → ℤ} {m : MRingOver ℚ ι ⧸ KH.genIdeal y}
     (hm : m ∈ KH.quotPart ℚ (KH.genIdeal y) d) :

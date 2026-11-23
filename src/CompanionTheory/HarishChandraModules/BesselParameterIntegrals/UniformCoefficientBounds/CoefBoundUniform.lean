@@ -220,7 +220,6 @@ theorem coef_bound_uniform {T : Submodule ℂ H} [FiniteDimensional ℂ T] {ρ :
   have h1 := hn i ⟨a, ha⟩
   have h2 := hn j ⟨b, hb⟩
   have h3 := (hC i j g hg).trans (mul_le_mul_of_nonneg_right (le_abs_self _) (hρ g hg))
-  have h4 := hρ g hg
   calc _ ≤ ‖a‖ * (‖b‖ * (|C i j| * ρ g)) := by gcongr
     _ = _ := by ring
 

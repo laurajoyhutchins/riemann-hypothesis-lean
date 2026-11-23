@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.UnitaryExistence.FinrankRatSkewHermitianMatricesCmField
 public import Mathlib.Analysis.CStarAlgebra.Classes
 public import Mathlib.LinearAlgebra.TensorProduct.Pi
 public import Mathlib.NumberTheory.NumberField.InfinitePlace.Embeddings
@@ -93,24 +94,7 @@ theorem li1 (hΨ : ∀ σ : E →+* ℂ, σ ∈ Ψ ↔ ComplexEmbedding.conjugat
 
 theorem two_card (hΨ : ∀ σ : E →+* ℂ, σ ∈ Ψ ↔ ComplexEmbedding.conjugate σ ∉ Ψ) :
     2 * Ψ.card = Module.finrank ℚ E := by
-  classical
-  have h1 : Ψᶜ = Ψ.image ComplexEmbedding.conjugate := by
-    ext σ
-    simp only [Finset.mem_compl, Finset.mem_image]
-    constructor
-    · intro h
-      exact ⟨ComplexEmbedding.conjugate σ, (conj_mem_iff hΨ σ).2 h, by simp [ComplexEmbedding.conjugate]⟩
-    · rintro ⟨τ, hτ, rfl⟩
-      exact (hΨ τ).1 hτ
-  have hinj : Function.Injective (ComplexEmbedding.conjugate : (E →+* ℂ) → (E →+* ℂ)) := by
-    intro a c h
-    simpa [ComplexEmbedding.conjugate] using congrArg star h
-  have h2 : (Ψ.image ComplexEmbedding.conjugate).card = Ψ.card := Finset.card_image_of_injective _ hinj
-  have h3 := Finset.card_compl Ψ
-  have h4 := Embeddings.card E ℂ
-  have h5 := Finset.card_le_univ Ψ
-  rw [h1, h2] at h3
-  omega
+  apply GlobalTheory.two_mul_card_of_cmType_finset <;> assumption
 
 theorem phi1_bijective (hΨ : ∀ σ : E →+* ℂ, σ ∈ Ψ ↔ ComplexEmbedding.conjugate σ ∉ Ψ) :
     Function.Bijective (phi1 Ψ) := by

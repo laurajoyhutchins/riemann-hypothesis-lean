@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JBePosA
 public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.JacLocOfHpk
 public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
 import Formalism.DoubleCosetMeasures.StatementZ
@@ -66,22 +67,7 @@ open Formalism.QuantumDeterminants Formalism.FourierDecayAlt.B Formalism.Fourier
 variable {k r : ℕ}
 
 theorem meas_invM : Measurable (invM : Mt k r → Mt k r) := by
-  unfold invM
-  have hof : Continuous fun x : Mt k r => (Matrix.of x : Mat k r) := continuous_id
-  have hc : Continuous fun x : Mt k r => ((Matrix.of x).adjugate : Mt k r) := hof.matrix_adjugate
-  have hdc : Continuous fun x : Mt k r => (Matrix.of x : Mat k r).det := hof.matrix_det
-  have hd : Measurable fun x : Mt k r => Ring.inverse (Matrix.of x : Mat k r).det := by
-    simp only [Ring.inverse_eq_inv']
-    exact hdc.measurable.inv
-  have he : (fun x : Mt k r => (((Matrix.of x : Mat k r)⁻¹ : Mat k r) : Mt k r)) =
-      fun x : Mt k r => (Ring.inverse (Matrix.of x).det • (Matrix.of x).adjugate : Mt k r) := by
-    funext x
-    rw [Matrix.inv_def]
-  have hc' : Measurable fun x : Mt k r => ((Matrix.of x).adjugate : Mt k r) :=
-    Measurable.of_eval fun i => Measurable.of_eval fun j =>
-      ((continuous_apply j).comp ((continuous_apply i).comp hc)).measurable
-  rw [he]
-  exact hd.smul hc'
+  apply ReciprocityTheory.ChartRestriction.DS.Mult1.BesselPositivity.bp_meas_inv <;> assumption
 
 theorem meas_mulM : Measurable (mulM : Mt k r × Mt k r → Mt k r) := by
   unfold mulM

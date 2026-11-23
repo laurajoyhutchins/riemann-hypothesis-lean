@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IntegralReTopDegreeDensityDbarEqZero
 public import Development.AbelianVarietyTheory.Definitions.ThetaMetrics.EventuallyDifferentiableAtOfContDiffAtTwo
 public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
 public import Mathlib.MeasureTheory.Integral.IntegrableOn
@@ -72,17 +73,7 @@ namespace GlobalTheory.GoodTop
 theorem integral_dbar_eq_zero_of_hasCompactSupport {n : ℕ} {G : V n → ℂ} (hG : ContDiff ℝ 1 G)
     (hc : HasCompactSupport G) (u : V n) :
     Integrable (fun v => dbar G v u) ∧ ∫ v, dbar G v u = 0 := by
-  have hint : ∀ w : V n, Integrable (fun y => fderiv ℝ G y w) := fun w =>
-    ((hG.continuous_fderiv (by norm_num)).clm_apply continuous_const).integrable_of_hasCompactSupport
-      (hc.fderiv_apply (𝕜 := ℝ) w)
-  refine ⟨?_, ?_⟩
-  · simp only [dbar_apply, smul_eq_mul]
-    exact ((hint _).add ((hint _).const_mul _)).const_mul _
-  · simp only [dbar_apply, smul_eq_mul]
-    rw [integral_const_mul, integral_add (hint _) ((hint _).const_mul _), integral_const_mul,
-      ReciprocityTheory.L2DbarEstimates.integral_fderiv_apply_eq_zero n G hG hc,
-      ReciprocityTheory.L2DbarEstimates.integral_fderiv_apply_eq_zero n G hG hc]
-    simp
+  apply _root_.GlobalTheory.CxForm.integrable_dbar_integral_eq_zero <;> assumption
 
 theorem setIntegral_dbar_eq_zero {n : ℕ} (U K : Set (V n)) (g : V n → ℂ) (ξ : V n)
     (hU : IsOpen U) (hK : IsCompact K) (hKU : K ⊆ U) (hg : ContDiffOn ℝ 1 g U)

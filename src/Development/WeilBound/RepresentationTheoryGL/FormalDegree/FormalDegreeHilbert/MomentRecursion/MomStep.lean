@@ -1,5 +1,6 @@
 module
 
+import CompanionTheory.RealGroups.FormalDegrees.ArchimedeanFormalDegrees.MomentRecursion.MomStep
 public import Development.WeilBound.RepresentationTheoryGL.FormalDegree.FormalDegreeHilbert.MomB
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -62,27 +63,7 @@ theorem mom_step {Ω Ω' : Type} [MeasurableSpace Ω] [MeasurableSpace Ω'] {ν 
     (he : ∀ j : ℕ, 1 ≤ j → ∫⁻ x, ENNReal.ofReal (V x ^ j) ∂ν = ∫⁻ y, ENNReal.ofReal (V' y ^ j) ∂ν')
     (hf : ∀ j : ℕ, 1 ≤ j → ∫⁻ x, ENNReal.ofReal (V x ^ j) ∂ν ≠ ⊤) (M : ℕ) : ∀ j : ℕ, 1 ≤ j →
     ∫⁻ x, ENNReal.ofReal (V x ^ j * (1 - V x) ^ M) ∂ν = ∫⁻ y, ENNReal.ofReal (V' y ^ j * (1 - V' y) ^ M) ∂ν' := by
-  have split : ∀ {A : Type} [MeasurableSpace A] (m : Measure A) (W : A → ℝ), Measurable W → (∀ x, 0 ≤ W x ∧ W x ≤ 1) →
-      ∀ j M : ℕ, ∫⁻ x, ENNReal.ofReal (W x ^ j * (1 - W x) ^ M) ∂m =
-        ∫⁻ x, ENNReal.ofReal (W x ^ j * (1 - W x) ^ (M + 1)) ∂m + ∫⁻ x, ENNReal.ofReal (W x ^ (j + 1) * (1 - W x) ^ M) ∂m := by
-    intro A _ m W hW h j M
-    rw [← lintegral_add_left (by fun_prop)]
-    refine lintegral_congr fun x => ?_
-    have a := (h x).1
-    have b := sub_nonneg.2 (h x).2
-    rw [← ENNReal.ofReal_add (by positivity) (by positivity)]
-    congr 1; ring
-  induction M with
-  | zero => simpa using he
-  | succ M ih =>
-    intro j hj
-    have fin : ∫⁻ x, ENNReal.ofReal (V x ^ (j + 1) * (1 - V x) ^ M) ∂ν ≠ ⊤ := by
-      refine ne_top_of_le_ne_top (hf (j + 1) (by omega)) (lintegral_mono fun x => ENNReal.ofReal_le_ofReal ?_)
-      have a := (h0 x).1
-      exact mul_le_of_le_one_right (by positivity) (pow_le_one₀ (sub_nonneg.2 (h0 x).2) (by linarith))
-    have e := ih j hj
-    rw [split ν V hV h0 j M, split ν' V' hV' h0' j M, ← ih (j + 1) (by omega)] at e
-    exact (ENNReal.add_left_inj fin).1 e
+  apply CompanionTheory.RgFd.mom_step <;> assumption
 
 theorem mom_sum {A : Type} [MeasurableSpace A] (m : Measure A) {W : A → ℝ} (hW : Measurable W) (h : ∀ x, 0 ≤ W x ∧ W x ≤ 1) :
     m {x | 0 < W x} = ∑' M : ℕ, ∫⁻ x, ENNReal.ofReal (W x ^ 1 * (1 - W x) ^ M) ∂m := by
@@ -116,31 +97,7 @@ theorem momA : MomA := by
   · simpa only [← pow_mul, mul_comm t0] using hf j hj
 
 theorem momB : MomB := by
-  intro I _ α β c hα hβ hc
-  refine ⟨(Measure.pi fun _ : I => (volume : Measure ℝ).restrict (Ioi 0)).withDensity
-    fun y => ENNReal.ofReal (c * ∏ i, Real.exp (-α i * |y i|)), fun y => ∏ i, Real.exp (-β i * |y i|), by fun_prop,
-    fun y => ⟨Finset.prod_pos fun i _ => Real.exp_pos _, Finset.prod_le_one₀ (fun i _ => (Real.exp_pos _).le) fun i _ =>
-      Real.exp_le_one_iff.2 (by have := hβ i; have := abs_nonneg (y i); nlinarith)⟩, fun t => ?_⟩
-  have hp : ∀ i, 0 < α i + t * β i := fun i => by have := hα i; have := hβ i; positivity
-  have e1 : ∀ i, EqOn (fun x : ℝ => Real.exp (-(α i + t * β i) * |x|)) (fun x => Real.exp (-(α i + t * β i) * x)) (Ioi 0) :=
-    fun i x hx => by simp only [abs_of_pos (show (0 : ℝ) < x from hx)]
-  have hi : ∀ i, Integrable (fun x : ℝ => Real.exp (-(α i + t * β i) * |x|)) (volume.restrict (Ioi 0)) := fun i =>
-    (integrableOn_exp_mul_Ioi (neg_neg_of_pos (hp i)) 0).congr_fun (e1 i).symm measurableSet_Ioi
-  have hv : ∀ i, ∫ x in Ioi (0 : ℝ), Real.exp (-(α i + t * β i) * |x|) = (α i + t * β i)⁻¹ := fun i => by
-    rw [setIntegral_congr_fun measurableSet_Ioi (e1 i), integral_exp_mul_Ioi (neg_neg_of_pos (hp i))]
-    rw [mul_zero, Real.exp_zero, neg_div_neg_eq, one_div]
-  rw [lintegral_withDensity_eq_lintegral_mul _ (by fun_prop) (by fun_prop)]
-  have e2 : ∀ y : I → ℝ, ((fun y : I → ℝ => ENNReal.ofReal (c * ∏ i, Real.exp (-α i * |y i|))) *
-      fun y : I → ℝ => ENNReal.ofReal ((∏ i, Real.exp (-β i * |y i|)) ^ t)) y =
-      ENNReal.ofReal (c * ∏ i, Real.exp (-(α i + t * β i) * |y i|)) := fun y => by
-    rw [Pi.mul_apply, ← ENNReal.ofReal_mul (by positivity), mul_assoc, ← Finset.prod_pow, ← Finset.prod_mul_distrib]
-    congr 2
-    refine Finset.prod_congr rfl fun i _ => ?_
-    rw [← Real.exp_nat_mul, ← Real.exp_add]; congr 1; ring
-  rw [lintegral_congr e2, ← ofReal_integral_eq_lintegral_ofReal ((Integrable.fintype_prod hi).const_mul c)
-    (.of_forall fun y => by positivity), integral_const_mul,
-    integral_fintype_prod_eq_prod (f := fun i (x : ℝ) => Real.exp (-(α i + t * β i) * |x|))]
-  simp only [hv, Finset.prod_inv_distrib, div_eq_mul_inv]
+  apply CompanionTheory.RgFd.momB <;> assumption
 
 theorem momW_of : MomA → MomB → MomW := by
   intro hA hB Ω _ P h U I _ α β c t0 hh hU h01 hα hβ hc hm

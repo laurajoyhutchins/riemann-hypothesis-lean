@@ -328,7 +328,6 @@ theorem gram_independent_signature' : C2.GramIndependentSignature := by
     unfold C2.Uperp
     rw [of_star_gramVec]
     show Module.finrank ℂ (LinearMap.ker (Matrix.mulVecLin (Vᴴ * H))) = k - 1
-    have hk := hstd.1
     omega
 
 end Formalism.FourierDecayAlt.P

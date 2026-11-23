@@ -103,7 +103,6 @@ theorem sum_int {t y : ℝ} (ht : 0 < t) (hy : t ≤ y) (m : ℕ) :
       ∑' k : ℤ, ((|(k : ℝ)| + y) ^ (m + 2))⁻¹ ≤ 2 * (1 + 1 / t) * (y * (y ^ (m + 2))⁻¹) := by
   have hy0 : 0 < y := by linarith
   obtain ⟨B, hB⟩ : ∃ B, B = (1 + 1 / t) * (y ^ m)⁻¹ := ⟨_, rfl⟩
-  have hB0 : 0 ≤ B := by rw [hB]; positivity
   have hs : HasSum (fun n : ℕ => B * (1 / ((n : ℝ) + y) - 1 / ((n : ℝ) + y + 1))) (B * (1 / y)) :=
     (hasSum_tele hy0).mul_left B
   have nn : ∀ k : ℤ, 0 ≤ ((|(k : ℝ)| + y) ^ (m + 2))⁻¹ := fun k => by positivity

@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PhiPreservesIsomorphism
 public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.LeibnizOrders.ProdGPn
 public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.SubsingletonOfGiso
 import Mathlib.Algebra.Order.Floor.Extended
@@ -69,48 +70,7 @@ theorem twAct_equiv {G M V W : Type} [Group G] [Group M] [AddCommGroup V] [Modul
     {ρ : Representation ℂ G V} {σ : Representation ℂ G W} (e : ρ.Equiv σ) (N : Subgroup G) (θ : N →* ℂˣ) (s : M →* G)
     (hs : ∀ (m : M) (n : N), ∃ h : s m * (n : G) * (s m)⁻¹ ∈ N, θ ⟨_, h⟩ = θ n) :
     Nonempty ((twAct ρ N θ s hs).Equiv (twAct σ N θ s hs)) := by
-  let eL : V ≃ₗ[ℂ] W :=
-    { e.toIntertwiningMap.toLinearMap with
-      invFun := e.invFun
-      left_inv := e.left_inv
-      right_inv := e.right_inv }
-  have hf : ∀ (g : G) (v : V), (eL : V →ₗ[ℂ] W) (ρ g v) = σ g ((eL : V →ₗ[ℂ] W) v) :=
-    fun g v => Representation.IntertwiningMap.isIntertwining ρ σ e.toIntertwiningMap g v
-  have hg : ∀ (g : G) (w : W), (eL.symm : W →ₗ[ℂ] V) (σ g w) = ρ g ((eL.symm : W →ₗ[ℂ] V) w) := by
-    intro g w
-    apply eL.injective
-    have := hf g (eL.symm w)
-    simp only [LinearEquiv.coe_coe, LinearEquiv.apply_symm_apply] at this ⊢
-    exact this.symm
-  have hf' : ∀ (g : G) (v : V), eL (ρ g v) = σ g (eL v) := hf
-  have hfc : ∀ g : G, (eL : V →ₗ[ℂ] W) ∘ₗ ρ g = σ g ∘ₗ (eL : V →ₗ[ℂ] W) :=
-    fun g => LinearMap.ext fun v => hf g v
-  let F := GlobalTheory.BZMir.twMap ρ σ N θ (eL : V →ₗ[ℂ] W) hf
-  let F' := GlobalTheory.BZMir.twMap σ ρ N θ (eL.symm : W →ₗ[ℂ] V) hg
-  have hF'F : F' ∘ₗ F = LinearMap.id := by
-    simp only [F, F', GlobalTheory.BZMir.twMap]
-    rw [← Submodule.mapQ_comp]
-    refine mapQ_eq_id_of_eq_id _ ?_ _
-    ext v
-    simp
-  have hFF' : F ∘ₗ F' = LinearMap.id := by
-    simp only [F, F', GlobalTheory.BZMir.twMap]
-    rw [← Submodule.mapQ_comp]
-    refine mapQ_eq_id_of_eq_id _ ?_ _
-    ext w
-    simp
-  have hcomm : ∀ m : M, F ∘ₗ GlobalTheory.BZMir.twAct ρ N θ s hs m =
-      GlobalTheory.BZMir.twAct σ N θ s hs m ∘ₗ F := by
-    intro m
-    first
-      | (simp only [F, GlobalTheory.BZMir.twMap, GlobalTheory.BZMir.twAct,
-            MonoidHom.coe_mk, OneHom.coe_mk]
-         erw [← Submodule.mapQ_comp, ← Submodule.mapQ_comp]
-         exact mapQ_congr _ _ (hfc (s m)) _ _)
-      | (apply Submodule.linearMap_qext
-         ext v
-         simp [F, GlobalTheory.BZMir.twMap, GlobalTheory.BZMir.twAct, hf, hf'])
-  exact ⟨⟨⟨F, hcomm⟩, F', fun x => LinearMap.congr_fun hF'F x, fun y => LinearMap.congr_fun hFF' y⟩⟩
+  apply GlobalTheory.CompanionTheory.LeibOrd.nonempty_twAct_equiv <;> assumption
 
 theorem giso_psiN : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] (n : ℕ)
     (A B : MRep k n), MIso A B → GIso (psiN A) (psiN B) := by

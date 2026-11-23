@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.FdPointwise
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.LaplaceFoundations.RaisingLoweringNormIdentities
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.FormalDegreeG2.FdDefs
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.FormalDegree.PmatIsHermitian
@@ -68,43 +69,12 @@ theorem trace_dMat_pmat {ε : Fin n → Bool} (y : PCoord ε → ℂ) : trace (L
 
 theorem pmat_herm_apply {ε : Fin n → Bool} (y : PCoord ε → ℂ) (a b : Fin n) :
     pmat y b a = star (pmat y a b) := by
-  simp only [pmat]
-  by_cases h1 : a < b ∧ ε b ≠ ε a
-  · have h2 : ¬ (b < a ∧ ε a ≠ ε b) := fun h => lt_asymm h.1 h1.1
-    simp only [dif_pos h1, dif_neg h2, star_star]
-  · by_cases h2 : b < a ∧ ε a ≠ ε b
-    · simp only [dif_neg h1, dif_pos h2]
-    · simp only [dif_neg h1, dif_neg h2, star_zero]
+  apply ReciprocityTheory.ChartRestriction.DS.pmat_herm_apply <;> assumption
 
 theorem sum_pairs_pmat_fp {ε : Fin n → Bool} (w : Fin n → Fin n → ℝ) (z : PCoord ε → ℂ) :
     ∑ x : Fin n × Fin n, (if x.2 < x.1 then w x.1 x.2 * ‖pmat z x.1 x.2‖ ^ 2 else 0) =
       ∑ ab : PCoord ε, w ab.1.1 ab.1.2 * ‖z ab‖ ^ 2 := by
-  classical
-  have key : ∀ x : Fin n × Fin n, (if x.2 < x.1 then w x.1 x.2 * ‖pmat z x.1 x.2‖ ^ 2 else 0) =
-      (if h : x.2 < x.1 ∧ ε x.1 ≠ ε x.2 then w x.1 x.2 * ‖z ⟨x, h⟩‖ ^ 2 else 0) := by
-    rintro ⟨a, b⟩
-    dsimp only
-    by_cases h : b < a ∧ ε a ≠ ε b
-    · rw [dif_pos h, if_pos h.1]
-      have hp : pmat z a b = z ⟨(a, b), h⟩ := by
-        simp only [pmat, dif_pos h]
-      rw [hp]
-    · rw [dif_neg h]
-      split_ifs with hab
-      · have h2 : ¬ (a < b ∧ ε b ≠ ε a) := fun h' => lt_asymm hab h'.1
-        have hp : pmat z a b = 0 := by
-          simp only [pmat, dif_neg h, dif_neg h2]
-        rw [hp]; simp
-      · rfl
-  rw [Finset.sum_congr rfl (fun x _ => key x)]
-  rw [← Finset.sum_filter_of_ne (p := fun x : Fin n × Fin n => x.2 < x.1 ∧ ε x.1 ≠ ε x.2)
-    (fun x _ hx => by
-      by_contra h
-      exact hx (dif_neg h))]
-  rw [Finset.sum_subtype (p := fun x : Fin n × Fin n => x.2 < x.1 ∧ ε x.1 ≠ ε x.2) _
-    (fun x => by simp)]
-  refine Finset.sum_congr rfl fun ab _ => ?_
-  exact dif_pos ab.2
+  apply ReciprocityTheory.ChartRestriction.DS.sum_pairs_pmat_fp <;> assumption
 
 private theorem pmat_apply_eq_zero_of_sign_eq {ε : Fin n → Bool} (y : PCoord ε → ℂ) {a b : Fin n} (he : ε a = ε b) :
     pmat y a b = 0 := by
@@ -114,56 +84,11 @@ private theorem pmat_apply_eq_zero_of_sign_eq {ε : Fin n → Bool} (y : PCoord 
 theorem qForm_term {ε : Fin n → Bool} (y : PCoord ε → ℂ) (a b : Fin n) :
     -((((Dvec n a : ℝ) : ℂ) - ((Dvec n b : ℝ) : ℂ)) * (pmat y a b * Lap.Base.partNM ε (Dvec n) (pmat y) b a)) =
       (((if b < a then (((a : ℕ) : ℝ) - ((b : ℕ) : ℝ)) * ‖pmat y a b‖ ^ 2 else 0 : ℝ)) : ℂ) := by
-  have hD : ((Dvec n a : ℝ) : ℂ) - ((Dvec n b : ℝ) : ℂ) = ((((b : ℕ) : ℝ) - ((a : ℕ) : ℝ) : ℝ) : ℂ) := by
-    simp only [Dvec]; push_cast; ring
-  by_cases h : b < a ∧ ε a ≠ ε b
-  · have hin : Lap.Base.InNM ε (Dvec n) b a := Or.inr h
-    have hN : Lap.Base.partNM ε (Dvec n) (pmat y) b a = pmat y b a := by
-      rw [Lap.Base.partNM, Matrix.of_apply, if_pos hin]
-    rw [hN, if_pos h.1, hD, pmat_herm_apply y a b, Complex.star_def, Complex.mul_conj,
-      Complex.normSq_eq_norm_sq]
-    push_cast; ring
-  · have h0 : pmat y a b * Lap.Base.partNM ε (Dvec n) (pmat y) b a = 0 := by
-      rw [Lap.Base.partNM, Matrix.of_apply]
-      split_ifs with hin
-      · rcases hin with ⟨_, he, _⟩ | h'
-        · rw [pmat_apply_eq_zero_of_sign_eq y he, zero_mul]
-        · exact absurd h' h
-      · exact mul_zero _
-    rw [h0, mul_zero, neg_zero]
-    split_ifs with hba
-    · have he : ε a = ε b := by
-        by_contra he
-        exact h ⟨hba, he⟩
-      rw [pmat_apply_eq_zero_of_sign_eq y he]; simp
-    · simp
+  apply ReciprocityTheory.ChartRestriction.DS.qForm_term <;> assumption
 
 theorem qForm_pmat {ε : Fin n → Bool} (y : PCoord ε → ℂ) :
     Lap.Base.qForm ε (Dvec n) (pmat y) = ((Qf (0 : Fin n → ℝ) y : ℝ) : ℂ) := by
-  have h1 : Lap.Base.qForm ε (Dvec n) (pmat y) = ∑ a : Fin n, ∑ b : Fin n,
-      -((((Dvec n a : ℝ) : ℂ) - ((Dvec n b : ℝ) : ℂ)) *
-        (pmat y a b * Lap.Base.partNM ε (Dvec n) (pmat y) b a)) := by
-    have e : ∀ a b : Fin n, -((((Dvec n a : ℝ) : ℂ) - ((Dvec n b : ℝ) : ℂ)) *
-        (pmat y a b * Lap.Base.partNM ε (Dvec n) (pmat y) b a)) =
-        -(((Dvec n a : ℝ) : ℂ) * (pmat y a b * Lap.Base.partNM ε (Dvec n) (pmat y) b a)) +
-          ((Dvec n b : ℝ) : ℂ) * (Lap.Base.partNM ε (Dvec n) (pmat y) b a * pmat y a b) :=
-      fun a b => by ring
-    simp_rw [e, Finset.sum_add_distrib, Finset.sum_neg_distrib]
-    rw [Finset.sum_comm (f := fun a b : Fin n =>
-      ((Dvec n b : ℝ) : ℂ) * (Lap.Base.partNM ε (Dvec n) (pmat y) b a * pmat y a b))]
-    simp only [Lap.Base.qForm, Lap.Base.dMat, Matrix.trace, Matrix.diag_apply, Matrix.diagonal_mul]
-    simp only [Matrix.sub_apply, Matrix.mul_apply, mul_sub, Finset.mul_sum, Finset.sum_sub_distrib]
-    ring
-  rw [h1]
-  simp only [qForm_term]
-  have e2 := sum_pairs_pmat_fp (fun a b : Fin n => ((a : ℕ) : ℝ) - ((b : ℕ) : ℝ)) y
-  rw [Fintype.sum_prod_type' (f := fun a b : Fin n =>
-    (if b < a then (((a : ℕ) : ℝ) - ((b : ℕ) : ℝ)) * ‖pmat y a b‖ ^ 2 else 0 : ℝ))] at e2
-  rw [← Complex.ofReal_inj] at e2
-  simp only [Complex.ofReal_sum] at e2
-  rw [e2, ← Complex.ofReal_sum]
-  congr 1
-  simp only [Qf, wab, Pi.zero_apply, sub_self, zero_add]
+  apply ReciprocityTheory.ChartRestriction.DS.qForm_pmat <;> assumption
 
 theorem matrix_coefficient_pointwise_limit (hB3 : Lap.Base.TangentPairingStatement) {ε : Fin n → Bool} {lam : Fin n → ℝ} (H : ℕ → Type)
     [∀ t, NormedAddCommGroup (H t)] [∀ t, InnerProductSpace ℂ (H t)] [∀ t, CompleteSpace (H t)]

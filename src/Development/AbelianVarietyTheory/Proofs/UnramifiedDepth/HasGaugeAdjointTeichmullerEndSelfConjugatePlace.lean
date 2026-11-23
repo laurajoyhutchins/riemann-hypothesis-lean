@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.IntSOfMulEqOne
 public import Formalism.LocalToGlobal.CharacterGerms.RowTieSelf
 public import Development.AbelianVarietyTheory.Definitions.TeichmullerDepth.HasTeich
 public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsIntegralEndOfLadicActionLimitStatement
@@ -104,21 +105,7 @@ theorem teichSelf_intS_subst {V : VF C} {σ τ : Type} [Finite σ] (a : σ → M
 
 theorem teichSelf_mvExp_eq [CharZero C] {τ : Type} {f : MvPowerSeries τ C} (hf : constantCoeff f = 0) :
     mvExp f = PowerSeries.subst f (PowerSeries.exp C) := by
-  ext m
-  rw [PowerSeries.coeff_subst (PowerSeries.HasSubst.of_constantCoeff_zero hf),
-    finsum_eq_sum_of_support_subset (s := Finset.range (m.degree + 1))]
-  · show ∑ k ∈ Finset.range (m.degree + 1), coeff m (f ^ k) / (k.factorial : C) = _
-    refine Finset.sum_congr rfl fun k _ => ?_
-    rw [PowerSeries.coeff_exp, smul_eq_mul]
-    simp [div_eq_inv_mul]
-  · intro k hk
-    rw [Function.mem_support] at hk
-    rw [Finset.coe_range, Set.mem_Iio]
-    by_contra hc
-    apply hk
-    rw [coeff_of_lt_order, smul_zero]
-    refine lt_of_lt_of_le ?_ (le_order_pow_of_constantCoeff_eq_zero k hf)
-    exact_mod_cast (by omega : m.degree < k)
+  apply GlobalTheory.RowVal.mvExp_eq_subst <;> assumption
 
 theorem teichSelf_subst_mvExp [CharZero C] {σ τ : Type} (b : σ → MvPowerSeries τ C) [Finite σ]
     (hb : ∀ s, constantCoeff (b s) = 0) {f : MvPowerSeries σ C} (hf : constantCoeff f = 0) :

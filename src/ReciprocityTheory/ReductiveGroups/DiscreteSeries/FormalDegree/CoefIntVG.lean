@@ -83,9 +83,6 @@ theorem integrable_opPow_of_dec (Ψ : Matrix (Fin n) (Fin n) ℂ → ℂ)
   have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
   have hNc : ((2 * (n * Fintype.card (S7.SgIxV ε σ)) : ℕ) : ℝ) = 2 * ((n : ℝ) * S7.q0 ε) := by
     rw [hσ]; push_cast; ring
-  have hh : 0 ≤ h := by
-    have : 0 ≤ 8 * c * (N + 2 * (n : ℝ) * S7.q0 ε) := by positivity
-    linarith
   set F : S7.UJ ε → ℝ := fun g =>
     ‖Ψ (S7.toM g)‖ * ‖Matrix.toEuclideanCLM (𝕜 := ℂ) (S7.toM g)‖ ^ N with hFdef
   have hfc : Continuous fun g : S7.UJ ε => Ψ (S7.toM g) :=

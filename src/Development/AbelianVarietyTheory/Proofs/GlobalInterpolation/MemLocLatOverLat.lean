@@ -1,5 +1,6 @@
 module
 
+import Formalism.LocalRingCardinality.IntCastDvdOfDvdIntegers
 public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.OverPlaceIntegralForm
 public import Development.AbelianVarietyTheory.BlockTheory.GlobalSignature.SplittingProjection
 public import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AdelicLatticeCompletionLocalGlobalStatement
@@ -730,34 +731,7 @@ theorem exists_overLattice (L : ColLevel R F E sp gp C A clsLat)
 end Level
 
 theorem T_ne_g (D : D7) (u : D.what₂.Word) (i : Fin 2) : (D.mem u).A.T ≠ D.host.g i := by
-  intro h
-  obtain ⟨π, -, hπ, hmod⟩ := D.T_norm u
-  obtain ⟨a, ha⟩ := Ideal.mem_span_singleton'.1 hmod
-  have hd : D.host.g i ∣ D.host.QS * D.host.q * D.host.d * (D.host.g 0 * D.host.g 1) ^ 2 := by
-    refine Dvd.dvd.mul_left (Dvd.dvd.pow ?_ two_ne_zero) _
-    fin_cases i
-    · exact Dvd.intro _ rfl
-    · exact Dvd.intro_left _ rfl
-  obtain ⟨m, hm⟩ := hd
-  let c := RingOfIntegers.mapRingHom (D.host.conj : D.host.E →+* D.host.E)
-  have h1 : π = 1 + (D.host.g i : 𝓞 D.host.E) * (a * m) := by
-    rw [hm] at ha; push_cast at ha; linear_combination -ha
-  have h2 : c π = 1 + (D.host.g i : 𝓞 D.host.E) * c (a * m) := by
-    conv_lhs => rw [h1]
-    rw [map_add (f := _), map_one, map_mul c (D.host.g i : 𝓞 D.host.E), map_natCast]
-  have h3 : π * c π = (D.host.g i : 𝓞 D.host.E) := by
-    apply RingOfIntegers.ext
-    rw [← h]
-    exact hπ.trans (map_natCast (algebraMap (𝓞 D.host.E) D.host.E) _).symm
-  have h4 : IsUnit (D.host.g i : 𝓞 D.host.E) := by
-    refine isUnit_of_dvd_one ⟨1 - a * m - c (a * m) - (D.host.g i : 𝓞 D.host.E) * (a * m) * c (a * m), ?_⟩
-    rw [h2] at h3
-    rw [h1] at h3
-    linear_combination h3
-  have h5 := h4.map (Algebra.norm ℤ)
-  rw [show (D.host.g i : 𝓞 D.host.E) = algebraMap ℤ _ (D.host.g i : ℤ) by simp, Algebra.norm_algebraMap,
-    isUnit_pow_iff Module.finrank_pos.ne', Int.isUnit_iff_natAbs_eq, Int.natAbs_natCast] at h5
-  exact (D.host.g_prime i).ne_one h5
+  apply Formalism.BasicNotions.D7.T_ne_g <;> assumption
 
 theorem overLattice : GlobalTheory.IndefiniteRowSideFullHecke.OverPlaceIntegralForm.OverLattice :=
   overLattice_iff_selfDualOverBase.2 fun D Lv u =>

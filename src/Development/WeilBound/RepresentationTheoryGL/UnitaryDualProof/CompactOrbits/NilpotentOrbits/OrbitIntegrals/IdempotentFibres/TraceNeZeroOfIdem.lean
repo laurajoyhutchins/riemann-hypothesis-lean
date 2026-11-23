@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.NilpotentOrbits.FourierTransforms.IsSemisimpleRing
 public import Development.WeilBound.RepresentationTheoryGL.UnitaryDualProof.CompactOrbits.NilpotentOrbits.OrbitIntegrals.ZNClosed
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -119,49 +120,7 @@ theorem exists_pow_eq {Z : Subalgebra k (Matrix (Fin n) (Fin n) k)} {c : Matrix 
 omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in
 theorem eq_zero_of_trace [CharZero k] {Z : Subalgebra k (Matrix (Fin n) (Fin n) k)} (hZ : CR Z)
     {c : Matrix (Fin n) (Fin n) k} (hc : c ∈ Z) (h : ∀ b ∈ Z, trace (b * c) = 0) : c = 0 := by
-  obtain ⟨m, d, hd, hmd⟩ := exists_pow_eq hc
-  have hcomm : ∀ a ∈ Z, ∀ b ∈ Z, a * b = b * a := hZ.1
-  have hdc : d * c = c * d := hcomm d hd c hc
-
-  have key : ∀ j, c ^ m = c ^ (m + j) * d ^ j := by
-    intro j
-    induction j with
-    | zero => simp
-    | succ j ih =>
-      rw [ih]
-      calc c ^ (m + j) * d ^ j = c ^ j * c ^ m * d ^ j := by rw [← pow_add, add_comm]
-        _ = c ^ j * (c ^ (m + 1) * d) * d ^ j := by rw [← hmd]
-        _ = c ^ j * c ^ (m + 1) * (d * d ^ j) := by simp only [mul_assoc]
-        _ = c ^ (m + (j + 1)) * d ^ (j + 1) := by
-          rw [← pow_add, pow_succ' d j, show j + (m + 1) = m + (j + 1) by omega]
-  set e := c ^ m * d ^ m with he_def
-  have hcd : Commute c d := by rw [Commute, SemiconjBy, hdc]
-  have he_idem : IsIdempotentElem e := by
-    unfold IsIdempotentElem
-    have h2 := key m
-    calc e * e = c ^ m * (d ^ m * c ^ m) * d ^ m := by simp only [he_def, mul_assoc]
-      _ = c ^ m * (c ^ m * d ^ m) * d ^ m := by rw [← (hcd.pow_pow m m).eq]
-      _ = c ^ (m + m) * d ^ m * d ^ m := by rw [pow_add]; simp only [mul_assoc]
-      _ = c ^ m * d ^ m := by rw [← h2]
-  have he_mem : e ∈ Z := Z.mul_mem (Z.pow_mem hc m) (Z.pow_mem hd m)
-  by_contra hne
-  by_cases he0 : e = 0
-  ·
-    have hcm0 : c ^ m = 0 := by
-      have h2 := key m
-      rw [h2, pow_add, mul_assoc, ← he_def, he0, mul_zero]
-    have hnil : IsNilpotent (⟨c, hc⟩ : Z) := ⟨m, Subtype.ext (by simpa using hcm0)⟩
-    have := hZ.2
-    have := hnil.eq_zero
-    exact hne (by simpa using congrArg Subtype.val this)
-  ·
-    have hb : c ^ m * d ^ (m + 1) ∈ Z := Z.mul_mem (Z.pow_mem hc m) (Z.pow_mem hd _)
-    have hbe : c ^ m * d ^ (m + 1) * c = e := by
-      calc c ^ m * d ^ (m + 1) * c = c ^ m * (c * d ^ (m + 1)) := by
-            rw [mul_assoc, ← (hcd.pow_right (m + 1)).eq]
-        _ = c ^ (m + 1) * (d * d ^ m) := by rw [← mul_assoc, ← pow_succ, pow_succ' d m]
-        _ = e := by rw [← mul_assoc, ← hmd]
-    exact trace_ne_zero_of_idem he_idem he0 (by rw [← hbe]; exact h _ hb)
+  apply PositivityTheory.RgUd.T.Nil.Four.Alg.trZ_nondeg <;> assumption
 
 
 omit [ValuativeRel k] [TopologicalSpace k] [IsNonarchimedeanLocalField k] in

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsLatticeIdempotentPositionInvolutionStable
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnitLemmaGroup
 public import Mathlib.LinearAlgebra.BilinearForm.DualLattice
 public import Mathlib.LinearAlgebra.FreeModule.PID
@@ -340,21 +341,7 @@ theorem sigma_smul (B : InvAlg K) (a : K.O) : ∃ b : K.O, ∀ y, B.σ (a • y)
     IsScalarTower.algebraMap_apply K.O K.E B.A b, B.σ_alg, hb]
 
 theorem sigma_integral (B : InvAlg K) {y : B.A} (hi : IsIntegral K.O y) : IsIntegral K.O (B.σ y) := by
-  have hinj : Function.Injective (algebraMap K.O K.E) := IsFractionRing.injective K.O K.E
-
-  choose c' hc' using K.c_int
-  let φ : K.O →+* K.O :=
-    { toFun := c'
-      map_one' := hinj (by simp [← hc'])
-      map_mul' := fun x y => hinj (by simp [← hc'])
-      map_zero' := hinj (by simp [← hc'])
-      map_add' := fun x y => hinj (by simp [← hc']) }
-  have hsq : (algebraMap K.O B.A).comp φ = B.σ.toRingHom.comp (algebraMap K.O B.A) := by
-    refine RingHom.ext fun x => ?_
-    show algebraMap K.O B.A (c' x) = B.σ (algebraMap K.O B.A x)
-    rw [IsScalarTower.algebraMap_apply K.O K.E B.A (c' x), IsScalarTower.algebraMap_apply K.O K.E B.A x,
-      B.σ_alg, hc']
-  exact IsIntegral.map_of_comp_eq φ B.σ.toRingHom hsq hi
+  apply GlobalTheory.UnitLemma.Desc.isIntegral_sigma <;> assumption
 
 theorem conj_mem (x : K.E) : K.c x ∈ (algebraMap K.O K.E).range ↔ x ∈ (1 : Submodule K.O K.E) := by
   rw [RingHom.mem_range, Submodule.mem_one]

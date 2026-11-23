@@ -73,8 +73,6 @@ private theorem bvec_dotProduct {n : ℕ} (v : Fin n → ℂ) (p : Fin n) : bvec
 private theorem star_inv_sqrt_two' : star ((Real.sqrt 2 : ℂ)⁻¹) = (Real.sqrt 2 : ℂ)⁻¹ := by
   first
     | (rw [star_inv₀]; congr 1; exact Complex.conj_ofReal _)
-    | simp [Complex.star_def]
-    | simp
 
 private theorem inv_sqrt_two_mul_inv_sqrt_two_mul_two_eq_one : (Real.sqrt 2 : ℂ)⁻¹ * (Real.sqrt 2 : ℂ)⁻¹ * 2 = 1 := by
   have h2 : (Real.sqrt 2 : ℂ) * (Real.sqrt 2 : ℂ) = 2 := by
@@ -161,10 +159,6 @@ private theorem Hpk_mulVec_Hpk_mulVec (k r : ℕ) (y : Fin (2 * r + k + 1) → �
 private theorem bvec_apply_eq_ite_val {n : ℕ} (p q : Fin n) : bvec p q = if q.val = p.val then 1 else 0 := by
   first
     | simp [bvec, Pi.single_apply, Fin.ext_iff]
-    | (unfold bvec; rw [Pi.single_apply]; simp only [Fin.ext_iff])
-    | (by_cases h : q = p
-       · subst h; simp [bvec]
-       · rw [if_neg (fun e => h (Fin.ext e))]; simp [bvec, h])
 
 private theorem epsV_apply_eq (k r : ℕ) (q : Fin (2 * r + k + 1)) :
     epsV k r q = (Real.sqrt 2 : ℂ)⁻¹ * (bvec (wI k r 0) q + bvec (wI k r (Fin.last k)) q) := rfl
@@ -204,9 +198,6 @@ theorem ortho (k r : ℕ) (hk : 1 ≤ k) (i j : Fin (r + 1)) :
 theorem dot_swap {n : ℕ} (u v : Fin n → ℂ) : star u ⬝ᵥ v = star (star v ⬝ᵥ u) := by
   first
     | exact star_dotProduct u v
-    | exact Matrix.star_dotProduct u v
-    | (simp only [dotProduct, star_sum, star_mul', star_star, Pi.star_apply]
-       exact Finset.sum_congr rfl fun i _ => mul_comm _ _)
 
 def AN (k r' : ℕ) (y : Fin (2 * r' + k + 1) → ℂ) (j : ℕ) : ℂ := if h : j < r' + 1 then aF k r' y ⟨j, h⟩ else 0
 
@@ -351,8 +342,6 @@ theorem gram_Y (k r' : ℕ) (hk : 1 ≤ k) (x : HPar k r') (l : Fin (1 + r' + 1)
 theorem nsq (z : ℂ) : ((‖z‖ ^ 2 : ℝ) : ℂ) = star z * z := by
   first
     | (rw [Complex.star_def, mul_comm, Complex.mul_conj, Complex.normSq_eq_norm_sq])
-    | (rw [Complex.star_def, Complex.conj_mul']; push_cast; ring)
-    | simp [Complex.mul_conj, Complex.normSq_eq_norm_sq, mul_comm]
 
 theorem fsum (r' : ℕ) (g : ℕ → ℂ) : ∑ j : Fin (1 + r'), g j.val = ∑ j ∈ Finset.range (r' + 1), g j := by
   rw [Fin.sum_univ_eq_sum_range g (1 + r'), Nat.add_comm]
@@ -391,7 +380,6 @@ theorem hc1 (k r' : ℕ) (hk : 1 ≤ k) (x : HPar k r') (j : Fin (1 + r')) : (hc
       | (simp only [smul_eq_mul, cc]; ring)
       | (simp [wI]; done)
       | (simp [wI]; omega)
-      | omega
 
 theorem hc2 (k r' : ℕ) (x : HPar k r') (j : Fin (1 + r')) : (hcoord k r' x).2.1 j = AN' k r' x.1 j.val := by
   have hj : j.val < r' + 1 := by omega

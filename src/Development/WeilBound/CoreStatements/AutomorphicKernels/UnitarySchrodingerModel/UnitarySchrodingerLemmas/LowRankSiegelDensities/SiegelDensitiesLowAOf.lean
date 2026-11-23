@@ -152,7 +152,6 @@ theorem arith2 {x y q A B : ℝ} (hq : 1 ≤ q) (hx : |x - 1| ≤ A / q ^ 2) (hy
     |x * y - 1| ≤ (|A| + |B| + |A| * |B|) / q ^ 2 := by
   have hq0 : 0 < q ^ 2 := by positivity
   set e : ℝ := 1 / q ^ 2 with he
-  have he0 : 0 < e := by positivity
   have he1 : e ≤ 1 := by
     rw [he, div_le_one hq0]
     nlinarith
@@ -164,8 +163,6 @@ theorem arith2 {x y q A B : ℝ} (hq : 1 ≤ q) (hx : |x - 1| ≤ A / q ^ 2) (hy
     refine hy.trans ?_
     rw [he, mul_one_div]
     exact div_le_div_of_nonneg_right (le_abs_self B) hq0.le
-  have hA : 0 ≤ |A| := abs_nonneg A
-  have hB : 0 ≤ |B| := abs_nonneg B
   have hdec : x * y - 1 = (x - 1) * (y - 1) + (x - 1) + (y - 1) := by ring
   have hprod : |(x - 1) * (y - 1)| ≤ |A| * |B| * e := by
     rw [abs_mul]
@@ -266,13 +263,6 @@ theorem mass_good_lt (hE2 : OneVecBinaryMass) (hcm : IsCMExt F E σ) : ∀ (n M 
     have a1 := h1 lam hl m hm
     have a2 := h2 lam hl m m' hm hm' (hermOf (Fv F v) σ _ hbh)
     have a3 := h3 lam hl m' m₁ m₂ hm' hm₁ hm₂
-    have hint : algebraMap F (Fv F v) t ∈ v.adicCompletionIntegers F := by
-      rw [HeightOneSpectrum.mem_adicCompletionIntegers]
-      exact h5.le
-    have hne : algebraMap F (Fv F v) t ≠ 0 := by
-      intro h0
-      rw [h0] at h5
-      simp at h5
     have a4 := h4 lam hl m₁ hm₁ _ h5
     have a6 := h6 lam hl m₂ hm₂
     rw [← a1, a2, a3, ENNReal.toReal_mul]

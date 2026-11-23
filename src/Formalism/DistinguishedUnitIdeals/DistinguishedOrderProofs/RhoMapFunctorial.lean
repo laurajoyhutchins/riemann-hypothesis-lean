@@ -1,5 +1,6 @@
 module
 
+import Formalism.DistinguishedUnitIdeals.DistinguishedOrderProofs.SplittingOfPositiveLevel
 public import Formalism.DistinguishedUnitIdeals.StatementE
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -170,27 +171,7 @@ theorem γ_N (h1 : ∀ i, ∀ v ∈ L.N i, L.γ i v - v ∈ sm X (L.N i)) {i : Z
 
 theorem γ_pull (h1 : ∀ i, ∀ v ∈ L.N i, L.γ i v - v ∈ sm X (L.N i)) {i : ZMod n} {k : ℕ} {v : V}
     (hv : v ∈ L.pull i k) : L.γ (i + (k : ZMod n)) v ∈ L.pull i k := by
-  let P : Submodule (PowerSeries O) V :=
-    { carrier := {x | L.γ (i + (k : ZMod n)) x ∈ L.pull i k}
-      add_mem' := fun {x y} hx hy => by
-        show L.γ (i + (k : ZMod n)) (x + y) ∈ L.pull i k
-        rw [map_add (f := _)]
-        exact add_mem hx hy
-      zero_mem' := by
-        show L.γ (i + (k : ZMod n)) 0 ∈ L.pull i k
-        rw [map_zero]
-        exact zero_mem _
-      smul_mem' := fun a {x} hx => by
-        show L.γ (i + (k : ZMod n)) (a • x) ∈ L.pull i k
-        rw [L.γ_semi]
-        exact Submodule.smul_mem _ _ hx }
-  have hle : L.pull i k ≤ P := by
-    refine Submodule.span_le.2 ?_
-    rintro _ ⟨u, hu, rfl⟩
-    show L.γ (i + (k : ZMod n)) (L.phiIt i k u) ∈ L.pull i k
-    rw [γ_phiIt]
-    exact phiIt_mem_pull L k (γ_N L h1 hu)
-  exact hle hv
+  apply Formalism.ExponentWindows.E.S1.gam_pull <;> assumption
 
 theorem γ_sm {a : PowerSeries O} (ha : B.γ a ∈ Ideal.span {a}) {i : ZMod n}
     {S : Submodule (PowerSeries O) V} (hS : ∀ v ∈ S, L.γ i v ∈ S) {v : V} (hv : v ∈ sm a S) :

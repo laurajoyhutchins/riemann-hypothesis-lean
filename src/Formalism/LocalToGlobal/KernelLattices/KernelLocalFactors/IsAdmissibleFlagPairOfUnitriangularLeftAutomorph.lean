@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.SpanRangeEmb4EqTop
 public import Formalism.LocalToGlobal.KernelLattices.LateralTheory
 public import Formalism.LocalToGlobal.GlobalTheory.GL3.Statement
 public import Formalism.LocalToGlobal.TorsionIntegrality.QuadraticSemicharacters.LineTransport
@@ -432,38 +433,7 @@ def putE (D : D7) (N N' : ℕ) (i : Fin N') (j : Fin N) : (D.what₂.Tau → ℂ
 
 theorem Lat0 (cc : Ideal (𝓞 D.host.K)) (δ : ℂ) :
     TaylorLogMetric.La D (TaylorLogMetric.tor0 D cc δ) (StandardLatticesGL3.stdL D N) (StandardLatticesGL3.stdL D N') = powLat (lamMM D (TaylorLogMetric.lamOf D cc δ)) N N' := by
-  apply le_antisymm
-  · unfold TaylorLogMetric.La
-    rw [AddSubgroup.closure_le]
-    rintro z ⟨w, hw, A, hA, rfl⟩ i j
-    exact AddSubgroup.subset_closure ⟨w, hw, A i j, YYl_std_entry D hA i j, rfl⟩
-  · intro z hz
-    have key : ∀ (i : Fin N') (j : Fin N), lamMM D (TaylorLogMetric.lamOf D cc δ) ≤
-        (TaylorLogMetric.La D (TaylorLogMetric.tor0 D cc δ) (StandardLatticesGL3.stdL D N) (StandardLatticesGL3.stdL D N')).comap (putE D N N' i j) := by
-      intro i j
-      unfold lamMM
-      rw [AddSubgroup.closure_le]
-      rintro v ⟨w, hw, a, ha, rfl⟩
-      refine AddSubgroup.subset_closure ⟨w, hw, a • Matrix.single i j (1 : D.host.E),
-        Submodule.subset_span ⟨a, ha, _, single_mem_homL D i j, rfl⟩, ?_⟩
-      funext τ i' j'
-      show (if i' = i ∧ j' = j then w * TaylorLogMetric.embT D τ a else 0)
-        = w * TaylorLogMetric.embT D τ ((a • Matrix.single i j (1 : D.host.E)) i' j')
-      by_cases h : i' = i ∧ j' = j
-      · obtain ⟨rfl, rfl⟩ := h; simp
-      · have h' : ¬ (i = i' ∧ j = j') := fun e => h ⟨e.1.symm, e.2.symm⟩
-        simp [h, Matrix.single_apply, h']
-    have hsum : z = ∑ i, ∑ j, putE D N N' i j (fun τ => z τ i j) := by
-      funext τ i' j'
-      simp only [Finset.sum_apply, putE, AddMonoidHom.coe_mk, ZeroHom.coe_mk]
-      rw [Finset.sum_eq_single i', Finset.sum_eq_single j']
-      · simp
-      · intro b _ hb; simp [Ne.symm hb]
-      · simp
-      · intro b _ hb; simp [Ne.symm hb]
-      · simp
-    rw [hsum]
-    exact AddSubgroup.sum_mem _ fun i _ => AddSubgroup.sum_mem _ fun j _ => key i j (hz i j)
+  apply GlobalTheory.FourthRootStd.Lat0 <;> assumption
 
 end Lat0
 
@@ -699,65 +669,12 @@ variable {D : D7}
 def emb4 (D : D7) (x : Fin 4 → D.host.E) : Fin 4 × D.what₂.Tau → ℂ := fun w => TaylorLogMetric.embT D w.2 (x w.1)
 
 theorem span_range_emb4_eq_top (D : D7) : Submodule.span ℂ (Set.range (emb4 D)) = ⊤ := by
-  rw [eq_top_iff]
-  intro v _
-  have hv : v = ∑ a : Fin 4, (fun w : Fin 4 × D.what₂.Tau => if w.1 = a then v (a, w.2) else 0) := by
-    funext w
-    rw [Finset.sum_apply, Finset.sum_eq_single w.1]
-    · simp
-    · intro b _ hb; simp [Ne.symm hb]
-    · simp
-  rw [hv]
-  refine Submodule.sum_mem _ fun a _ => ?_
-  have key : ∀ u : D.what₂.Tau → ℂ, (fun w : Fin 4 × D.what₂.Tau => if w.1 = a then u w.2 else 0)
-      ∈ Submodule.span ℂ (Set.range (emb4 D)) := by
-    intro u
-    have hu : u ∈ Submodule.span ℝ (Set.range fun b : 𝓞 D.host.E => FL.embP D (b : D.host.E)) := by
-      rw [FL.span_embP]; trivial
-    induction hu using Submodule.span_induction with
-    | mem u h =>
-      obtain ⟨b, rfl⟩ := h
-      refine Submodule.subset_span ⟨Pi.single a (b : D.host.E), ?_⟩
-      funext w
-      by_cases h : w.1 = a
-      · simp [emb4, h, FL.embP]
-      · simp [emb4, h, Pi.single_apply]
-    | zero =>
-      have : (fun w : Fin 4 × D.what₂.Tau => if w.1 = a then (0 : D.what₂.Tau → ℂ) w.2 else 0) = 0 := by
-        funext w; simp
-      rw [this]; exact Submodule.zero_mem (Submodule.span ℂ (Set.range (emb4 D)))
-    | add x y _ _ hx hy =>
-      have : (fun w : Fin 4 × D.what₂.Tau => if w.1 = a then (x + y) w.2 else 0)
-          = (fun w : Fin 4 × D.what₂.Tau => if w.1 = a then x w.2 else 0)
-            + (fun w : Fin 4 × D.what₂.Tau => if w.1 = a then y w.2 else 0) := by
-        funext w; by_cases h : w.1 = a <;> simp [h]
-      rw [this]; exact Submodule.add_mem _ hx hy
-    | smul r x _ hx =>
-      have : (fun w : Fin 4 × D.what₂.Tau => if w.1 = a then (r • x) w.2 else 0)
-          = (r : ℂ) • (fun w : Fin 4 × D.what₂.Tau => if w.1 = a then x w.2 else 0) := by
-        funext w; by_cases h : w.1 = a <;> simp [h]
-      rw [this]; exact Submodule.smul_mem _ _ hx
-  exact key fun τ => v (a, τ)
+  apply GlobalTheory.FourthRootStd.span_range_emb4_eq_top <;> assumption
 
 theorem isoK_hermitian_sum_eq_emb4_hermitian_sum (γ : IsoK D) (x y : Fin 4 → D.host.E) :
     ∑ w, D.host.φ₀ ((γ.g x w : D.host.K) : D.host.E) * conj (D.host.φ₀ ((γ.g y w : D.host.K) : D.host.E))
       = ∑ w, emb4 D x w * conj (emb4 D y w) := by
-  calc ∑ w, D.host.φ₀ ((γ.g x w : D.host.K) : D.host.E) * conj (D.host.φ₀ ((γ.g y w : D.host.K) : D.host.E))
-      = D.host.φ₀ (∑ w, algebraMap D.host.K D.host.E (γ.g x w)
-          * D.host.conj (algebraMap D.host.K D.host.E (γ.g y w))) := by
-
-        rw [map_sum]; refine Finset.sum_congr rfl fun w _ => ?_
-        rw [map_mul, CU.emb_conj]; rfl
-    _ = D.host.φ₀ (algebraMap D.host.K D.host.E
-          (∑ a, Algebra.trace D.host.K D.host.E (x a * D.host.conj (y a)))) := by rw [γ.isom]
-    _ = ∑ a, D.host.φ₀ (algebraMap D.host.K D.host.E
-          (Algebra.trace D.host.K D.host.E (x a * D.host.conj (y a)))) := by rw [map_sum, map_sum]
-    _ = ∑ a, ∑ τ, TaylorLogMetric.embT D τ (x a * D.host.conj (y a)) :=
-        Finset.sum_congr rfl fun a _ => by rw [FL.sum_tau_trace]; rfl
-    _ = ∑ w, emb4 D x w * conj (emb4 D y w) := by
-        rw [Fintype.sum_prod_type]
-        refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun τ _ => ?_
-        rw [map_mul, CU.emb_conj]; rfl
+  apply GlobalTheory.FourthRootStd.isoK_hermitian_sum_eq_emb4_hermitian_sum <;> assumption
 
 theorem blockFourfold_hOne_eq_hOne (L : PeriodPair) (n : Type) [Fintype n] [DecidableEq n] :
     blk4 (hOne L n) = hOne L (Fin 4 × n) := by

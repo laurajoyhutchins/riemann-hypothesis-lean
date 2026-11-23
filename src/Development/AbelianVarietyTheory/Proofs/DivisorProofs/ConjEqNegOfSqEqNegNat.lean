@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GoodPointOrConjugate
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.TwoWeightEqOneAddRoot
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -51,24 +52,7 @@ open NumberField
 
 theorem conj_eq_neg_of_sq_eq_neg_nat (z : ℂ) (d : ℕ) (h : z ^ 2 = -(d : ℂ)) :
     (starRingEnd ℂ) z = -z := by
-  have hre : z.re * z.re - z.im * z.im = -(d : ℝ) := by
-    have := congrArg Complex.re h
-    simpa [pow_two] using this
-  have him : z.re * z.im + z.im * z.re = 0 := by
-    have := congrArg Complex.im h
-    simpa [pow_two] using this
-  have hd : (0 : ℝ) ≤ d := Nat.cast_nonneg d
-  have h0 : z.re = 0 := by
-    by_contra hne
-    have hi : z.im = 0 := by
-      have h2 : z.re * z.im = 0 := by linarith
-      exact (mul_eq_zero.1 h2).resolve_left hne
-    rw [hi] at hre
-    have hpos : 0 < z.re * z.re := mul_self_pos.2 hne
-    linarith
-  apply Complex.ext
-  · simp [h0]
-  · simp
+  apply GlobalTheory.CompanionTheory.Ar.QuotUnif.Dich.conj_eq_neg_of_sq_eq_neg_natCast <;> assumption
 
 theorem conjugate_rt {E : Type} [Field E] [NumberField E] [IsCMField E]
     (H : ReciprocityTheory.ChartRestriction.G.Geo.Tor.Host E) (σ : E →+* ℂ) :

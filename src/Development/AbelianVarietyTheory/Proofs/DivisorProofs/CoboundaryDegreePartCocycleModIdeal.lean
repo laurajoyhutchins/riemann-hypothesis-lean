@@ -66,36 +66,7 @@ theorem coeff_subst_sub_mem :
         ∀ (w : τ →₀ ℕ), w.degree = m → ∃ r ∈ N,
           coeff w (MvPowerSeries.subst (QLog.up (Q := Q) u) c) -
             coeff w (MvPowerSeries.subst (QLog.up (Q := Q) ℓ) c) = algebraMap B Q r := by
-  intro B Q σ τ _ _ _ _ N u ℓ hu hlin m c hc w hw
-  have hℓ : ∀ s, constantCoeff (ℓ s) = 0 := fun s => by
-    simpa only [coeff_zero_eq_constantCoeff_apply, hu s] using (hlin s 0 (by simp)).symm
-  have horder : ∀ s, (2 : ℕ∞) ≤ (u s - ℓ s).order := fun s =>
-    nat_le_order (n := 2) fun β hβ => by
-      rw [map_sub, hlin s β (by omega), sub_self]
-  have huSubst : HasSubst (QLog.up (Q := Q) u) :=
-    hasSubst_of_constantCoeff_zero fun s => by simp [QLog.up, hu s]
-  have hℓSubst : HasSubst (QLog.up (Q := Q) ℓ) :=
-    hasSubst_of_constantCoeff_zero fun s => by simp [QLog.up, hℓ s]
-  rw [coeff_subst huSubst, coeff_subst hℓSubst,
-    ← finsum_sub_distrib (coeff_subst_finite huSubst c w) (coeff_subst_finite hℓSubst c w)]
-  refine finsum_induction (fun x : Q => ∃ r ∈ N, x = algebraMap B Q r)
-    ⟨0, N.zero_mem, by simp⟩
-    (fun x y ⟨r, hr, hx⟩ ⟨t, ht, hy⟩ => ⟨r + t, N.add_mem hr ht, by rw [hx, hy, map_add]⟩)
-    fun α => ?_
-  have hprod (v : σ → MvPowerSeries τ B) :
-      (α.prod fun s e => QLog.up (Q := Q) v s ^ e) =
-        MvPowerSeries.map (algebraMap B Q) (α.prod fun s e => v s ^ e) := by
-    simp only [QLog.up, Finsupp.prod, map_prod, map_pow]
-  rw [hprod u, hprod ℓ, coeff_map, coeff_map, smul_eq_mul, smul_eq_mul, ← mul_sub, ← map_sub,
-    ← map_sub]
-  by_cases h : α.degree < m
-  · obtain ⟨b, hb, hcb⟩ := hc α h
-    exact ⟨b * _, N.mul_mem_right _ hb, by rw [hcb, map_mul]⟩
-  · have hmono := GlobalTheory.SubstMod.order_monoProd_sub u ℓ hu hℓ horder α
-    have hdegree : w.degree < α.degree + 1 := by omega
-    have hzero : coeff w ((α.prod fun s e => u s ^ e) - α.prod fun s e => ℓ s ^ e) = 0 :=
-      coeff_of_lt_order (lt_of_lt_of_le (by exact_mod_cast hdegree) hmono)
-    exact ⟨0, N.zero_mem, by rw [hzero, map_zero, mul_zero]⟩
+  apply GlobalTheory.SubstMod.subst_coeff_sub_mem <;> assumption
 
 theorem coeff_op_of_degree_le_one : ∀ {B O : Type} [CommRing B] [CommRing O] (θ : B →+* O) {d : ℕ} {μ : Fin d → MvPowerSeries (Fin d ⊕ Fin d) B}, IsLift θ μ → ∀ {τ : Type} (u v : Fin d → MvPowerSeries τ B), (∀ j, constantCoeff (u j) = 0) → (∀ j, constantCoeff (v j) = 0) → ∀ (i : Fin d) (β : τ →₀ ℕ), β.degree ≤ 1 → coeff β (op μ u v i) = coeff β (u i + v i) := GlobalTheory.T.coeff_formalGroupLawEvalPoints_of_degree_le_one
 

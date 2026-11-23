@@ -1,5 +1,6 @@
 module
 
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.ScalarCommuteTransposedRMatrixEntry
 public import Formalism.HermitianCurvature.StatementWd
 public import Mathlib.CategoryTheory.Category.Basic
 import Mathlib.Algebra.Order.Floor.Extended
@@ -124,21 +125,7 @@ theorem star_eU [StarRing A] (a : S) (i j : Fin 2) :
 
 theorem ins_mul (a : S) (M N : M2 (SlopeTestRemainingChoices S A)) (hM : FreeOf2 a M) :
     ins a (M * N) = ins a M * ins a N := by
-  have key : ∀ i j k l : Fin 2, (eU a i j : SlopeTestRemainingChoices S A) * M i j * (eU a k l * N k l) =
-      if j = k then eU a i l * (M i j * N k l) else 0 := by
-    intro i j k l
-    have e1 : (eU a i j : SlopeTestRemainingChoices S A) * M i j * (eU a k l * N k l) =
-        eU a i j * (M i j * eU a k l) * N k l := by
-      simp only [mul_assoc]
-    rw [e1, ← (hM i j k l).eq]
-    have e2 : (eU a i j : SlopeTestRemainingChoices S A) * (eU a k l * M i j) * N k l =
-        (eU a i j * eU a k l) * (M i j * N k l) := by
-      simp only [mul_assoc]
-    rw [e2, eU_mul_eU]
-    split_ifs <;> simp
-  simp only [ins, Fin.sum_univ_two, Matrix.mul_apply, add_mul, mul_add, key]
-  simp
-  abel
+  apply Formalism.FourierDecayAlt.P.Wd7.ins_mul <;> assumption
 
 theorem ins_star [StarRing A] (a : S) (M : M2 (SlopeTestRemainingChoices S A)) (hM : FreeOf2 a M) :
     star (ins a M) = ins a Mᴴ := by

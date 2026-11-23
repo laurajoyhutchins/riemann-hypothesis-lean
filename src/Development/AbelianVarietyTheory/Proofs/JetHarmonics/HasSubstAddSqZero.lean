@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.LawRightUnit
 public import Mathlib.Algebra.DualNumber
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.CocycleRightZeroThd
 import Mathlib.Algebra.Order.Floor.Extended
@@ -151,22 +152,7 @@ theorem hasSubst_pt_zero (R : Type) [CommRing R] (d : ℕ) :
 
 theorem law_right_unit {R : Type} [CommRing R] {d : ℕ} (G : FGLaw R d) (i : Fin d) :
     ev (n := 1) ![pt R d 0, 0] (G.F i) = (X ((0 : Fin 1), i) : PS R 1 d) := by
-  have hb : HasSubst (fun p : Fin 2 × Fin d => (![pt R d 0, 0] : Fin 2 → Pt R 1 d) p.1 p.2) :=
-    hasSubst_of_constantCoeff_zero (hasSubst_pt_zero R d)
-  have ha : HasSubst
-      (fun p : Fin 2 × Fin d => (![pt R d 1, pt R d 0] : Fin 2 → Pt R 2 d) p.1 p.2) :=
-    hasSubst_of_constantCoeff_zero (by
-      rintro ⟨j, i⟩
-      fin_cases j <;> simp [pt])
-  rw [← G.comm i, ← G.unit i]
-  unfold ev
-  rw [subst_comp_subst_apply ha hb]
-  congr 1
-  funext p
-  obtain ⟨j, l⟩ := p
-  fin_cases j
-  · exact subst_X hb ((1 : Fin 2), l)
-  · exact subst_X hb ((0 : Fin 2), l)
+  apply GlobalTheory.HomChain.law_right_unit <;> assumption
 
 theorem map_ev_pt_zero {R S : Type} [CommRing R] [CommRing S] {d : ℕ} (φ : R →+* S)
     (g : PS R 2 d) :

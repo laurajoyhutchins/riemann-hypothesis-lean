@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.BetaModuloX.ModLatticeAbsoluteValue
 public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.FourParts
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -98,24 +99,7 @@ theorem Xsp_eq_of_flag {T T' : E} {F : LFlag S r T} {G : LFlag S r T'} (h : ∀ 
   exact h r
 
 theorem Xsp_le_orth {T : E} (F : LFlag S r T) : Xsp F ≤ orth S (Xsp F) := by
-  intro y hy
-  change y ∈ Submodule.span E (Set.range F.fl.e) at hy
-  simp only [orth, Submodule.mem_iInf, LinearMap.mem_ker]
-  intro x hx
-  change x ∈ Submodule.span E (Set.range F.fl.e) at hx
-  induction hx using Submodule.span_induction with
-  | mem x hx' =>
-    obtain ⟨a, rfl⟩ := hx'
-    induction hy using Submodule.span_induction with
-    | mem y hy' =>
-      obtain ⟨b, rfl⟩ := hy'
-      exact F.fl.e_iso a b
-    | zero => simp
-    | add y z _ _ h1 h2 => simp [h1, h2]
-    | smul c y _ h => simp [h]
-  | zero => simp
-  | add x z _ _ h1 h2 => simp [h1, h2]
-  | smul c x _ h => simp [h]
+  apply PI.UnitaryGroupMassFormula.BetaModX.xsp_le_orth <;> assumption
 
 theorem map_mem_Xflag {Λ : Submodule (𝓞 E) S.V} {T : E} {F : LFlag S r T} {n : S.V ≃ₗ[E] S.V}
     (hn : n ∈ NLam Λ F) (j : ℕ) {v : S.V} (hv : v ∈ Xflag F j) : n v ∈ Xflag F j := by

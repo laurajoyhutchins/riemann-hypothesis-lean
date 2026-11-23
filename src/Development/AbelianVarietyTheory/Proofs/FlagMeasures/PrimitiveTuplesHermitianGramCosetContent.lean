@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MatrixCongruentOneModUniformizerPowGroupAndOrbit
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.HermLat
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CardPrimitiveTuplesHermitianGramModUniformizerStatement
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CommensurableCosetUnionContentIndependentNonnegStatement
@@ -162,23 +163,7 @@ theorem form_conj {n : ℕ} {Hm : Matrix (Fin n) (Fin n) E} (h : IsHerm L Hm) (x
 
 theorem mem_hermLat {m : ℕ} (X : Matrix (Fin m) (Fin m) E) :
     X ∈ hermLat L m ↔ IsHerm L X ∧ IsIntM L X := by
-  refine ⟨fun h => ?_, fun h => AddSubgroup.subset_closure h⟩
-  induction h using AddSubgroup.closure_induction with
-  | mem x hx => exact hx
-  | zero => exact ⟨by ext i j; simp [cT], fun i j => L.O.zero_mem⟩
-  | add x y _ _ hx hy =>
-    refine ⟨?_, fun i j => L.O.add_mem (hx.2 i j) (hy.2 i j)⟩
-    ext i j
-    have h1 := congrFun (congrFun hx.1 i) j
-    have h2 := congrFun (congrFun hy.1 i) j
-    simp only [cT] at h1 h2
-    simp [cT, h1, h2]
-  | neg x _ hx =>
-    refine ⟨?_, fun i j => L.O.neg_mem (hx.2 i j)⟩
-    ext i j
-    have h1 := congrFun (congrFun hx.1 i) j
-    simp only [cT] at h1
-    simp [cT, h1]
+  apply GlobalTheory.CongGrp.mem_hermLat <;> assumption
 
 theorem mem_mul_herm {m : ℕ} {p : E} (hp : IsUnit p) (hc : L.cj p = p) (X : Matrix (Fin m) (Fin m) E) :
     X ∈ (hermLat L m).map (DistribSMul.toAddMonoidHom _ p) ↔

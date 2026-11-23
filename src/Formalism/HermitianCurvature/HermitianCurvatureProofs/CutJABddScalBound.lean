@@ -156,7 +156,6 @@ theorem phiR_le (D : B.RealPlaceData k r Wp Wq) {ε : ℝ} (hε : 0 < ε) :
   have hle : a / b ≤ 1 / T := by
     rw [div_le_div_iff₀ hpos hT0]
     nlinarith
-  have hx := norm_nonneg (phiR k r D.z D.z' g)
   nlinarith [sq_nonneg (‖phiR k r D.z D.z' g‖ - 1)]
 
 theorem phiD_le (D : B.RealPlaceData k r Wp Wq) (ε : ℝ) :
@@ -202,7 +201,6 @@ end
 theorem scalar_transfer_bound_holds : JAScalBound := by
   refine ⟨2, by norm_num, ?_⟩
   intro k r Wp Wq _ _ _ _ D Bg hBg
-  have hr : (0 : ℝ) ≤ r := Nat.cast_nonneg _
   refine ⟨⟨ckOn_phiR D, fun ε hε m => ?_⟩, ⟨ckOn_phiD D, fun ε hε m => ?_⟩⟩
   · exact scal_bound_of_ubl D _ r (r + 1) Bg (by push_cast; linarith) ε (phiR_le D hε)
       (fun n => ubl_phiR D hε n) m

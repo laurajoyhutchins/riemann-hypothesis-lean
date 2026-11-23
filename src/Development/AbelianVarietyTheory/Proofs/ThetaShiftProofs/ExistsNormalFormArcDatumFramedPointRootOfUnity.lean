@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsIsArcFr
 public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsFramedPointChangedByLetters
 public import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.IsIntegralElemOfIsAlgebraicInt
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
@@ -90,21 +91,7 @@ theorem one_eq : η[t'.G].left ≫ m.φ = (1 : Over.mk x ⟶ Xo.univ.t.G).left :
   exact this
 
 theorem tan_iff (w : epsR S ⟶ t'.G) : IsTanAt x (w.left ≫ m.φ) ↔ IsTangent w := by
-  have hw : w.left ≫ t'.G.hom = spMap (algebraMap S (DualNumber S)) := Over.w w
-  constructor
-  · intro h
-    apply m.cart.1.hom_ext
-    · rw [Category.assoc]; exact h.2.trans (one_eq m).symm
-    · have a : η[t'.G].left ≫ t'.G.hom = 𝟙 _ := Over.w η[t'.G]
-      rw [Category.assoc, hw, a, ← spMap_comp]
-      have : (TrivSqZeroExt.fstHom S S S).toRingHom.comp (algebraMap S (DualNumber S)) = RingHom.id S := by
-        ext r; simp [TrivSqZeroExt.algebraMap_eq_inl]
-      rw [this]
-      exact Spec.map_id _
-  · intro h
-    refine ⟨by rw [Category.assoc, m.cart.1.w, ← Category.assoc, hw], ?_⟩
-    rw [← Category.assoc]
-    exact (congrArg (· ≫ m.φ) h).trans (one_eq m)
+  apply GlobalTheory.ArcQ.ExFr.tan_iff <;> assumption
 
 theorem scale_over (s : S) : spMap (epsScaleR s) ≫ spMap (algebraMap S (DualNumber S)) =
     spMap (algebraMap S (DualNumber S)) := by
@@ -124,23 +111,7 @@ theorem push_prod {n : ℕ} (u : Fin n → (epsR S ⟶ t'.G)) :
 
 theorem comb_iff {n : ℕ} (v : Fin n → (epsR S ⟶ t'.G)) (cf : Fin n → S) (w : epsR S ⟶ t'.G) :
     IsCombAt x (fun i => (v i).left ≫ m.φ) cf (w.left ≫ m.φ) ↔ IsLieComb cf v w := by
-  constructor
-  · rintro ⟨u, hu, hw⟩
-    choose u' hu' using fun i => exists_lift m (T := epsR S) (u i).left (Over.w (u i))
-    have e : u = fun i => pushHom m.cart (epsR S) (u' i) := funext fun i => Over.OverMorphism.ext (hu' i).symm
-    refine ⟨u', fun i => ?_, Over.OverMorphism.ext ?_⟩
-    · apply m.cart.1.hom_ext
-      · rw [Category.assoc]; exact (hu' i).trans (hu i)
-      · have hv : (v i).left ≫ t'.G.hom = spMap (algebraMap S (DualNumber S)) := Over.w (v i)
-        rw [Over.w, Category.assoc, hv, scale_over]; rfl
-    · apply m.cart.1.hom_ext
-      · rw [e] at hw
-        exact hw.symm.trans (push_prod m u').symm
-      · rw [Over.w, Over.w]
-  · rintro ⟨u, hu, rfl⟩
-    refine ⟨fun i => pushHom m.cart (epsR S) (u i), fun i => ?_, (push_prod m u).symm⟩
-    show (u i).left ≫ m.φ = _
-    rw [hu, Category.assoc]; rfl
+  apply GlobalTheory.ArcQ.ExFr.comb_iff <;> assumption
 
 end ExFr
 

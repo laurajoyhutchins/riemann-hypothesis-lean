@@ -1,5 +1,6 @@
 module
 
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.AdelicBoxesCompactExhaust
 public import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
 public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.HermitianOneByOneIsScalarStatement
 public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.InfiniteProductMultipliable
@@ -96,28 +97,7 @@ theorem two_le_norm (v : HeightOneSpectrum (𝓞 F)) : 2 ≤ Ideal.absNorm v.asI
 
 theorem exists_nat_mul_mem (v : HeightOneSpectrum (𝓞 F)) (x : Fv F v) :
     ∃ n : ℕ, 0 < n ∧ (n : Fv F v) * x ∈ v.adicCompletionIntegers F := by
-  set q : 𝓞 F := ((Ideal.absNorm v.asIdeal : ℕ) : 𝓞 F) with hq
-  have hqm : q ∈ v.asIdeal := Ideal.absNorm_mem v.asIdeal
-  have hlt := val_lt_one_of_mem v hqm
-  have hcast : (algebraMap F (Fv F v)) (algebraMap (𝓞 F) F q) = ((Ideal.absNorm v.asIdeal : ℕ) : Fv F v) := by
-    simp [hq]
-  rw [hcast] at hlt
-  set y : Fv F v := ((Ideal.absNorm v.asIdeal : ℕ) : Fv F v) with hy
-  have hy0 : y ≠ 0 := by
-    have hq0 : q ≠ 0 := by
-      rw [hq]; exact_mod_cast (by have := two_le_norm v; omega : Ideal.absNorm v.asIdeal ≠ 0)
-    rw [← hcast]
-    exact (map_ne_zero _).2 ((map_ne_zero_iff _ (FaithfulSMul.algebraMap_injective (𝓞 F) F)).2 hq0)
-  have hv0 : Valued.v y ≠ 0 := (Valuation.ne_zero_iff _).2 hy0
-  have hgt : 1 < (Valued.v y)⁻¹ := by
-    exact (one_lt_inv₀ (zero_lt_iff.2 hv0)).2 hlt
-  obtain ⟨j, hj⟩ := MulArchimedean.arch (Valued.v x) hgt
-  refine ⟨Ideal.absNorm v.asIdeal ^ j, pow_pos (by have := two_le_norm v; omega) j, ?_⟩
-  rw [HeightOneSpectrum.mem_adicCompletionIntegers]
-  push_cast
-  rw [map_mul, map_pow, ← hy]
-  calc Valued.v y ^ j * Valued.v x ≤ Valued.v y ^ j * (Valued.v y)⁻¹ ^ j := by gcongr
-    _ = 1 := by rw [← mul_pow, mul_inv_cancel₀ hv0, one_pow]
+  apply GlobalTheory.CompanionTheory.SW.BoxF.exists_nat_v <;> assumption
 
 theorem exists_exponents (a : ℕ) (ha : 0 < a) :
     ∃ e : HeightOneSpectrum (𝓞 F) → ℕ,

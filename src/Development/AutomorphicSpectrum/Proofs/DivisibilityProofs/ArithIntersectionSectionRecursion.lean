@@ -1,5 +1,6 @@
 module
 
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionBounded
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
 public import Development.WeilBound.CoreStatements.HodgeTatePoints.GfForms
 public import Development.WeilBound.CoreStatements.FlagImmersions.IntersectionConstantMetricLine
@@ -153,48 +154,7 @@ theorem prod_pow_add (y : (Σ k, ι k) → Ω) (c : ∀ k, ι k) (a b : K → �
 theorem exists_form_of_mem_chart {y : (Σ k, ι k) → Ω} {c : ∀ k, ι k} (hc : ∀ k, y ⟨k, c k⟩ ≠ 0)
     {t : Ω} (ht : t ∈ chartRingZ y c) :
     ∃ (N : K → ℕ) (r : MRing ι), IsMultiHomog r N ∧ aeval y r = t * ∏ k, y ⟨k, c k⟩ ^ N k := by
-  classical
-  unfold chartRingZ at ht
-  induction ht using Algebra.adjoin_induction with
-  | mem x hx =>
-    obtain ⟨p, rfl⟩ := hx
-    refine ⟨Pi.single p.1 1, X p, ?_, ?_⟩
-    · intro m hm k
-      rw [support_X] at hm
-      rw [Finset.mem_singleton.mp hm]
-      obtain ⟨k0, i0⟩ := p
-      by_cases hk : k = k0
-      · subst hk
-        simp [Finsupp.single_apply]
-      · have : ∀ i, (Finsupp.single (⟨k0, i0⟩ : Σ k, ι k) 1 : (Σ k, ι k) →₀ ℕ) ⟨k, i⟩ = 0 := by
-          intro i
-          rw [Finsupp.single_apply, if_neg]
-          intro h
-          exact hk (congrArg Sigma.fst h).symm
-        simp [this, Pi.single_eq_of_ne hk]
-    · have hprod : ∏ k, y ⟨k, c k⟩ ^ (Pi.single p.1 1 : K → ℕ) k = y ⟨p.1, c p.1⟩ := by
-        rw [Finset.prod_eq_single p.1 (fun b _ hb => by simp [Pi.single_eq_of_ne hb]) (by simp)]
-        simp
-      rw [hprod, aeval_X, div_mul_cancel₀ _ (hc _)]
-  | algebraMap n =>
-    refine ⟨0, C n, ?_, by simp⟩
-    intro m hm k
-    rw [C_apply] at hm
-    rw [Finset.mem_singleton.mp (support_monomial_subset hm)]
-    simp
-  | add a b _ _ h1 h2 =>
-    obtain ⟨N1, r1, hr1, e1⟩ := h1
-    obtain ⟨N2, r2, hr2, e2⟩ := h2
-    refine ⟨N1 + N2, r1 * mon c N2 + r2 * mon c N1, hom_add (hom_mul hr1 (hom_mon c N2))
-      (hom_of_eq (hom_mul hr2 (hom_mon c N1)) fun k => by simp [add_comm]), ?_⟩
-    rw [map_add (f := _), map_mul, map_mul, aeval_mon, aeval_mon, e1, e2, prod_pow_add]
-    ring
-  | mul a b _ _ h1 h2 =>
-    obtain ⟨N1, r1, hr1, e1⟩ := h1
-    obtain ⟨N2, r2, hr2, e2⟩ := h2
-    refine ⟨N1 + N2, r1 * r2, hom_mul hr1 hr2, ?_⟩
-    rw [map_mul, e1, e2, prod_pow_add]
-    ring
+  apply GroundTheory.Heights₂.Heights.HilbertSamuel.SectionBounded.exists_form_of_mem_chartRingZ <;> assumption
 
 theorem chart_rel {y : (Σ k, ι k) → Ω} {c : ∀ k, ι k} (hc : ∀ k, y ⟨k, c k⟩ ≠ 0) {a : K → ℤ} {s : Ω}
     (hs : s * ∏ k, y ⟨k, c k⟩ ^ (-(((1 : ℕ) : ℤ) * a k)) ∈ chartRingZ y c) {g h : MRing ι}

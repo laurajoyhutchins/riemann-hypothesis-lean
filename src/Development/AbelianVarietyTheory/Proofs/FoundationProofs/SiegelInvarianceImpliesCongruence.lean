@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SiegelUnitJPolynomialBoundedDenominators
 public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.SmoothedSiegelUnitQExpansionCoeffsIntegral
 public import Development.AbelianVarietyTheory.Definitions.Foundations.Imports
 public import Development.AbelianVarietyTheory.Definitions.Foundations.SgC
@@ -133,25 +134,7 @@ theorem ee_add (x y : ℂ) : ee (x + y) = ee x * ee y := by
 
 theorem hasQ_shift {M : ℕ} {f : ℍ → ℂ} {α : ℕ → ℂ} (h : HasQ M f α) (d : ℕ) :
     HasQ M (fun τ => f τ * ee (((d : ℂ) / M) * (τ : ℂ))) (fun n => if d ≤ n then α (n - d) else 0) := by
-  intro τ
-  have h1 := (h τ).mul_right (ee (((d : ℂ) / M) * (τ : ℂ)))
-  have e : ∀ n : ℕ, α n * Complex.exp (2 * Real.pi * Complex.I * n * τ / M) * ee (((d : ℂ) / M) * (τ : ℂ)) =
-      α n * Complex.exp (2 * Real.pi * Complex.I * ((n + d : ℕ) : ℂ) * τ / M) := fun n => by
-    rw [mul_assoc, ee, ← Complex.exp_add]; push_cast; ring_nf
-  simp only [e] at h1
-  have h2 := (hasSum_extend_zero (f := fun n : ℕ => α n * Complex.exp (2 * Real.pi * Complex.I * ((n + d : ℕ) : ℂ) * τ / M))
-    (g := fun n : ℕ => n + d) (add_left_injective d)).mpr h1
-  convert h2 using 1
-  funext n
-  by_cases hn : d ≤ n
-  · obtain ⟨m, rfl⟩ := Nat.exists_eq_add_of_le hn
-    dsimp only
-    rw [if_pos hn, show d + m = m + d by ring, (add_left_injective d).extend_apply]
-    simp
-  · dsimp only
-    rw [if_neg hn, zero_mul, Function.extend_apply']
-    · rfl
-    · rintro ⟨m, rfl⟩; omega
+  apply GlobalTheory.FracBd.shift_hasQ <;> assumption
 
 theorem exp_siegel_ord {Ω : Type} [Field Ω] [Algebra ℚ Ω] [IsAlgClosure ℚ Ω] (ε : Ω →+* ℂ) (T : Tower Ω ε)
     (c M a b : ℕ) (hM : 0 < M) (ha : a < M) (hadm : admitted c ![(a : ℚ) / M, (b : ℚ) / M]) :

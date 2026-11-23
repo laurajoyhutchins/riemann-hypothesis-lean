@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.MertensLogSum.LogFactorialEqSumLog
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ChebyshevPrimeBounds.PrimeCountBoundOf
 import Mathlib.Algebra.Order.Floor.Extended
 public import Mathlib.Algebra.Order.Floor.Semifield
@@ -64,24 +65,7 @@ theorem log_factorial_eq_sum_log (N : ℕ) : log ((N ! : ℕ) : ℝ) = ∑ m ∈
 
 theorem log_factorial_eq_sum (N : ℕ) :
     log ((N ! : ℕ) : ℝ) = ∑ d ∈ Ioc 0 N, Λ d * ((N / d : ℕ) : ℝ) := by
-  rw [log_factorial_eq_sum_log]
-  have h1 : ∀ m ∈ Ioc 0 N, log (m : ℝ) = ∑ d ∈ Ioc 0 N, if d ∣ m then Λ d else 0 := by
-    intro m hm
-    rw [Finset.mem_Ioc] at hm
-    rw [← Finset.sum_filter, ← ArithmeticFunction.vonMangoldt_sum]
-    apply Finset.sum_congr _ (fun _ _ => rfl)
-    ext d
-    simp only [Finset.mem_filter, Finset.mem_Ioc, Nat.mem_divisors]
-    constructor
-    · rintro ⟨hd, -⟩
-      exact ⟨⟨Nat.pos_of_dvd_of_pos hd hm.1, (Nat.le_of_dvd hm.1 hd).trans hm.2⟩, hd⟩
-    · rintro ⟨-, hd⟩
-      exact ⟨hd, by omega⟩
-  rw [Finset.sum_congr rfl h1, Finset.sum_comm]
-  apply Finset.sum_congr rfl
-  intro d _
-  rw [← Finset.sum_filter, Finset.sum_const, nsmul_eq_mul, Nat.Ioc_filter_dvd_card_eq_div]
-  ring
+  apply PI.PrimeLogOverPWork.log_factorial_eq <;> assumption
 
 theorem log_factorial_eq_sum_of_le {N M : ℕ} (h : N ≤ M) :
     log ((N ! : ℕ) : ℝ) = ∑ d ∈ Ioc 0 M, Λ d * ((N / d : ℕ) : ℝ) := by

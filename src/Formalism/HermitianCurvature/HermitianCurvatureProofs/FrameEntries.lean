@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TorusInvariance.TransferInvarianceRestriction
 public import Formalism.HermitianCurvature.StatementQr
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.OperatorRepresentations
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RestrictionIrrelevantDoubleLevelOperator
@@ -157,22 +158,7 @@ theorem mul_inv_uh {g : Mx k r} (hg : g ∈ UH (Hpk k r)) : g * g⁻¹ = 1 := by
 theorem inv_mul_uh {g : Mx k r} (hg : g ∈ UH (Hpk k r)) : g⁻¹ * g = 1 := Matrix.nonsing_inv_mul g (Matrix.isUnit_det_of_right_inverse (mul_inv_uh hg))
 
 theorem glev_inv {i : Fin (r + 1)} {g : Mx k r} (hg : g ∈ Glev k r i) : g⁻¹ ∈ Glev k r i := by
-  simp only [Glev, Set.mem_setOf_eq] at hg ⊢
-  obtain ⟨hU, hfix⟩ := hg
-  have h1 := mul_inv_uh hU
-  have h2 := inv_mul_uh hU
-  refine ⟨?_, fun a ha => ?_⟩
-  · have hU' : gᴴ * Hpk k r * g = Hpk k r := hU
-    show (g⁻¹)ᴴ * Hpk k r * g⁻¹ = Hpk k r
-    calc (g⁻¹)ᴴ * Hpk k r * g⁻¹ = (g⁻¹)ᴴ * (gᴴ * Hpk k r * g) * g⁻¹ := by rw [hU']
-      _ = (g * g⁻¹)ᴴ * Hpk k r * (g * g⁻¹) := by rw [conjTranspose_mul]; simp only [Matrix.mul_assoc]
-      _ = Hpk k r := by rw [h1, conjTranspose_one, Matrix.one_mul, Matrix.mul_one]
-  · obtain ⟨e1, e2⟩ := hfix a ha
-    constructor
-    · conv_lhs => rw [← e1]
-      rw [mulVec_mulVec, h2, one_mulVec]
-    · conv_lhs => rw [← e2]
-      rw [mulVec_mulVec, h2, one_mulVec]
+  apply Formalism.FourierDecayAlt.Q.TInvW.glev_inv <;> assumption
 
 theorem herm_inv {g : Mx k r} (hg : g ∈ UH (Hpk k r)) (x y : Fin (2 * r + k + 1) → ℂ) :
     herm (Hpk k r) (g *ᵥ x) y = herm (Hpk k r) x (g⁻¹ *ᵥ y) := by

@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicArithmetic.Foundations.GaloisRepresentations.ThetaParseval.BlockDeterminants.ExponentialEntries.LinDer
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.IsFockMap
 import Mathlib.Algebra.Module.StablyFree.Basic
 import Mathlib.Algebra.Order.Floor.Extended
@@ -194,26 +195,7 @@ theorem isExp_of_gens {σ : Type} (D : Derivation ℂ (MvPolynomial σ ℂ) (MvP
 
 theorem isExp_shift {V : Type} [AddCommGroup V] [Module ℂ V] {L U : Module.End ℂ V} (h : IsExp L U) (s : ℂ) :
     IsExp (L + s • 1) (Complex.exp s • U) := by
-  intro v l
-  have hc : Commute L (s • (1 : Module.End ℂ V)) := (Commute.one_right L).smul_right s
-  have b : HasSum (fun n : ℕ => ((n.factorial : ℂ))⁻¹ * s ^ n) (Complex.exp s) := by
-    have := NormedSpace.exp_series_hasSum_exp' (𝕂 := ℂ) s
-    rw [← Complex.exp_eq_exp_ℂ] at this
-    simpa [smul_eq_mul] using this
-  have T := hasSum_cauchy (h v l) b
-  have e : l ((Complex.exp s • U) v) = l (U v) * Complex.exp s := by
-    simp [mul_comm]
-  rw [e]
-  convert T using 2 with k
-
-  rw [hc.add_pow', LinearMap.sum_apply, map_sum, Finset.mul_sum]
-  refine Finset.sum_congr rfl fun p hp => ?_
-  obtain rfl : p.1 + p.2 = k := Finset.HasAntidiagonal.mem_antidiagonal.1 hp
-  have : (s • (1 : Module.End ℂ V)) ^ p.2 = s ^ p.2 • 1 := by rw [smul_pow, one_pow]
-  rw [this, LinearMap.smul_apply, Module.End.mul_apply]
-  simp only [mul_smul_comm, mul_one, LinearMap.smul_apply, Module.End.one_apply, map_nsmul, map_smul, smul_eq_mul, nsmul_eq_mul]
-  rw [← mul_assoc, fact_choose]
-  ring
+  apply UpperTheory.TP.RP.isExp_add_smul <;> assumption
 
 section Mat
 

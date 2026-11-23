@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeLatticeGenericAgree
 public import Mathlib.LinearAlgebra.ExteriorPower.Basic
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -62,24 +63,6 @@ namespace GlobalTheory.CompanionTheory.Ar.Flat.CPoint
 
 theorem ιMulti_matrix_transform : ∀ (Ω Vs : Type) [Field Ω] [AddCommGroup Vs] [Module Ω Vs] (p : ℕ) (P : Matrix (Fin p) (Fin p) Ω) (v : Fin p → Vs),
     exteriorPower.ιMulti Ω p (fun i => ∑ k, P i k • v k) = P.det • exteriorPower.ιMulti Ω p v := by
-  intro Ω Vs _ _ _ p P v
-  have hA : (exteriorPower.ιMulti Ω p).compLinearMap (Fintype.linearCombination Ω v) =
-      (Matrix.detRowAlternating : (Fin p → Ω) [⋀^Fin p]→ₗ[Ω] Ω).smulRight
-        (exteriorPower.ιMulti Ω p v) := by
-    refine (Pi.basisFun Ω (Fin p)).ext_alternating fun u hu => ?_
-    let s : Equiv.Perm (Fin p) := Equiv.ofBijective u (Finite.injective_iff_bijective.1 hu)
-    have e : (fun i => Pi.basisFun Ω (Fin p) (u i)) = (fun i => Pi.basisFun Ω (Fin p) i) ∘ s := rfl
-    rw [e, AlternatingMap.map_perm, AlternatingMap.map_perm]
-    congr 1
-    have e1 : (Matrix.detRowAlternating : (Fin p → Ω) [⋀^Fin p]→ₗ[Ω] Ω)
-        (fun i => Pi.basisFun Ω (Fin p) i) = 1 := by
-      change Matrix.det (Matrix.of fun i => Pi.basisFun Ω (Fin p) i) = 1
-      rw [show (Matrix.of fun i => Pi.basisFun Ω (Fin p) i) = 1 from by
-        ext i j; simp [Matrix.one_apply, Pi.single_apply, eq_comm], Matrix.det_one]
-    rw [AlternatingMap.smulRight_apply, e1, one_smul, AlternatingMap.compLinearMap_apply]
-    congr 1
-    funext i
-    simp [Fintype.linearCombination_apply_single]
-  exact AlternatingMap.congr_fun hA P
+  apply GlobalTheory.CompanionTheory.Ar.Flat.GenAgree.iotaMulti_rows <;> assumption
 
 end GlobalTheory.CompanionTheory.Ar.Flat.CPoint

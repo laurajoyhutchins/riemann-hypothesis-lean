@@ -72,7 +72,6 @@ variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensiona
 theorem integrable_maxpow (ν : Measure E) [ν.IsAddHaarMeasure] (B : ℝ)
     (hB : (Module.finrank ℝ E : ℝ) < B) : Integrable (fun q : E => (max 1 ‖q‖) ^ (-B)) ν := by
   have h0 : Integrable (fun q : E => (1 + ‖q‖) ^ (-B)) ν := integrable_one_add_norm hB
-  have hB0 : 0 ≤ B := le_trans (Nat.cast_nonneg _) hB.le
   refine Integrable.mono' (h0.const_mul (2 ^ B)) ?_ (Filter.Eventually.of_forall fun q => ?_)
   · exact (Continuous.rpow_const (by fun_prop) (fun q => Or.inl (by positivity))).aestronglyMeasurable
   · rw [Real.norm_of_nonneg (by positivity)]
@@ -243,7 +242,6 @@ theorem tailStepOfBound : TailStepOfBound := by
   refine ⟨C1 * C2, ?_⟩
   intro V _ _ _ Φ A K ε t c hε hε1 hA ht ht1 hΦ
   have ht0 : 0 < ‖t‖ := norm_pos_iff.2 ht
-  have hm : (0 : ℝ) ≤ (m : ℝ) := Nat.cast_nonneg m
   set τ : ℝ := ‖t‖ ^ (-ε) with hτ
   have hτ1 : 1 ≤ τ := Real.one_le_rpow_of_pos_of_le_one_of_nonpos ht0 ht1 (by linarith)
   have hτ0 : 0 < τ := by linarith
@@ -335,7 +333,6 @@ theorem norm_omLong_le (m : ℕ) (β : ℂ) (r : ℝ) (hr : 0 < r) {V : Type} [N
     (Filter.Eventually.of_forall fun v => ?_)
   rw [norm_smul, (additive_character_psi β _ 0).2.1, one_mul]
   refine (hb v).trans (mul_le_mul_of_nonneg_left ?_ hK)
-  have hm : (0 : ℝ) ≤ (m : ℝ) := Nat.cast_nonneg m
   calc min 1 (‖longM (m + 1 + 1) z v‖ ^ (-A)) ≤ (max 1 ‖longM (m + 1 + 1) z v‖) ^ (-A) := min_le_maxpow A _
     _ ≤ (max 1 ‖longM (m + 1 + 1) z v‖) ^ (-(((m : ℝ) + 1) * ((m : ℝ) + 4) + 1)) :=
         Real.rpow_le_rpow_of_exponent_le (le_max_left _ _) (by linarith)
@@ -366,15 +363,12 @@ theorem germLargeT : GermLargeT := by
   set r : ℝ := min 1 r0 with hr
   set R : ℝ := max 1 R0 with hR
   have hrpos : 0 < r := lt_min one_pos hr0
-  have hRpos : 0 < R := lt_of_lt_of_le one_pos (le_max_left _ _)
   set C1 : ℝ := ∫ v : UT (m + 1 + 1) → ℂ,
       (max 1 ‖r • v‖) ^ (-(((m : ℝ) + 1) * ((m : ℝ) + 4) + 1)) ∂(muPi β (UT (m + 1 + 1))) with hC1
-  have hC1pos : 0 ≤ C1 := integral_nonneg fun v => by positivity
   refine ⟨CT * (t₀ ^ (3 * m + 4))⁻¹ + ((m : ℝ) + 2) * R ^ ((m + 1) ^ 2) * C1 / t₀, ?_⟩
   intro V _ _ _ Φ A K hA hΦ t c ht hD
   have ht0 : 0 < ‖t‖ := ht₀.trans_le ht
   have htne : t ≠ 0 := norm_pos_iff.1 ht0
-  have hm : (0 : ℝ) ≤ (m : ℝ) := Nat.cast_nonneg m
   have hbZ : ∀ Z : Mat (m + 1 + 1), detM Z = (wMat (m + 1)).det * (c * t ^ (m + 1)) →
       ‖Φ Z‖ ≤ K * min 1 (‖Z‖ ^ (-A)) := by
     intro Z hZ

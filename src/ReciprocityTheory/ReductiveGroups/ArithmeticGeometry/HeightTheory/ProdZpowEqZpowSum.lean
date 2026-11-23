@@ -85,14 +85,6 @@ private theorem tauFG_sH_X (c : ι) (b : Fin (d.D + 1)) (u : Kˣ) (v : TVar d.D 
     rfl
   have hTC : ∀ a : Ω c, tauPG (Ω := Ω c) (D := d.D) (N := d.N) b u (C a) = C a :=
     fun a => (tauPG (Ω := Ω c) (D := d.D) (N := d.N) b u).commutes a
-  have hconst : ∀ r : K, tauFG (Ω := Ω c) (D := d.D) (N := d.N) b u
-      (algebraMap K (OmS (Ω c) d.D d.N) r) = algebraMap K (OmS (Ω c) d.D d.N) r := by
-    intro r
-    rw [hKC]
-    unfold tauFG
-    rw [IsFractionRing.ringEquivOfRingEquiv_algebraMap]
-    congr 1
-    exact hTC _
   have hTin : ∀ w : SVar d.D d.N, IsBaseBlockVar b w →
       tauPG (Ω := Ω c) (D := d.D) (N := d.N) b u (X w) = C (algebraMap K (Ω c) u) * X w := by
     intro w hw
@@ -185,24 +177,6 @@ theorem tauFG_KTtoS (h : d.S1) (c : ι) (b : Fin (d.D + 1)) (u : Kˣ) (z : KTf K
     rw [IsFractionRing.ringEquivOfRingEquiv_algebraMap]
     congr 1
     exact hTC _
-  have hTin : ∀ w : SVar d.D d.N, IsBaseBlockVar b w →
-      tauPG (Ω := Ω c) (D := d.D) (N := d.N) b u (X w) = C (algebraMap K (Ω c) u) * X w := by
-    intro w hw
-    show (aeval (R := Ω c) (S₁ := MvPolynomial (SVar d.D d.N) (Ω c)) _) (X w) = _
-    rw [aeval_X]
-    try dsimp only
-    rw [if_pos hw]
-    rfl
-  have hTout : ∀ w : SVar d.D d.N, ¬ IsBaseBlockVar b w →
-      tauPG (Ω := Ω c) (D := d.D) (N := d.N) b u (X w) = X w := by
-    intro w hw
-    show (aeval (R := Ω c) (S₁ := MvPolynomial (SVar d.D d.N) (Ω c)) _) (X w) = _
-    rw [aeval_X]
-    try dsimp only
-    rw [if_neg hw]
-  have hsX : ∀ w : TVar d.D d.N, d.sH c (X w) = sImg (d.jc c) (d.x c) w := fun w => by
-    show aeval (sImg (d.jc c) (d.x c)) (X w) = _
-    exact aeval_X _ _
   have hsC : d.sH c (C (u : K)) = algebraMap K _ (u : K) := (d.sH c).commutes _
   have hX : ∀ v : TVar d.D d.N, tauFG (Ω := Ω c) b u (d.sH c (X v)) = d.sH c (sigP b u (X v)) :=
     fun v => tauFG_sH_X d c b u v

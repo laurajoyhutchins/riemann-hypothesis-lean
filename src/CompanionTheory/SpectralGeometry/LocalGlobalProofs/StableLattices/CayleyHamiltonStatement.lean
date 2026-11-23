@@ -1,5 +1,6 @@
 module
 
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.HermitianCharacters.CharacteristicIdentity
 public import CompanionTheory.RealGroups.DiscreteSeries.DiscreteSeriesClassification.DiscreteSeriesExhaustion.HeckeAlgebraActions.BackStable
 public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.QuantumDeterminantTensorStatement
 import Formalism.RealPlaceAnalysis.ThirdArithmeticHolds
@@ -86,33 +87,7 @@ theorem commute_coeff_X_add_C (a t : A) (h : Commute a t) (k : ℕ) :
   split_ifs <;> simp [h]
 
 theorem eq_zero_of_eval (R : A[X]) (h : ∀ y : ℂ, R.eval (algebraMap ℂ A y) = 0) : R = 0 := by
-  ext k
-  rw [coeff_zero]
-  refine (Module.forall_dual_apply_eq_zero_iff ℂ _).1 fun φ => ?_
-  let r : ℂ[X] := ∑ i ∈ R.support, monomial i (φ (R.coeff i))
-  have hr : ∀ y, r.eval y = 0 := by
-    intro y
-    have hy := congrArg φ (h y)
-
-    rw [eval_eq_sum, sum_def, map_sum, map_zero] at hy
-    rw [← hy]
-    simp only [r, eval_finsetSum, eval_monomial]
-    refine Finset.sum_congr rfl fun i _ => ?_
-    rw [← map_pow, ← Algebra.commutes, ← Algebra.smul_def, map_smul, smul_eq_mul, mul_comm]
-  have h0 : r = 0 := Polynomial.funext (by simpa using hr)
-  have hc : r.coeff k = φ (R.coeff k) := by
-    classical
-    simp only [r, finsetSum_coeff]
-    rw [Finset.sum_eq_single k]
-    · simp [coeff_monomial]
-    · intro i hi hik
-      simp [coeff_monomial, hik]
-    · intro hk
-      have hk0 : R.coeff k = 0 := by
-        by_contra hne
-        exact hk (mem_support_iff.mpr hne)
-      simp [coeff_monomial, hk0]
-  rw [← hc, h0, coeff_zero]
+  apply GlobalTheory.CompanionTheory.Inh.CharId.eq_zero_of_eval <;> assumption
 
 def PolF (f : ℂ → A) : Prop := ∃ p : A[X], ∀ y : ℂ, p.eval (algebraMap ℂ A y) = f y
 

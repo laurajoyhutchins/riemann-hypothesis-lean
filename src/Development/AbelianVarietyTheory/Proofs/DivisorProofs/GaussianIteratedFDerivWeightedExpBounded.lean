@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.ThetaLifts.LeviDeterminants.NormIteratedFDerivIdLeOneAdd
 public import Mathlib.Analysis.CStarAlgebra.Classes
 public import Mathlib.Analysis.Calculus.ContDiff.FTaylorSeries
 public import Mathlib.Analysis.Complex.Exponential
@@ -81,22 +82,7 @@ theorem norm_iteratedFDeriv_id_le_one_add' (j : ℕ) (x : E) :
 
 theorem norm_iteratedFDeriv_diag_le' (B : E →L[ℝ] E →L[ℝ] ℝ) (n : ℕ) (x : E) :
     ‖iteratedFDeriv ℝ n (fun y => B y y) x‖ ≤ ‖B‖ * (2 ^ n * (1 + ‖x‖) ^ 2) := by
-  have h := B.norm_iteratedFDeriv_le_of_bilinear (f := id) (g := id) (N := (n : WithTop ℕ∞))
-    contDiff_id contDiff_id x le_rfl
-  simp only [id] at h
-  refine h.trans (mul_le_mul_of_nonneg_left ?_ (norm_nonneg _))
-  calc ∑ i ∈ Finset.range (n + 1), (n.choose i : ℝ) * ‖iteratedFDeriv ℝ i (fun y : E => y) x‖ *
-        ‖iteratedFDeriv ℝ (n - i) (fun y : E => y) x‖
-      ≤ ∑ i ∈ Finset.range (n + 1), (n.choose i : ℝ) * (1 + ‖x‖) ^ 2 := by
-        refine Finset.sum_le_sum fun i _ => ?_
-        rw [mul_assoc, sq]
-        gcongr
-        · exact norm_iteratedFDeriv_id_le_one_add' i x
-        · exact norm_iteratedFDeriv_id_le_one_add' (n - i) x
-    _ = 2 ^ n * (1 + ‖x‖) ^ 2 := by
-        rw [← Finset.sum_mul]
-        congr 1
-        exact_mod_cast Nat.sum_range_choose n
+  apply PositivityTheory.ThKF0.Lib.norm_iteratedFDeriv_diag_le <;> assumption
 
 theorem norm_iteratedFDeriv_rexp' (i : ℕ) (y : ℝ) : ‖iteratedFDeriv ℝ i Real.exp y‖ = Real.exp y := by
   rw [norm_iteratedFDeriv_eq_norm_iteratedDeriv]

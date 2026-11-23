@@ -65,8 +65,6 @@ namespace GlobalTheory
 theorem norm_sub_sq_le_of_split (u v : ℂ) : ‖u - v‖ ^ 2 ≤ 32 / 31 * ‖v‖ ^ 2 + 32 * ‖u‖ ^ 2 := by
   have h1 : ‖u - v‖ ≤ ‖u‖ + ‖v‖ := norm_sub_le u v
   have h0 : 0 ≤ ‖u - v‖ := norm_nonneg _
-  have hu := norm_nonneg u
-  have hv := norm_nonneg v
   nlinarith [sq_nonneg (‖v‖ - 31 * ‖u‖)]
 
 theorem weight_ge_of_nonpos (δ t : ℝ) (hδ : 0 < δ) (ht : t ≤ 0) :
@@ -91,13 +89,11 @@ theorem final_pointwise_le (n : ℕ) (x T tv ep e : ℝ) (Fp hp : ℂ) (hep : 0 
   have hu : ‖(tv : ℂ) * hp‖ ^ 2 = tv ^ 2 * ‖hp‖ ^ 2 := by
     rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, mul_pow, sq_abs]
   rw [hu] at hnorm
-  have hγ0 : 0 ≤ 1 / (1 + x ^ 2) := by positivity
   have hmin : 0 < 1 + min (x ^ 2) ((T + 1) ^ 2) :=
     lt_of_lt_of_le one_pos (le_add_of_nonneg_right (le_min (sq_nonneg _) (sq_nonneg _)))
   have hγw : 1 / (1 + x ^ 2) ≤ wT T x := by
     unfold wT
     exact one_div_le_one_div_of_le hmin (by linarith [min_le_left (x ^ 2) ((T + 1) ^ 2)])
-  have hv0 : 0 ≤ ‖(tv : ℂ) * hp - Fp‖ ^ 2 := sq_nonneg _
   apply mul_le_mul_of_nonneg_left _ (pow_nonneg (by norm_num : (0:ℝ) ≤ 2) n)
   have h1 : 1 / (1 + x ^ 2) * (‖Fp‖ ^ 2 * ep) * e ≤
       1 / (1 + x ^ 2) * e * ep * (32 / 31 * ‖(tv : ℂ) * hp - Fp‖ ^ 2 + 32 * (tv ^ 2 * ‖hp‖ ^ 2)) := by
@@ -149,7 +145,6 @@ theorem l2_extension_of_etale_coordinates : ∀ (n : ℕ) (Y : Type) [Topologica
     have hψle : ∀ y, psi A L s y ≤ 0 := fun y => by
       unfold psi
       exact mul_nonpos_of_nonneg_of_nonpos hn0.le (Real.log_nonpos (hsqn_nn y) (hsq y))
-    have hc0 : 0 < min 1 (1 / (2 * δ ^ 2)) := lt_min one_pos (by positivity)
     have hL2 : ∫⁻ y, ENNReal.ofReal (A.nsq (A.kap + E) h y) ∂A.mu < ⊤ := by
       have hle : ∀ y, ENNReal.ofReal (A.nsq (A.kap + E) h y) ≤
           ENNReal.ofReal (1 / min 1 (1 / (2 * δ ^ 2))) * ENNReal.ofReal (1 / (1 + (δ * psi A L s y) ^ 2) *
@@ -175,10 +170,6 @@ theorem l2_extension_of_etale_coordinates : ∀ (n : ℕ) (Y : Type) [Topologica
         _ < ⊤ := ENNReal.mul_lt_top ENNReal.ofReal_lt_top hfin
     set K : ℝ := Real.pi ^ n / ((n - 1).factorial : ℝ) / δ *
         ∑ P ∈ hS.toFinset, resSq A E L s P (f P) with hK
-    have hKpos : 0 < K := by
-      have := Real.pi_pos
-      have : (0:ℝ) < ((n - 1).factorial : ℝ) := by positivity
-      exact mul_pos (by positivity) hSpos
     have hggm : Measurable (fun y => ENNReal.ofReal (1 / (1 + (δ * psi A L s y) ^ 2) *
         A.nsq (A.kap + E) h y * Real.exp (-psi A L s y))) := by
       refine Measurable.ennreal_ofReal ?_

@@ -111,32 +111,25 @@ theorem xv_of_not {j₀ : Fin m} {p : Fin (D + 1) × Fin m} (h : ¬ Zs j₀ p) :
     xv (Ω := Ω) j₀ p = X ⟨p, h⟩ := by
   first
   | (rw [xv, dif_neg h])
-  | simp [xv, h]
 
 theorem xv_of_Z {j₀ : Fin m} {p : Fin (D + 1) × Fin m} (h : Zs j₀ p) :
     xv (Ω := Ω) j₀ p = 0 := by
   first
   | (rw [xv, dif_pos h])
-  | simp [xv, h]
 
 theorem psi_X (x : Fin m → Ω) (j₀ : Fin m) (p : Fin (D + 1) × Fin m) :
     psi x j₀ (X p) = gs x j₀ p := by
   first
   | (rw [psi, aeval_X])
-  | simp [psi]
 
 theorem psi_C (x : Fin m → Ω) (j₀ : Fin m) (a : Ω) :
     psi (D := D) x j₀ (C a) = C a := by
   first
   | (rw [psi, aeval_C, MvPolynomial.algebraMap_eq])
-  | simp [psi]
-  | exact (psi x j₀).commutes a
 
 theorem incl_C (j₀ : Fin m) (a : Ω) : incl (D := D) j₀ (C a) = C a := by
   first
   | (rw [incl, rename_C])
-  | simp [incl]
-  | exact (incl j₀).commutes a
 
 theorem gs_succ (x : Fin m → Ω) (j₀ : Fin m) (i : Fin D) (j : Fin m) :
     gs x j₀ (i.succ, j) = xv j₀ (i.succ, j) +
@@ -179,7 +172,6 @@ theorem psi_sec (x : Fin m → Ω) (j₀ : Fin m) (hx₀ : x j₀ ≠ 0) (i : Fi
   rw [Finset.sum_add_distrib, hI, neg_mul, hS]
   first
   | exact add_neg_cancel _
-  | exact add_right_neg _
   | abel
 
 theorem incl_xv_succ (j₀ : Fin m) (i : Fin D) (k : Fin m) :
@@ -225,13 +217,11 @@ theorem sub_incl_psi_mem (x : Fin m → Ω) (j₀ : Fin m) (hx₀ : x j₀ ≠ 0
       obtain ⟨i, rfl⟩ : ∃ i : Fin D, i.succ = i' := by
         first
         | exact Fin.exists_succ_eq.mpr hp'.1
-        | exact ⟨i'.pred hp'.1, Fin.succ_pred i' hp'.1⟩
       rw [hp'.2, X_sub_incl_gs x j₀ hx₀ i]
       exact Ideal.mul_mem_left _ _ (Ideal.subset_span ⟨i, rfl⟩)
     · first
       | (rw [gs, if_neg hp, xv_of_not hp, incl, rename_X, sub_self]
          exact Ideal.zero_mem _)
-      | simp [gs, hp, xv_of_not hp, incl]
   induction f using MvPolynomial.induction_on
   next a =>
     rw [psi_C, incl_C, sub_self]
@@ -310,7 +300,6 @@ theorem pderiv_aeval {ι : Type*} [Fintype ι] [DecidableEq ι] (j₀ : Fin m) (
     first
     | (rw [aeval_C, MvPolynomial.algebraMap_apply, pderiv_C]
        simp only [pderiv_C, map_zero, zero_mul, Finset.sum_const_zero])
-    | simp
   next G₁ G₂ h₁ h₂ =>
     simp only [map_add (f := _), h₁, h₂, add_mul, Finset.sum_add_distrib]
   next G i h =>
@@ -323,8 +312,6 @@ theorem pderiv_aeval {ι : Type*} [Fintype ι] [DecidableEq ι] (j₀ : Fin m) (
         have h0 : pderiv b (X i : MvPolynomial ι K) = 0 := by
           first
           | exact pderiv_X_of_ne (Ne.symm hb)
-          | exact pderiv_X_of_ne hb
-          | simp [pderiv_X, Pi.single_apply, hb, Ne.symm hb]
         rw [h0, mul_zero, map_zero, zero_mul]
       · intro hi
         exact absurd (Finset.mem_univ i) hi

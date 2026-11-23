@@ -390,7 +390,6 @@ theorem kc_scal {Cb Cc : ℝ} {S : C.HidaSetting E Wp Wq} {p : ∀ v, KB.Pl (D.p
     have hΓ1 : ΓS S (j + 1) =
         D.GamLev S.G.k S.G.r (D.kapG (S.g : ℝ) (S6.rd E)) (D.deG (S.g : ℝ) (S6.rd E)) (j + 1) := rfl
     rw [← hΓ1, zpow_neg]
-    have hκX := zpow_pos hκ (4 * ((S.G.r : ℤ) + 1 - ((j + 1 : ℕ) : ℤ)) * (C.Mlev S.G.k S.G.r (j + 1) - 1))
     field_simp
   have hdl : 0 < KB.dlB S (j + 1) 1 := by unfold KB.dlB; exact div_pos (zpow_pos hrd _) hδ
   have e3 : Kc S v j w h h' * |(lamS S j ^ 2)⁻¹| = (K * |(lamS S j ^ 2)⁻¹|) / S.sizeAt v w := by

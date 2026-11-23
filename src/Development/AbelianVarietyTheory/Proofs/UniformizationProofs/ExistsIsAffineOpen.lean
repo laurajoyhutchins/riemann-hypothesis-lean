@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.IsSemiAbelianOfCharts
 public import Development.AbelianVarietyTheory.Definitions.Uniformization.PointEqOfSubsingleton
 public import Development.AbelianVarietyTheory.Definitions.Uniformization.ExistsUniqueTorusCompat
 public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsGroupQuotientPullback
@@ -59,27 +60,7 @@ namespace GlobalTheory.TorusQuotLift
 
 theorem isMonHom_of_points {S : Scheme.{0}} {G H : Over S} [GrpObj G] [GrpObj H] (φ : G ⟶ H)
     (key : ∀ {T : Over S} (x y : T ⟶ G), (x * y) ≫ φ = (x ≫ φ) * (y ≫ φ)) : IsMonHom φ := by
-  refine ⟨?_, ?_⟩
-  ·
-    have hsq := key (T := 𝟙_ (Over S)) 1 1
-    rw [_root_.mul_one] at hsq
-    have hid : ((1 : 𝟙_ (Over S) ⟶ G) ≫ φ) = 1 := by
-      have h2 : ((1 : 𝟙_ (Over S) ⟶ G) ≫ φ) * ((1 : 𝟙_ (Over S) ⟶ G) ≫ φ) =
-          ((1 : 𝟙_ (Over S) ⟶ G) ≫ φ) * 1 := by rw [← hsq, _root_.mul_one]
-      exact mul_left_cancel h2
-    have eG : (1 : 𝟙_ (Over S) ⟶ G) = η := by
-      rw [Hom.one_def, toUnit_unique (toUnit _) (𝟙 _), Category.id_comp]
-    have eH : (1 : 𝟙_ (Over S) ⟶ H) = η := by
-      rw [Hom.one_def, toUnit_unique (toUnit _) (𝟙 _), Category.id_comp]
-    rw [eG, eH] at hid
-    exact hid
-  ·
-    have hm := key (T := G ⊗ G) (fst G G) (snd G G)
-    rw [Hom.mul_def, Hom.mul_def, lift_fst_snd, Category.id_comp] at hm
-    have ht : (φ ⊗ₘ φ) = lift (fst G G ≫ φ) (snd G G ≫ φ) := by
-      ext <;> simp
-    rw [ht]
-    exact hm
+  apply GlobalTheory.GroupGlue.isMonHom_of_points <;> assumption
 
 private lemma pullback_fst_comp_mul_left {S S' : Scheme.{0}} {G : Over S} [GrpObj G] (f : S' ⟶ S) {T : Over S'}
     (u v : T ⟶ (Over.pullback f).obj G) :

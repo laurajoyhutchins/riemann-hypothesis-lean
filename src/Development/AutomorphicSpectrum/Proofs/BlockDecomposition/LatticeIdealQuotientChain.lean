@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LatticeIdealIsPrime
 public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LevelChainValuations.LatDefs
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -64,36 +65,7 @@ theorem dpE_succ_mem_IB (i : ℕ) : Lat.dpE f ξ l M (i + 1) ∈ Lat.IB f ξ := 
 theorem dpE_zero_eq : Lat.dpE f ξ l M 0 = 1 := by simp [Lat.dpE]
 
 theorem exists_rep_B (x : B) (hx : x ∈ Lat.sub f ξ l M) : ∃ a : W, x - f a ∈ Lat.IB f ξ := by
-  unfold Lat.sub at hx
-  induction hx using Subring.closure_induction with
-  | mem x hx =>
-    rcases hx with ⟨w, rfl⟩ | ⟨i, rfl⟩
-    · exact ⟨w, by simp⟩
-    · cases i with
-      | zero => exact ⟨1, by simp [dpE_zero_eq]⟩
-      | succ i => exact ⟨0, by simpa using dpE_succ_mem_IB f ξ l M i⟩
-  | zero => exact ⟨0, by simp⟩
-  | one => exact ⟨1, by simp⟩
-  | add x y _ _ hx hy =>
-    obtain ⟨a, ha⟩ := hx
-    obtain ⟨b, hb⟩ := hy
-    refine ⟨a + b, ?_⟩
-    have h := Ideal.add_mem _ ha hb
-    have e : x + y - f (a + b) = x - f a + (y - f b) := by rw [map_add (f := _)]; ring
-    rw [e]; exact h
-  | neg x _ hx =>
-    obtain ⟨a, ha⟩ := hx
-    refine ⟨-a, ?_⟩
-    have h := Ideal.neg_mem_iff _ |>.2 ha
-    have e : -x - f (-a) = -(x - f a) := by rw [map_neg]; ring
-    rw [e]; exact h
-  | mul x y _ _ hx hy =>
-    obtain ⟨a, ha⟩ := hx
-    obtain ⟨b, hb⟩ := hy
-    refine ⟨a * b, ?_⟩
-    have h := Ideal.add_mem _ (Ideal.mul_mem_right y _ ha) (Ideal.mul_mem_left _ (f a) hb)
-    have e : x * y - f (a * b) = (x - f a) * y + f a * (y - f b) := by rw [map_mul]; ring
-    rw [e]; exact h
+  apply GlobalTheory.CompanionTheory.LatPrime.exists_sub_mem_IB <;> assumption
 
 theorem exists_rep (x : Lat.A f ξ l M) : ∃ a : W, Lat.ι f ξ l M x - f a ∈ Lat.IB f ξ :=
   exists_rep_B f ξ l M _ x.2

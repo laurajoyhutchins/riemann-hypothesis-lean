@@ -1542,9 +1542,6 @@ private lemma sLow_mul_lemma {n : ℕ} {a b : Matrix (Fin n) (Fin n) K} (ha : Is
           rw [Fin.lt_iff_val_lt_val]
           have h1 : (c : ℕ) ≠ j := fun e => hc.1 (Fin.ext e)
           have h2 : (c : ℕ) ≠ j + 1 := fun e => hc.2 (Fin.ext e)
-          have h3 : (j : ℕ) ≤ c := by
-            have := not_lt.1 hcj
-            exact this
           show (j : ℕ) + 1 < c
           omega
         rw [ha.1 hlt, zero_mul]
@@ -1570,9 +1567,6 @@ private lemma sUp_mul_lemma {n : ℕ} {a b : Matrix (Fin n) (Fin n) K} (ha : IsU
           rw [Fin.lt_iff_val_lt_val]
           have h1 : (c : ℕ) ≠ j := fun e => hc.1 (Fin.ext e)
           have h2 : (c : ℕ) ≠ j + 1 := fun e => hc.2 (Fin.ext e)
-          have h3 : (j : ℕ) ≤ c := by
-            have := not_lt.1 hcj
-            exact this
           show (j : ℕ) + 1 < c
           omega
         rw [hb.1 hlt, mul_zero]

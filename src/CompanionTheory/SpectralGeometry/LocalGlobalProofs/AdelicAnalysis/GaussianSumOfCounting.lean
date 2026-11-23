@@ -108,8 +108,6 @@ lemma summable_wt {c : ℝ} (hc : 0 < c) (n : ℕ) :
     have hy0 : 0 < y := by positivity
     have hx0 : 0 ≤ c * y / 4 := by positivity
     have hb := Real.pow_div_factorial_le_exp (c * y / 4) hx0 (n + 1)
-    have hfac : (0 : ℝ) < ((n + 1).factorial : ℝ) := by positivity
-    have hxp : 0 < (c * y / 4) ^ (n + 1) := by positivity
     have hexp : Real.exp (-(c * y / 4)) ≤ ((n + 1).factorial : ℝ) / (c * y / 4) ^ (n + 1) := by
       rw [Real.exp_neg, inv_le_comm₀ (Real.exp_pos _) (by positivity), inv_div]
       exact hb
@@ -190,11 +188,8 @@ theorem gaussian_sum_le (n : ℕ) (c t₀ C : ℝ) (hc : 0 < c) (ht₀ : 0 < t�
           ∑' j : ℕ, wt c j * ((4 : ℝ) ^ n) ^ j) * (Real.sqrt t ^ n)⁻¹) := by
   intro X Ω _ _ Pr s p hsm hpm hs0 hcount t ht
   have htpos : 0 < t := ht₀.trans_le ht
-  have hq : 0 < Real.sqrt t := Real.sqrt_pos.mpr htpos
   set B : ℝ := (Real.sqrt t ^ n)⁻¹ with hB
   set D : ℝ := 1 + (Real.sqrt t₀ ^ n)⁻¹ with hD
-  have hB0 : 0 ≤ B := by positivity
-  have hD0 : 0 ≤ D := by positivity
   set E : ℝ := |C| * D * B with hE
   have hE0 : 0 ≤ E := by positivity
   have hmeas : ∀ j : ℕ, Measurable fun ω => ∑' x, Set.indicator

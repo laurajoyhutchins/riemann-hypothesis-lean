@@ -72,7 +72,6 @@ theorem nxt_not_mem (hA : GlobalTheory.Published.IrreducibleAdmissibleGL) (Δ : 
   rw [decW, List.mem_ofFn] at h
   obtain ⟨i, hi⟩ := h
   have h2 := GlobalTheory.T.cuspidal_twist_injective hA Δ.first Δ.isCusp_first _ _ hi
-  have h3 := (Fin.rev i).isLt
   omega
 
 theorem eq_decW_of_append (hA : GlobalTheory.Published.IrreducibleAdmissibleGL) (Δ : Segment k) (u P Q : List (IrrGL (k := k)))

@@ -1,5 +1,6 @@
 module
 
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.LetterLiftOfParts
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.RuleGD
 public import Formalism.HermitianCurvature.StatementTL
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.FnComm
@@ -198,41 +199,7 @@ theorem cj_add (g gi : A) (h : g * gi = 1) (h' : gi * g = 1) {x a : A} (hx : x *
 
 theorem commute_Avr_Bvr_of_commute_siteOps {L : LevelData A r} {x : A} (hx : ∀ y ∈ siteOps L, Commute x y) (Y : ℂ) :
     Commute x (L.Avr Y) ∧ Commute x (L.Bvr Y) := by
-  have key : ∀ ms : List (Matrix (Fin 2) (Fin 2) A), (∀ M ∈ ms, ∀ i j, Commute x (M i j)) →
-      ∀ i j, Commute x (ms.prod i j) := by
-    intro ms
-    induction ms with
-    | nil =>
-      intro _ i j
-      rw [List.prod_nil, Matrix.one_apply]
-      split_ifs
-      · exact Commute.one_right x
-      · exact Commute.zero_right x
-    | cons M ms ih =>
-      intro hms i j
-      rw [List.prod_cons, Matrix.mul_apply]
-      exact Commute.sum_right _ _ _ (fun k _ =>
-        (hms M (by simp) i k).mul_right (ih (fun N hN => hms N (by simp [hN])) k j))
-  have hpb : ∀ l, Commute x (L.pb l) := fun l => hx _ (by simp [siteOps])
-  have hcb : ∀ l, Commute x (L.cb l) := fun l => hx _ (by simp [siteOps])
-  have hcbi : ∀ l, Commute x (L.cbi l) := fun l => hx _ (by simp [siteOps])
-  have hT : ∀ M ∈ (List.ofFn (L.Tvl Y)).reverse, ∀ i j, Commute x (M i j) := by
-    intro M hM
-    rw [List.mem_reverse, List.mem_ofFn] at hM
-    obtain ⟨l, rfl⟩ := hM
-    intro i j
-    fin_cases i <;> fin_cases j <;> simp [R.LevelData.Tvl] <;>
-      first
-      | exact (Algebra.commute_algebraMap_right Y x).sub_right (hpb l)
-      | exact (hcb l).neg_right
-      | exact hcb l
-      | exact hcbi l
-      | exact Commute.zero_right x
-  refine ⟨?_, ?_⟩
-  · unfold R.LevelData.Avr R.LevelData.Tvprod
-    exact key _ hT 0 0
-  · unfold R.LevelData.Bvr R.LevelData.Tvprod
-    exact key _ hT 1 0
+  apply Formalism.FourierDecayAlt.P.TLA.ColumnLift.comm_TM <;> assumption
 
 end
 

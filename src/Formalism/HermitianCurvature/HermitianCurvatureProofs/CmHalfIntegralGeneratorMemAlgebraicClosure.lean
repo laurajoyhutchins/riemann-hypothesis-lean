@@ -168,7 +168,6 @@ lemma three_block_injective {a a' b b' : ℂ} {y y' : Fin (2 * r' + k + 1) → �
   · have := congrArg cL h; rwa [three_block_last, three_block_last] at this
 lemma e0_eq : e0 k r' = mk3 k r' 1 0 0 := by
   funext i
-  have hi := i.isLt
   rw [e0_apply_eq_ite, three_block_apply]
   split_ifs <;> first | omega | simp
 lemma dual_base_vector_eq_single : es0 k r' = mk3 k r' 0 0 1 := by
@@ -178,7 +177,6 @@ lemma dual_base_vector_eq_single : es0 k r' = mk3 k r' 0 0 1 := by
   split_ifs <;> first | omega | simp
 lemma lift_eq (y : Fin (2 * r' + k + 1) → ℂ) : liftVec k 1 r' y = mk3 k r' 0 y 0 := by
   funext i
-  have hi := i.isLt
   rw [three_block_apply]
   simp only [liftVec]
   split_ifs <;> first | omega | simp
@@ -360,13 +358,11 @@ lemma eq_hb {y : Fin (2 * r' + k + 1) → ℂ} {b : ℂ} (h : b + conj b = - her
 
 private lemma ιLev_apply_tkF (g : Mat k r') (q : Fin (2 * (1 + r') + k + 1)) :
     ιLev k 1 r' g (tkF k r') q = if q.val = 0 then 1 else 0 := by
-  have hq := q.isLt
   simp only [ιLev, tkF, Fin.ext_iff, Fin.val_mk]
   split_ifs <;> first | rfl | omega
 
 private lemma ιLev_apply_tkL (g : Mat k r') (q : Fin (2 * (1 + r') + k + 1)) :
     ιLev k 1 r' g (tkL k r') q = if q.val = 2 * (1 + r') + k then 1 else 0 := by
-  have hq := q.isLt
   simp only [ιLev, tkL, Fin.ext_iff, Fin.val_mk]
   split_ifs <;> first | rfl | omega
 
@@ -374,7 +370,6 @@ private lemma ιLev_levPos_apply (g : Mat k r') (i : Fin (2 * r' + k + 1)) (q : 
     ιLev k 1 r' g (levPos k 1 r' i) q =
       if h : 1 ≤ q.val ∧ q.val < 2 * r' + k + 1 + 1 then g i ⟨q.val - 1, by omega⟩ else 0 := by
   have hi := i.isLt
-  have hq := q.isLt
   have c1 : 1 ≤ i.val + 1 ∧ i.val + 1 < 2 * r' + k + 1 + 1 := by omega
   simp only [ιLev, levPos, Fin.val_mk, c1, and_self, ↓reduceDIte]
   by_cases hc : 1 ≤ q.val ∧ q.val < 2 * r' + k + 1 + 1
@@ -405,8 +400,6 @@ lemma levi_three_block (g₁ : Mat k r') (a b : ℂ) (y : Fin (2 * r' + k + 1) �
   have hN0 : 2 * (1 + r') + k ≠ 0 := by omega
   have hN0' : (0 : ℕ) ≠ 2 * (1 + r') + k := by omega
   have hN : ∀ j : Fin (2 * r' + k + 1), j.val + 1 ≠ 2 * (1 + r') + k := fun j => by have := j.isLt; omega
-  have hN' : ∀ j : Fin (2 * r' + k + 1), 2 * (1 + r') + k ≠ j.val + 1 := fun j => by have := j.isLt; omega
-  have hL : ¬ (2 * (1 + r') + k < 2 * r' + k + 1 + 1) := by omega
   apply eq_three_block_of_coordinates
   · rw [tk_mulVec]
     simp only [ιLev_apply_tkF]
@@ -454,7 +447,6 @@ lemma long_weyl_three_block (c a b : ℂ) (y : Fin (2 * r' + k + 1) → ℂ) :
   have hN0' : (0 : ℕ) ≠ 2 * (1 + r') + k := by omega
   have hN : ∀ j : Fin (2 * r' + k + 1), j.val + 1 ≠ 2 * (1 + r') + k := fun j => by have := j.isLt; omega
   have hN' : ∀ j : Fin (2 * r' + k + 1), 2 * (1 + r') + k ≠ j.val + 1 := fun j => by have := j.isLt; omega
-  have hL : ¬ (2 * (1 + r') + k < 2 * r' + k + 1 + 1) := by omega
   apply eq_three_block_of_coordinates
   · rw [tk_mulVec]
     simp only [w0_tkF_apply_eq_ite_star_inv]
@@ -614,8 +606,6 @@ theorem μx_map_inv (l : ℂ) (hl : l ≠ 0) : μx.map (fun c => l / conj c) = �
   simp only [Pi.mul_apply]
   rw [← mul_assoc, ← ENNReal.ofReal_mul (abs_nonneg _), conj_inverse_map_det, abs_neg]
   congr 2
-  have h1 : 0 < ‖c‖ := norm_pos_iff.2 hc
-  have h2 : 0 < ‖l‖ := norm_pos_iff.2 hl
   rw [abs_of_nonneg (by positivity), norm_div, RCLike.norm_conj]
   field_simp
 
@@ -763,7 +753,6 @@ lemma parametrisation_eq_scaled_sum (p : ℂ × HPar k r') :
 lemma heisenberg_dilation_map_measure (c : ℂ) (hc : c ≠ 0) :
     (volume : Measure (HPar k r')).map (fun x : HPar k r' => (c • x.1, ‖c‖ ^ 2 * x.2)) =
       ENNReal.ofReal ((‖c‖ ^ (2 * (2 * r' + k + 1) + 2))⁻¹) • volume := by
-  have hc' : 0 < ‖c‖ := norm_pos_iff.mpr hc
   have e : (fun x : HPar k r' => (c • x.1, ‖c‖ ^ 2 * x.2)) =
       Prod.map (fun y : Fin (2 * r' + k + 1) → ℂ => c • y) (fun s : ℝ => ‖c‖ ^ 2 * s) := rfl
   rw [e, Measure.volume_eq_prod, ← Measure.map_prod_map _ _ (measurable_const_smul c) (measurable_const_mul _),

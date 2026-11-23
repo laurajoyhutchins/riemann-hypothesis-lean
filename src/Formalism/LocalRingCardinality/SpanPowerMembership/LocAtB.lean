@@ -84,7 +84,6 @@ theorem resChar_prime : (resChar v).Prime := by
   haveI : Finite (𝓞 F ⧸ v.asIdeal) := by
     first
     | exact Ideal.finiteQuotientOfFreeOfNeBot v.asIdeal v.ne_bot
-    | exact Ideal.finiteQuotientOfFreeOfNeBot _ v.ne_bot
     | infer_instance
   exact (CharP.char_is_prime_or_zero (𝓞 F ⧸ v.asIdeal) (ringChar (𝓞 F ⧸ v.asIdeal))).resolve_right
     (CharP.char_ne_zero_of_finite (𝓞 F ⧸ v.asIdeal) _)
@@ -94,7 +93,6 @@ theorem resChar_mem : ((resChar v : ℕ) : 𝓞 F) ∈ v.asIdeal := by
   rw [← Ideal.Quotient.eq_zero_iff_mem, map_natCast]
   first
   | exact ringChar.Nat.cast_ringChar
-  | exact CharP.cast_eq_zero _ _
 
 def cjT : (v.adicCompletion F ⊗[F] E) ≃ₐ[v.adicCompletion F] (v.adicCompletion F ⊗[F] E) :=
   AlgEquiv.ofAlgHom (Algebra.TensorProduct.map (AlgHom.id _ _) sig)
@@ -235,7 +233,6 @@ theorem exists_emb {K : Type} [Field K] [Algebra F K]
   have hmonic : (Polynomial.X ^ 2 + Polynomial.C (d : F) : Polynomial F).Monic := by
     first
     | exact Polynomial.monic_X_pow_add_C _ two_ne_zero
-    | exact Polynomial.monic_X_pow_add_C _ (by norm_num)
     | monicity!
   have haeval : Polynomial.aeval b (Polynomial.X ^ 2 + Polynomial.C (d : F) : Polynomial F) = 0 := by
     simp [hb2]
@@ -267,7 +264,6 @@ theorem exists_emb {K : Type} [Field K] [Algebra F K]
       first
       | (field_simp; ring)
       | field_simp
-      | ring
     obtain ⟨a1, ha1⟩ := hfix _ hA
     obtain ⟨a2, ha2⟩ := hfix _ hB
     have hx : x = algebraMap F E a1 + algebraMap F E a2 * b := by
@@ -275,7 +271,6 @@ theorem exists_emb {K : Type} [Field K] [Algebra F K]
       first
       | (field_simp; ring)
       | field_simp
-      | ring
     rw [hx]
     exact add_mem (IntermediateField.algebraMap_mem _ a1)
       (mul_mem (IntermediateField.algebraMap_mem _ a2) (IntermediateField.mem_adjoin_simple_self F b))
@@ -368,10 +363,8 @@ theorem conjF_conjF (x : H.E) : conjF H (conjF H x) = x := by
     · first
       | decide
       | rfl
-      | simp [Formalism.HC.Frame.cc]
     · first
       | exact mul_one _
-      | simp [Formalism.HC.Frame.cc]
   have hc2 : H.conj * H.conj = 1 := by
     show H.gal.symm R.toFrame.cc * H.gal.symm R.toFrame.cc = 1
     rw [← map_mul, hcc, map_one]
@@ -396,8 +389,6 @@ theorem finrank_FE : Module.finrank H.F H.E = 2 := by
     have hc : (((R.toFrame.cc.1.2 : ℤˣ) : ℤ)) = -1 := by
       first
       | rfl
-      | decide
-      | simp [Formalism.HC.Frame.cc]
     rw [h1, hc]
     simp
   have hfix : ∀ x, conjF H x = x → ∃ a, algebraMap H.F H.E a = x :=
@@ -411,7 +402,6 @@ theorem finrank_FE : Module.finrank H.F H.E = 2 := by
   have hmonic : (Polynomial.X ^ 2 + Polynomial.C (H.d : H.F) : Polynomial H.F).Monic := by
     first
     | exact Polynomial.monic_X_pow_add_C _ two_ne_zero
-    | exact Polynomial.monic_X_pow_add_C _ (by norm_num)
     | monicity!
   have haeval : Polynomial.aeval H.sqd (Polynomial.X ^ 2 + Polynomial.C (H.d : H.F) : Polynomial H.F) = 0 := by
     simp [H.sqd_sq]
@@ -443,7 +433,6 @@ theorem finrank_FE : Module.finrank H.F H.E = 2 := by
       first
       | (field_simp; ring)
       | field_simp
-      | ring
     obtain ⟨a1, ha1⟩ := hfix _ hA
     obtain ⟨a2, ha2⟩ := hfix _ hB
     have hx : x = algebraMap H.F H.E a1 + algebraMap H.F H.E a2 * H.sqd := by
@@ -451,7 +440,6 @@ theorem finrank_FE : Module.finrank H.F H.E = 2 := by
       first
       | (field_simp; ring)
       | field_simp
-      | ring
     rw [hx]
     exact add_mem (IntermediateField.algebraMap_mem _ a1)
       (mul_mem (IntermediateField.algebraMap_mem _ a2) (IntermediateField.mem_adjoin_simple_self H.F H.sqd))
@@ -556,8 +544,6 @@ theorem splH (hg : ∀ k, (placesOver H.E (H.g k)).ncard = Module.finrank ℚ H.
     have hc : (((R.toFrame.cc.1.2 : ℤˣ) : ℤ)) = -1 := by
       first
       | rfl
-      | decide
-      | simp [Formalism.HC.Frame.cc]
     rw [h1, hc]
     simp
   have hfix : ∀ x, conjF H x = x → ∃ a, algebraMap H.F H.E a = x :=

@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.LevelLetterCocycles.LevelKernelDetection.PfLvEquiv
 public import Formalism.SharpRestriction.LevelLetterCocycles.MapEvalPsPi
 import Formalism.DistinguishedUnitIdeals.DistinguishedOrderProofs.Graded
 import Mathlib.Algebra.Order.Floor.Extended
@@ -69,35 +70,7 @@ theorem grdB_one' (τ : Ks ≃ₐ[LL] Ks) (a : LLˣ) : grdB τ a 1 = 1 := by
 
 theorem grdB_mul' (τ : Ks ≃ₐ[LL] Ks) (a : LLˣ) (x y : HahnSeries ℤ Ks) :
     grdB τ a (x * y) = grdB τ a x * grdB τ a y := by
-  ext n
-  show algebraMap LL Ks ((a ^ n : LLˣ) : LL) * τ ((x * y).coeff n) = (grdB τ a x * grdB τ a y).coeff n
-
-  rw [HahnSeries.coeff_mul, HahnSeries.coeff_mul, map_sum, Finset.mul_sum]
-  symm
-  have hsub : ∀ ij : ℤ × ℤ, ij ∈ Finset.antidiagonal (grdB τ a x).isPWO_support
-      (grdB τ a y).isPWO_support n → ij ∈ Finset.antidiagonal x.isPWO_support y.isPWO_support n := by
-    intro ij hij
-    rw [Finset.mem_antidiagonal] at hij ⊢
-    refine ⟨fun h0 => hij.1 ?_, fun h0 => hij.2.1 ?_, hij.2.2⟩
-    · change algebraMap LL Ks ((a ^ ij.1 : LLˣ) : LL) * τ (x.coeff ij.1) = 0
-      rw [h0, map_zero, mul_zero]
-    · change algebraMap LL Ks ((a ^ ij.2 : LLˣ) : LL) * τ (y.coeff ij.2) = 0
-      rw [h0, map_zero, mul_zero]
-  rw [Finset.sum_subset hsub]
-  · refine Finset.sum_congr rfl fun ij hij => ?_
-    rw [Finset.mem_antidiagonal] at hij
-    have hn : ij.1 + ij.2 = n := hij.2.2
-    change (algebraMap LL Ks ((a ^ ij.1 : LLˣ) : LL) * τ (x.coeff ij.1)) *
-      (algebraMap LL Ks ((a ^ ij.2 : LLˣ) : LL) * τ (y.coeff ij.2)) = _
-    rw [← hn, zpow_add, Units.val_mul, map_mul, map_mul]
-    ring
-  · intro ij hmem hnot
-    rw [Finset.mem_antidiagonal] at hmem hnot
-    by_cases h1 : (grdB τ a x).coeff ij.1 = 0
-    · rw [h1, zero_mul]
-    · by_cases h2 : (grdB τ a y).coeff ij.2 = 0
-      · rw [h2, mul_zero]
-      · exact absurd ⟨h1, h2, hmem.2.2⟩ hnot
+  apply Formalism.MainNotions.N.Ln03.Pf.Pf_LvEquiv_grdB_mul <;> assumption
 
 theorem grdB_ringInverse (τ : Ks ≃ₐ[LL] Ks) (a : LLˣ) {X : HahnSeries ℤ Ks} (hX : grdB τ a X = X) :
     grdB τ a (Ring.inverse X) = Ring.inverse X := by

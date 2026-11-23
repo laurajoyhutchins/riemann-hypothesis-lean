@@ -161,16 +161,7 @@ theorem const_ph : PowerSeries.constantCoeff g.ph = 0 := by
   simp [GL3Theta.logMv]
 
 theorem ex_l (h : g.Ok) : PowerSeries.subst g.l g.ex = PowerSeries.X := by
-  obtain ⟨-, -, h0, h1⟩ := h
-  have hl : ∀ _ : Unit, MvPowerSeries.constantCoeff (g.l : MvPowerSeries Unit ℂ_[p]) = 0 := fun _ => const_l g
-  have he : ∀ _ : Unit, MvPowerSeries.constantCoeff (g.ex : MvPowerSeries Unit ℂ_[p]) = 0 := fun _ => h0
-  have h2 : ∀ i : Unit, MvPowerSeries.subst (fun _ : Unit => (g.ex : MvPowerSeries Unit ℂ_[p]))
-      (g.l : MvPowerSeries Unit ℂ_[p]) = MvPowerSeries.X i := fun _ => h1
-  have h3 := GlobalTheory.FormalInv.eq_substInv_of_right hl he h2
-  have h4 := GlobalTheory.FormalInv.subst_substInv_left hl
-    (IsUnit.of_mul_eq_one _ (GlobalTheory.FormalInv.linearPart_mul_eq_one hl he h2)) ()
-  rw [← h3] at h4
-  exact h4
+  apply _root_.GlobalTheory.CMEndo.ex_l <;> assumption
 
 theorem pt_lg (h : g.Ok) {a : MvPowerSeries σ ℂ_[p]} (ha : MvPowerSeries.constantCoeff a = 0) :
     g.pt (g.lg a) = a := by

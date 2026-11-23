@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagCoverArithmeticThird
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsImg
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.FlagModelBaseProjectionPointsStatement
 import Development.AutomorphicSpectrum.Proofs.MetricProofs.SameOrbitRefl
@@ -62,21 +63,7 @@ variable {K : Type} [Fintype K] {ι : K → Type} [∀ k, Fintype (ι k)]
 
 theorem mCoordIdeal_le_of_sameOrbit {z z' : (Σ k, ι k) → ℂ} (h : SameOrbit z z') :
     mCoordIdeal z' ≤ mCoordIdeal z := by
-  obtain ⟨c, hc, rfl⟩ := h
-  let θ : MvPolynomial K ℂ →ₐ[ℂ] MvPolynomial K ℂ := aeval fun k => C (c k) * X k
-  have key : ∀ f : MRing ι, mConeMap (fun p => c p.1 * z' p) f = θ (mConeMap z' f) := by
-    intro f
-    induction f using MvPolynomial.induction_on with
-    | C a => simp [mConeMap]
-    | add p q hp hq => simp only [map_add (f := _), hp, hq]
-    | mul_X p i hp =>
-      simp only [map_mul, hp]
-      congr 1
-      simp [mConeMap, θ, mul_assoc, mul_left_comm]
-  intro f hf
-  have hf' : mConeMap z' f = 0 := hf
-  show mConeMap _ f = 0
-  rw [key, hf', map_zero]
+  apply GlobalTheory.CompanionTheory.Ar.PB.CovMap.ImgBase.mCoordIdeal_le <;> assumption
 
 theorem mCoordIdeal_eq_of_sameOrbit {z z' : (Σ k, ι k) → ℂ} (h : SameOrbit z z') :
     mCoordIdeal z = mCoordIdeal z' :=

@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.HodgeGramComplexConjugate
 public import Development.AbelianVarietyTheory.Definitions.Divisors.CrystallineConnectionFormCoboundaryZero
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.IsGrpPullback
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.CrystallineH2SmallCoverBijectiveStatement
@@ -284,22 +285,7 @@ theorem eq_of_iso {L M : LB X} (hL : L.IsLB) (hM : M.IsLB) (h : LBIso L M) {z z'
     · exact congrArg₂ (· * ·) rfl (h1 _ _ (n.G.map φ)).symm
 
 theorem lbIso_refl {L : LB X} (hL : L.IsLB) : LBIso L L := by
-  refine ⟨⟨fun p ↦ L.g p.1 p.2⟩, fun p q ↦ ?_⟩
-  have rr : ∀ {U V W : X.Opens} (h : V ≤ U) (h' : W ≤ V) (a : Γ(X, U)ˣ),
-      res h' (res h a) = res (h'.trans h) a := fun h h' a ↦ Units.ext (by
-    change (X.presheaf.map _ ≫ X.presheaf.map _).hom a.val = _
-    rw [← X.presheaf.map_comp]; rfl)
-  let W := L.U p.1 ⊓ L.U p.2 ⊓ (L.U q.1 ⊓ L.U q.2)
-  have a1 : W ≤ L.U p.1 := inf_le_left.trans inf_le_left
-  have a2 : W ≤ L.U p.2 := inf_le_left.trans inf_le_right
-  have b1 : W ≤ L.U q.1 := inf_le_right.trans inf_le_left
-  have b2 : W ≤ L.U q.2 := inf_le_right.trans inf_le_right
-  have e1 := congrArg (res (le_inf (le_inf a1 a2) b2)) (hL.cocycle p.1 p.2 q.2)
-  have e2 := congrArg (res (le_inf (le_inf a1 b1) b2)) (hL.cocycle p.1 q.1 q.2)
-  simp only [map_mul, rr] at e1 e2
-  change res (le_inf a1 a2) (L.g p.1 p.2) = res (le_inf a1 b1) (L.g p.1 q.1) *
-    (res (le_inf a2 b2) (L.g p.2 q.2))⁻¹ * res (le_inf b1 b2) (L.g q.1 q.2)
-  rw [mul_right_comm, e2, ← e1, mul_inv_cancel_right]
+  apply PositivityTheory.Xgn.HodgeGramConjugation.lbIso_refl <;> assumption
 
 end GlobalTheory.Cris.ChernExists
 

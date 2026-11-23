@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPolyEntriesConjLeftRightMul
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.ModelFun
 public import Mathlib.Algebra.MvPolynomial.Monad
 public import Mathlib.RingTheory.MvPolynomial.Basic
@@ -134,21 +135,7 @@ theorem totalDegree_rsub (ε : Fin n → Bool) (k : KG ε) (p : Fin n × Fin n) 
 
 theorem totalDegree_bind₁_le {σ τ : Type*} (g : σ → MvPolynomial τ ℂ) (hg : ∀ i, (g i).totalDegree ≤ 1)
     (Q : MvPolynomial σ ℂ) : (MvPolynomial.bind₁ g Q).totalDegree ≤ Q.totalDegree := by
-  classical
-  conv_lhs => rw [Q.as_sum]
-
-  rw [map_sum]
-  refine (MvPolynomial.totalDegree_finsetSum _ _).trans (Finset.sup_le fun d hd => ?_)
-  rw [MvPolynomial.bind₁_monomial]
-  refine (MvPolynomial.totalDegree_mul _ _).trans ?_
-  rw [MvPolynomial.totalDegree_C, zero_add]
-  refine (MvPolynomial.totalDegree_finsetProd _ _).trans ?_
-  refine le_trans ?_ (MvPolynomial.le_totalDegree hd)
-  rw [Finsupp.sum]
-  refine Finset.sum_le_sum fun i _ => ?_
-  refine (MvPolynomial.totalDegree_pow _ _).trans ?_
-  calc d i * (g i).totalDegree ≤ d i * 1 := Nat.mul_le_mul_left _ (hg i)
-    _ = d i := mul_one _
+  apply GlobalTheory.PolyEntryMul.totalDegree_bind₁_le_of_le_one <;> assumption
 
 theorem rtr_polyK (ε : Fin n → Bool) (k : KG ε) (Q : MvPolynomial (Fin n × Fin n) ℂ) :
     rtr ε k (evalK ε Q) ∈ polyK ε Q.totalDegree := by

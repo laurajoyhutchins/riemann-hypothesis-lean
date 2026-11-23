@@ -75,11 +75,6 @@ theorem hwfin_denom (ε : Fin n → Bool) :
     simp
   rw [h1] at h
   simp only [zero_add] at h
-  have hD : ((∏ i ∈ Finset.range (Formalism.MainNotions.LocalBesselAndTopKernel.nPl ε), (i.factorial : ℝ)) *
-        ∏ i ∈ Finset.range (Formalism.MainNotions.LocalBesselAndTopKernel.nMi ε), (i.factorial : ℝ)) ≠ 0 := by
-    intro h0
-    rw [h0, div_zero] at h
-    exact one_ne_zero h
   field_simp at h
   exact h.symm
 

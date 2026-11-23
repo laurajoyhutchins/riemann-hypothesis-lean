@@ -58,7 +58,6 @@ theorem parith_small (k f g : ℕ) (b e : ℝ) (hb : 2 ≤ b) (hk : 9 ≤ k) (hf
     (32 / (g : ℝ)) ^ (k * f) * ((4 * k * f : ℕ) : ℝ) ^ (4 * f) * (b ^ (e * f)) ^ 42 ≤ 1 / 2 := by
   have hb0 : 0 < b := by linarith
   have hk1 : (1 : ℝ) ≤ k := by exact_mod_cast (by omega : 1 ≤ k)
-  have hk0 : (0 : ℝ) < k := by linarith
   have hfk' : (f : ℝ) ≤ k := by exact_mod_cast hfk
   have h1 : (b ^ (e * f)) ^ 42 = (Real.exp (42 * (e * Real.log b))) ^ f := by
     rw [Real.rpow_def_of_pos hb0, ← Real.exp_nat_mul, ← Real.exp_nat_mul]
@@ -199,7 +198,6 @@ theorem parith_pair (K : Type) [Field K] [NumberField K] (k g r T x x' : ℕ) (h
   have hD1 : (1 : ℝ) ≤ (T : ℝ) ^ (2 * f) := one_le_pow₀ hT1
   have hDA : (T : ℝ) ^ (2 * f) ≤ A ^ 2 := by rw [mul_comm, pow_mul]; gcongr
   generalize (T : ℝ) ^ (2 * f) = D at *
-  have hD0 : 0 ≤ D := by linarith
   have hxx : (1 : ℝ) ≤ (x : ℝ) * x' := one_le_mul_of_one_le_of_one_le hx1 hx1'
   have hY1 : (1 : ℝ) ≤ (x : ℝ) * x' * D ^ 2 := one_le_mul_of_one_le_of_one_le hxx (one_le_pow₀ hD1)
   have hYA : (x : ℝ) * x' * D ^ 2 ≤ A ^ 6 * (S * S') ^ 2 := by
@@ -211,11 +209,7 @@ theorem parith_pair (K : Type) [Field K] [NumberField K] (k g r T x x' : ℕ) (h
     calc D * x * x' = x * x' * D := by ring
       _ ≤ _ := by gcongr
   generalize (x : ℝ) * x' * D ^ 2 = Y at *
-  have hY0 : 0 ≤ Y := by linarith
-  have hv0 : 0 ≤ Formalism.HermitianLatticesTheory.vInv K := by linarith
   have hSS : 1 ≤ S * S' := one_le_mul_of_one_le_of_one_le hS hS'
-  have hS2 : 1 ≤ S ^ 2 := one_le_pow₀ hS
-  have hS2' : 1 ≤ S' ^ 2 := one_le_pow₀ hS'
   have hZ : 1 ≤ (S * S') ^ 14 := one_le_pow₀ hSS
   set V := (A * S ^ 2) * (A * S' ^ 2) with hV
   have hVe : V = A ^ 2 * (S * S') ^ 2 := by rw [hV]; ring
@@ -251,7 +245,6 @@ theorem parith_pair (K : Type) [Field K] [NumberField K] (k g r T x x' : ℕ) (h
         _ ≤ _ := by gcongr)
   have hB' := le_trans hB (mul_le_mul_of_nonneg_right (le_trans hco (pow_le_pow_left₀ (by linarith) hAV 183))
     (by positivity))
-  have hV0 : 0 ≤ V := by linarith
   rw [mul_assoc]
   refine mul_le_mul_of_nonneg_left ?_ (by positivity)
   calc _ ≤ V ^ (96 * r) * (V ^ 183 * ((S * S') ^ 14) ^ k) := mul_le_mul h1 hB' (by positivity) (by positivity)
@@ -294,7 +287,6 @@ theorem parith_sum (K : Type) [Field K] [NumberField K] [StarRing K] (k g r T : 
   have hD0' : 0 ≤ Del' := by linarith
   set C := (Del ^ ((k : ℝ) / 2) * Del' ^ ((k : ℝ) / 2)) *
     ((U * U') ^ (96 * r + 183) * (S * S') ^ (14 * k) * (U ^ (250000 * r ^ 4) * U' ^ (250000 * r ^ 4))) with hC
-  have hC0 : 0 ≤ C := by positivity
   have hterm : ∀ x ∈ Finset.Icc 1 ⌊Del⌋₊, ∀ x' ∈ Finset.Icc 1 ⌊Del'⌋₊, pairBd K k g r T x x' *
       (datBd K k r Del Db ((T : ℝ) ^ Formalism.HermitianLatticesTheory.fDeg K) x * datBd K k r Del' Db' ((T : ℝ) ^ Formalism.HermitianLatticesTheory.fDeg K) x') ≤ C := by
     intro x hx x' hx'
@@ -427,8 +419,6 @@ theorem sum_pairBd_mul_datBd_le : ∀ Ca : ℝ, 1 ≤ Ca → ∃ Ch Cl : ℝ, 0 
     gcongr
     linarith
   have hkr : 300000 * r ^ 4 ≤ k := by omega
-  have hD0 : 0 ≤ Del := by linarith
-  have hD0' : 0 ≤ Del' := by linarith
   exact mul_le_mul
     (parith_abs k r _ _ S _ hA hAB hS (by linarith) hkr _ (by positivity))
     (parith_abs k r _ _ S' _ hA hAB hS' (by linarith) hkr _ (by positivity)) (by positivity) (by positivity)

@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.CuspSpanNormBounds.CayleyDegreeNondegeneracy.ExtendByIdentitySymmFixOrth
 public import Formalism.SharpRestriction.CuspSpanNormBounds.GlobalAssemblyOfStatements
 public import Formalism.SharpRestriction.CuspSpanNormBounds.GluingLemmasAndTheorems
 public import Formalism.FlagUnipotentLattices.DetIndexProductHyperbolicInequality
@@ -4927,28 +4928,7 @@ theorem i_mem_dual (L : Submodule (𝓞 E) S.V) (x : S.V) :
   Formalism.HermitianLatticesTheory.dualBasic_mem_dual S.hT L x
 
 theorem i_isCompl (U : Submodule E S.V) (h : U ⊓ orth S U = ⊥) : IsCompl U (orth S U) := by
-  refine ⟨disjoint_iff.2 h, codisjoint_iff.2 ?_⟩
-  set b := Module.finBasis E U with hb
-  set φ : S.V →ₗ[E] (Fin (finrank E U) → E) := LinearMap.pi (fun i => S.hT (b i : S.V)) with hφ
-  have hker : LinearMap.ker φ ≤ orth S U := by
-    intro y hy
-    have h1 : ∀ i, S.hT ((b i : U) : S.V) y = 0 := fun i => congrFun (LinearMap.mem_ker.1 hy) i
-    have h2 := a_orth_of_frame (fun i => ((b i : U) : S.V)) y h1
-    have h3 : Submodule.span E (Set.range fun i => ((b i : U) : S.V)) = U := by
-      have : (Set.range fun i => ((b i : U) : S.V)) = U.subtype '' (Set.range b) := by
-        rw [← Set.range_comp]; rfl
-      rw [this, Submodule.span_image, b.span_eq, Submodule.map_top, Submodule.range_subtype]
-    rwa [h3] at h2
-  have h4 := LinearMap.finrank_range_add_finrank_ker φ
-  have h5 : finrank E (LinearMap.range φ) ≤ finrank E U := by
-    have := Submodule.finrank_le (LinearMap.range φ)
-    simpa using this
-  have h6 : finrank E (LinearMap.ker φ) ≤ finrank E (orth S U) := Submodule.finrank_mono hker
-  have h7 := Submodule.finrank_sup_add_finrank_inf_eq U (orth S U)
-  rw [h, finrank_bot, add_zero] at h7
-  apply Submodule.eq_top_of_finrank_eq
-  have h8 := Submodule.finrank_le (U ⊔ orth S U)
-  omega
+  apply Formalism.MainNotions.BridgeLemma₂.isCompl_orth_of_nondegenerate <;> assumption
 
 theorem i_cancel {U U' : Submodule E S.V} (hd : U ⊓ U' = ⊥) {A A' B B' : Submodule (𝓞 E) S.V}
     (hA : A ≤ toO S U) (hA' : A' ≤ toO S U) (hB' : B' ≤ toO S U')

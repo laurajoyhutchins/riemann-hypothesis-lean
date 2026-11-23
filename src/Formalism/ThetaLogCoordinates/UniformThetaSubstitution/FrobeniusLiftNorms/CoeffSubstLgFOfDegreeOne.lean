@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsContinuousPadic
 public import Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FirstDeriv
 public import Formalism.FormalGroupLog.Statement
 public import Formalism.FormalGroupLog.FormalGroupLogProofs.ConstantCoeffSubstOfZero
@@ -268,24 +269,7 @@ theorem coeff_subst_lgF_of_degree_one {ι : Type} (p : ℕ) (hp : 2 ≤ p) (F : 
 end Alg
 
 theorem not_dvd_den {p : ℕ} [Fact p.Prime] (r : ℚ) (h : ‖(r : ℚ_[p])‖ ≤ 1) : ¬ p ∣ r.den := by
-  intro hd
-  have hp := Fact.out (p := p.Prime)
-  rw [Padic.eq_padicNorm] at h
-  have hden : padicNorm p ((r.den : ℤ) : ℚ) < 1 :=
-    (padicNorm.int_lt_one_iff _).mpr (by exact_mod_cast hd)
-  have hnum : padicNorm p ((r.num : ℤ) : ℚ) < 1 := by
-    have hc : ((r.num : ℤ) : ℚ) = r * ((r.den : ℤ) : ℚ) := by
-      push_cast
-      exact (Rat.mul_den_eq_num r).symm
-    rw [hc, padicNorm.mul]
-    calc padicNorm p r * padicNorm p ((r.den : ℤ) : ℚ) ≤ 1 * padicNorm p ((r.den : ℤ) : ℚ) :=
-          mul_le_mul_of_nonneg_right (by exact_mod_cast h) (padicNorm.nonneg _)
-      _ < 1 := by rw [one_mul]; exact hden
-  have h1 : (p : ℤ) ∣ r.num := (padicNorm.int_lt_one_iff _).mp hnum
-  have h2 : p ∣ r.num.natAbs := Int.natCast_dvd.mp h1
-  have h3 := Nat.dvd_gcd h2 hd
-  rw [Nat.Coprime.gcd_eq_one r.reduced] at h3
-  exact hp.one_lt.ne' (Nat.dvd_one.mp h3)
+  apply GlobalTheory.LocalData.not_dvd_den <;> assumption
 
 theorem norm_ratCast_le_one {K : Type} [NormedField K] [IsUltrametricDist K] {p : ℕ}
     (hp : p.Prime) (hnp : ‖(p : K)‖ < 1) (r : ℚ) (hr : ¬ p ∣ r.den) : ‖(r : K)‖ ≤ 1 := by

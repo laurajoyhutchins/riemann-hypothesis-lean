@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FibreFiniteCard
 public import Development.AbelianVarietyTheory.Definitions.Foundations.IsHermND
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.OrbitMassEquivariantConstantFibreStatement
 import Mathlib.Algebra.Order.Floor.Extended
@@ -56,24 +57,7 @@ namespace GlobalTheory.HL
 theorem coset_fibre_card {G : Type} [Group G] (D H : Subgroup G) (h : D ≤ H) (hDH : D.relIndex H ≠ 0)
     (z : G ⧸ H) : Finite {y : G ⧸ D // Subgroup.quotientMapOfLE h y = z} ∧
       Nat.card {y : G ⧸ D // Subgroup.quotientMapOfLE h y = z} = D.relIndex H := by
-  let e := Subgroup.quotientEquivProdOfLE (α := G) h
-  have he : ∀ y, (e y).1 = Subgroup.quotientMapOfLE h y := by
-    intro y
-    induction y using QuotientGroup.induction_on with
-    | H a => rfl
-  let e2 : {y : G ⧸ D // Subgroup.quotientMapOfLE h y = z} ≃ (H ⧸ D.subgroupOf H) :=
-    { toFun := fun y => (e y.1).2
-      invFun := fun c => ⟨e.symm (z, c), by rw [← he, Equiv.apply_symm_apply]⟩
-      left_inv := fun y => by
-        apply Subtype.ext
-        apply e.injective
-        rw [Equiv.apply_symm_apply]
-        exact Prod.ext ((he y.1).trans y.2).symm rfl
-      right_inv := fun c => by simp }
-  haveI : (D.subgroupOf H).FiniteIndex := ⟨hDH⟩
-  refine ⟨Finite.of_equiv _ e2.symm, ?_⟩
-  rw [Nat.card_congr e2]
-  rfl
+  apply GlobalTheory.FibreEquivalence.fibre_finite_card <;> assumption
 
 theorem mass_orbit_eq : ∀ {G : Type} [Group G] (Γ K0 : Subgroup G), ∃ V₀ : ℝ≥0∞, ∀ (X : Type) [MulAction G X] (x : X), K0.relIndex (MulAction.stabilizer G x) ≠ 0 → (MulAction.stabilizer G x).relIndex K0 ≠ 0 → (∑' o : MulAction.orbitRel.Quotient Γ X, if o.out ∈ MulAction.orbit G x then ((((Γ ⊓ MulAction.stabilizer G o.out : Subgroup G) : Set G).encard : ℝ≥0∞))⁻¹ else 0) = V₀ * ENNReal.ofReal (invVol K0 (MulAction.stabilizer G x)) := by
   intro G _ Γ K0

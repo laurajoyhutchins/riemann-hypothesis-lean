@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.MuBridgeA
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.EqOneOfToHAFin
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.SdTestC
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.StdConjExOfWitt
@@ -77,30 +78,7 @@ theorem phi_notReal (v : InfinitePlace X.B.I.F) : ¬ ∀ e : X.B.I.E, conj (X.B.
 
 theorem emb_trace (v : InfinitePlace X.B.I.F) (e : X.B.I.E) :
     v.embedding (Algebra.trace X.B.I.F X.B.I.E e) = X.B.I.φ v e + conj (X.B.I.φ v e) := by
-  classical
-  haveI : FiniteDimensional X.B.I.F X.B.I.E := fd_of X
-  letI : Algebra X.B.I.F ℂ := v.embedding.toAlgebra
-  let φA : X.B.I.E →ₐ[X.B.I.F] ℂ := { X.B.I.φ v with commutes' := X.B.I.φ_over v }
-  let ψA : X.B.I.E →ₐ[X.B.I.F] ℂ :=
-    { (starRingEnd ℂ).comp (X.B.I.φ v) with
-      commutes' := fun a => by
-        show conj (X.B.I.φ v (algebraMap X.B.I.F X.B.I.E a)) = v.embedding a
-        rw [X.B.I.φ_over, emb_real] }
-  have hne : φA ≠ ψA := by
-    intro h
-    apply phi_notReal X v
-    intro e
-    have := congrArg (fun f : X.B.I.E →ₐ[X.B.I.F] ℂ => f e) h
-    exact this.symm
-  have hcard : Fintype.card (X.B.I.E →ₐ[X.B.I.F] ℂ) = 2 := by
-    rw [AlgHom.card X.B.I.F X.B.I.E ℂ, X.B.I.cm.deg2]
-  have huniv : (Finset.univ : Finset (X.B.I.E →ₐ[X.B.I.F] ℂ)) = {φA, ψA} := by
-    symm
-    apply Finset.eq_of_subset_of_card_le (Finset.subset_univ _)
-    rw [Finset.card_univ, hcard, Finset.card_pair hne]
-  have h := trace_eq_sum_embeddings (K := X.B.I.F) (L := X.B.I.E) ℂ (x := e)
-  rw [huniv, Finset.sum_pair hne] at h
-  exact h
+  apply PI.AprimeInfW.MuB.emb_trace <;> assumption
 
 theorem evInf_conj (v : InfinitePlace X.B.I.F) (a : Ainf X.B.I.F) :
     conj (PI.AprimeInfU.evInf X v a) = PI.AprimeInfU.evInf X v a := by
@@ -123,15 +101,7 @@ theorem trace_one_tmul (e : X.B.I.E) :
 theorem evInf_trace (v : InfinitePlace X.B.I.F) (z : Ainf X.B.I.F ⊗[X.B.I.F] X.B.I.E) :
     PI.AprimeInfU.evInf X v (Algebra.trace (Ainf X.B.I.F) (Ainf X.B.I.F ⊗[X.B.I.F] X.B.I.E) z) =
       PI.AprimeInfU.thetaInf X v z + conj (PI.AprimeInfU.thetaInf X v z) := by
-  induction z using TensorProduct.induction_on with
-  | zero => simp
-  | tmul a e =>
-    have h1 : a ⊗ₜ[X.B.I.F] e = a • ((1 : Ainf X.B.I.F) ⊗ₜ[X.B.I.F] e) := by
-      rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]
-    rw [h1, map_smul, trace_one_tmul, smul_eq_mul, map_mul, evInf_alg, emb_trace, ← h1, thetaInf_tmul, map_mul,
-      evInf_conj]
-    ring
-  | add x y hx hy => rw [map_add (f := _), map_add (f := _), hx, hy, map_add (f := _), map_add (f := _)]; ring
+  apply PI.AprimeInfW.MuB.evInf_trace <;> assumption
 
 theorem theta_sigR (v : InfinitePlace X.B.I.F) (t : Ainf X.B.I.F ⊗[X.B.I.F] X.B.I.E) :
     PI.AprimeInfU.thetaInf X v (sigR (Ainf X.B.I.F) X.B.I.cm.sig t) = conj (PI.AprimeInfU.thetaInf X v t) := by

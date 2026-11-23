@@ -1,5 +1,6 @@
 module
 
+import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.MeasurePreservingPiProd
 public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.JacobianCoordinates
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -87,22 +88,7 @@ theorem inner_dc {n : ℕ} {ε : Fin n → Bool} (μS μS' : Measure (Formalism.
   exact lintegral_mul_right_of_map μS s₁ h₁ (fun x => ∫⁻ s', φ (x * g * s'⁻¹) ∂μS')
 
 theorem measurableSet_goodLoc (r : ℕ) (T T' : ℝ) : MeasurableSet (GoodLoc (r := r) T T') := by
-  have hD : ∀ l, Continuous fun c : Fin (r + 1) → ℂ => Dl (Matrix.diagonal c) l := by
-    intro l
-    by_cases h : l ≤ r + 1
-    · simp only [Dl, dif_pos h]
-      exact (continuous_id.matrix_diagonal.matrix_submatrix _ _).matrix_det
-    · simp only [Dl, dif_neg h]
-      exact continuous_const
-  have hG : Continuous fun c : Fin (r + 1) → ℂ => Gv T T' (Matrix.diagonal c) := by
-    simp only [Gv]
-    exact ((hD (r + 1)).norm.pow 2).sub (continuous_const.mul ((hD r).norm.pow 2))
-  have h0 : MeasurableSet {c : Fin (r + 1) → ℂ | ∀ l, c l ≠ 0} := by
-    rw [Set.ofPred_forall]
-    exact MeasurableSet.iInter fun l => (measurable_pi_apply l) (measurableSet_singleton 0).compl
-  unfold GoodLoc
-  rw [Set.ofPred_and]
-  exact h0.inter (measurableSet_lt measurable_const hG.measurable)
+  apply Formalism.L2.SG.RealObj.InfCut.ProductExactness.measurableSet_goodLoc <;> assumption
 
 end JL
 

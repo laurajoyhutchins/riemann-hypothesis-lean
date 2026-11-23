@@ -1,5 +1,6 @@
 module
 
+import Formalism.QuotientMetricDivisors.HermitianTwistDivisors.ImageLcv
 public import Formalism.LocalToGlobal.GlobalTheory.GL6.PBwDecomp
 public import Formalism.LocalToGlobal.GlobalTheory.GL6.LatticeInclusionOfSubIntegral
 public import Formalism.LocalRingCardinality.Lemmas
@@ -61,21 +62,7 @@ theorem length_quotient_map_equiv {O M : Type*} [CommRing O] [AddCommGroup M] [M
     (A B : Submodule O M) :
     Module.length O (A.map (e : M →ₗ[O] M) ⧸ (B.map (e : M →ₗ[O] M)).comap (A.map (e : M →ₗ[O] M)).subtype) =
       Module.length O (A ⧸ B.comap A.subtype) := by
-  refine (Submodule.Quotient.equiv (B.comap A.subtype)
-    ((B.map (e : M →ₗ[O] M)).comap (A.map (e : M →ₗ[O] M)).subtype) (e.submoduleMap A) ?_).length_eq.symm
-  ext ⟨y, hy⟩
-  rw [Submodule.mem_map, Submodule.mem_comap, Submodule.subtype_apply]
-  constructor
-  · rintro ⟨⟨x, hxA⟩, hxB, hxy⟩
-    rw [Submodule.mem_comap, Submodule.subtype_apply] at hxB
-    have hx : e x = y := congrArg Subtype.val hxy
-    exact Submodule.mem_map.2 ⟨x, hxB, hx⟩
-  · intro hyB
-    obtain ⟨b, hbB, rfl⟩ := Submodule.mem_map.1 hyB
-    obtain ⟨a, haA, hab⟩ := Submodule.mem_map.1 hy
-    have hab' : a = b := e.injective hab
-    subst hab'
-    exact ⟨⟨a, haA⟩, hbB, rfl⟩
+  apply Formalism.DivisionValues.imageLcv_len_map <;> assumption
 
 theorem length_quotient_map_of_inverse {O M : Type*} [CommRing O] [AddCommGroup M] [Module O M] (f g : M →ₗ[O] M)
     (h1 : ∀ x, f (g x) = x) (h2 : ∀ x, g (f x) = x) (A B : Submodule O M) :

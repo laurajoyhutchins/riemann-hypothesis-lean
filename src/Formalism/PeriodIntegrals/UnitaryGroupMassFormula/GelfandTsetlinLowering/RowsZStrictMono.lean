@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinBranching.RowActDiagMonomial
 public import Formalism.PeriodIntegrals.GTDefs
 public import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.GelfandTsetlinLowering.MultisetProdNormLeOne
@@ -60,28 +61,7 @@ theorem embGL_apply {n N : ℕ} (h : n + 1 = N) (g : GL (Fin n) ℂ) (a b : Fin 
     ((embGL ℂ n N h g : GL (Fin N) ℂ) : Matrix (Fin N) (Fin N) ℂ) a b =
       if ha : a.1 < n then (if hb : b.1 < n then (g : Matrix (Fin n) (Fin n) ℂ) ⟨a.1, ha⟩ ⟨b.1, hb⟩ else 0)
       else (if b.1 < n then 0 else 1) := by
-  unfold embGL blkHom
-  simp [Matrix.reindexAlgEquiv_apply, Matrix.reindex_apply, Matrix.submatrix_apply]
-  have hl : ∀ (x : Fin N) (hx : x.1 < n),
-      finSumFinEquiv.symm (Fin.cast h.symm x) = (Sum.inl ⟨x.1, hx⟩ : Fin n ⊕ Fin 1) := by
-    intro x hx
-    have hc : Fin.cast h.symm x = Fin.castAdd 1 ⟨x.1, hx⟩ := Fin.ext rfl
-    rw [hc, finSumFinEquiv_symm_apply_castAdd]
-  have hr : ∀ (x : Fin N), ¬ x.1 < n →
-      finSumFinEquiv.symm (Fin.cast h.symm x) = (Sum.inr 0 : Fin n ⊕ Fin 1) := by
-    intro x hx
-    have hxN := x.isLt
-    have hc : Fin.cast h.symm x = Fin.natAdd n (0 : Fin 1) := Fin.ext (by simp; omega)
-    rw [hc, finSumFinEquiv_symm_apply_natAdd]
-  by_cases ha : a.1 < n <;> by_cases hb : b.1 < n
-  · rw [hl a ha, hl b hb]
-    simp [ha, hb]
-  · rw [hl a ha, hr b hb]
-    simp [ha, hb]
-  · rw [hr a ha, hl b hb]
-    simp [ha, hb]
-  · rw [hr a ha, hr b hb]
-    simp [ha, hb]
+  apply PI.WGB.embGL_apply_B <;> assumption
 
 theorem rowAct_initMinor {N s : ℕ} (G : Matrix (Fin N) (Fin N) ℂ) (I : Fin s → Fin N) (hI : StrictMono I)
     (hs : s ≤ N) (hG : ∀ a b : Fin N, a < b → G b a = 0)

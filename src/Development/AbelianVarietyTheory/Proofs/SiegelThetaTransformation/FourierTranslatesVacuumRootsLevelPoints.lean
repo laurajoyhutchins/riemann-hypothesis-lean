@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsClassicalLevelDataCoverSelfDual
 public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsBaseClassLevelAdapted
 public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeSelfDualSemicharacterIndex
 public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.TensorLatticeVacuaExistUnique
@@ -521,22 +522,7 @@ namespace GlobalTheory.Dict.Poisson
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] {H : Host E} (l : Geo.Tor.Level H)
 
 theorem conjI_Mfr : conjI (Mfr l) = l.Mb := by
-  unfold conjI Mfr
-  have hset : {a : 𝓞 E | ∃ b ∈ l.Mb.map (H.bar : 𝓞 E →+* 𝓞 E), ((a : 𝓞 E) : E) = cc ((b : 𝓞 E) : E)} =
-      (l.Mb : Set (𝓞 E)) := by
-    ext a
-    simp only [Set.mem_setOf_eq, SetLike.mem_coe]
-    constructor
-    · rintro ⟨b, hb, hab⟩
-      obtain ⟨x, hx, rfl⟩ := (Ideal.mem_map_iff_of_surjective _ H.bar.surjective).1 hb
-      have hax : a = x := by
-        apply RingOfIntegers.ext
-        rw [hab, H.bar_eq, cc, IsCMField.complexConj_apply_apply]
-      rwa [hax]
-    · intro ha
-      refine ⟨H.bar a, Ideal.mem_map_of_mem _ ha, ?_⟩
-      rw [H.bar_eq, cc, IsCMField.complexConj_apply_apply]
-  rw [hset, Ideal.span_eq]
+  apply GlobalTheory.LevelTied.conjI_Mfr <;> assumption
 
 theorem M_mem : (l.M : 𝓞 E) ∈ Mfr l ∧ (l.M : 𝓞 E) ∈ l.Mb := by
   have h : (l.M : 𝓞 E) ∈ l.Mb * Mfr l := by

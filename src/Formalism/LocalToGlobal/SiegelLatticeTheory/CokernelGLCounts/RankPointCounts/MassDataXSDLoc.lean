@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ValuationLocalVolumes.HRSmulERight
 public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.LocVol
 public import Formalism.PeriodIntegrals.SelfDualLoc
 public import Formalism.PeriodIntegrals.OrbitalBoundsConclusion.SelfDualLoc
@@ -105,27 +106,7 @@ theorem oev_gen (a : 𝓞 E) : inclR (F := F) (Fv F v) (a : E) ∈ OEv (E := E) 
 
 theorem oev_mul {s t : Fv F v ⊗[F] E} (hs : s ∈ OEv (E := E) v) (ht : t ∈ OEv (E := E) v) :
     s * t ∈ OEv (E := E) v := by
-  unfold OEv at hs ht ⊢
-  rw [SetLike.mem_coe] at hs ht ⊢
-  induction hs using Submodule.span_induction with
-  | mem a ha =>
-    obtain ⟨a, -, rfl⟩ := ha
-    induction ht using Submodule.span_induction with
-    | mem b hb =>
-      obtain ⟨b, -, rfl⟩ := hb
-      exact Submodule.subset_span ⟨a * b, trivial, by simp [map_mul]⟩
-    | zero => simp
-    | add y z _ _ h1 h2 => rw [mul_add]; exact Submodule.add_mem _ h1 h2
-    | smul c y _ h =>
-      show _ * ((c : Fv F v) • y) ∈ _
-      rw [mul_smul_comm]
-      exact Submodule.smul_mem _ c h
-  | zero => simp
-  | add x z _ _ h1 h2 => rw [add_mul]; exact Submodule.add_mem _ h1 h2
-  | smul c x _ h =>
-    show ((c : Fv F v) • x) * t ∈ _
-    rw [smul_mul_assoc]
-    exact Submodule.smul_mem _ c h
+  apply Formalism.L2.SG.Pf.NcVal.OmVSt.OmW.oev_mul <;> assumption
 
 theorem oev_alg (c : v.adicCompletionIntegers F) : ((c : Fv F v) ⊗ₜ[F] (1 : E)) ∈ OEv (E := E) v := by
   have h : ((c : Fv F v) ⊗ₜ[F] (1 : E)) = c • inclR (F := F) (Fv F v) ((1 : 𝓞 E) : E) := by

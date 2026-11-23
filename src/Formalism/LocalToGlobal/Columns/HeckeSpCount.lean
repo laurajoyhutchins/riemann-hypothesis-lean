@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.SatakeParameters.CardKerSubspacesAndHeckePolyOfConvolution
 public import Formalism.LocalToGlobal.Columns.HeckeSp
 public import Formalism.LocalToGlobal.Columns.AlgebraMapMemMaximalIdealPowIff
 import Formalism.HermitianLattices.HermitianLatticesProofs.DualBasic
@@ -78,31 +79,7 @@ theorem hcnt_prod_succ (q : ℤ) (a i : ℕ) :
 theorem gaussBin_mul_prod (q n i : ℕ) :
     (gaussBin q n i : ℤ) * ∏ j ∈ Finset.range i, ((q : ℤ) ^ i - (q : ℤ) ^ j) =
       ∏ j ∈ Finset.range i, ((q : ℤ) ^ n - (q : ℤ) ^ j) := by
-  induction n generalizing i with
-  | zero =>
-    cases i with
-    | zero => rw [show gaussBin q 0 0 = 1 from rfl]; simp
-    | succ i =>
-      rw [show gaussBin q 0 (i + 1) = 0 from rfl, Nat.cast_zero, zero_mul]
-      exact (Finset.prod_eq_zero (Finset.mem_range.2 (Nat.succ_pos i)) (by simp)).symm
-  | succ n ih =>
-    cases i with
-    | zero => rw [show gaussBin q (n + 1) 0 = 1 from rfl]; simp
-    | succ i =>
-      have hG : ((gaussBin q (n + 1) (i + 1) : ℕ) : ℤ) =
-          (gaussBin q n i : ℤ) + (q : ℤ) ^ (i + 1) * (gaussBin q n (i + 1) : ℤ) := by
-        rw [show gaussBin q (n + 1) (i + 1) = gaussBin q n i + q ^ (i + 1) * gaussBin q n (i + 1) from rfl]
-        push_cast; ring
-      have h1 := ih i
-      have h2 := ih (i + 1)
-      have e1 := hcnt_prod_succ (q : ℤ) i i
-      have e2 := hcnt_prod_succ (q : ℤ) n i
-      have e3 : ∏ j ∈ Finset.range (i + 1), ((q : ℤ) ^ n - (q : ℤ) ^ j) =
-          (∏ j ∈ Finset.range i, ((q : ℤ) ^ n - (q : ℤ) ^ j)) * ((q : ℤ) ^ n - (q : ℤ) ^ i) :=
-        Finset.prod_range_succ _ _
-      rw [hG]
-      linear_combination (gaussBin q n i : ℤ) * e1 + ((q : ℤ) ^ (i + 1) - 1) * (q : ℤ) ^ i * h1 +
-        (q : ℤ) ^ (i + 1) * h2 + (q : ℤ) ^ (i + 1) * e3 - e2
+  apply GlobalTheory.KerRangeCount.gaussBin_mul_prod <;> assumption
 
 theorem hcnt_cast_prod (q n i : ℕ) (hq : 1 ≤ q) (hi : i ≤ n) :
     ((∏ j : Fin i, (q ^ n - q ^ (j : ℕ)) : ℕ) : ℤ) = ∏ j ∈ Finset.range i, ((q : ℤ) ^ n - (q : ℤ) ^ j) := by

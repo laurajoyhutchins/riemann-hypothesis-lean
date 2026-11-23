@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.ExistsHighestWeightIrreducibleUnitaryRepU
 public import Formalism.PeriodIntegrals.UpqRep
 public import Formalism.RealPlaceAnalysis.RealPlaceTaylor.CompactCasimirHighestWeight
 public import Formalism.RealPlaceAnalysis.SmoothOnGVIff
@@ -448,29 +449,7 @@ theorem stable [FiniteDimensional ℂ W] (U : ℝ → W →L[ℂ] W) (A : W →�
     (hadd : ∀ s t v, U (s + t) v = U s (U t v))
     (hd : ∀ v, HasDerivAt (fun t => U t v) (A v) 0) (S : Submodule ℂ W) (hS : ∀ v ∈ S, A v ∈ S)
     (v : W) (hv : v ∈ S) (t : ℝ) : U t v ∈ S := by
-  set Q : W →L[ℂ] W := ContinuousLinearMap.id ℂ W - S.starProjection with hQ
-  have hQ0 : ∀ y ∈ S, Q y = 0 := fun y hy => by
-    simp [hQ, (Submodule.starProjection_eq_self_iff (K := S)).2 hy]
-  set B : W →L[ℂ] W := Q.comp (LinearMap.toContinuousLinearMap A) with hB
-  have hq : ∀ t, HasDerivAt (fun s => Q (U s v)) (B (Q (U t v))) t := by
-    intro t
-    have h2 : HasDerivAt (fun s => Q (U s v)) (Q (A (U t v))) t :=
-      (Q.restrictScalars ℝ).hasFDerivAt.comp_hasDerivAt t (deriv_left U A hadd hd v t)
-    convert h2 using 1
-    have h3 : Q (A (S.starProjection (U t v))) = 0 :=
-      hQ0 _ (hS _ (Submodule.starProjection_apply_mem S _))
-    have h4 : Q (U t v) = U t v - S.starProjection (U t v) := by simp [hQ]
-    simp only [hB, ContinuousLinearMap.comp_apply, LinearMap.coe_toContinuousLinearMap']
-    rw [h4, map_sub, map_sub, h3, sub_zero]
-  have hz : (fun s => Q (U s v)) = fun _ => (0 : W) := by
-    refine ODE_solution_unique_univ (v := fun _ y => B y) (s := fun _ => Set.univ) (K := ‖B‖₊) (t₀ := 0)
-      (fun _ => B.lipschitz.lipschitzOnWith) (fun t => ⟨hq t, trivial⟩)
-      (fun t => ⟨by simpa using hasDerivAt_const t (0 : W), trivial⟩) ?_
-    simp only [h0]
-    exact hQ0 v hv
-  have h5 : U t v - S.starProjection (U t v) = 0 := by simpa [hQ] using congrFun hz t
-  rw [sub_eq_zero.1 h5]
-  exact Submodule.starProjection_apply_mem S _
+  apply GlobalTheory.UnitaryHighestWeight.stable <;> assumption
 
 end OneParam
 
@@ -553,33 +532,7 @@ theorem isWeight_of_isWtOn (E : Fin k → Fin k → Module.End ℂ W)
     (hE : ∀ Z : Matrix (Fin k) (Fin k) ℂ, Zᴴ = -Z → ∀ v,
       HasDerivAt (fun t : ℝ => π (NormedSpace.exp ((t : ℂ) • Z)) v) (∑ a, ∑ b, Z a b • E a b v) 0)
     (μ : Fin k → ℝ) (v : W) (hv : IsWtOn (Kset (allPos k)) π μ v) : Formalism.REAL.IsWeight E μ v := by
-  intro a
-  set θ : Fin k → ℝ := Pi.single a 1 with hθ
-  have h1 := hE _ (diag_skew θ) v
-  rw [sum_diag] at h1
-  have h2 : (fun t : ℝ => π (NormedSpace.exp ((t : ℂ) • Matrix.diagonal fun a => (θ a : ℂ) * Complex.I)) v) =
-      fun t : ℝ => Complex.exp ((μ a * Complex.I) * t) • v := by
-    funext t
-    have hm := exp_mem (diag_skew θ) t
-    rw [exp_diag] at hm ⊢
-    rw [hv (fun b => t * θ b) ((mem_K_iff _).2 hm)]
-    congr 2
-    simp [hθ, Pi.single_apply]
-    ring
-  have h3 : HasDerivAt (fun t : ℝ => Complex.exp ((μ a * Complex.I) * t) • v) ((μ a * Complex.I) • v) 0 := by
-    have h4 : HasDerivAt (fun t : ℝ => (μ a * Complex.I) * (t : ℂ)) (μ a * Complex.I) 0 := by
-      simpa using (Complex.ofRealCLM.hasDerivAt (x := (0 : ℝ))).const_mul (μ a * Complex.I)
-    simpa using h4.cexp.smul_const v
-  rw [h2] at h1
-  have h5 := h1.unique h3
-  have h6 : ∑ b, ((θ b : ℂ) * Complex.I) • E b b v = Complex.I • E a a v := by
-    rw [Finset.sum_eq_single a]
-    · simp [hθ]
-    · intro b _ hb
-      simp [hθ, Pi.single_eq_of_ne hb]
-    · simp
-  rw [h6, mul_comm, ← smul_smul] at h5
-  exact smul_right_injective W Complex.I_ne_zero h5
+  apply GlobalTheory.UnitaryHighestWeight.isWeight_of_isWtOn <;> assumption
 
 theorem stable_of_derived [FiniteDimensional ℂ W] (hπ : IsURepOn (UJset (allPos k)) π)
     (E : Fin k → Fin k → Module.End ℂ W)

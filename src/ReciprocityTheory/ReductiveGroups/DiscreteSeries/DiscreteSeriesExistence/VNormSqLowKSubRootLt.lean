@@ -100,9 +100,6 @@ theorem vNormSq_lowK_sub_root_lt {ε : Fin n → Bool} {lam : Fin n → ℝ} (hm
     have fa : ((if a < a then (1:ℝ) else 0) - (if a < a then 1 else 0)) -
         ((if b < a then 1 else 0) - (if a < b then 1 else 0)) = 1 := by
       simp [hab, hba]
-    have fb : ((if a < b then (1:ℝ) else 0) - (if b < a then 1 else 0)) -
-        ((if b < b then 1 else 0) - (if b < b then 1 else 0)) = 1 := by
-      simp [hab, hba]
     linarith
   set w : Fin n → ℝ := Formalism.QuantumDeterminants.lowK ε lam + (2:ℝ) • Formalism.REAL.rhoC ε with hw
   have hwx : ∀ x, w x = lam x + (Formalism.REAL.rhoN ε x + Formalism.REAL.rhoC ε x) := by

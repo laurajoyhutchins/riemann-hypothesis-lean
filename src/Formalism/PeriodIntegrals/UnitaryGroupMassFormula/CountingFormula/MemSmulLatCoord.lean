@@ -65,7 +65,6 @@ def InP (ϖ : 𝒪[F]) (u : F) : Prop := ∃ o : 𝒪[F], u = (ϖ : F) * o
 theorem e_alg (e : E ≃ₐ[F] F × F) (c : F) : e (algebraMap F E c) = (c, c) := by
   first
   | (rw [e.commutes]; rfl)
-  | simp [e.commutes]
 
 theorem pi_smulF (e : E ≃ₐ[F] F × F) {n : ℕ} (π : V ≃+ (Fin n → F) × (Fin n → F))
     (hπ : ∀ (a : E) (x : V), π (a • x) = ((e a).1 • (π x).1, (e a).2 • (π x).2)) (c : F) (x : V) :
@@ -91,8 +90,6 @@ theorem mem_smulLat_iff' (H : Loc.HermSp M V) (Λ : Submodule M.L.O V) (c : E) (
       refine ⟨a • y, Λ.smul_mem a hy, ?_⟩
       first
       | exact smul_comm a c y
-      | exact (smul_comm c a y).symm
-      | (show ((a : E)) • c • y = c • ((a : E) • y); exact smul_comm _ _ _)
   · rintro ⟨y, hy, rfl⟩
     exact Submodule.subset_span ⟨y, hy, rfl⟩
 
@@ -130,16 +127,13 @@ theorem inP_sub_iff [IsDiscreteValuationRing 𝒪[F]] {ϖ : 𝒪[F]} (hϖ : Irre
   have e1 : resF F u = IsLocalRing.residue 𝒪[F] ⟨u, hu⟩ := by
     first
     | simp [resF, hu]
-    | (unfold resF; rw [dite_eq_left hu])
   have e2 : resF F w = IsLocalRing.residue 𝒪[F] ⟨w, hw⟩ := by
     first
     | simp [resF, hw]
-    | (unfold resF; rw [dite_eq_left hw])
   have hs : (u - w : F) = ((⟨u, hu⟩ - ⟨w, hw⟩ : 𝒪[F]) : F) := rfl
   have hm : IsLocalRing.maximalIdeal 𝒪[F] = Ideal.span {ϖ} := by
     first
     | exact hϖ.maximalIdeal_eq
-    | exact (IsDiscreteValuationRing.irreducible_iff_uniformizer _).1 hϖ
   rw [e1, e2, hs, key, ← sub_eq_zero, ← map_sub, IsLocalRing.residue_eq_zero_iff, hm, Ideal.mem_span_singleton]
 
 theorem mk_eq_iff [IsDiscreteValuationRing 𝒪[F]] (e : E ≃ₐ[F] F × F) (H : Loc.HermSp M V)
@@ -182,15 +176,10 @@ theorem resF_bil {n : ℕ} (x y : Fin n → F) (hx : ∀ k, x k ∈ 𝒪[F]) (hy
     intro a ha
     first
     | simp [resF, ha]
-    | (unfold resF; rw [dite_eq_left ha])
   have hsum : (∑ k, ∑ l, x k * (Ph k l : F) * y l) =
       ((∑ k, ∑ l, (⟨x k, hx k⟩ : 𝒪[F]) * Ph k l * (⟨y l, hy l⟩ : 𝒪[F]) : 𝒪[F]) : F) := by
     first
     | (push_cast; rfl)
-    | (simp only [AddSubmonoidClass.coe_finsetSum, MulMemClass.coe_mul]; rfl)
-    | (simp only [AddSubmonoidClass.coe_finsetSum, MulMemClass.coe_mul])
-    | (push_cast; simp)
-    | simp
   have hxk : ∀ k, resF F (x k) = IsLocalRing.residue 𝒪[F] ⟨x k, hx k⟩ := fun k => hc _ (hx k)
   have hyl : ∀ l, resF F (y l) = IsLocalRing.residue 𝒪[F] ⟨y l, hy l⟩ := fun l => hc _ (hy l)
   have hc' : ∀ z : 𝒪[F], resF F (z : F) = IsLocalRing.residue 𝒪[F] z := fun z => hc z z.2

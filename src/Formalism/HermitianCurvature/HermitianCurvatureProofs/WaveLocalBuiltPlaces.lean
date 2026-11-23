@@ -150,7 +150,6 @@ theorem xw_K (hB : KB.IsLeadingFormSetting Cb Cc S p f χ A₀) (v : Fin S.f) (j
     (∏ b, ∑ i, |F7.lagCo (grid b) i|) * (((S.g : ℝ) * lamS S j) / (2 * Real.pi)) ^ K *
       (Real.exp 1 * J.supA S.G S.de S.de' S.T S.T' S.l (decide (j = 0)) (S.pl v)) ^ K ≤ (Xw S (j + 1) v) ^ K := by
   obtain ⟨hg, hk⟩ := glob_pos hB
-  have hl := lenI_pos hB v
   rw [T_eq S hg j]
   have hdec : decide (j + 1 = 1 ∧ 0 + 1 = 1) = decide (j = 0) := by
     by_cases h : j = 0 <;> simp [h]
@@ -162,8 +161,6 @@ theorem xw_K (hB : KB.IsLeadingFormSetting Cb Cc S p f χ A₀) (v : Fin S.f) (j
   set Tf := (2 * Real.pi / S.G.g) ^ (-(S6.nuBlock S.G.r (j + 1) 0)) with hTf
   set A := J.supA S.G S.de S.de' S.T S.T' S.l (decide (j = 0)) (S.pl v) with hA
   have hA0 : 0 ≤ A := supA_nonneg S hg hk v _
-  have hgg : 0 < 2 * Real.pi / S.G.g := by positivity
-  have hTf0 : 0 ≤ Tf := by positivity
   have hprod : (∏ b, ∑ i, |F7.lagCo (grid b) i|) ≤ cg ^ K := by
     calc (∏ b, ∑ i, |F7.lagCo (grid b) i|) ≤ ∏ _b : Fin K, cg :=
           Finset.prod_le_prod₀ (fun b _ => Finset.sum_nonneg fun i _ => abs_nonneg _) fun b _ => hl1 b

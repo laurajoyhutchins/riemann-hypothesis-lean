@@ -1,5 +1,6 @@
 module
 
+import CompanionTheory.RealGroups.FormalDegrees.ArchimedeanFormalDegrees.PositiveConjugation.HsOpOpMul
 public import Development.WeilBound.RepresentationTheoryGL.FormalDegree.FormalDegreeHilbert.HlamStable
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -65,19 +66,6 @@ theorem hsOp_op_mul {ε : Fin n → Bool} {Λ : Fin n → ℝ} (T : KType ε Λ)
   rw [ContinuousLinearMap.mul_apply, KType_norm_op_apply]
 
 theorem hsPol : HsPol := by
-  intro n ε g hg
-  refine ⟨⟨PolarDecomposition.polar_L g, PolarDecomposition.polar_L_inP hg, rfl⟩, fun Λ T μ => ?_⟩
-  obtain ⟨k, hk⟩ := polar_pP hg
-  have hL := PolarDecomposition.polar_L_inP hg
-  have hex : ∃ (k' : KG ε) (X' : Matrix (Fin n) (Fin n) ℂ), inP ε X' ∧ g = toMK k' * NormedSpace.exp X' :=
-    ⟨k, PolarDecomposition.polar_L g, hL, hk⟩
-  unfold PsiM
-  rw [dite_eq_left hex]
-  obtain ⟨hP, hEq⟩ := hex.choose_spec.choose_spec
-  have hEq' : toMK k * NormedSpace.exp (PolarDecomposition.polar_L g) = toMK hex.choose * NormedSpace.exp hex.choose_spec.choose :=
-    hk.symm.trans hEq
-  obtain ⟨-, h2⟩ := polar_unique hL hP hEq'
-  rw [hsOp_op_mul, ← h2]
-  rfl
+  apply _root_.CompanionTheory.RgFd.hsPol <;> assumption
 
 end PositivityTheory.RgFd

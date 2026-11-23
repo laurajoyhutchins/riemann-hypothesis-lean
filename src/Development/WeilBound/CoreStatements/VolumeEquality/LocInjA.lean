@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.PlurisubharmonicCones.EmbEquivSymmApply
 public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsFundSet
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.ContinuousHermitianMatrixFamily
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsometryPreservesHermitianAndAction
@@ -114,25 +115,7 @@ theorem reForm_pos (R : RiemLat E g Λ) (v : Λ) (hv : v ≠ 0) : 0 < reForm R v
 
 theorem periods_li (R : RiemLat E g Λ) {ι : Type} [Fintype ι] (b : Module.Basis ι ℤ Λ) :
     LinearIndependent ℝ fun i => R.P (b i) := by
-  classical
-  rw [Fintype.linearIndependent_iff]
-  intro a ha
-  let Wz : Matrix ι ι ℤ := Matrix.of fun i j => R.form (b i) (b j)
-  let Wr : Matrix ι ι ℝ := Wz.map (Int.castRingHom ℝ)
-  have hWz : Wz.det ≠ 0 := HmCont.gram_det_ne_zero b R.form R.unimod.1
-  have hWr : Wr.det ≠ 0 := by
-    have : Wr.det = ((Wz.det : ℤ) : ℝ) := by
-      have := (Int.castRingHom ℝ).map_det Wz
-      simpa [Wr, RingHom.mapMatrix_apply] using this.symm
-    rw [this]
-    exact_mod_cast hWz
-  have h0 : a ᵥ* Wr = 0 := by
-    funext j
-    have h := congrArg (fun z => (z ⬝ᵥ R.Hm *ᵥ star (R.P (b j))).im) ha
-    simp only [sum_dotProduct, smul_dotProduct, Complex.im_sum, Complex.smul_im, R.im, zero_dotProduct,
-      Complex.zero_im, smul_eq_mul] at h
-    simpa [Wr, Wz, vecMul, dotProduct] using h
-  exact congrFun (Matrix.eq_zero_of_vecMul_eq_zero hWr h0)
+  apply LevelTowerAlt.basis_indep <;> assumption
 
 theorem periods_span (R : RiemLat E g Λ) : Submodule.span ℝ (Set.range R.P) = ⊤ := by
   have := R.free

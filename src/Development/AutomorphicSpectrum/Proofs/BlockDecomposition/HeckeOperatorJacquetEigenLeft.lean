@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsCompactKm
 public import Development.WeilBound.CoreStatements.TemperedRepresentationTheory.SquareIntegrableTempered.CentredSegments.IrreducibleUnif
 import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
 public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IsLocallyConstantOrbit
@@ -103,25 +104,7 @@ theorem unif_pow_ne_zero (m : ℕ) : (((Zls.unif k ^ m : 𝒪[k])) : k) ≠ 0 :=
   simpa using this
 
 theorem isOpen_Km (N m : ℕ) : IsOpen (Zls.Km k N m : Set (GL (Fin N) k)) := by
-  set c : k := (((Zls.unif k ^ m : 𝒪[k])) : k) with hc
-  have hc0 : c ≠ 0 := unif_pow_ne_zero m
-  have hU : IsOpen {g : GL (Fin N) k | ∀ i j, ((g : Matrix (Fin N) (Fin N) k) i j -
-      (1 : Matrix (Fin N) (Fin N) k) i j) * c⁻¹ ∈ 𝒪[k]} := by
-    simp only [Set.setOf_forall]
-    refine isOpen_iInter_of_finite fun i => isOpen_iInter_of_finite fun j => ?_
-    have ho : IsOpen (𝒪[k] : Set k) := Valuation.isOpen_integer
-    refine ho.preimage (f := fun g : GL (Fin N) k =>
-      ((g : Matrix (Fin N) (Fin N) k) i j - (1 : Matrix (Fin N) (Fin N) k) i j) * c⁻¹) ?_
-    have := Units.continuous_val (M := Matrix (Fin N) (Fin N) k)
-    fun_prop
-  refine Subgroup.isOpen_of_mem_nhds _ (g := 1) (Filter.mem_of_superset
-    ((hU.inter (GlobalTheory.SplitFlip.isOpen_KO (k := k) (n := Fin N))).mem_nhds ?_) ?_)
-  · refine ⟨fun i j => ?_, one_mem _⟩
-    simp
-  · rintro g ⟨hg, hK⟩
-    have hK' := (GlobalTheory.SplitFlip.mem_KO_iff g).1 hK
-    exact mem_Km_of_entries m g hK'.1 hK'.2 fun i j => ⟨_, hg i j, by
-      rw [mul_assoc, inv_mul_cancel₀ hc0, mul_one]⟩
+  apply GlobalTheory.CompanionTheory.KmTop.isOpen_Km <;> assumption
 
 theorem isCompact_Km (N m : ℕ) : IsCompact (Zls.Km k N m : Set (GL (Fin N) k)) :=
   GlobalTheory.SplitFlip.isCompact_KO.of_isClosed_subset

@@ -291,7 +291,6 @@ theorem bound_step {q : ℝ} {M : ℕ} (hq : 2 ≤ q) (hM : 3 ≤ M) {Dp D' : �
     (hD' : |D' - 1| ≤ 2 / q ^ (M - 1))
     (hDp : |Dp - 1| ≤ 1 / q ^ (M - 1) + 1 / q ^ (2 * M - 1)) :
     |Dp + q ^ 2 / q ^ (2 * M) * D' - 1| ≤ 2 / q ^ (M - 1) := by
-  have hq0 : 0 < q := by linarith
   obtain ⟨k, rfl⟩ : ∃ k, M = k + 3 := ⟨M - 3, by omega⟩
   have e1 : k + 3 - 1 = k + 2 := by omega
   have e2 : 2 * (k + 3) - 1 = 2 * (k + 2) + 1 := by omega
@@ -307,7 +306,6 @@ theorem bound_step {q : ℝ} {M : ℕ} (hq : 2 ≤ q) (hM : 3 ≤ M) {Dp D' : �
     have h1 : q ^ 2 ≤ q ^ (k + 2) := pow_le_pow_right₀ (by linarith) (by omega)
     nlinarith
   generalize q ^ (k + 2) = t at ht4 hD' hDp ⊢
-  have htpos : 0 < t := by linarith
   have hqr : q ^ 2 / (t ^ 2 * q ^ 2) * D' = (1 / t) ^ 2 * D' := by
     field_simp
   have hf1 : 1 / (t ^ 2 * q) = (1 / t) ^ 2 * (1 / q) := by field_simp
@@ -329,7 +327,6 @@ theorem bound_step {q : ℝ} {M : ℕ} (hq : 2 ≤ q) (hM : 3 ≤ M) {Dp D' : �
   have p3 := mul_le_mul_of_nonneg_left hr2 (sq_nonneg u)
   have p4 := mul_le_mul_of_nonneg_left hu4 hu0.le
   have p5 := mul_le_mul_of_nonneg_left hu4 (sq_nonneg u)
-  have p6 := mul_nonneg (sq_nonneg u) hr0.le
   constructor <;> nlinarith
 
 theorem local_quadratic_density_bound_at_level {lam : Measure (Fv F v)} (hstd : IsStdV v lam) (h2 : Valued.v (2 : Fv F v) = 1)

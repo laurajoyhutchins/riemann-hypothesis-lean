@@ -217,7 +217,6 @@ theorem normId_gen {z : Fin (2 * r + k + 1) → ℂ} {c : ℂ} {π : Mx k r → 
       push_cast
       ring
     rw [e3, Complex.ofReal_im, Complex.im_ofReal_mul, Complex.star_def, Complex.conj_im] at h1
-    have hu' : 0 < ‖u‖ := norm_pos_iff.mpr hu
     have hne : ‖u‖ ^ 2 / d ≠ 0 := by positivity
     have h2 : ‖u‖ ^ 2 / d * (⟪ξ, be z c π μW μN σ v v ξ⟫_ℂ).im = 0 := by linarith
     rcases mul_eq_zero.mp h2 with h | h

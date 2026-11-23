@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LocalSystemQuotients.QuoZeroSub
 public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.LocalSystemQuotients.FlatL
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -201,32 +202,7 @@ end Conn
 
 theorem mapH_bij {K L : Cx.{1} W} (φ : Cx.Hom K L (RingHom.id W)) (h : ∀ i, Function.Bijective (φ.f i))
     (j : ℕ) : Function.Bijective (φ.mapH j) := by
-  constructor
-  · refine (injective_iff_map_eq_zero _).2 fun x hx => ?_
-    obtain ⟨z, rfl⟩ := Submodule.Quotient.mk_surjective _ x
-    have hb : φ.f j z.1 ∈ L.B j := mem_B_of_mk (φ.mapZ j z) hx
-    refine mk_of_mem_B z ?_
-    cases j with
-    | zero =>
-      have e : φ.f 0 z.1 = 0 := hb
-      have e' : z.1 = 0 := (h 0).1 (by rw [e, map_zero])
-      rw [e']
-      exact Submodule.zero_mem _
-    | succ j =>
-      obtain ⟨y, hy⟩ := hb
-      obtain ⟨y, rfl⟩ := (h j).2 y
-      exact ⟨y, (h (j + 1)).1 (by rw [← φ.comm, hy])⟩
-  · intro x
-    obtain ⟨z, rfl⟩ := Submodule.Quotient.mk_surjective _ x
-    obtain ⟨y, hy⟩ := (h j).2 z.1
-    have hd : K.d j y = 0 := by
-      apply (h (j + 1)).1
-      have hz : L.d j z.1 = 0 := z.2
-      rw [map_zero, ← φ.comm, hy, hz]
-    refine ⟨Submodule.Quotient.mk ⟨y, hd⟩, ?_⟩
-    change Submodule.Quotient.mk (φ.mapZ j ⟨y, hd⟩) = Submodule.Quotient.mk z
-    congr 1
-    exact Subtype.ext hy
+  apply CrystallineSemistableComparison.Pb.LsQ.mapH_bij <;> assumption
 
 theorem mem_lpow {l : ℕ} {M : Type 1} [AddCommGroup M] [Module W M] {n : ℕ} {x : M} :
     x ∈ lpow (W := W) l M n ↔ ∃ y : M, ((l : W) ^ n) • y = x := by

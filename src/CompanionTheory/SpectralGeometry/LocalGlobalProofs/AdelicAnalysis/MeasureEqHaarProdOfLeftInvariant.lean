@@ -126,8 +126,6 @@ theorem measure_eq_haar_prod_of_left_invariant :
   haveI hmfc : IsFiniteMeasureOnCompacts m := ⟨fun C hC => hmC C hC⟩
   refine ⟨m, inferInstance, ?_⟩
   symm
-  let CQ : Set (Set Q) := {U | MeasurableSet U ∧ ∃ L, IsCompact L ∧ U ⊆ L}
-  let CZ : Set (Set Z) := {A | MeasurableSet A ∧ ∃ L, IsCompact L ∧ A ⊆ L}
   have genAux : ∀ (X : Type) [TopologicalSpace X] [SigmaCompactSpace X] [T2Space X]
       [MeasurableSpace X] [BorelSpace X],
       MeasurableSpace.generateFrom {U : Set X | MeasurableSet U ∧ ∃ L, IsCompact L ∧ U ⊆ L} =

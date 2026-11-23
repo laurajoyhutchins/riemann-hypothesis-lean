@@ -159,8 +159,6 @@ theorem final_arith (P : M.Par) (ρ : M.Ty P) (A ζ : ℂ) (hζ : P.TT < Complex
       (m : ℂ) + ((-rhoSum P ρ + P.TT * (uSum P - 2 * rhoSum P ρ) / (Complex.normSq ζ - P.TT) : ℝ) : ℂ)) :
     (ζ * (modA P ρ ζ - A)).re = ((N - m : ℤ) : ℝ) / 2 := by
   have hpos : 0 < Complex.normSq ζ - P.TT := sub_pos.mpr hζ
-  have hne : ((Complex.normSq ζ : ℂ) - (P.TT : ℂ)) ≠ 0 := by
-    rw [← Complex.ofReal_sub]; exact_mod_cast hpos.ne'
   have haC : M.aC P ρ = uSum P / 2 - rhoSum P ρ := rfl
   have hre := congrArg Complex.re hA
   have h1 : (ζ * A + star ζ * star A).re = 2 * (ζ * A).re := by

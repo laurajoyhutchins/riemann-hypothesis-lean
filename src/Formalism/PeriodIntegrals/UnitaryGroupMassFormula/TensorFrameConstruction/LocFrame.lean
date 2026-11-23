@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HermitianFrameExistence.Transfer
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TensorFrameConstruction.LocalFramePreservesOrthogonal
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -56,21 +57,7 @@ lemma phi_star (I : Formalism.MainNotions.S.AutInst) (v : InfinitePlace I.F) (a 
 
 lemma hJ_rv (I : Formalism.MainNotions.S.AutInst) (v : InfinitePlace I.F) (x y : Fin I.n → I.E) :
     hJ (I.ε v) (rv I v x) (rv I v y) = I.φ v (Formalism.UG.hform (starRingEnd I.E) I.J x y) := by
-  have hdet : IsUnit (I.P v).det := (Matrix.isUnit_iff_isUnit_det _).1 (I.P_unit v)
-  have hJm : Formalism.REAL.Jm (I.ε v) * (I.P v)⁻¹ = (I.P v)ᴴ * I.J.map (I.φ v) := by
-    rw [← I.P_spec v, Matrix.mul_assoc, Matrix.mul_nonsing_inv _ hdet, Matrix.mul_one]
-  have hPP : ((I.P v)⁻¹)ᴴ * (I.P v)ᴴ = 1 := by
-    rw [← Matrix.conjTranspose_mul, Matrix.mul_nonsing_inv _ hdet, Matrix.conjTranspose_one]
-  set u : Fin I.n → ℂ := fun i => I.φ v (x i)
-  set w : Fin I.n → ℂ := fun i => I.φ v (y i)
-  have key : hJ (I.ε v) (rv I v x) (rv I v y) = star u ⬝ᵥ (I.J.map (I.φ v) *ᵥ w) := by
-    unfold hJ rv
-    rw [Matrix.mulVec_mulVec, hJm, ← Matrix.mulVec_mulVec, Matrix.star_mulVec,
-      ← Matrix.dotProduct_mulVec, Matrix.mulVec_mulVec, hPP, Matrix.one_mulVec]
-  rw [key]
-
-  simp only [u, w, Formalism.UG.hform, dotProduct, Matrix.mulVec, Matrix.map_apply, map_sum, map_mul,
-  Pi.star_apply, Finset.mul_sum, starRingEnd_apply, phi_star, mul_assoc]
+  apply PI.ScPiFrameW.hJ_rv <;> assumption
 
 lemma phi_ite (I : Formalism.MainNotions.S.AutInst) (v : InfinitePlace I.F) {r : ℕ} (a b : Fin r) :
     I.φ v (if a = b then (1 : I.E) else 0) = if a = b then 1 else 0 := by

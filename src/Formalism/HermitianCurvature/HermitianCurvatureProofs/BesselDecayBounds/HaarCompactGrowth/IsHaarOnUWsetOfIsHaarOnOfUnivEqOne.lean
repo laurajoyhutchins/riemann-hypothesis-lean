@@ -112,7 +112,6 @@ theorem haarLie_finite_compact (κ : ℝ≥0∞) (hκ : κ ≠ ⊤) (K : Set (Mt
         rw [Real.norm_eq_abs]; exact le_abs_self _
       exact e1.trans hb0
     have he0 : 0 ≤ Formalism.MainNotions.GrowthW.hsN (NormedSpace.exp X) := Formalism.MainNotions.GrowthW.hsN_nonneg _
-    have hX0 : 0 ≤ Formalism.MainNotions.GrowthW.hsN X := Formalism.MainNotions.GrowthW.hsN_nonneg _
     have hp : Formalism.MainNotions.GrowthW.hsN (NormedSpace.exp X) ^ D ≤ R ^ D := Real.rpow_le_rpow he0 he hD.le
     have hp0 : 0 ≤ Formalism.MainNotions.GrowthW.hsN (NormedSpace.exp X) ^ D := Real.rpow_nonneg he0 D
     have hc1 : C * Formalism.MainNotions.GrowthW.hsN (NormedSpace.exp X) ^ D ≤ |C| * Formalism.MainNotions.GrowthW.hsN (NormedSpace.exp X) ^ D :=

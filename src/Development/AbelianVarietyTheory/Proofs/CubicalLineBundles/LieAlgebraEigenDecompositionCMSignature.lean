@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.CmHostIdempotentTraceEqOne
 public import Development.AbelianVarietyTheory.Definitions.CMLattices.IsDiffOf
 public import Development.AbelianVarietyTheory.Proofs.HermitianTraceForms.IsLocallyConstantRankAtStalkEigenSub
 import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsCoprimeTwoSubRtTwoAddRt
@@ -145,24 +146,7 @@ theorem finrank_eigenSub {K : Type} [Field K] [NumberField K] {P : Out.PolAV (Sp
 variable {E : Type} [Field E] [NumberField E] [IsCMField E] (H : Host E)
 
 theorem bar_rt : H.bar H.rt = -H.rt := by
-  obtain ⟨φ⟩ : Nonempty (E →+* ℂ) := inferInstance
-  have hz : φ (H.rt : E) ^ 2 = -(H.d : ℂ) := by
-    have h := congrArg (fun x : 𝓞 E => φ (x : E)) H.rt_sq
-    simpa using h
-  have hd : (0 : ℝ) < H.d := by exact_mod_cast H.d_prime.pos
-  have hre := congrArg Complex.re hz
-  have him := congrArg Complex.im hz
-  simp only [pow_two, Complex.mul_re, Complex.mul_im, Complex.neg_re, Complex.neg_im, Complex.natCast_re,
-    Complex.natCast_im, neg_zero] at hre him
-  have h0 : (φ (H.rt : E)).re = 0 := by
-    rcases mul_eq_zero.mp (show (φ (H.rt : E)).re * (φ (H.rt : E)).im = 0 by linarith) with h | h
-    · exact h
-    · rw [h] at hre
-      nlinarith [mul_self_nonneg (φ (H.rt : E)).re]
-  apply RingOfIntegers.ext
-  apply φ.injective
-  rw [H.bar_eq, IsCMField.complexEmbedding_complexConj]
-  apply Complex.ext <;> simp [h0]
+  apply GlobalTheory.QuadTrace.bar_rt <;> assumption
 
 theorem card_half {K : Type} [Field K] [NumberField K] {ρ : 𝓞 K} (hs : Splits E K) (hρ : ρ ^ 2 = -(H.d : 𝓞 K)) :
     (∀ τ : 𝓞 E →+* 𝓞 K, ¬ τ H.rt = ρ ↔ τ H.rt = -ρ) ∧

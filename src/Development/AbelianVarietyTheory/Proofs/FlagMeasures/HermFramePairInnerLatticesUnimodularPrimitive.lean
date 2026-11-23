@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermFramePairSplitTermNearReferenceBySkew
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.NormalFormDualOrthogonalLast
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.HermFramePairNormalFormGeometrySummaryStatement
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsLocalizedModuleSubtype
@@ -250,42 +251,7 @@ theorem hermFramePairNormalForm_baseLattice_fg (N : NF H r) : N.P0.FG := by
     (Submodule.fg_iSup _ fun _ => Submodule.fg_iSup _ fun _ => (ipow_fg _ _).map _)
 
 theorem span_hermFramePair_lattice_eq_sup (N : NF H r) : Submodule.span K (N.P0 : Set V) = V0 N.F N.F' ⊔ N.Ist := by
-  apply le_antisymm
-  · rw [Submodule.span_le]
-    refine (show N.P0 ≤ rs (𝓞 K) (V0 N.F N.F' ⊔ N.Ist) from sup_le (sup_le (sup_le (iSup_le fun a => line_le ?_)
-      (iSup_le fun a => iSup_le fun _ => line_le ?_)) (line_le ?_)) (iSup_le fun a => iSup_le fun ha => line_le ?_))
-    · exact Submodule.mem_sup_left (Submodule.mem_sup_left (Submodule.mem_sup_left (e_mem_X _ a)))
-    · exact Submodule.mem_sup_left (Submodule.mem_sup_left (Submodule.mem_sup_right (e_mem_X _ a)))
-    · exact Submodule.mem_sup_left (Submodule.mem_sup_right (Submodule.subset_span (by simp)))
-    · exact Submodule.mem_sup_right (Submodule.subset_span ⟨a, ha, rfl⟩)
-  have he : ∀ a : Fin r, N.F.e a.castSucc ∈ Submodule.span K (N.P0 : Set V) := fun a =>
-    mem_span_of_line (ipow_ne_bot N.𝔡_ne _) (le_sup_of_le_left (le_sup_of_le_left (le_sup_of_le_left
-      (le_iSup (fun a : Fin r => line (N.aa a) (N.F.e a.castSucc)) a))))
-  have hz : N.F.z ∈ Submodule.span K (N.P0 : Set V) :=
-    mem_span_of_line (A := 1) (fun h => one_ne_zero ((Submodule.mem_bot (𝓞 K)).1
-      (h ▸ Submodule.mem_one.2 ⟨1, map_one _⟩ : (1 : K) ∈ (⊥ : Submodule (𝓞 K) K)))) (le_sup_of_le_left le_sup_right)
-  refine sup_le (sup_le (sup_le ?_ ?_) ?_) ?_
-  · refine Submodule.span_le.2 ?_
-    rintro _ ⟨a, -, rfl⟩
-    exact he a
-  · refine Submodule.span_le.2 ?_
-    rintro _ ⟨a, -, rfl⟩
-    by_cases ha : a.val < N.j
-    · exact mem_span_of_line (ipow_ne_bot N.𝔡_ne _) (le_sup_of_le_left (le_sup_of_le_left (le_sup_of_le_right
-        (le_iSup₂_of_le (f := fun (a : Fin r) (_ : a.val < N.j) => line (N.aa a) (N.F'.e a.castSucc)) a ha le_rfl))))
-    · show N.F'.e a.castSucc ∈ _
-      rw [N.same _ (by simpa using ha)]
-      exact Submodule.smul_mem _ _ (he a)
-  · refine Submodule.span_le.2 ?_
-    rintro _ (rfl | rfl)
-    · exact hz
-    · show N.F'.e (Fin.last r) ∈ _
-      rw [N.same _ (by simpa using N.j_le)]
-      exact Submodule.smul_mem _ _ hz
-  · refine Submodule.span_le.2 ?_
-    rintro _ ⟨a, ha, rfl⟩
-    exact mem_span_of_line (ipow_ne_bot N.𝔡_ne _) (le_sup_of_le_right
-      (le_iSup₂_of_le (f := fun (a : Fin r) (_ : N.j ≤ a.val) => line (ipow N.𝔡 ((r : ℤ) - a.val)) (N.ist a)) a ha le_rfl))
+  apply GlobalTheory.DegCnt.DualPos.span_hermFramePair_lattice_eq_sup <;> assumption
 
 
 omit [StarRing K] in

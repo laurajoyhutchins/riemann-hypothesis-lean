@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.DegreeOnePrimeReductionSplitPlaceDictionary
 public import CompanionTheory.SpectralGeometry.CountingDefinitions.AdelicEulerProducts.IsEulerProd
 public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.CompletionIsLocalRingStatement
 public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.FiniteFieldQuadraticFormPointCountStatement
@@ -105,33 +106,7 @@ local notation "𝓴" => IsLocalRing.ResidueField 𝒪
 local notation "res" => IsLocalRing.residue 𝒪
 
 theorem res_eq_zero_iff (a : 𝒪) : res a = 0 ↔ Valued.v (a : Fv F v) < 1 := by
-  rw [IsLocalRing.residue_eq_zero_iff, IsLocalRing.mem_maximalIdeal, mem_nonunits_iff]
-  constructor
-  · intro h
-    have h1 : Valued.v (a : Fv F v) ≤ 1 := a.2
-    refine lt_of_le_of_ne h1 fun h2 => h ?_
-    have ha0 : (a : Fv F v) ≠ 0 := by
-      intro h0
-      rw [h0, map_zero] at h2
-      exact zero_ne_one h2
-    have hinv : (a : Fv F v)⁻¹ ∈ v.adicCompletionIntegers F := by
-      show Valued.v ((a : Fv F v)⁻¹) ≤ 1
-      rw [map_inv₀, h2, inv_one]
-    refine IsUnit.of_mul_eq_one (⟨(a : Fv F v)⁻¹, hinv⟩ : v.adicCompletionIntegers F) ?_
-    apply Subtype.ext
-    show (a : Fv F v) * (a : Fv F v)⁻¹ = 1
-    exact mul_inv_cancel₀ ha0
-  · intro h hu
-    obtain ⟨b, hb⟩ := hu.exists_right_inv
-    have h3 : Valued.v ((a : Fv F v) * (b : Fv F v)) = 1 := by
-      have : (a : Fv F v) * (b : Fv F v) = 1 := congrArg Subtype.val hb
-      rw [this, map_one]
-    rw [map_mul] at h3
-    have hb1 : Valued.v (b : Fv F v) ≤ 1 := b.2
-    have h4 : Valued.v (a : Fv F v) * Valued.v (b : Fv F v) < 1 := by
-      calc _ ≤ Valued.v (a : Fv F v) * 1 := by gcongr
-        _ < 1 := by simpa using h
-    exact absurd h3 (ne_of_lt h4)
+  apply GlobalTheory.PlaceRed.mem_max_iff <;> assumption
 
 theorem res_eq_iff (a b : 𝒪) : res a = res b ↔ Valued.v ((a : Fv F v) - b) < 1 := by
   rw [← sub_eq_zero, ← map_sub, res_eq_zero_iff]

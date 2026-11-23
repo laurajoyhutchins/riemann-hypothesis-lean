@@ -170,8 +170,6 @@ theorem GK.add {κ κ' : WVO (IS I0) → C} (h : GK Y p κ) (h' : GK Y p κ') : 
   have h2 : GImg V (AA Y p) (VP.addAt Y (EK Y p κ) (EK Y p κ')) := by
     first
       | exact GImg.add (Y := Y) (cc_AA Y p) h h'
-      | exact GImg.add (Y := Y) h h'
-      | exact GImg.add (cc_AA Y p) h h'
   rw [EK_add] at h2
   exact h2
 
@@ -181,8 +179,6 @@ theorem GK.zero : GK Y p 0 := by
   first
     | exact GImg.zero (V := V) (A := AA Y p)
     | exact GImg.zero (V := V) (A := AA Y p) (cc_AA Y p)
-    | exact GImg.zero (V := V) (A := AA Y p) (Y := Y)
-    | exact GImg.zero (V := V) (A := AA Y p) (Y := Y) (cc_AA Y p)
 
 theorem GK.sum {ι : Type} (s : Finset ι) {κ : ι → WVO (IS I0) → C} (h : ∀ i ∈ s, GK Y p (κ i)) :
     GK Y p (∑ i ∈ s, κ i) := by
@@ -194,8 +190,6 @@ theorem GK.map {φ : Pt C 1 dd} (hφ : IsEndo Y φ) {lam : WVO (IS I0) → C}
   have h2 : GImg V (AA Y p) (VP.mapAt φ (EK Y p κ)) := by
     first
       | exact GImg.map (cc_AA Y p) hφ h
-      | exact GImg.map hφ (cc_AA Y p) h
-      | exact GImg.map hφ h
   rw [EK_map Y p hφ hl] at h2
   exact h2
 
@@ -203,8 +197,6 @@ theorem GK.act (x : O) {κ : WVO (IS I0) → C} (h : GK Y p κ) : GK Y p (lamAct
   have h2 : GImg V (AA Y p) (VP.actAt Y x (EK Y p κ)) := by
     first
       | exact GImg.act (Y := Y) (cc_AA Y p) x h
-      | exact GImg.act (Y := Y) x (cc_AA Y p) h
-      | exact GImg.act (Y := Y) x h
   rw [EK_act] at h2
   exact h2
 

@@ -167,7 +167,6 @@ theorem fibre_block_stages : ∀ (F E : Type) [Field F] [NumberField F] [Field E
       m fib hm₀ hfib _ hTB
   have hBa := hBorel (n + 1) (M + 1)
   have hBb := hBorel n M
-  have hBc := hBorel 1 (M + 1)
   have hact : Measurable fun p : HA R σ (blockOne (algebraMap F E t) J) × (Fin (n + 1) → Fin (M + 1) → R ⊗[F] E) =>
       actW R σ _ p.1 p.2 := (gAct (n + 1)).1.measurable
   have hactu : ∀ u : HA R σ J, Measurable (actW R σ J u : (Fin n → Fin M → R ⊗[F] E) → Fin n → Fin M → R ⊗[F] E) :=

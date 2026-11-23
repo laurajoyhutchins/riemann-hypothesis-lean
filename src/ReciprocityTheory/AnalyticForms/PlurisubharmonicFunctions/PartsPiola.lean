@@ -195,9 +195,6 @@ theorem dz_add (hf : DifferentiableAt ℝ f z) (hg : DifferentiableAt ℝ g z) :
   have e : fderiv ℝ (fun y => f y + g y) z = fderiv ℝ f z + fderiv ℝ g z := by
     first
     | (exact (hf.hasFDerivAt.add hg.hasFDerivAt).fderiv)
-    | (exact (hf.hasFDerivAt.fun_add hg.hasFDerivAt).fderiv)
-    | (exact fderiv_add hf hg)
-    | (exact fderiv_fun_add hf hg)
   unfold dz
   rw [e, ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply]
   ring
@@ -207,9 +204,6 @@ theorem dz_mul (hf : DifferentiableAt ℝ f z) (hg : DifferentiableAt ℝ g z) :
   have e : fderiv ℝ (fun y => f y * g y) z = f z • fderiv ℝ g z + g z • fderiv ℝ f z := by
     first
     | (exact (hf.hasFDerivAt.mul hg.hasFDerivAt).fderiv)
-    | (exact (hf.hasFDerivAt.fun_mul hg.hasFDerivAt).fderiv)
-    | (exact fderiv_mul hf hg)
-    | (exact fderiv_fun_mul hf hg)
   unfold dz
   rw [e]
   simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, smul_eq_mul]
@@ -241,7 +235,6 @@ theorem differentiableAt_dzb (hf : ContDiffAt ℝ 2 f z) : DifferentiableAt ℝ 
     first
       | (exact h4.div_const (2 : ℂ))
       | (simpa only [div_eq_mul_inv] using h4.mul_const (2⁻¹ : ℂ))
-      | (fun_prop)
   exact h5
 
 end DzCalc
@@ -368,8 +361,6 @@ private lemma prod_cons_eq_sum_mul_prod_cons_single {n : ℕ} (A : Matrix (Fin (
     | (rw [Finset.sum_eq_single (σ i0) (fun x _ hx => by simp [hx]) (by simp)]
        rw [Finset.sum_eq_single i0 (fun x _ hx => by simp [hx]) (by simp)]
        simp)
-    | (simp [ite_and])
-    | (simp [ite_and, Finset.sum_ite_eq', Finset.sum_ite_eq])
 
 theorem mixedDisc_cons_eq_sum {n : ℕ} (A : Matrix (Fin (n + 1)) (Fin (n + 1)) ℂ)
     (B : Fin n → Matrix (Fin (n + 1)) (Fin (n + 1)) ℂ) :
@@ -439,9 +430,6 @@ theorem monge_ampere_density_cofactor : MaDensCofStatement := by
               (fderiv ℝ (fderiv ℝ v) z)))) z := by
       first
         | (exact ((hw _).add ((hw _).const_mul Complex.I)).const_mul (1 / 2 : ℂ))
-        | (exact ((hw _).fun_add ((hw _).const_mul Complex.I)).const_mul (1 / 2 : ℂ))
-        | (exact ((hw _).add ((hw _).fun_const_mul Complex.I)).fun_const_mul (1 / 2 : ℂ))
-        | (exact ((hw _).fun_add ((hw _).fun_const_mul Complex.I)).fun_const_mul (1 / 2 : ℂ))
     have heq : dzb k (cplx v) =ᶠ[𝓝 z] fun y => (1 / 2 : ℂ) *
         (((fderiv ℝ v y (Pi.single k 1) : ℝ) : ℂ) +
           Complex.I * ((fderiv ℝ v y (Complex.I • Pi.single k 1) : ℝ) : ℂ)) := by

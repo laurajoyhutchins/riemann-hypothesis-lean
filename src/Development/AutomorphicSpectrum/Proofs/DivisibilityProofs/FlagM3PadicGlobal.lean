@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.ModelDescentIntegralClosure
 public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.LocalAtPlaces
 public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.CycNumIntAndComb
 public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.FinitePlacesModelFamilyStatement
@@ -129,21 +130,7 @@ variable {Ψ : Type} [Fintype Ψ] [DecidableEq Ψ] {N : ℕ}
 
 theorem bracket_isHomogeneous (j : ℕ) (φ : Equiv.Perm (Ψ ⊕ Ψ)) (p k : ℕ) (τ : Ψ) :
     (bracket (N := N) j φ p k τ).IsHomogeneous (k - 1) := by
-  unfold bracket
-  have hl : ∀ τ' : Ψ ⊕ Ψ, (liePs (N := N) j (k - 1) τ').IsHomogeneous (k - 1) := by
-    intro τ'
-    cases τ' with
-    | inl t =>
-      refine IsHomogeneous.sum _ _ _ fun i _ => ?_
-      simpa using (isHomogeneous_X ℝ (t, i)).pow (k - 1)
-    | inr t =>
-      refine IsHomogeneous.sum _ _ _ fun i _ => ?_
-      have := ((isHomogeneous_C (Ψ × Fin N) (-1 : ℝ)).mul (isHomogeneous_X ℝ (t, i))).pow (k - 1)
-      simpa using this
-  have hs : (∑ τ', C (co φ p k (Sum.inl τ) τ') * liePs (N := N) j (k - 1) τ').IsHomogeneous (k - 1) := by
-    refine IsHomogeneous.sum _ _ _ fun τ' _ => ?_
-    simpa using (isHomogeneous_C (Ψ × Fin N) _).mul (hl τ')
-  simpa using (isHomogeneous_C (Ψ × Fin N) (k : ℝ)).mul hs
+  apply GlobalTheory.CompanionTheory.Ar.Num.ModelDescentAlt.isHomogeneous_bracket <;> assumption
 
 end Numbers
 

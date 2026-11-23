@@ -137,7 +137,6 @@ theorem ld_dil_one {H : ℝ → Eu l →L[ℝ] Eu l} {H' : Eu l →L[ℝ] Eu l} 
       have := (H t - H t₀).le_opNorm x
       rw [ContinuousLinearMap.sub_apply] at this
       simpa only [h0, ContinuousLinearMap.one_apply] using this
-    have hw : 0 < 1 + ‖x‖ := by positivity
     have hm := (convex_closedBall x (‖x‖ / 2)).norm_image_sub_le_of_norm_fderiv_le (𝕜 := ℝ) (f := f)
       (C := 2 ^ (N + 1) * C / (1 + ‖x‖) ^ (N + 1)) (x := x) (y := H t x) (fun y _ => f.differentiableAt) (fun y hy => by
         rw [le_div_iff₀ (by positivity)]

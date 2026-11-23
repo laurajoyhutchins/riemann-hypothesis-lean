@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerPairs.IsUnitDetOfMemGV
 public import Formalism.HermitianCurvature.OperatorsCommuteTranslations
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormFormOneUnitary.PRowWSColW
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormFormOneUnitary.HermitianOrthogonalProjectionVector
@@ -155,24 +156,7 @@ theorem mul_mem_isotropic_unipotent_set (z' : Fin (2 * r + k + 1) → ℂ) (j1 j
 
 theorem herm_bvec_esI (v : Fin (2 * r + k + 1) → ℂ) (b : Fin r) :
     herm (Hpk k r) v (bvec (esI k r b)) = v (eI k r b) := by
-  have hb := b.isLt
-  have hv : (esI k r b).val = 2 * r + k - b.val := rfl
-  have hrow : ∀ q : Fin (2 * r + k + 1), Hpk k r (esI k r b) q = if q = eI k r b then 1 else 0 := by
-    intro q
-    have e : q = eI k r b ↔ q.val = b.val := by rw [Fin.ext_iff]; simp only [eI]
-    by_cases h1 : q = eI k r b
-    · rw [if_pos h1]; have := e.mp h1
-      unfold Hpk
-      rw [if_neg (by omega), if_pos (by omega)]
-    · rw [if_neg h1]; have := fun h => h1 (e.mpr h)
-      unfold Hpk
-      rw [if_neg (by omega), if_neg (by omega), if_neg (by rintro ⟨-, h2, -⟩; omega)]
-  simp only [herm, bvec, dotProduct, Matrix.mulVec]
-  rw [Finset.sum_eq_single (esI k r b)]
-  · simp only [Pi.star_apply, Pi.single_eq_same, star_one, one_mul, hrow]
-    simp
-  · intro q _ hq; simp [Pi.single_apply, hq]
-  · simp
+  apply PI.StabPairsW.herm_es <;> assumption
 
 end N2
 

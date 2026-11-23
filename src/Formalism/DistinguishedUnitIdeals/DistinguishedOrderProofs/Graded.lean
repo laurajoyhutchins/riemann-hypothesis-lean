@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.InertiaThroughOfPoly
 public import Formalism.DistinguishedUnitIdeals.ExistsConstOfInvariantMod
 public import Mathlib.RingTheory.TensorProduct.Free
 import Mathlib.Algebra.Order.Floor.Extended
@@ -271,22 +272,7 @@ lemma eig_zero (T : Module.End LL W) (N : ℕ) (c : LL) (hT : T ^ N = 1) (hc : c
 
 lemma aeval_mem (T : Module.End LL W) (p : Submodule LL W) (hp : ∀ v ∈ p, T v ∈ p)
     (P : Polynomial LL) {v : W} (hv : v ∈ p) : Polynomial.aeval T P v ∈ p := by
-  have hpow : ∀ n : ℕ, ∀ w ∈ p, (T ^ n) w ∈ p := by
-    intro n
-    induction n with
-    | zero => intro w hw; rw [pow_zero]; exact hw
-    | succ n ih => intro w hw; rw [pow_succ']; exact hp _ (ih w hw)
-  induction P using Polynomial.induction_on' with
-  | add P Q hP hQ => rw [map_add (f := _), LinearMap.add_apply]; exact p.add_mem hP hQ
-  | monomial n a =>
-    rw [Polynomial.aeval_monomial]
-    first
-      | (show a • (T ^ n) v ∈ p
-         exact p.smul_mem a (hpow n v hv))
-      | (rw [Module.End.mul_apply, Module.algebraMap_end_apply]
-         exact p.smul_mem a (hpow n v hv))
-      | (simp only [LinearMap.mul_apply, Module.algebraMap_end_apply]
-         exact p.smul_mem a (hpow n v hv))
+  apply GlobalTheory.PassPoly.aeval_mem_of_stable <;> assumption
 
 lemma aeval_projectionPoly_eq_zero_of_pow_eq (T : Module.End LL W) (u : LLˣ) (ℓ E : ℕ) (JS : Finset ℤ) (i : ℤ)
     (hi : i ∈ JS) (h0 : i ≠ 0)

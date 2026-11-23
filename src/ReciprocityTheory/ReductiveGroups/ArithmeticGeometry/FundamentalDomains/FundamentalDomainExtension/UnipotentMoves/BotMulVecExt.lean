@@ -90,15 +90,11 @@ lemma en_add_le {n : ℕ} (u v : Fin n → ℂ) : en (u + v) ≤ en u + en v := 
   unfold en
   first
     | (rw [WithLp.toLp_add]; exact norm_add_le _ _)
-    | exact norm_add_le _ _
-    | simpa using norm_add_le (WithLp.toLp 2 u : EuclideanSpace ℂ (Fin n)) (WithLp.toLp 2 v)
 
 lemma en_sub_le {n : ℕ} (u v : Fin n → ℂ) : en (u - v) ≤ en u + en v := by
   unfold en
   first
     | (rw [WithLp.toLp_sub]; exact norm_sub_le _ _)
-    | exact norm_sub_le _ _
-    | simpa using norm_sub_le (WithLp.toLp 2 u : EuclideanSpace ℂ (Fin n)) (WithLp.toLp 2 v)
 
 lemma eq_zero_of_en {n : ℕ} (d : Fin n → ℂ) (h : en d = 0) : d = 0 := by
   rw [en_eq_sqrt, Real.sqrt_eq_zero (nsq_nonneg_unipotent_moves d)] at h
@@ -136,8 +132,6 @@ lemma re_conj_mul (w : ℂ) (s : ℝ) : (conj w * (w * (s : ℂ))).re = s * ‖w
     Complex.ofReal_re, Complex.ofReal_im]
   first
     | (rw [Complex.sq_norm, Complex.normSq_apply]; ring)
-    | (rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]; ring)
-    | (simp [Complex.sq_abs, Complex.normSq_apply]; ring)
 
 section Blocks
 
@@ -228,8 +222,6 @@ lemma blkB_low (Z : X.Coord) (τ : X.Ψ) : blkB X (X.lowBlock Z τ) = Matrix.of 
   have hne : X.p0 + (m : ℕ) ≠ (b : ℕ) := by omega
   first
     | simp [blkB, Data.lowBlock, nI, Fin.ext_iff, hne, hb]
-    | (simp only [blkB, Data.lowBlock, Matrix.of_apply, Fin.ext_iff, Fin.coe_castLE, nI]
-       split_ifs <;> first | (simp_all; done) | omega | (congr 1 <;> ext <;> simp))
 
 end Blocks
 
@@ -248,7 +240,6 @@ lemma fin_split (i : Fin r) :
 lemma col_mul (P Q : Matrix (Fin r) (Fin r) ℂ) (j : Fin r) : col (P * Q) j = P *ᵥ col Q j := by
   first
     | rfl
-    | (funext k; simp [col, Matrix.mul_apply, Matrix.mulVec, dotProduct])
 
 lemma span_cols_eq {p : ℕ} (u w : Fin p → Fin r → ℂ) (A : Matrix (Fin p) (Fin p) ℂ)
     (hA : IsUnit A.det) (h : ∀ a, u a = ∑ b, A b a • w b) :
@@ -311,8 +302,6 @@ private lemma col_eq_mulVec_single (M : Matrix (Fin r) (Fin r) ℂ) (j : Fin r) 
   funext k
   first
     | simp [col, Matrix.mulVec, dotProduct, Pi.single_apply]
-    | simp [col, Matrix.mulVec_single_one]
-    | (rw [Matrix.mulVec_single_one]; rfl)
 
 private lemma hermC_mat_mulVec_eq_sum_sgn_of_isOrtho {x : Frame X.Ψ r} (ho : X.IsOrtho x) (τ : X.Ψ) (c d : Fin r → ℂ) :
     hermC τ.1 X.Gm (mat x τ *ᵥ c) (mat x τ *ᵥ d) =
@@ -321,7 +310,6 @@ private lemma hermC_mat_mulVec_eq_sum_sgn_of_isOrtho {x : Frame X.Ψ r} (ho : X.
   first
     | simp only [Matrix.diagonal_apply, mul_ite, ite_mul, mul_zero, zero_mul, Finset.sum_ite_eq,
         Finset.mem_univ, if_true]
-    | simp [Matrix.diagonal_apply]
 
 lemma maj_ortho {x : Frame X.Ψ r} (ho : X.IsOrtho x) (τ : X.Ψ) (c : Fin r → ℂ) :
     X.maj x τ (mat x τ *ᵥ c) = nsq c := by

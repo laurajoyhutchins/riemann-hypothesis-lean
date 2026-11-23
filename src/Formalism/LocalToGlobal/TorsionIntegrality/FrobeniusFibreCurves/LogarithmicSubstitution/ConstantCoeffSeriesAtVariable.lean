@@ -1,5 +1,6 @@
 module
 
+import Formalism.LocalToGlobal.TorsionIntegrality.RamifiedCurveKernels.PairedSquareJets.InverseEndoIntegralHolds
 public import Formalism.LocalToGlobal.TorsionIntegrality.FrobeniusFibreCurves.StatementB
 public import Formalism.FormalGroupLog.FormalGroupLogProofs.ConstantCoeffSubstOfZero
 public import Formalism.GL3MeanSquares.HookFormulaTorsion.IntegralInverse
@@ -211,24 +212,7 @@ theorem law_coeff_one_subst {K : Type} [Field K] (l D : PowerSeries K)
     (hD : PowerSeries.constantCoeff D = 0) :
     PowerSeries.coeff 1 (PowerSeries.subst D l : PowerSeries K) =
       PowerSeries.coeff 1 l * PowerSeries.coeff 1 D := by
-  have hs : PowerSeries.HasSubst D := PowerSeries.HasSubst.of_constantCoeff_zero' hD
-  have key : ∀ g : PowerSeries K, PowerSeries.coeff 1 g =
-      PowerSeries.constantCoeff (PowerSeries.derivative (R := K) g) := by
-    intro g
-    rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply, PowerSeries.coeff_derivative]
-    simp
-  have hc : ∀ g : PowerSeries K, PowerSeries.constantCoeff (PowerSeries.subst D g : PowerSeries K) =
-      PowerSeries.constantCoeff g := by
-    intro g
-    have e : g = PowerSeries.C (PowerSeries.constantCoeff g) +
-        (g - PowerSeries.C (PowerSeries.constantCoeff g)) := by ring
-    conv_lhs => rw [e]
-    rw [PowerSeries.subst_add hs, map_add (f := _), PowerSeries.subst_C]
-    have := PowerSeries.constantCoeff_subst_eq_zero (a := D) hD
-      (g - PowerSeries.C (PowerSeries.constantCoeff g)) (by simp)
-    erw [this, add_zero]
-    exact MvPowerSeries.constantCoeff_C _
-  rw [key, PowerSeries.derivative_subst hs, map_mul, hc, ← key, ← key]
+  apply Formalism.L2.Th1.G.coeff_one_subst1 <;> assumption
 
 theorem formal_halving_exists : HalfExists := by
   intro K _ _ _ F l h h2

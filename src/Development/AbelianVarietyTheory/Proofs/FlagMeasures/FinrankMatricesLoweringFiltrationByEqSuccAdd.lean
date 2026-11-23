@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsUnitaryLayerCoordsToBlocks
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LowersMulZero
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -64,29 +65,7 @@ theorem block_eq_zero (hB : Biorth r m U (fun b => (U b)ᴴ)) {s : ℕ} (hs : m 
 theorem mem_lowers_iff_blocks (hB : Biorth r m U (fun b => (U b)ᴴ))
     (hW : ∀ k y, y ∈ W k ↔ ∀ b, k ≤ b → (U b)ᴴ *ᵥ y = 0) (c : ℕ) (Y : Matrix (Fin n) (Fin n) ℂ) :
     Y ∈ lowers W c ↔ ∀ s t, t ≤ s + c → (U s)ᴴ * Y * U t = 0 := by
-  obtain ⟨-, h2, h3⟩ := hB
-  rw [mem_lowers]
-  constructor
-  · intro h s t hst
-    refine Matrix.ext_of_mulVec_single fun j => ?_
-    have hy : U t *ᵥ Pi.single j 1 ∈ W (s + c + 1) := by
-      rw [hW]
-      intro b hb
-      rw [Matrix.mulVec_mulVec, h2 b t (by omega), Matrix.zero_mulVec]
-    have := (hW _ _).1 (h s _ hy) s le_rfl
-    rw [Matrix.mulVec_mulVec, Matrix.mulVec_mulVec] at this
-    rw [this, Matrix.zero_mulVec]
-  · intro h b y hy
-    rw [hW]
-    intro s hs
-    have e : (U s)ᴴ *ᵥ Y *ᵥ y = ((U s)ᴴ * Y * ∑ t ∈ range m, U t * (U t)ᴴ) *ᵥ y := by
-      rw [h3, Matrix.mul_one, Matrix.mulVec_mulVec]
-    rw [e, Matrix.mul_sum, Matrix.sum_mulVec]
-    refine Finset.sum_eq_zero fun t _ => ?_
-    rw [← Matrix.mul_assoc, ← Matrix.mulVec_mulVec]
-    by_cases hst : t ≤ s + c
-    · rw [h s t hst, Matrix.zero_mulVec]
-    · rw [(hW _ _).1 hy t (by omega), Matrix.mulVec_zero]
+  apply GlobalTheory.LayerIso.mem_lowers_iff <;> assumption
 
 noncomputable def layer (m : ℕ) (U : ∀ b, Matrix (Fin n) (Fin (r b)) ℂ) (c : ℕ) :
     Matrix (Fin n) (Fin n) ℂ →ₗ[ℂ] ∀ b : Fin m, Matrix (Fin (r b)) (Fin (r (b + c + 1))) ℂ where

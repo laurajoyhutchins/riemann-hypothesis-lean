@@ -1,5 +1,6 @@
 module
 
+import Formalism.MahlerMeasure.MahlerMeasureProofs.FockBlocks
 public import Formalism.MahlerMeasure.LevelLattice
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -106,51 +107,11 @@ theorem pos_lt_u (hB : D.BlockOK) (i : Fin D.T.t) : D.T.pos i + 1 < (D.uPos : �
 
 theorem deg_lettersAt_pos (hB : D.BlockOK) (j : Fin D.T.t → ℕ) (jp : ℕ) (i : Fin D.T.t) :
     (D.lettersAt j jp).deg (D.letterAt (D.T.pos i)) = D.LL.deg (D.letterAt (D.T.pos i)) - j i := by
-  simp only [BlockData.lettersAt]
-  simp only [← List.sum_toFinset _ (List.nodup_finRange _), List.toFinset_finRange]
-  have hs : (∑ i', if ((D.letterAt (D.T.pos i) : Fin N) : ℕ) = D.T.pos i' ∨
-      ((D.letterAt (D.T.pos i) : Fin N) : ℕ) = D.T.pos i' + 1 then j i' else 0) = j i := by
-    rw [Finset.sum_eq_single i]
-    · simp [letterAt_pos_val hB]
-    · intro b _ hb
-      rw [if_neg]
-      rw [letterAt_pos_val hB]
-      rintro (h | h)
-      · exact hb (pos_inj hB h).symm
-      · exact pos_ne_succ hB i b h
-    · intro h
-      exact absurd (Finset.mem_univ _) h
-  have hu : D.letterAt (D.T.pos i) ≠ D.uPos := by
-    intro h
-    have h1 := congrArg Fin.val h
-    rw [letterAt_pos_val hB] at h1
-    have := pos_lt_u hB i
-    omega
-  rw [hs, if_neg hu, Nat.sub_zero]
+  apply Formalism.GM.FockB.deg_fst <;> assumption
 
 theorem deg_lettersAt_pos_succ (hB : D.BlockOK) (j : Fin D.T.t → ℕ) (jp : ℕ) (i : Fin D.T.t) :
     (D.lettersAt j jp).deg (D.letterAt (D.T.pos i + 1)) = D.LL.deg (D.letterAt (D.T.pos i + 1)) - j i := by
-  simp only [BlockData.lettersAt]
-  simp only [← List.sum_toFinset _ (List.nodup_finRange _), List.toFinset_finRange]
-  have hs : (∑ i', if ((D.letterAt (D.T.pos i + 1) : Fin N) : ℕ) = D.T.pos i' ∨
-      ((D.letterAt (D.T.pos i + 1) : Fin N) : ℕ) = D.T.pos i' + 1 then j i' else 0) = j i := by
-    rw [Finset.sum_eq_single i]
-    · simp [letterAt_succ_val hB]
-    · intro b _ hb
-      rw [if_neg]
-      rw [letterAt_succ_val hB]
-      rintro (h | h)
-      · exact pos_ne_succ hB b i h.symm
-      · exact hb (pos_inj hB (by omega)).symm
-    · intro h
-      exact absurd (Finset.mem_univ _) h
-  have hu : D.letterAt (D.T.pos i + 1) ≠ D.uPos := by
-    intro h
-    have h1 := congrArg Fin.val h
-    rw [letterAt_succ_val hB] at h1
-    have := pos_lt_u hB i
-    omega
-  rw [hs, if_neg hu, Nat.sub_zero]
+  apply Formalism.GM.FockB.deg_snd <;> assumption
 
 theorem deg_U (hB : D.BlockOK) (j : Fin D.T.t → ℕ) (jp : ℕ) :
     (D.lettersAt j jp).deg D.uPos = D.LL.deg D.uPos - jp := by

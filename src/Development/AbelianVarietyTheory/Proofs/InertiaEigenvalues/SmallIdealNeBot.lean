@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.SesquilinearFractions.NIdeal
 public import Formalism.ConjugateSelfDual.Statement
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -57,30 +58,7 @@ open NumberField
 
 theorem norm_le_one_of_isIntegral {K : Type} [NormedField K] [IsUltrametricDist K] {y : K}
     (hy : IsIntegral ℤ y) : ‖y‖ ≤ 1 := by
-  obtain ⟨p, hp, hpy⟩ := hy
-  by_contra hlt
-  rw [not_le] at hlt
-
-  have heq : y ^ p.natDegree + ∑ i ∈ Finset.range p.natDegree, (p.coeff i : K) * y ^ i = 0 := by
-    rw [hp.as_sum] at hpy
-    simp only [Polynomial.eval₂_add, Polynomial.eval₂_finsetSum, Polynomial.eval₂_mul, Polynomial.eval₂_C,
-      Polynomial.eval₂_X_pow] at hpy
-    simp only [algebraMap_int_eq, eq_intCast] at hpy
-    exact hpy
-  rcases Nat.eq_zero_or_pos p.natDegree with h0 | hpos
-  · rw [h0] at heq
-    simp at heq
-  obtain ⟨i, hi, hle⟩ := IsUltrametricDist.exists_norm_finsetSum_le_of_nonempty
-    (Finset.nonempty_range_iff.mpr hpos.ne') (fun i => (p.coeff i : K) * y ^ i)
-  have hnorm : ‖y‖ ^ p.natDegree = ‖∑ i ∈ Finset.range p.natDegree, (p.coeff i : K) * y ^ i‖ := by
-    rw [← norm_pow, eq_neg_of_add_eq_zero_left heq, norm_neg]
-  have hterm : ‖(p.coeff i : K) * y ^ i‖ < ‖y‖ ^ p.natDegree := by
-    rw [norm_mul, norm_pow]
-    calc ‖(p.coeff i : K)‖ * ‖y‖ ^ i ≤ 1 * ‖y‖ ^ i :=
-          mul_le_mul_of_nonneg_right (IsUltrametricDist.norm_intCast_le_one K _) (by positivity)
-      _ = ‖y‖ ^ i := one_mul _
-      _ < ‖y‖ ^ p.natDegree := pow_lt_pow_right₀ hlt (Finset.mem_range.mp hi)
-  linarith
+  apply PositivityTheory.Xgf.NI.norm_le_one_of_isIntegral <;> assumption
 
 theorem norm_int_le_one {L K : Type} [Field L] [NormedField K] [IsUltrametricDist K]
     (a : L →+* K) (x : 𝓞 L) : ‖a (x : L)‖ ≤ 1 := by

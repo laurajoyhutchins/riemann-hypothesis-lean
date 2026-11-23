@@ -1,5 +1,6 @@
 module
 
+import CompanionTheory.HarishChandraModules.BesselParameterIntegrals.InPCommutatorOfInK
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FormalDegreeSquareIntegrable.FormalDegreeFromOrthogonality
 public import Mathlib.MeasureTheory.Group.ModularCharacter
 public import Mathlib.Topology.Algebra.Group.Units
@@ -180,32 +181,7 @@ lemma modChar_herm (h : UJ ε) (hh : (toM h)ᴴ = toM h) : Measure.modularCharac
     linarith
 
 lemma isCompact_Kset : IsCompact (Kset ε) := by
-  unfold Kset
-  have hK : IsCompact (Set.pi Set.univ fun _ : Fin n => Set.pi Set.univ fun _ : Fin n => Metric.closedBall (0 : ℂ) 1) :=
-    isCompact_univ_pi fun _ => isCompact_univ_pi fun _ => isCompact_closedBall 0 1
-  refine hK.of_isClosed_subset ?_ ?_
-  · refine IsClosed.inter (s₁ := {g : Matrix (Fin n) (Fin n) ℂ | g ∈ unitaryGroup (Fin n) ℂ})
-      (s₂ := {g : Matrix (Fin n) (Fin n) ℂ | g * Jm ε = Jm ε * g}) ?_ ?_
-    · have e : {g : Matrix (Fin n) (Fin n) ℂ | g ∈ unitaryGroup (Fin n) ℂ} = {g | g * star g = 1} :=
-        Set.ext fun g => mem_unitaryGroup_iff
-      rw [e]
-      exact isClosed_eq (continuous_id.matrix_mul continuous_id.matrix_conjTranspose) continuous_const
-    · exact isClosed_eq (continuous_id.matrix_mul continuous_const) (continuous_const.matrix_mul continuous_id)
-  · rintro (g : Matrix (Fin n) (Fin n) ℂ) ⟨hg, -⟩
-    refine Set.mem_univ_pi.mpr fun i => Set.mem_univ_pi.mpr fun j => ?_
-    rw [Metric.mem_closedBall, dist_zero_right]
-    have hu : g * gᴴ = 1 := mem_unitaryGroup_iff.mp hg
-    have h := congrFun (congrFun hu i) i
-    rw [Matrix.mul_apply] at h
-    simp only [Matrix.conjTranspose_apply, Matrix.one_apply_eq] at h
-    have h2 : ∑ k, ‖g i k‖ ^ 2 = 1 := by
-      have h4 : ∑ k, g i k * star (g i k) = ∑ k, ((‖g i k‖ ^ 2 : ℝ) : ℂ) := by
-        refine Finset.sum_congr rfl fun k _ => ?_
-        rw [Complex.star_def, Complex.mul_conj, Complex.normSq_eq_norm_sq]
-      rw [h4, ← Complex.ofReal_sum] at h
-      exact_mod_cast h
-    have h3 : ‖g i j‖ ^ 2 ≤ 1 := h2 ▸ Finset.single_le_sum (fun k _ => sq_nonneg ‖g i k‖) (Finset.mem_univ j)
-    nlinarith [norm_nonneg (g i j)]
+  apply CompanionTheory.D.Upq.isCompact_Kset <;> assumption
 
 lemma isCompact_KG : IsCompact ((KG ε : Set (UJ ε))) :=
   (isClosedEmbeddingMatrix n ε).1.isCompact_preimage (isCompact_Kset ε)

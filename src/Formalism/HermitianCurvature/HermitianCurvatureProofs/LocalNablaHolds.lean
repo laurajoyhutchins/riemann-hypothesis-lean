@@ -209,7 +209,6 @@ theorem radDZ_expr (P : M.Par) (Bs : B.RealPlaceData P.k P.r Wp Wq)
 
 theorem local_nabla_holds : GTCLNab := by
   intro Wp Wq _ _ _ _ _ _ P Bs X d hH hT e he hk
-  have hpl := hH.1
   have hk2 := hH.2.1
   have hL := hH.2.2.2.1
   have hR := hH.2.2.2.2.2.1

@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.AnalyticForms.PotentialTheory.Partition
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.IsLocSec
 public import Development.AutomorphicSpectrum.Proofs.MetricProofs.CompatibleChartProductProjectionTwistedStatement
 import Mathlib.Algebra.Order.Floor.Extended
@@ -55,25 +56,7 @@ namespace GlobalTheory.CompanionTheory.Ar.PB.WSq.Sec.SncProd
 theorem compat_restr {e : ℕ} {X : Type} [TopologicalSpace X] (A : FinHolAtlas e X)
     (ψ : OpenPartialHomeomorph X (Fin e → ℂ)) (h : IsCompatChart A ψ) (V : Set X) (hV : IsOpen V) :
     IsCompatChart A (ψ.restrOpen V hV) := by
-  intro j
-  refine ⟨?_, ?_⟩
-  · refine (h j).1.mono ?_
-    rintro z ⟨hz, hs⟩
-    refine ⟨hz, ?_⟩
-    have : (A.chart j).symm z ∈ ψ.source ∩ V := by
-      simpa [OpenPartialHomeomorph.restrOpen_source] using hs
-    exact this.1
-  · have hsymm : ((ψ.restrOpen V hV).symm : (Fin e → ℂ) → X) = ψ.symm := rfl
-    rw [hsymm]
-    refine (h j).2.mono ?_
-    rintro z ⟨hz, hs⟩
-    refine ⟨?_, hs⟩
-    have h1 : ψ.symm z ∈ ψ.source ∩ V := by
-      have := (ψ.restrOpen V hV).map_target hz
-      rwa [OpenPartialHomeomorph.restrOpen_source] at this
-    have h2 : ψ (ψ.symm z) = z := (ψ.restrOpen V hV).right_inv hz
-    rw [← h2]
-    exact ψ.map_source h1.1
+  apply ReciprocityTheory.AnForm.M.pa_compat_restr <;> assumption
 
 theorem holoOn_comp {e n : ℕ} {X Z : Type} [TopologicalSpace X] [TopologicalSpace Z] (A : FinHolAtlas e X)
     (B : FinHolAtlas n Z) (pr : X → Z) (hp : HoloMap A B pr) (S : Set Z) (g : Z → ℂ) (hg : B.HoloOn S g) :

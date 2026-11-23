@@ -1,5 +1,6 @@
 module
 
+import Formalism.LogFactorialIndices.SignedSubspaceIndex.IdxBase
 public import Formalism.LogFactorialIndices.StatementIdx
 public import Mathlib.Algebra.Module.Lattice.Full
 public import Mathlib.LinearAlgebra.Determinant
@@ -302,24 +303,7 @@ theorem idxScale_of (hB : LatBasis) : IdxScale := by
     simp
 
 theorem LatticeIndexDeterminant.lattice_span_of_basis : LatBasis := by
-  intro O K X _ _ _ _ _ _ _ _ _ _ _ A hA
-  have : Module.IsTorsionFree O K :=
-    isTorsionFree_iff_algebraMap_injective.mpr (IsFractionRing.injective O K)
-  have : Submodule.IsFullLattice K A :=
-    { toIsLattice := Submodule.IsLattice.of_fg K hA.1, span_eq_top := hA.2 }
-  have := Submodule.IsLattice.finite K A
-  have := Submodule.IsLattice.free K A
-  let b := Module.Free.chooseBasis O A
-  let bK := b.extendOfIsFullLattice K
-  have hcard : Fintype.card (Module.Free.ChooseBasisIndex O A) = finrank K X :=
-    (Module.finrank_eq_card_basis bK).symm
-  refine ⟨bK.reindex (Fintype.equivFinOfCardEq hcard), ?_⟩
-  rw [Module.Basis.range_reindex]
-  have hr : Set.range bK = A.subtype '' Set.range b := by
-    rw [← Set.range_comp]
-    ext x
-    simp [bK]
-  rw [hr, Submodule.span_image, b.span_eq, Submodule.map_top, Submodule.range_subtype]
+  apply Formalism.LatticeIndexTer.lattice_has_basis <;> assumption
 
 theorem lattice_index_scale : IdxScale := idxScale_of LatticeIndexDeterminant.lattice_span_of_basis
 

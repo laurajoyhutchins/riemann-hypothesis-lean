@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalMassType.CongruenceLiftOfBasis
 public import Formalism.LocalRingCardinality.DataLevel
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.OneAddPowOfMulSelfEqZero
 public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ClosureUpperUni
@@ -194,28 +195,7 @@ variable {F : Type} [Field F] [NumberField F] {k : ℕ}
 
 theorem natCast_mem_max (v : HeightOneSpectrum (𝓞 F)) (g : ℕ) (hg : (g : 𝓞 F) ∈ v.asIdeal) :
     (g : v.adicCompletionIntegers F) ∈ IsLocalRing.maximalIdeal (v.adicCompletionIntegers F) := by
-  rw [IsLocalRing.mem_maximalIdeal, mem_nonunits_iff]
-  intro hu
-  obtain ⟨u, hu⟩ := hu.exists_right_inv
-  have h1 : Valued.v ((g : v.adicCompletion F)) * Valued.v (u : v.adicCompletion F) = 1 := by
-    rw [← map_mul]
-    have := congrArg (fun z : v.adicCompletionIntegers F => (z : v.adicCompletion F)) hu
-    simp only [MulMemClass.coe_mul, OneMemClass.coe_one] at this
-    have e : (((g : v.adicCompletionIntegers F)) : v.adicCompletion F) = (g : v.adicCompletion F) := by simp
-    rw [e] at this
-    rw [this, map_one]
-  have h2 : Valued.v ((g : v.adicCompletion F)) < 1 := by
-    have e : (g : v.adicCompletion F) = ((algebraMap (𝓞 F) F (g : 𝓞 F) : F) : v.adicCompletion F) := by
-      rw [map_natCast]
-      exact (map_natCast (algebraMap F (v.adicCompletion F)) g).symm
-    rw [e, HeightOneSpectrum.valuedAdicCompletion_eq_valuation', HeightOneSpectrum.valuation_lt_one_iff_mem]
-    exact hg
-  have h3 : Valued.v (u : v.adicCompletion F) ≤ 1 :=
-    (HeightOneSpectrum.mem_adicCompletionIntegers _ _ _).1 u.2
-  have h4 : Valued.v ((g : v.adicCompletion F)) * Valued.v (u : v.adicCompletion F) < 1 :=
-    lt_of_le_of_lt (mul_le_of_le_one_right' h3) h2
-  rw [h1] at h4
-  exact lt_irrefl _ h4
+  apply PI.LocMassTypL.natCast_mem_max <;> assumption
 
 theorem iwU_coprime (v : HeightOneSpectrum (𝓞 F)) (g : ℕ) (hg : g.Prime) (hgv : (g : 𝓞 F) ∈ v.asIdeal)
     (δ : GL (Fin k) (v.adicCompletion F)) (hδ : δ ∈ iwU F k v) (N : ℕ) (hc : Nat.Coprime N g) (hN : δ ^ N = 1) : δ = 1 := by

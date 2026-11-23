@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.FockDegreeOne.OmEDiagMonomial
 public import Formalism.PeriodIntegrals.FockDegreeTwoParts
 import Aesop.Frontend.Tactic
 import Aesop.Main
@@ -145,25 +146,7 @@ theorem sum_diag_of {p q r s : ℕ} (M : Matrix (Ln p q r s) (Ln p q r s) ℂ)
 
 theorem fockAct1_diag (p q r s : ℕ) (a : Ix p q) :
     fockAct1 p q r s (Eab a a) = ∑ c : Ix r s, omE ((a, c) : Ln p q r s) (a, c) := by
-  have hM : ∀ l l' : FockH1Action.Ln p q r s,
-      ((Matrix.kroneckerMapBilinear (LinearMap.mul ℂ ℂ)).flip (1 : FockH1Action.Mat r s)
-        (FockH1Action.Eab a a)) l l' = if l = l' ∧ l.1 = a then 1 else 0 := by
-    rintro ⟨x, y⟩ ⟨x', y'⟩
-    show FockH1Action.Eab a a x x' * (1 : FockH1Action.Mat r s) y y' = _
-    first
-      | simp only [FockH1Action.Eab, Matrix.single_apply, Matrix.one_apply, Prod.mk.injEq]
-      | simp only [FockH1Action.Eab, Matrix.single, Matrix.of_apply, Matrix.one_apply, Prod.mk.injEq]
-    split_ifs <;> first | (simp_all; done) | aesop
-  rw [show FockH1Action.fockAct1 p q r s (FockH1Action.Eab a a) = FockH1Action.omAct p q r s
-      ((Matrix.kroneckerMapBilinear (LinearMap.mul ℂ ℂ)).flip (1 : FockH1Action.Mat r s)
-        (FockH1Action.Eab a a)) from rfl, omAct_apply',
-    sum_diag_of _ (fun l => l.1 = a) hM, Fintype.sum_prod_type,
-    Finset.sum_eq_single a]
-  · simp
-  · intro b _ hb
-    simp [hb]
-  · intro h
-    exact absurd (Finset.mem_univ a) h
+  apply PI.FockOneDegW.Diag.fockAct1_diag <;> assumption
 
 theorem fockAct2_diag (p q r s : ℕ) (c : Ix r s) :
     fockAct2 p q r s (Eab c c) = ∑ a : Ix p q, omE ((a, c) : Ln p q r s) (a, c) := by

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ThetaIdealLatticeEqSumLevelTranslates
 public import Development.AbelianVarietyTheory.Definitions.SpanningFamilies.IsStabForm
 public import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.HasSumPolyDerivMulProdAddMatrix
 public import Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.ExistsSymplOfSelfDual
@@ -71,24 +72,7 @@ variable {E : Type} [Field E] [NumberField E] [IsCMField E] {r g : ℕ} {X : Dat
 theorem thetaSignExpEF_add_selfDual_lattice {L : Lt E r} (hL : SelfD X L) {w : E} (hw : IsIntegral ℤ w) (hw1 : w + cc w = 1)
     {u v : Fin r → E} (hu : u ∈ L) (hv : v ∈ L) :
     eps1 X w (u + v) = eps1 X w u * eps1 X w v * cexp (-(Real.pi * I * ((EF X u v : ℚ) : ℂ))) := by
-  have hwv : w • v ∈ L := GlobalTheory.SW.TensLat.int_smul_mem hw hv
-  obtain ⟨k, hk⟩ := (hL.2 u).1 hu (w • v) hwv
-  have hcc : cc w = 1 - w := by rw [← hw1]; ring
-  have hB : ∀ a b c d : Fin r → E,
-      EF X (a + b) (c + d) = EF X a c + EF X a d + EF X b c + EF X b d := by
-    intro a b c d
-    simp only [GlobalTheory.SW.TensLat.EF_eq_bilin, map_add (f := _), LinearMap.add_apply]
-    ring
-  have hvu : EF X v (w • u) = EF X u (w • v) - EF X u v := by
-    rw [GlobalTheory.SW.TensLat.EF_swap X (w • u) v, GlobalTheory.SW.TensLat.EF_smul, hcc, sub_smul, one_smul]
-    simp only [GlobalTheory.SW.TensLat.EF_eq_bilin, map_sub]
-    ring
-  have key : EF X (u + v) (w • (u + v)) =
-      EF X u (w • u) + EF X v (w • v) - EF X u v + 2 * (k : ℚ) := by
-    rw [smul_add, hB, hvu, hk]; ring
-  unfold GlobalTheory.Dict.eps1
-  rw [key, ← Complex.exp_add, ← Complex.exp_add, Complex.exp_eq_exp_iff_exists_int]
-  exact ⟨k, by push_cast; ring⟩
+  apply GlobalTheory.Dict.ThetaEig.thetaSignExpEF_add_selfDual_lattice <;> assumption
 
 private theorem bilinForm_sum_smul_eq_neg_omegaStd {V : Type} [AddCommGroup V] [Module ℚ V] (B : LinearMap.BilinForm ℚ V)
     {b : Fin g ⊕ Fin g → V}

@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.LevelLetterCocycles.DvrLatticeRank.ExistsInfFilVEqBot
 public import Formalism.WeaklyAdmissibleFiltrations.Statement
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -151,22 +152,7 @@ theorem exists_le_filV (D : Submodule LL (V ⊗[Qp] BdR)) [FiniteDimensional LL 
 
 theorem exists_inf_filV_eq_bot (D : Submodule LL (V ⊗[Qp] BdR)) [FiniteDimensional LL D] :
     ∃ a : ℤ, D ⊓ FilV PD (LL := LL) (V := V) a = ⊥ := by
-  let S : ℤ → Submodule LL D := fun a => (Formalism.WeaklyAdmissibleFiltrations.FilV PD (LL := LL) (V := V) a).comap D.subtype
-  have hex : ∃ n : ℕ, ∃ a : ℤ, finrank LL (S a) = n := ⟨_, 0, rfl⟩
-  obtain ⟨a₀, ha₀⟩ := Nat.find_spec hex
-  refine ⟨a₀, eq_bot_iff.mpr ?_⟩
-  rintro x ⟨hxD, hxF⟩
-  rw [Submodule.mem_bot]
-  refine filV_sep PD (LL := LL) x fun b => ?_
-  rcases le_total b a₀ with hb | hb
-  · exact filVB_anti PD hb hxF
-  · have hle : S b ≤ S a₀ := Submodule.comap_mono (filVB_anti PD hb)
-    have heq : S b = S a₀ :=
-      Submodule.eq_of_le_of_finrank_eq hle
-        (le_antisymm (Submodule.finrank_mono hle) (ha₀ ▸ Nat.find_min' hex ⟨b, rfl⟩))
-    have hx : (⟨x, hxD⟩ : D) ∈ S a₀ := hxF
-    rw [← heq] at hx
-    exact hx
+  apply Formalism.MainNotions.N.Ln34.CrystallineExponents.exists_inf_filV_eq_bot <;> assumption
 
 end Fil
 

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.TupleJacobianRightMulIsometry
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.HermLat
 public import Mathlib.RingTheory.Norm.Defs
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsEqZpowMulUnit
@@ -66,65 +67,7 @@ variable {E : Type} [CommRing E] [Algebra F E] [TopologicalSpace E]
 theorem exists_basis [IsNonarchimedeanLocalField F] [CharZero F] (L : LocE F E) :
     ∃ b : Module.Basis (Fin 2) F E, (∀ x, x ∈ L.O ↔ ∀ i, b.repr x i ∈ 𝒪[F]) ∧
       ∀ x, algebraMap F E (Algebra.norm F x) = x * L.cj x := by
-  obtain ⟨ω, hω, e, he, hωe⟩ := GlobalTheory.UnramOrder.exists_sub_cj_mul_eq_one L
-  have hint : ∀ a : F, a ∈ 𝒪[F] → algebraMap F E a ∈ L.O := fun a h =>
-    (GlobalTheory.UnramOrder.algebraMap_mem_iff L a).2 h
-  have he' : (L.cj ω - ω) * L.cj e = 1 := by simpa [L.cj_cj] using congrArg L.cj hωe
-  have hce : L.cj e = -e := by linear_combination (-e) * he' - (L.cj e) * hωe
-  have hli : LinearIndependent F ![(1 : E), ω] := by
-    rw [LinearIndependent.pair_iff]
-    intro s t h
-    simp only [Algebra.smul_def, mul_one] at h
-    have h' := congrArg L.cj h
-    simp only [map_add (f := _), map_mul, AlgEquiv.commutes, map_zero] at h'
-    have ht : algebraMap F E t = 0 := by
-      linear_combination e * h - e * h' - algebraMap F E t * hωe
-    have hs : algebraMap F E s = 0 := by rw [ht] at h; simpa using h
-    exact ⟨GlobalTheory.UnramOrder.algebraMap_inj L (by simpa using hs),
-      GlobalTheory.UnramOrder.algebraMap_inj L (by simpa using ht)⟩
-  let b : Module.Basis (Fin 2) F E :=
-    basisOfLinearIndependentOfCardEqFinrank hli (by simp [L.rank])
-  have hb0 : b 0 = 1 := by simp [b]
-  have hb1 : b 1 = ω := by simp [b]
-  have hx : ∀ x, x = algebraMap F E (b.repr x 0) + algebraMap F E (b.repr x 1) * ω := by
-    intro x
-    have := b.sum_repr x
-    rw [Fin.sum_univ_two, hb0, hb1] at this
-    simpa [Algebra.smul_def] using this.symm
-  refine ⟨b, fun x => ⟨fun h => ?_, fun h => ?_⟩, fun x => ?_⟩
-  · have h1 := hx x
-    have h2 := congrArg L.cj h1
-    simp only [map_add (f := _), map_mul, AlgEquiv.commutes] at h2
-    have h3 : algebraMap F E (b.repr x 1) = (x - L.cj x) * e := by
-      linear_combination -e * h1 + e * h2 - algebraMap F E (b.repr x 1) * hωe
-    have h4 : algebraMap F E (b.repr x 1) ∈ L.O := by
-      rw [h3]
-      exact L.O.mul_mem (L.O.sub_mem h (GlobalTheory.UnramOrder.cj_mem L h)) he
-    have h5 : algebraMap F E (b.repr x 0) ∈ L.O := by
-      have : algebraMap F E (b.repr x 0) = x - algebraMap F E (b.repr x 1) * ω := by
-        linear_combination -h1
-      rw [this]
-      exact L.O.sub_mem h (L.O.mul_mem h4 hω)
-    intro i
-    fin_cases i
-    · exact (GlobalTheory.UnramOrder.algebraMap_mem_iff L _).1 h5
-    · exact (GlobalTheory.UnramOrder.algebraMap_mem_iff L _).1 h4
-  · rw [hx x]
-    exact L.O.add_mem (hint _ (h 0)) (L.O.mul_mem (hint _ (h 1)) hω)
-  · rw [Algebra.norm_eq_matrix_det b, Matrix.det_fin_two]
-    simp only [Algebra.leftMulMatrix_eq_repr_mul, hb0, hb1, mul_one, map_sub, map_mul]
-    have h1 := hx x
-    have h2 := congrArg L.cj h1
-    have h3 := hx (x * ω)
-    have h4 := congrArg L.cj h3
-    simp only [map_add (f := _), map_mul, AlgEquiv.commutes] at h2 h4
-    generalize algebraMap F E (b.repr x 0) = a at *
-    generalize algebraMap F E (b.repr x 1) = c at *
-    generalize algebraMap F E (b.repr (x * ω) 0) = a' at *
-    generalize algebraMap F E (b.repr (x * ω) 1) = c' at *
-    have key : (ω - L.cj ω) * (a * c' - a' * c - x * L.cj x) = 0 := by
-      linear_combination (-(L.cj x)) * h3 + x * h4 + (a' + c' * L.cj ω) * h1 - (a' + c' * ω) * h2
-    linear_combination e * key - (a * c' - a' * c - x * L.cj x) * hωe
+  apply GlobalTheory.HL.TupleJac.exists_int_basis <;> assumption
 
 theorem span_eq_map (L : LocE F E) {n m : ℕ} (y : Fin m → Fin n → E) :
     (Submodule.span L.O (Set.range y)).toAddSubgroup =

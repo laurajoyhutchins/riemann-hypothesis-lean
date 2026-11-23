@@ -76,7 +76,6 @@ theorem arith_nil (N D D' E m K : ℕ) (hN : 0 < N)
   have h6 : (2 * (k + 1)) * D ≤ 2 * m ^ 2 + K * m := by omega
   have h7 : 2 * ((k + 1) * D) ≤ 2 * (m ^ 2 + K * m) := by
     have : (2 * (k + 1)) * D = 2 * ((k + 1) * D) := by ring
-    have h8 : 2 * (m ^ 2 + K * m) = 2 * m ^ 2 + K * m + K * m := by ring
     omega
   omega
 

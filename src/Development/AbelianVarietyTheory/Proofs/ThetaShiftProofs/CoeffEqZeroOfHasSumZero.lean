@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsNormAnOnOrbit
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.ModerateCoefficientPositivity
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -141,25 +142,7 @@ variable {E : Type} [Field E] [NumberField E] [NumberField.IsCMField E] {r : ℕ
 theorem flow_mem_dom_of_im_nonneg (X : Data E r) {ξ : Fin r → E} (hξ : X.IsIso ξ)
     {x : Frame X.Ψ r} (hx : x ∈ X.dom) (s : X.Ψ → ℂ) (hs : ∀ τ, 0 ≤ (s τ).im) :
     X.flow ξ s x ∈ X.dom := by
-  have hiv : X.IsIsoV fun τ => Data.emb τ.1 ξ := by
-    intro τ
-    refine ⟨?_, ?_⟩
-    · have key : hermC τ.1 X.Gm (Data.emb τ.1 ξ) (Data.emb τ.1 ξ) = τ.1 (herm X.Gm ξ ξ) := by
-        set_option synthInstance.maxHeartbeats 100000 in
-          simp only [hermC, herm, Data.emb, map_sum, map_mul, cc,
-          NumberField.IsCMField.complexEmbedding_complexConj]
-      change hermC τ.1 X.Gm (Data.emb τ.1 ξ) (Data.emb τ.1 ξ) = 0
-      rw [key, hξ.2.1, map_zero]
-    · intro h0
-      apply hξ.2.2
-      funext a
-      have := congrFun h0 a
-      simpa [Data.emb] using this
-  refine (flowDomainCriterion_holds r X _ hiv x hx s).1.2 fun τ => ?_
-  have ht : 0 < X.ttV (fun τ => Data.emb τ.1 ξ) x τ :=
-    one_div_pos.mpr (mul_pos (MajorantFamilyNorms.c_pos X τ) (X.maj_pos hx τ (hiv τ).2))
-  have := div_nonneg (hs τ) ht.le
-  linarith
+  apply GlobalTheory.ArcShift.flow_mem_of_im <;> assumption
 
 theorem hasSum_fj_of_line (X : Data E r) {la : Wt X.Ψ r} {P : Frame X.Ψ r → ℂ}
     (hP : X.IsSec la P) {ξ : Fin r → E} (hξ : X.IsIso ξ) {x : Frame X.Ψ r} (hx : x ∈ X.dom)

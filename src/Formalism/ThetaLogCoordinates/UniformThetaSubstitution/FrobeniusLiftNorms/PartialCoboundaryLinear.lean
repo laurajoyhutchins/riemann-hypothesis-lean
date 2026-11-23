@@ -267,8 +267,14 @@ end Norm
 end FrobeniusSubstitution
 
 open FrobeniusSubstitution in
-theorem StepII_of (hW : DworkMv) (hD : DivDeriv) (hDe : DeIntegral) (hL : LawSymm) : StepII := by
-  intro K _ _ _ p σ hU F hF G c _ hS hc hDer
+theorem frobenius_coboundary_error_bound (hD : DivDeriv) (hDe : DeIntegral) (hL : LawSymm)
+    {K : Type} [NormedField K] [IsUltrametricDist K] [CharZero K] {p : ℕ}
+    {σ : K →+* K} (hU : UnrOK K p σ)
+    {F G : MvPowerSeries (Fin 2) K} (hF : IsLawOfLog p F) {c : K}
+    (hc : ‖c‖ ≤ 1) (hDer : DerivIs p G c) :
+    Bd (p : ℝ)⁻¹ (MvPowerSeries.C (p : K) *
+      (d1 F (DeS p σ G) - MvPowerSeries.C (σ c) * (in3 (cob F (g0F K p)) * at1 2 (lgF K p))) -
+      (frobVar p (MvPowerSeries.map σ (d1 F G)) - MvPowerSeries.C (p : K) * d1 F G)) := by
   obtain ⟨hp, -, hnp, -, hσ⟩ := hU
   have hσF : MvPowerSeries.map σ F = F := (hL K p hp hnp F hF).1 σ
   have hδi : Integral (cob F (g0F K p)) := hDe K p σ hp hnp hσ F hF
@@ -367,12 +373,6 @@ theorem StepII_of (hW : DworkMv) (hD : DivDeriv) (hDe : DeIntegral) (hL : LawSym
       frobVar_pair hp0 h1, frobVar_pair hp0 h2, frobVar_pair hp0 h3, frobVar_X hp0, frobVar_X hp0,
       frobVar_X hp0]
 
-  have hE2 : Bd (p : ℝ)⁻¹ (frobVar p (MvPowerSeries.map σ (d1 F G)) -
-      MvPowerSeries.C (p : K) * d1 F G) := by
-    obtain ⟨hS0, hS1⟩ := hS
-    rw [sub_zero] at hS0 hS1
-    exact (hW K (Fin 3) p σ hp hnp hσ (d1 F G) hS0).1 hS1
-
   set Φ : MvPowerSeries (Fin 2) K :=
     Gs - MvPowerSeries.C (σ c) * (at1 0 (lgF K p) * at1 1 (g0F K p)) with hΦ
   have hΦi : Integral (MvPowerSeries.pderiv (R := K) 0 Φ) := by
@@ -454,8 +454,33 @@ theorem StepII_of (hW : DworkMv) (hD : DivDeriv) (hDe : DeIntegral) (hL : LawSym
     rw [partial_coboundary_linear hF0, hd1P, hd1s, hSΦ _ _ (hasSubst_pair hfA0 (hXp0 2)),
       hSΦ _ _ (hasSubst_pair hAp0 (hXp0 2)), hgb, hδ]
     ring
-  rw [key]
-  exact bd_sub (hscale _ (bd_sub hE2 hE1))
+  have htail := bd_mul (inv_nonneg.mpr hppos.le) zero_le_one
+    (bd_C (ι := Fin 3) (inv_nonneg.mpr hppos.le) hnp.le)
     (int_mul (bd_C zero_le_one (norm_sigma_le hσ hp.one_le hc)) (int_mul hδ3i (integral_X 2)))
+  rw [mul_one] at htail
+  rw [key, mul_sub, ← mul_assoc, hCC, one_mul]
+  have hsum := bd_add hE1 htail
+  convert bd_neg hsum using 1
+  ring
+
+open FrobeniusSubstitution in
+theorem StepII_of (hW : DworkMv) (hD : DivDeriv) (hDe : DeIntegral) (hL : LawSymm) : StepII := by
+  intro K _ _ _ p σ hU F hF G c _ hS hc hDer
+  have herror := frobenius_coboundary_error_bound hD hDe hL hU hF hc hDer
+  obtain ⟨hp, -, hnp, -, hσ⟩ := hU
+  have hE2 : Bd (p : ℝ)⁻¹ (frobVar p (MvPowerSeries.map σ (d1 F G)) -
+      MvPowerSeries.C (p : K) * d1 F G) := by
+    obtain ⟨hS0, hS1⟩ := hS
+    rw [sub_zero] at hS0 hS1
+    exact (hW K (Fin 3) p σ hp hnp hσ (d1 F G) hS0).1 hS1
+
+  have hb := bd_add herror hE2
+  rw [sub_add_cancel] at hb
+  intro n
+  have hn := hb n
+  rw [MvPowerSeries.coeff_C_mul, norm_mul, hnp] at hn
+  have hp_pos : 0 < (p : ℝ) := by exact_mod_cast hp.pos
+  apply (mul_le_mul_iff_of_pos_left (inv_pos.mpr hp_pos)).mp
+  simpa only [mul_one] using hn
 
 end Formalism.InvariantFactorPaths.G7

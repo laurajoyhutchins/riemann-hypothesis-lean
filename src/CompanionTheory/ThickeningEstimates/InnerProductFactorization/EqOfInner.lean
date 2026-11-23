@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.ThetaLifts.CartanFactorisation.EqOfInner
 public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.RealMetaplecticRepresentation
 public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.IteratedLineDerivMemWeylAlg
 public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.MetaplecticRepresentation
@@ -79,21 +80,7 @@ theorem Impl.inner {s} {S : Sch l →ₗ[ℂ] Sch l} (h : Impl s S) (f g : Sch l
     ← map_smul, ← map_add, ← map_sub, h.norm, h.norm, h.norm, h.norm]
 
 theorem exists_rho (w : l ⊕ l → ℝ) (f : Sch l) : ∃ g : Sch l, ⇑g = rhoFun w f := by
-  have ht : Function.HasTemperateGrowth (phase w) := by
-    have h2 : Function.HasTemperateGrowth fun x : EuclideanSpace ℝ l => ⟪qPart w, x⟫ + ⟪pPart w, qPart w⟫ / 2 :=
-      (innerSL ℝ (qPart w)).hasTemperateGrowth.add (Function.HasTemperateGrowth.const _)
-    have h3 := GlobalTheory.Published.Metaplectic.hasTemperateGrowth_eChar.comp h2
-    convert h3 using 1
-    funext x
-    change exp (((2 * π * ⟪qPart w, x⟫ + π * ⟪pPart w, qPart w⟫ : ℝ) : ℂ) * I) =
-      exp (((2 * π * (⟪qPart w, x⟫ + ⟪pPart w, qPart w⟫ / 2) : ℝ) : ℂ) * I)
-    congr 1
-    push_cast
-    ring
-  refine ⟨smulLeftCLM ℂ (phase w) (compSubConstCLM ℂ (-pPart w) f), ?_⟩
-  funext x
-  rw [smulLeftCLM_apply_apply ht]
-  simp [rhoFun]
+  apply PositivityTheory.ThKF.E.exists_rho <;> assumption
 
 theorem toLp_rho {w : l ⊕ l → ℝ} {f g : Sch l} (h : ⇑g = rhoFun w f) : g.toLp 2 volume = rho w (f.toLp 2 volume) := by
   refine Lp.ext ((g.coeFn_toLp 2 volume).trans ?_)

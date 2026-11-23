@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.GlobalConditionOfProductFormula
 public import Formalism.LocalToGlobal.SiegelLatticeTheory.CokernelGLCounts.LocVol
 public import Formalism.PeriodIntegrals.LocFramePrim
 public import Mathlib.Algebra.AffineMonoid.Basic
@@ -133,22 +134,7 @@ theorem corr_zpow_neg {A B} (h : CorrFI ι A B) (hA : A ≠ 0) (hB : B ≠ 0) (k
 theorem mem_dual_one_iff (t : K) :
     t ∈ FractionalIdeal.dual ℤ ℚ (1 : FractionalIdeal (𝓞 K)⁰ K) ↔
       ∀ s : 𝓞 K, ∃ z : ℤ, Algebra.trace ℚ K (t * (s : K)) = z := by
-  rw [FractionalIdeal.mem_dual (one_ne_zero : (1 : FractionalIdeal (𝓞 K)⁰ K) ≠ 0)]
-  constructor
-  · intro H s
-    obtain ⟨z, hz⟩ := H (s : K) (by rw [FractionalIdeal.mem_one_iff]; exact ⟨s, rfl⟩)
-    refine ⟨z, ?_⟩
-    rw [Algebra.traceForm_apply] at hz
-    rw [← hz]
-    simp
-  · intro H a ha
-    rw [FractionalIdeal.mem_one_iff] at ha
-    obtain ⟨s, rfl⟩ := ha
-    obtain ⟨z, hz⟩ := H s
-    rw [RingHom.mem_range]
-    refine ⟨z, ?_⟩
-    rw [Algebra.traceForm_apply]
-    simpa using hz.symm
+  apply Formalism.MainNotions.BridgeLemma.mem_dual_iff <;> assumption
 
 theorem mem_diff_iff (x : 𝓞 K) : x ∈ differentIdeal ℤ (𝓞 K) ↔
     ∀ b : K, (∀ s : 𝓞 K, ∃ z : ℤ, Algebra.trace ℚ K (b * (s : K)) = z) →

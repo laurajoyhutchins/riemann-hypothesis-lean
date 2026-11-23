@@ -80,7 +80,6 @@ theorem lemGB_q : ∃ w : LetA O n, W.q = letπ ^ (PD.p - 1) + ((PD.p : ℕ) : L
   funext j
   first
     | (simp only [LocWach.q, letπ, Pi.add_apply, Pi.mul_apply, Pi.pow_apply, Pi.natCast_apply]; exact hw)
-    | exact hw
 
 theorem lemGB_q_unit : IsUnit (algebraMap (LetA O n) W.EE W.q) := by
   obtain ⟨w, hw⟩ := lemGB_q W
@@ -154,9 +153,6 @@ theorem lemG_units (hcase : Formalism.MainNotions.LiftingTheory.CaseA W) (hP9 : 
     rw [map_mul, map_one, hy, hxmap, mul_inv_cancel₀ hxne]
   first
     | exact IsUnit.of_mul_eq_one _ hcy
-    | exact IsUnit.of_mul_eq_one _ _ hcy
-    | exact isUnit_of_mul_eq_one _ _ hcy
-    | exact ⟨⟨_, y, hcy, by rw [mul_comm]; exact hcy⟩, rfl⟩
 
 def InImg {T₁ T₂ : LocLat G Qp LL O} (F : LatHom T₁.L T₂.L) (i : ZMod n) (z : W.DD T₂) : Prop :=
   ∃ x₁, Formalism.MainNotions.LiftingTheory.InNΔi W T₁ i x₁ ∧ W.map F x₁ = z
@@ -205,8 +201,6 @@ theorem inImg_smulA {T₁ T₂ : LocLat G Qp LL O} (F : LatHom T₁.L T₂.L) (i
   refine (lemGB_inImg_iff W).mpr ⟨a • x, inNΔi_smulA W T₁ i ha hx, ?_⟩
   first
     | exact LinearMap.map_smul_of_tower _ _ _
-    | exact map_smul _ _ _
-    | rw [← algebraMap_smul W.EE a x, map_smul, algebraMap_smul]
 
 theorem inImg_smulO {T₁ T₂ : LocLat G Qp LL O} (F : LatHom T₁.L T₂.L) (i : ZMod n) (c : O)
     {z : W.DD T₂} (hz : InImg W F i z) : InImg W F i (c • z) := by
@@ -214,7 +208,6 @@ theorem inImg_smulO {T₁ T₂ : LocLat G Qp LL O} (F : LatHom T₁.L T₂.L) (i
   refine (lemGB_inImg_iff W).mpr ⟨c • x, inNΔi_smulO W T₁ i c hx, ?_⟩
   first
     | exact LinearMap.map_smul_of_tower _ _ _
-    | exact map_smul _ _ _
     | rw [← algebraMap_smul (LetA O n) c x, ← algebraMap_smul W.EE (algebraMap O (LetA O n) c) x, map_smul,
         algebraMap_smul, algebraMap_smul]
 
@@ -279,9 +272,6 @@ theorem lemGB_Nl_γ (T : LocLat G Qp LL O) (i : ZMod n) (δ : W.Gam) {x : W.DD T
   refine ⟨W.γD T δ y, ?_, (lemGB_γD_letE W T δ i y).symm⟩
   first
     | exact W.N_Γ T δ y hy
-    | exact W.N_Γ T δ hy
-    | exact W.N_Γ T hy δ
-    | exact W.N_Γ
 
 theorem lemGB_Nl_le_N (T : LocLat G Qp LL O) (i : ZMod n) {x : W.DD T} (hx : x ∈ W.Nl T i) :
     x ∈ W.N T := by
@@ -327,7 +317,6 @@ theorem inImg_of_Nimg (hΔ : IsUnit ((W.DelF.card : ℕ) : O)) {T₁ T₂ : LocL
       intro δ hδ
       first
         | (rw [W.map_γ]; exact hzΔ δ hδ)
-        | exact W.map_γ
     have hmapS : W.map F (∑ δ ∈ W.DelF, W.γD T₁ δ y) = ((W.DelF.card : ℕ) : O) • W.map F y := by
 
       rw [map_sum, Finset.sum_congr rfl hfix, Finset.sum_const]
@@ -336,7 +325,6 @@ theorem inImg_of_Nimg (hΔ : IsUnit ((W.DelF.card : ℕ) : O)) {T₁ T₂ : LocL
         (↑u⁻¹ : O) • W.map F (∑ δ ∈ W.DelF, W.γD T₁ δ y) := by
       first
         | exact LinearMap.map_smul_of_tower _ _ _
-        | exact map_smul _ _ _
     rw [hc, hmapS, smul_smul, ← hu, Units.inv_mul, one_smul]
 
 theorem q_pow_inImg (hcase : Formalism.MainNotions.LiftingTheory.CaseA W) (hP9 : Formalism.MainNotions.DeltaInvariantLattices.P9W W) {T₁ T₂ : LocLat G Qp LL O}

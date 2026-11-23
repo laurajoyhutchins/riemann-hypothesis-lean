@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IdemMulEqZero
 public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.AcrisKummerUnits.MapUgAlgebraMap
 public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.AcrisKummerUnits.Splits
 public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsUniqueIdempotentLiftTiltStatement
@@ -197,26 +198,7 @@ variable {l : ℕ} [Fact l.Prime] (A : PAlg l)
 
 theorem eq_of_idem {a b : A.W} (ha : IsIdempotentElem a) (hb : IsIdempotentElem b)
     (h : a.coeff 0 = b.coeff 0) : a = b := by
-  have ha' : a * a = a := ha
-  have hb' : b * b = b := hb
-  set d := a - b with hd
-  have hd3 : d * d * d = d := by
-    rw [hd]
-    linear_combination (a + 1 - 3 * b) * ha' + (3 * a - b - 1) * hb'
-  have hmem : d ∈ Ideal.span {(l : A.W)} := by
-    rw [A.mem_span_l_iff, hd, ← WittVector.constantCoeff_apply, map_sub, sub_eq_zero]
-    exact h
-  have hall : ∀ k : ℕ, d ∈ Ideal.span {(l : A.W)} ^ k := by
-    intro k
-    induction k with
-    | zero => simp
-    | succ k ih =>
-      rw [← hd3, pow_succ]
-      exact Ideal.mul_mem_mul (Ideal.mul_mem_left _ _ ih) hmem
-  have h0 : d = 0 := IsHausdorff.haus (A.completeW.toIsHausdorff) d fun k => by
-    rw [SModEq.zero, smul_eq_mul, Ideal.mul_top]
-    exact hall k
-  exact sub_eq_zero.1 h0
+  apply GlobalTheory.CompanionTheory.LcLogProof.eq_of_idem <;> assumption
 
 theorem teich_sum {ι : Type*} [Fintype ι] {e : ι → A.A} (he : OrthogonalIdempotents e) :
     WittVector.teichmuller l (∑ i, e i) = ∑ i, WittVector.teichmuller l (e i) := by

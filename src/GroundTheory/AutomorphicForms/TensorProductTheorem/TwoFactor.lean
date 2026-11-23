@@ -217,20 +217,6 @@ theorem exists_equiv_outerTensor (hirr : (prodRep ρ₁ ρ₂ hcomm).IsIrreducib
     ext w
     rw [hT₂, map_one, Module.End.one_apply, hE2 _ w.2]
     rfl
-  have hc₁one : c₁ 1 = 1 := by
-    have h1 := hc₁ 1
-    rw [hT₁one, Module.End.one_apply, hpn] at h1
-    have h2 : (c₁ 1 - 1) • n true = 0 := by rw [sub_smul, ← h1, one_smul, sub_self]
-    rcases smul_eq_zero.1 h2 with h | h
-    · exact sub_eq_zero.1 h
-    · exact absurd h (hn0 true)
-  have hc₂one : c₂ 1 = 1 := by
-    have h1 := hc₂ 1
-    rw [hT₂one, Module.End.one_apply, hpn] at h1
-    have h2 : (c₂ 1 - 1) • n false = 0 := by rw [sub_smul, ← h1, one_smul, sub_self]
-    rcases smul_eq_zero.1 h2 with h | h
-    · exact sub_eq_zero.1 h
-    · exact absurd h (hn0 false)
 
   obtain ⟨x₁, hx₁⟩ : ∃ y ∈ (⊤ : Submodule ℂ W), p true y ≠ 0 := by
     by_contra hcon

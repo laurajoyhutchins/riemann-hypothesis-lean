@@ -1,5 +1,6 @@
 module
 
+import Formalism.MahlerMeasure.MahlerMeasureProofs.LieMat
 public import Formalism.MahlerMeasure.StatementD
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -95,24 +96,7 @@ variable [IsUltrametricDist K]
 
 lemma gaussR_mul_le (ρ : NNReal) (P Q : K[X]) :
     gaussR ρ (P * Q) ≤ gaussR ρ P * gaussR ρ Q := by
-  rw [gaussR_le_iff]
-  intro k
-  rw [Polynomial.coeff_mul]
-  have h1 : ‖∑ x ∈ Finset.HasAntidiagonal.antidiagonal k, P.coeff x.1 * Q.coeff x.2‖₊ ≤
-      (Finset.HasAntidiagonal.antidiagonal k).sup (fun x => ‖P.coeff x.1 * Q.coeff x.2‖₊) :=
-    IsUltrametricDist.nnnorm_sum_le_of_forall_le
-      (fun x hx => Finset.le_sup (f := fun x => ‖P.coeff x.1 * Q.coeff x.2‖₊) hx)
-  obtain ⟨x, hx, hxe⟩ := Finset.exists_mem_eq_sup (Finset.HasAntidiagonal.antidiagonal k) ⟨(0, k), by simp⟩
-    (fun x => ‖P.coeff x.1 * Q.coeff x.2‖₊)
-  have hk : x.1 + x.2 = k := Finset.HasAntidiagonal.mem_antidiagonal.1 hx
-  calc ‖∑ x ∈ Finset.HasAntidiagonal.antidiagonal k, P.coeff x.1 * Q.coeff x.2‖₊ * ρ ^ k
-      ≤ (Finset.HasAntidiagonal.antidiagonal k).sup (fun x => ‖P.coeff x.1 * Q.coeff x.2‖₊) * ρ ^ k :=
-        mul_le_mul_of_nonneg_right h1 zero_le
-    _ = ‖P.coeff x.1 * Q.coeff x.2‖₊ * ρ ^ k := by rw [hxe]
-    _ = (‖P.coeff x.1‖₊ * ρ ^ x.1) * (‖Q.coeff x.2‖₊ * ρ ^ x.2) := by
-        rw [nnnorm_mul, ← hk, pow_add]
-        ring
-    _ ≤ gaussR ρ P * gaussR ρ Q := mul_le_mul' (gaussR_term_le ρ P _) (gaussR_term_le ρ Q _)
+  apply Formalism.GM.DetBound.gaussR_mul_le <;> assumption
 
 lemma le_gaussR_mul (ρ : NNReal) (hρ : 0 < ρ) (P Q : K[X]) :
     gaussR ρ P * gaussR ρ Q ≤ gaussR ρ (P * Q) := by

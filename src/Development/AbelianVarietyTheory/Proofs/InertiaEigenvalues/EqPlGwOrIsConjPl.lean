@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ConjPlMemPlacesOver
 public import Formalism.LocalRingCardinality.RhoDetPrimeEqMuTildeMulChiPow
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -87,37 +88,6 @@ theorem finrank_E (H : Host R) : Module.finrank ℚ H.E = 2 * R.f := by
 
 theorem eq_plGw_or_isConjPl : ∀ (D : D7) (k : Fin 2), ∀ w ∈ placesOver D.host.E (D.host.g k),
     ∃ v : D.nd.PlG k, w = D.naut.plGw k v ∨ IsConjPl D.host (D.naut.plGw k v) w := by
-  intro D k w hw
-  classical
-  set S := placesOver D.host.E (D.host.g k) with hSdef
-  set A : Set (HeightOneSpectrum (𝓞 D.host.E)) := D.naut.plGw k '' Set.univ with hAdef
-  set B : Set (HeightOneSpectrum (𝓞 D.host.E)) := conjPl D.host '' A with hBdef
-  have hAS : A ⊆ S := by
-    rintro _ ⟨v, -, rfl⟩
-    exact D.naut.plGw_over k v
-  have hBS : B ⊆ S := by
-    rintro _ ⟨u, hu, rfl⟩
-    exact conjPl_mem_placesOver (hAS hu)
-  have hdisj : Disjoint A B := by
-    rw [Set.disjoint_left]
-    rintro _ ⟨v, -, rfl⟩ ⟨_, ⟨v', -, rfl⟩, h⟩
-    exact D.naut.plGw_nconj k v' v (h ▸ isConjPl_conjPl _)
-  have hS : S.ncard = 2 * D.R.f := by rw [hSdef, D.nd.g_split k, finrank_E]
-  have hSfin : S.Finite := Set.finite_of_ncard_pos (by
-    rw [hS, ← finrank_E D.host]
-    exact Module.finrank_pos)
-  have hA : A.ncard = D.R.f := by
-    rw [hAdef, Set.ncard_image_of_injective _ (D.naut.plGw_inj k), Set.ncard_univ, Nat.card_eq_fintype_card,
-      D.nd.card_PlG k]
-  have hB : B.ncard = D.R.f := by
-    rw [hBdef, Set.ncard_image_of_injective _ conjPl_injective, hA]
-  have hAfin : A.Finite := hSfin.subset hAS
-  have hBfin : B.Finite := hSfin.subset hBS
-  have hU : A ∪ B = S := Set.eq_of_subset_of_ncard_le (Set.union_subset hAS hBS)
-    (by rw [Set.ncard_union_eq hdisj hAfin hBfin, hA, hB, hS]; ring_nf; rfl) hSfin
-  rw [← hU] at hw
-  rcases hw with ⟨v, -, rfl⟩ | ⟨_, ⟨v, -, rfl⟩, rfl⟩
-  · exact ⟨v, Or.inl rfl⟩
-  · exact ⟨v, Or.inr (isConjPl_conjPl _)⟩
+  apply GlobalTheory.TypePlaceCover.place_cover <;> assumption
 
 end GlobalTheory.TypePlacesExhaust

@@ -42,6 +42,7 @@ import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Tactic.ReduceModChar
+import Development.AbelianVarietyTheory.Proofs.ModuliProofs.SiegelFamilyTangentDimensionBound
 
 @[expose] public section
 
@@ -60,19 +61,7 @@ theorem cls_cube_pair {S : Scheme.{0}} {A T : Over S} [GrpObj A] [IsCommMonObj A
     (x y : T ⟶ A) (h : (cubeLB A ![x, y] L).IsLB) :
     cls _ h = pull (x * y).left (cls L hL) - pull x.left (cls L hL) - pull y.left (cls L hL) +
       pull (1 : T ⟶ A).left (cls L hL) := by
-  refine (cls_linComb hL _ _ h).trans ?_
-  rw [← Equiv.ulift.symm.sum_comp]
-  have hu : (Finset.univ : Finset (Finset (Fin 2))) = {∅, {0}, {1}, {0, 1}} := by decide
-  have p₀ : psum A ![x, y] ∅ = 1 := rfl
-  have p₁ : psum A ![x, y] {0} = x := mul_one x
-  have p₂ : psum A ![x, y] {1} = y := mul_one y
-  have p₃ : psum A ![x, y] {0, 1} = x * y := congrArg (x * ·) (mul_one y)
-  rw [hu, Finset.sum_insert (by decide), Finset.sum_insert (by decide), Finset.sum_insert (by decide),
-    Finset.sum_singleton]
-  simp only [Equiv.ulift_symm_apply, p₀, p₁, p₂, p₃]
-  rw [Finset.card_pair (by decide)]
-  simp
-  abel
+  apply _root_.GlobalTheory.PowerTangent.cls_cube_two <;> assumption
 
 theorem pull_eq_zero_of_chart {X Y : Scheme.{0}} {L : LB X} (hL : L.IsLB) (f : Y ⟶ X) (i : L.ι)
     (hf : ∀ y, f y ∈ L.U i) : pull f (cls L hL) = 0 :=

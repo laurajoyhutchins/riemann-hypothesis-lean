@@ -197,38 +197,24 @@ theorem blkM_isLowUni (hN : N = m + 1) (A : Matrix (Fin m) (Fin m) K)
         exact hd x
       · rw [blkM_rr]
 
+private theorem blkM_transpose (hN : N = m + 1) (A : Matrix (Fin m) (Fin m) K)
+    (b a : Fin m → K) (d : K) :
+    (blkM hN A b a d)ᵀ = blkM hN Aᵀ a b d := by
+  rw [blkM, Matrix.transpose_submatrix, Matrix.fromBlocks_transpose,
+    Matrix.transpose_replicateCol, Matrix.transpose_replicateRow]
+  rfl
+
+private theorem isLowUni_transpose_iff {n : ℕ} (M : Matrix (Fin n) (Fin n) K) :
+    IsLowUni Mᵀ ↔ IsUpUni M := by
+  constructor
+  · rintro ⟨h, hd⟩
+    exact ⟨fun _ _ hij => h hij, hd⟩
+  · rintro ⟨h, hd⟩
+    exact ⟨h.transpose, hd⟩
+
 theorem blkM_isUpUni (hN : N = m + 1) (A : Matrix (Fin m) (Fin m) K)
     (b a : Fin m → K) (d : K) : IsUpUni (blkM hN A b a d) ↔ IsUpUni A ∧ a = 0 ∧ d = 1 := by
-  constructor
-  · rintro ⟨hl, hd⟩
-    refine ⟨⟨fun i j hij => ?_, fun i => ?_⟩, ?_, ?_⟩
-    · have hh : blkM hN A b a d (eN hN (Sum.inl i)) (eN hN (Sum.inl j)) = 0 :=
-        hl ((eN_lt_iff hN j i).2 hij)
-      rwa [blkM_ll] at hh
-    · have hh : blkM hN A b a d (eN hN (Sum.inl i)) (eN hN (Sum.inl i)) = 1 := hd _
-      rwa [blkM_ll] at hh
-    · funext i
-      have hh : blkM hN A b a d (eN hN (Sum.inr ())) (eN hN (Sum.inl i)) = 0 :=
-        hl (eN_inl_lt_inr hN i ())
-      rwa [blkM_rl] at hh
-    · have hh : blkM hN A b a d (eN hN (Sum.inr ())) (eN hN (Sum.inr ())) = 1 := hd _
-      rwa [blkM_rr] at hh
-  · rintro ⟨⟨hl, hd⟩, rfl, rfl⟩
-    refine ⟨fun i j hij => ?_, fun i => ?_⟩
-    · have hij' : j < i := hij
-      obtain ⟨x, rfl⟩ := (eN hN).surjective i
-      obtain ⟨y, rfl⟩ := (eN hN).surjective j
-      rcases x with x | ⟨⟩ <;> rcases y with y | ⟨⟩
-      · rw [blkM_ll]
-        exact hl ((eN_lt_iff hN y x).1 hij')
-      · exact absurd hij' (lt_asymm (eN_inl_lt_inr hN x ()))
-      · rw [blkM_rl]; rfl
-      · exact absurd hij' (lt_irrefl _)
-    · obtain ⟨x, rfl⟩ := (eN hN).surjective i
-      rcases x with x | ⟨⟩
-      · rw [blkM_ll]
-        exact hd x
-      · rw [blkM_rr]
+  simpa only [← blkM_transpose, isLowUni_transpose_iff] using blkM_isLowUni hN Aᵀ a b d
 
 def lastE (x : Fin m → K) : K := ∑ j : Fin m, if j.val + 1 = m then x j else 0
 
@@ -336,30 +322,9 @@ theorem sec_sLow (hN : N = m + 1) (A : Matrix (Fin m) (Fin m) K) (b a : Fin m �
 
 theorem sec_sUp (hN : N = m + 1) (A : Matrix (Fin m) (Fin m) K) (b a : Fin m → K) (d : K) :
     sUp (blkM hN A b a d) = sUp A + lastE b := by
-  unfold sUp lastE
-  rw [← (eN hN).sum_comp, Fintype.sum_sum_type]
-  have hinr : ¬ (((eN hN (Sum.inr ())) : Fin N) : ℕ) + 1 < N := by
-    rw [eN_inr]
-    omega
-  simp only [Fintype.univ_unit, Finset.sum_singleton]
-  rw [dite_eq_right hinr, add_zero, ← Finset.sum_add_distrib]
-  apply Finset.sum_congr rfl
-  intro i _
-  have hi := i.isLt
-  have hlt : ((eN hN (Sum.inl i) : Fin N) : ℕ) + 1 < N := by
-    rw [eN_inl]
-    omega
-  rw [dite_eq_left hlt]
-  by_cases h : i.val + 1 < m
-  · have e : (⟨((eN hN (Sum.inl i) : Fin N) : ℕ) + 1, hlt⟩ : Fin N) = eN hN (Sum.inl ⟨i.val + 1, h⟩) := by
-      ext
-      simp [eN_inl]
-    rw [e, blkM_ll, dite_eq_left h, if_neg (by omega), add_zero]
-  · have e : (⟨((eN hN (Sum.inl i) : Fin N) : ℕ) + 1, hlt⟩ : Fin N) = eN hN (Sum.inr ()) := by
-      ext
-      simp only [eN_inl, eN_inr]
-      omega
-    rw [e, blkM_lr, dite_eq_right h, if_pos (by omega), zero_add]
+  change sLow (blkM hN A b a d)ᵀ = sLow Aᵀ + lastE b
+  rw [blkM_transpose]
+  exact sec_sLow hN Aᵀ a b d
 
 theorem sec_lastE_vecMul {v : Matrix (Fin m) (Fin m) K} (hv : IsLowUni v) (ξ : Fin m → K) :
     lastE (ξ ᵥ* v) = lastE ξ := by

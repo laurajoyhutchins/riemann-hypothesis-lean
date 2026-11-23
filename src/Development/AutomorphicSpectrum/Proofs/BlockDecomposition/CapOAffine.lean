@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsLocalFrameOfCoords
 public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.SplittingFieldLattices.BasisB
 public import Development.WeilBound.CoreStatements.PadicHodgeComparison.EtaleCohomologyComparison.PerfectoidPullbacks.GlobalSerreRelations.GlobSerreSt
 public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.CechRefinementCohomologyBijectiveStatement
@@ -142,24 +143,7 @@ end Les
 section Chart
 
 theorem dividedPowerFiltration_bot (O : Type) [CommRing O] {k : ℕ} (hk : 1 ≤ k) : pdP (dividedPowersBot O) k = ⊥ := by
-  classical
-  refine le_bot_iff.1 (Ideal.span_le.2 ?_)
-  rintro _ ⟨l, hl, hr, rfl⟩
-  have : ∃ q ∈ l, 1 ≤ q.1 := by
-    by_contra hcon
-    push_neg at hcon
-    have : (l.map Prod.fst).sum = 0 := by
-      refine List.sum_eq_zero fun x hx => ?_
-      obtain ⟨q, hq, rfl⟩ := List.mem_map.1 hx
-      have := hcon q hq
-      omega
-    omega
-  obtain ⟨q, hq, h1⟩ := this
-  have h0 : (dividedPowersBot O).dpow q.1 q.2 = 0 := by
-    have : q.2 = 0 := by simpa using hl q hq
-    rw [this]
-    exact (dividedPowersBot O).dpow_eval_zero (by omega)
-  exact List.prod_eq_zero (List.mem_map.2 ⟨q, hq, h0⟩)
+  apply GlobalTheory.CompanionTheory.ConeLocal.dividedPowerFiltration_dividedPowersBot_of_one_le <;> assumption
 
 variable {O : Type} [CommRing O]
 

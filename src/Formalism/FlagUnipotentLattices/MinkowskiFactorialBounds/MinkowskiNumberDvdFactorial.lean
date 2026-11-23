@@ -118,18 +118,9 @@ theorem sublattice_count_alt : Formalism.HermitianLatticeCounting.S6.SublatticeC
 
 lemma prod_primepow_dvd (s : Finset ℕ) (hs : ∀ p ∈ s, p.Prime) (e : ℕ → ℕ) (n : ℕ)
     (h : ∀ p ∈ s, p ^ e p ∣ n) : ∏ p ∈ s, p ^ e p ∣ n := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simp
-  | insert p s hp ih =>
-    rw [Finset.prod_insert hp]
-    apply Nat.Coprime.mul_dvd_of_dvd_of_dvd _ (h p (Finset.mem_insert_self _ _))
-      (ih (fun q hq => hs q (Finset.mem_insert_of_mem hq)) (fun q hq => h q (Finset.mem_insert_of_mem hq)))
-    apply Nat.Coprime.prod_right
-    intro q hq
-    apply Nat.Coprime.pow
-    exact (Nat.coprime_primes (hs p (Finset.mem_insert_self _ _)) (hs q (Finset.mem_insert_of_mem hq))).2
-      (fun hpq => hp (hpq ▸ hq))
+  refine Finset.prod_dvd_of_isRelPrime (fun p hp q hq hpq => ?_) h
+  exact Nat.coprime_iff_isRelPrime.mp
+    (((Nat.coprime_primes (hs p hp) (hs q hq)).2 hpq).pow (e p) (e q))
 
 theorem minkowski_number_dvd_factorial : Formalism.HermitianLatticeCounting.S6.MinkowskiDvdFactorial := by
   intro N
@@ -137,21 +128,20 @@ theorem minkowski_number_dvd_factorial : Formalism.HermitianLatticeCounting.S6.M
   apply prod_primepow_dvd _ (fun p hp => (Finset.mem_filter.1 hp).2)
   intro p hp
   have hpp : p.Prime := (Finset.mem_filter.1 hp).2
-  have := Fact.mk hpp
   have hp2 : 2 ≤ p := hpp.two_le
-  rw [(by simpa only [_root_.Nat.padicValNat_def] using @_root_.multiplicity_dvd_iff_le : ∀ {p : _root_.Nat} [hp : _root_.Fact (_root_.Nat.Prime p)] {a n : _root_.Nat} (ha : a ≠ 0), p ^ n ∣ a ↔ n ≤ _root_.padicValNat p a) (Nat.factorial_ne_zero _)]
   have hlog : Nat.log p (2 * N) < N + 2 := by
-    by_cases h0 : 2 * N = 0
-    · simp [h0]
-    · apply Nat.log_lt_of_lt_pow h0
-      have h1 : N < 2 ^ N := Nat.lt_two_pow_self
-      have h2 : 2 ^ (N + 2) = 4 * 2 ^ N := by ring
-      have h3 : 2 ^ (N + 2) ≤ p ^ (N + 2) := Nat.pow_le_pow_left hp2 _
+    by_cases hN : N = 0
+    · simp [hN]
+    · apply Nat.log_lt_of_lt_pow (by omega)
+      have hpow := Nat.pow_le_pow_left hp2 (N + 2)
+      rw [pow_add] at hpow
+      norm_num at hpow
+      have := Nat.lt_two_pow_self (n := N)
       omega
-  rw [Nat.padicValNat_def, multiplicity_factorial hlog, Finset.sum_Ico_eq_sum_range]
+  rw [hpp.pow_dvd_iff_le_factorization (Nat.factorial_ne_zero _), Nat.factorization_factorial hpp hlog,
+    Finset.sum_Ico_eq_sum_range]
   unfold minkowskiExp
-  have e : N + 2 - 1 = N + 1 := by omega
-  rw [e]
+  rw [show N + 2 - 1 = N + 1 by omega]
   apply Finset.sum_le_sum
   intro i _
   have hpos : 0 < p ^ (1 + i) := pow_pos (by omega) _
@@ -201,26 +191,18 @@ theorem exterior_power_bound : Formalism.HermitianLatticeCounting.S6.ExtPowerBou
       simpa using this.symm.le
   have hB : ∀ x y, ‖B x y‖ ≤ 2 * ‖x‖ * ‖y‖ := by
     intro x y
-    by_cases hx : x = 0
-    · simp [hx]
-    by_cases hy : y = 0
-    · simp [hy]
-    have hx0 : ‖x‖ ≠ 0 := norm_ne_zero_iff.2 hx
-    have hy0 : ‖y‖ ≠ 0 := norm_ne_zero_iff.2 hy
-    have h1 := hB1 (((‖x‖ : ℂ))⁻¹ • x) (((‖y‖ : ℂ))⁻¹ • y)
-      (by rw [norm_smul, norm_inv, Complex.norm_real, norm_norm, inv_mul_cancel₀ hx0])
-      (by rw [norm_smul, norm_inv, Complex.norm_real, norm_norm, inv_mul_cancel₀ hy0])
-    have e0 : B (((‖x‖ : ℂ))⁻¹ • x) (((‖y‖ : ℂ))⁻¹ • y) = (((‖x‖ : ℂ))⁻¹ * ((‖y‖ : ℂ))⁻¹) * B x y := by
-      simp only [map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, map_inv₀, Complex.conj_ofReal,
-        RingHom.id_apply]
-      ring
-    rw [e0, norm_mul, norm_mul, norm_inv, norm_inv, Complex.norm_real, Complex.norm_real, norm_norm,
-      norm_norm] at h1
-    have hxp : 0 < ‖x‖ := norm_pos_iff.2 hx
-    have hyp' : 0 < ‖y‖ := norm_pos_iff.2 hy
-    have e : ‖x‖⁻¹ * ‖y‖⁻¹ * ‖B x y‖ = ‖B x y‖ / (‖x‖ * ‖y‖) := by field_simp
-    rw [e, div_le_iff₀ (by positivity)] at h1
-    linarith
+    have hRight (z : EuclideanSpace ℂ (Fin m)) (hz : ‖z‖ = 1) : ‖B z y‖ ≤ 2 * ‖y‖ := by
+      let f : EuclideanSpace ℂ (Fin m) →ₗ[ℂ] ℂ :=
+        ⟨⟨fun t => star (B z t), by simp⟩, by simp [map_smulₛₗ, smul_eq_mul]⟩
+      have h := f.bound_of_sphere_bound (r := 1) zero_lt_one 2
+        (fun t ht => by
+          simpa [f, norm_star] using hB1 z t hz (mem_sphere_zero_iff_norm.mp ht)) y
+      simpa [f, norm_star] using h
+    let f : EuclideanSpace ℂ (Fin m) →ₗ[ℂ] ℂ :=
+      ⟨⟨fun t => B t y, by simp⟩, by simp⟩
+    have h := f.bound_of_sphere_bound (r := 1) zero_lt_one (2 * ‖y‖)
+      (fun t ht => hRight t (mem_sphere_zero_iff_norm.mp ht)) x
+    simpa [f, mul_right_comm] using h
   let u : Fin j → EuclideanSpace ℂ (Fin m) := fun i => WithLp.toLp 2 (fun l => star (A i l))
   let w : Fin j → EuclideanSpace ℂ (Fin m) := fun i => WithLp.toLp 2 (fun l => star (A' i l))
   have hgram : ∀ (M : Matrix (Fin j) (Fin m) ℂ),

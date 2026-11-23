@@ -67,13 +67,6 @@ theorem torsUnit2 (K : Type) [NormedField K] [IsUltrametricDist K] (g2 g3 : K) (
     intro h0; rw [h0, norm_zero] at h2; exact zero_ne_one h2
   have hW : Formalism.ELL.IntegralModel (Formalism.L2.Th1.A.shortW g2 g3) := by
     refine ⟨?_, ?_, ?_, ?_, ?_⟩ <;> simp [Formalism.L2.Th1.A.shortW, n4, hg2, hg3.le]
-  have hD : ‖(Formalism.L2.Th1.A.shortW g2 g3).Δ‖ = 1 := by
-    have : (Formalism.L2.Th1.A.shortW g2 g3).Δ = g2 ^ 3 - 27 * g3 ^ 2 := by
-      simp only [WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
-        WeierstrassCurve.b₆, WeierstrassCurve.b₈, Formalism.L2.Th1.A.shortW]
-      field_simp
-      ring
-    rw [this, hΔ]
 
   have hNoTorsion : ∀ P : (Formalism.L2.Th1.A.shortW g2 g3).toAffine.Point,
       Formalism.ELL.InFormalGroupPoints P → n • P = 0 → P = 0 := by

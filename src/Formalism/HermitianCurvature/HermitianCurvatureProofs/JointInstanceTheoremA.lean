@@ -1,5 +1,6 @@
 module
 
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.OutsideSystemsBound
 public import Formalism.HermitianCurvature.StatementJ
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -272,21 +273,7 @@ theorem t_ProductDomination : ProductDomination := by
 theorem t_ProductLemma' : ProductLemma := t_ProductLemma t_SchurProduct t_ProductDomination
 
 theorem t_DiagScale : DiagScale := by
-  intro α F k a hk
-  have h1 : TB.PSDOn F (fun x y => (a x : ℂ) * (a y : ℂ)) := by
-    unfold TB.PSDOn
-    apply Matrix.PosSemidef.of_dotProduct_mulVec_nonneg
-    · ext x y; simp [Matrix.conjTranspose_apply, mul_comm]
-    · intro x
-      have : star x ⬝ᵥ (Matrix.of fun i j : F => (a i : ℂ) * (a j : ℂ)) *ᵥ x =
-          star (∑ i : F, (a i : ℂ) * x i) * ∑ i : F, (a i : ℂ) * x i := by
-        rw [star_sum, Finset.sum_mul_sum]
-        simp only [dotProduct, Matrix.mulVec, Matrix.of_apply, Pi.star_apply, Finset.mul_sum]
-        apply Finset.sum_congr rfl; intro i _
-        apply Finset.sum_congr rfl; intro j _
-        simp; ring
-      rw [this]; exact star_mul_self_nonneg _
-  exact psd_mul h1 hk
+  apply Formalism.FourierDecayAlt.P.Jx8.t_DiagScale <;> assumption
 
 end kernels
 

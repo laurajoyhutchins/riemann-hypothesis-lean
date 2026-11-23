@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.GenericFrameIntegralOffFinitelyManyFunctions
 public import Development.AbelianVarietyTheory.Definitions.ExistenceOfLattices.UnivFrame
 public import Formalism.LocalToGlobal.ProjectiveLattices.VAtVNeBot
 public import Mathlib.Tactic.ENatToNat
@@ -101,31 +102,7 @@ theorem integral_scal (T : CDVR) (io : c.F →+* T.Fr) : letI := io.toAlgebra
       (hg : ∀ s'' : LB.Sec (PPx y.x), ∃! b : T.Fr, ∀ i, s''.f i = scal y.x b i * s'.f i),
       (∀ i, s'.f i = scal y.x (algebraMap T.V T.Fr a) i * y.s.f i) → Integral T io y →
       Integral T io { y with s := s', gen := hg } := by
-  let _ := io.toAlgebra
-  intro y a s' hg hs h
-  obtain ⟨G, t', m1, m2, hu, θ, hθ, w1, w2, σ, s1, θ2, r1, r2, i1, i2, hp, hl⟩ := h
-  have hc : m2.φ.appTop.hom (G.G.hom.appTop.hom (toΓ T.V a)) =
-      t'.G.hom.appTop.hom (toΓ T.Fr (algebraMap T.V T.Fr a)) := by
-    rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop, m2.cart.1.w, Scheme.Hom.comp_appTop,
-      CommRingCat.comp_apply]
-    exact congrArg _ (appTop_toΓ _ _)
-  refine ⟨G, t', m1, m2, hu, mulSec (G.G.hom.appTop.hom (toΓ T.V a)) θ, fun τ => ?_, w1, w2, _, _, _, r1, r2,
-    isoMaps_mul i1 _, isoMaps_mul i2 _, pullSec_mul hp _, ?_⟩
-  · obtain ⟨b, hb, hbu⟩ := hθ τ
-    have key : ∀ (d : T.V) i, resG G.G.left le_top ((G.G.hom).appTop.hom (toΓ T.V d)) *
-        (mulSec (G.G.hom.appTop.hom (toΓ T.V a)) θ).f i =
-        resG G.G.left le_top ((G.G.hom).appTop.hom (toΓ T.V (d * a))) * θ.f i := fun d i => by
-      simp only [mulSec, map_mul, _root_.mul_assoc]
-    refine ⟨b * ↑a⁻¹, fun i => ?_, fun d hd => ?_⟩
-    · rw [key, Units.inv_mul_cancel_right]; exact hb i
-    · rw [← hbu (d * a) fun i => by rw [← key]; exact hd i, Units.mul_inv_cancel_right]
-  · intro g e1 e2 j hj
-    have e3 := hl g e1 e2 j hj
-    show resG _ le_top _ * s1.f j = (g.appLE _ _ hj).hom (s'.f _)
-    refine Eq.symm ((congrArg _ (hs _)).trans ((map_mul _ _ _).trans (congrArg₂ (· * ·) ?_ e3.symm)))
-    refine (appLE_res g _ _ hj _).trans (congrArg _ ?_)
-    rw [hc, ← e2, Scheme.Hom.comp_appTop]
-    rfl
+  apply GlobalTheory.Reg.GenInt.integral_scal <;> assumption
 
 theorem integral_chg (T : CDVR) (io : c.F →+* T.Fr) : letI := io.toAlgebra
     ∀ (y y' : FrPt Xo c T.Fr) (k : ∀ τ : E →+* ℂ, Matrix (Fin (Dw.mult τ)) (Fin (Dw.mult τ)) T.V) (a : T.Vˣ),

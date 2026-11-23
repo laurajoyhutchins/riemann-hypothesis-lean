@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ProdIccMulFactorial
 public import Formalism.IncomingBounds.StatementThmP
 public import Mathlib.Algebra.MvPolynomial.PDeriv
 public import Mathlib.LinearAlgebra.Matrix.Adjugate
@@ -546,25 +547,6 @@ namespace Formalism.IncomingBounds
 open MvPolynomial Matrix
 
 theorem cayleyIdentity : CayleyId := by
-  intro F _ _ n0 s
-  have hdl : detL F n0 = (Formalism.IncomingBounds.Cay.Mg F n0).det := rfl
-  rw [hdl]
-  cases n0 with
-  | zero =>
-    rw [Matrix.det_isEmpty, one_pow, one_pow, Formalism.IncomingBounds.Cay.diffOp_one, Finset.range_zero,
-      Finset.prod_empty, one_smul]
-  | succ k =>
-    have h := Formalism.IncomingBounds.Cay.gen (K := F) (k+1) s k id id
-    have hsub : (Formalism.IncomingBounds.Cay.Mg F (k+1)).submatrix id id =
-        Formalism.IncomingBounds.Cay.Mg F (k+1) := Matrix.submatrix_id_id _
-    have hadj : ((adjugate (Formalism.IncomingBounds.Cay.Mg F (k+1))).submatrix id id).det =
-        (Formalism.IncomingBounds.Cay.Mg F (k+1)).det ^ k := by
-      rw [Matrix.submatrix_id_id, det_adjugate, Fintype.card_fin, Nat.add_sub_cancel]
-    rw [hsub, hadj] at h
-    have hne : (Formalism.IncomingBounds.Cay.Mg F (k+1)).det ^ k ≠ 0 :=
-      pow_ne_zero _ (Formalism.IncomingBounds.Cay.det_ne (K := F) (k+1))
-    apply mul_left_cancel₀ hne
-    rw [h, smul_eq_C_mul]
-    ring
+  apply GlobalTheory.CayleyCapelli.cayleyId <;> assumption
 
 end Formalism.IncomingBounds

@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FirstCohomology.SectionArithmetic
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.AppCompatGeneric
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.DiscreteValuationRings.ValuationMultiplicationInvariance
@@ -141,24 +142,7 @@ theorem sval_lin {K : Type} [Fintype K] {φ : K → (Y ⟶ X)} {ε : K → ℤ} 
 theorem sval_pullSec {K : Type} [Fintype K] (φ : K → (Y ⟶ X)) (ε : K → ℤ)
     (s : LB.Sec (LB.LinComb L φ ε)) (h : Y' ⟶ Y) (r : Z ⟶ Y') (z : Z) {J : (Z ⟶ X) → L.ι}
     (hJ : Good L z J) : sval (pullSec L φ ε s h) r z J = sval s (r ≫ h) z J := by
-  have hmem : r z ∈ LB.wchart L (fun k => h ≫ φ k) (fun k => J (r ≫ h ≫ φ k)) := by
-    show r.base z ∈ (⋂ k, ((h ≫ φ k).base ⁻¹' (L.U (J (r ≫ h ≫ φ k)) : Set X)))
-    exact Set.mem_iInter.2 fun k => hJ (r ≫ h ≫ φ k)
-  calc sval (pullSec L φ ε s h) r z J
-      = gs r z (LB.wchart L (fun k => h ≫ φ k) (fun k => J (r ≫ h ≫ φ k)))
-          ((Y'.presheaf.map (homOfLE (wchart_comp_le φ h (fun k => J (r ≫ h ≫ φ k)))).op).hom
-            ((h.app _).hom (s.f (fun k => J (r ≫ h ≫ φ k))))) := rfl
-    _ = gs r z (h ⁻¹ᵁ LB.wchart L φ (fun k => J (r ≫ h ≫ φ k)))
-          ((h.app _).hom (s.f (fun k => J (r ≫ h ≫ φ k)))) :=
-        gs_res r z (wchart_comp_le φ h _) hmem _
-    _ = gs (r ≫ h) z (LB.wchart L φ (fun k => J (r ≫ h ≫ φ k))) (s.f (fun k => J (r ≫ h ≫ φ k))) :=
-        gs_pull r h z _ (wchart_comp_le φ h _ hmem) _
-    _ = sval s (r ≫ h) z J := by
-        have e : (fun k => J ((r ≫ h) ≫ φ k)) = fun k => J (r ≫ h ≫ φ k) := by
-          funext k; rw [Category.assoc]
-        show _ = gs (r ≫ h) z (LB.wchart L φ (fun k => J ((r ≫ h) ≫ φ k)))
-          (s.f (fun k => J ((r ≫ h) ≫ φ k)))
-        rw [e]
+  apply ReciprocityTheory.ChartRestriction.G.H1.SectionArithmetic.sval_pullSec <;> assumption
 
 end Gen
 

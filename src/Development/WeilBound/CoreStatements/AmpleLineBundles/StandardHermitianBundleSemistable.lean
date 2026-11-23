@@ -217,15 +217,6 @@ theorem integers_deg_le (G : Submodule (𝓞 K) (HermitianBundle.integers K).car
   have hpos : 0 < Nat.card (G ⧸ Submodule.span (𝓞 K) {sG 0}) := Nat.card_pos
   have hlog := Real.log_le_log (by exact_mod_cast hpos)
     (Nat.cast_le.2 hle : (Nat.card (G ⧸ Submodule.span (𝓞 K) {sG 0}) : ℝ) ≤ _)
-  have e1 : (HermitianBundle.integers K).degree G =
-      Real.log (Nat.card (G ⧸ Submodule.span (𝓞 K) {sG 0})) -
-        1 / 2 * ∑ σ : K →+* ℂ, Real.log (gramDet (HermitianBundle.integers K).metric σ
-          fun i => (sT i : (HermitianBundle.integers K).carrier)) := hGd
-  have e2 : (HermitianBundle.integers K).degree ⊤ =
-      Real.log (Nat.card ((⊤ : Submodule (𝓞 K) (HermitianBundle.integers K).carrier) ⧸
-        Submodule.span (𝓞 K) {sT 0})) -
-        1 / 2 * ∑ σ : K →+* ℂ, Real.log (gramDet (HermitianBundle.integers K).metric σ
-          fun i => (sT i : (HermitianBundle.integers K).carrier)) := hTd
   linarith
 
 theorem std_deg (r : ℕ) : (∀ F, (HermitianBundle.standard K r).degree F ≤ 0) ∧

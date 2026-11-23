@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.NotInPsiConj
 public import Development.AbelianVarietyTheory.Definitions.TwoChartAtlas.AdditionLawSecondIdentity
 public import Development.AbelianVarietyTheory.Proofs.FormalGroupCharts.HarmonicValuesEqOfRelatedBiextensionsStatement
 import Mathlib.Algebra.Order.Floor.Extended
@@ -54,29 +55,7 @@ namespace GlobalTheory.ChartCmp
 
 theorem inPsi_or_conjugate {E : Type} [Field E] [NumberField E] [IsCMField E] (H : Host E) (τ : E →+* ℂ) :
     InPsi H τ ∨ InPsi H (ComplexEmbedding.conjugate τ) := by
-  unfold InPsi
-  have hb : ∀ σ : E →+* ℂ, σ (H.rt : E) ^ 2 = H.rt0 ^ 2 := by
-    intro σ
-    have h1 : ((H.rt : 𝓞 E) : E) ^ 2 = -(H.d : E) := by
-      have := congrArg (algebraMap (𝓞 E) E) H.rt_sq
-      simpa using this
-    rw [← map_pow, h1, H.sqrt_neg_disc_sq]; simp
-  have h0 : H.rt0.re = 0 := by
-    have hd : (0 : ℝ) < H.d := by exact_mod_cast H.d_prime.pos
-    have hre := congrArg Complex.re H.sqrt_neg_disc_sq
-    have him := congrArg Complex.im H.sqrt_neg_disc_sq
-    simp [pow_two] at hre him
-    by_contra hne
-    have : H.rt0.im = 0 := by
-      have h2 : H.rt0.re * H.rt0.im = 0 := by linarith
-      exact (mul_eq_zero.1 h2).resolve_left hne
-    rw [this] at hre
-    nlinarith [mul_self_nonneg H.rt0.re]
-  rcases sq_eq_sq_iff_eq_or_eq_neg.1 (hb τ) with h | h
-  · exact Or.inl h
-  · right
-    rw [ComplexEmbedding.conjugate_coe_eq, h]
-    apply Complex.ext <;> simp [h0]
+  apply GlobalTheory.LabSelf.inPsi_or_conj <;> assumption
 
 theorem nuAlg_le_of_jrel : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (H : Host E) (Dw : Datum H) (l : Level H) (Xo : Moduli Dw l) (c : Coeff l) [StarRing (𝓞 E)], (∀ a : 𝓞 E, star a = H.bar a) → ∀ (T : CDVR) (io : c.F →+* T.Fr) (d : ℕ) (B B' : FB T.V d (𝓞 E)) (φ φi : Pt T.V 1 d) (h h' : PS T.Fr 2 d) (u u' : Lt1 Dw → Fin d → T.Fr), (∀ m, ∃ ε : PS T.V 2 d, JRel m B B' φ φi ε) → B.IsCanonGauge T.Fr h → B'.IsCanonGauge T.Fr h' → (∀ (a : 𝓞 E) (ℓ : Lt1 Dw), (dAct T.Fr B' a).mulVec (u' ℓ) = io (embK c ℓ.1 a) • u' ℓ) → (∀ ℓ, u ℓ = ((dLin φ).map (algebraMap T.V T.Fr)).mulVec (u' ℓ)) → ∀ (e k : ℕ) (a : (E →+* ℂ) × ℕ → ℕ) (n : ℕ), nuAlg Dw T B h u e k a n ≤ nuAlg Dw T B' h' u' e k a n := by
   intro E _ _ _ H Dw l Xo c _ hstar T io d B B' φ φi h h' u u' hrel hB hB' heig hu e k a n

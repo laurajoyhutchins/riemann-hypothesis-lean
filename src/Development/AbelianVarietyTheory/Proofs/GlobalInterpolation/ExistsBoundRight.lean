@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ExplicitFormula.GoodHeight
 public import Mathlib.Analysis.Analytic.Order
 public import Mathlib.Analysis.CStarAlgebra.Classes
 public import Mathlib.NumberTheory.LSeries.DirichletContinuation
@@ -100,27 +101,7 @@ theorem exists_far (S : Finset ℝ) (T : ℝ) : ∃ T' : ℝ, T ≤ T' ∧ T' �
 
 theorem one_le_order {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q) {w : ℂ} (h1 : w ≠ 1)
     (hw : LFunction χ w = 0) : 1 ≤ analyticOrderNatAt (LFunction χ) w := by
-  have hU : IsPreconnected ({1}ᶜ : Set ℂ) :=
-    (isConnected_compl_singleton_of_one_lt_rank (by rw [Complex.rank_real_complex]; norm_num) 1).isPreconnected
-  have han : AnalyticOnNhd ℂ (LFunction χ) ({1}ᶜ : Set ℂ) := by
-    intro z hz
-    have hd : DifferentiableOn ℂ (LFunction χ) ({1}ᶜ : Set ℂ) := fun u hu =>
-      (differentiableAt_LFunction χ u (.inl hu)).differentiableWithinAt
-    exact hd.analyticAt (isOpen_compl_singleton.mem_nhds hz)
-  have h2 : (2 : ℂ) ∈ ({1}ᶜ : Set ℂ) := by norm_num
-  have hw1 : w ∈ ({1}ᶜ : Set ℂ) := h1
-  have hne2 : analyticOrderAt (LFunction χ) 2 ≠ ⊤ := by
-    rw [(han 2 h2).analyticOrderAt_eq_zero.mpr
-      (LFunction_ne_zero_of_one_le_re χ (.inr (by norm_num)) (by norm_num))]
-    exact ENat.zero_ne_top
-  have hnetop := han.analyticOrderAt_ne_top_of_isPreconnected hU h2 hw1 hne2
-  have hne0 : analyticOrderAt (LFunction χ) w ≠ 0 := (han w hw1).analyticOrderAt_ne_zero.mpr hw
-  unfold analyticOrderNatAt
-  obtain ⟨n, hn⟩ := ENat.ne_top_iff_exists.mp hnetop
-  rw [← hn] at hne0 ⊢
-  simp only [ENat.toNat_natCast]
-  have : n ≠ 0 := by rintro rfl; exact hne0 rfl
-  omega
+  apply PI.EF.one_le_mult <;> assumption
 
 theorem exists_bound_right : ∃ B : ℝ, 0 ≤ B ∧ ∀ (N : ℕ) [NeZero N] (χ : DirichletCharacter ℂ N)
     (s : ℂ), 2 ≤ s.re → ‖deriv (LFunction χ) s / LFunction χ s‖ ≤ B := by

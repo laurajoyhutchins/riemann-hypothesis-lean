@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.NotDvdAbsNormDifferent
 public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.SettingBlocks
 public import Mathlib.Algebra.AffineMonoid.Basic
 public import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.SplitPrimeCounts.LsSetresSplit
@@ -54,45 +55,7 @@ namespace Formalism.L2.SG.SplitPrimeNormLemmas.IntG
 theorem not_dvd_absNorm_different (K : Type) [Field K] [NumberField K] (p : ℕ) (hp : p.Prime)
     (hram : ∀ P : Ideal (𝓞 K), P.IsPrime → P ≠ ⊥ → ((p : ℕ) : 𝓞 K) ∈ P → P.ramificationIdx ℤ = 1) :
     ¬ p ∣ Ideal.absNorm (differentIdeal ℤ (𝓞 K)) := by
-  haveI : Fact p.Prime := ⟨hp⟩
-  have hne : differentIdeal ℤ (𝓞 K) ≠ ⊥ := differentIdeal_ne_bot
-  suffices h : ∀ I : Ideal (𝓞 K), I ∣ differentIdeal ℤ (𝓞 K) → ¬ p ∣ Ideal.absNorm I from h _ dvd_rfl
-  intro I
-  refine UniqueFactorizationMonoid.induction_on_prime I ?_ ?_ ?_
-  · intro h _
-    exact hne (by simpa using zero_dvd_iff.mp h)
-  · intro x hx _ hdvd
-    have h1 := Nat.isUnit_iff.mp (hx.map Ideal.absNorm)
-    rw [h1] at hdvd
-    exact hp.one_lt.ne' (Nat.dvd_one.mp hdvd)
-  · intro a P _ hP ih hdiv hdvd
-    rw [map_mul] at hdvd
-    rcases hp.prime.dvd_mul.mp hdvd with h | h
-    · have hPi : P.IsPrime := Ideal.isPrime_of_prime hP
-      have hPne : P ≠ ⊥ := hP.ne_zero
-      have hPd : P ∣ differentIdeal ℤ (𝓞 K) := dvd_trans (dvd_mul_right P a) hdiv
-      haveI := hPi
-      have hN0 : Ideal.absNorm P ≠ 0 := by rwa [Ne, Ideal.absNorm_eq_zero_iff]
-      have hc : Nat.card (𝓞 K ⧸ P) = Ideal.absNorm P := by
-        rw [Ideal.absNorm_apply, Submodule.cardQuot_apply]
-      haveI : Finite (𝓞 K ⧸ P) := Nat.finite_of_card_ne_zero (hc ▸ hN0)
-      haveI : Fintype (𝓞 K ⧸ P) := Fintype.ofFinite _
-      obtain ⟨x, hx⟩ := exists_prime_addOrderOf_dvd_card (G := 𝓞 K ⧸ P) p
-        (by rwa [← Nat.card_eq_fintype_card, hc])
-      have hx0 : x ≠ 0 := by
-        rintro rfl
-        rw [addOrderOf_zero] at hx
-        exact hp.one_lt.ne hx
-      have hpx : ((p : ℕ) : 𝓞 K ⧸ P) * x = 0 := by
-        rw [← nsmul_eq_mul, ← hx]
-        exact addOrderOf_nsmul_eq_zero x
-      have hp0 : ((p : ℕ) : 𝓞 K ⧸ P) = 0 := (mul_eq_zero.mp hpx).resolve_right hx0
-      rw [← map_natCast (Ideal.Quotient.mk P), Ideal.Quotient.eq_zero_iff_mem] at hp0
-      have he := hram P hPi hPne hp0
-      have hun : ¬ Algebra.IsUnramifiedAt ℤ P := dvd_differentIdeal_iff.mp hPd
-      apply hun
-      exact Algebra.isUnramifiedAt_iff_of_isDedekindDomain.mpr he
-    · exact ih (dvd_trans (dvd_mul_left a P) hdiv) h
+  apply GlobalTheory.FrameIntegral.not_dvd_absNorm_different <;> assumption
 
 attribute [local instance] Formalism.BasicNotions.Host.cmStar
 

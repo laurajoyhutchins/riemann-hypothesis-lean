@@ -134,9 +134,6 @@ theorem hsD_le_of_sobolev {u : EuclideanSpace ℝ (Fin n) → ℂ} (hu : ContDif
     have := (dT_eventuallyEq_zero_of_not_mem_tsupport hx (fun l ↦ ev (I l))).self_of_nhds
     simp only [hw, pdT]
     rw [this, mul_zero]
-  have mem : ∀ {f : EuclideanSpace ℝ (Fin n) → ℝ}, Continuous f →
-      (∀ x, x ∉ tsupport u → f x = 0) → MemLp f 2 volume := fun hc hz ↦
-    memLp_two_of_continuous_hasCompactSupport hc (HasCompactSupport.intro hu_c hz)
   have memh : ∀ j I, MemLp (hsD j (w I)) 2 volume := fun j I ↦
     memLp_two_of_continuous_hasCompactSupport (continuous_hsD (hwC I) j) (by
       refine HasCompactSupport.intro (hwc I) fun x hx ↦ ?_
@@ -181,10 +178,8 @@ theorem exists_norm_iteratedFDeriv_le_of_wN {u : EuclideanSpace ℝ (Fin n) → 
     ∃ C M : ℝ, ∀ (k : ℕ) (y : EuclideanSpace ℝ (Fin n)), χ y = 1 →
       ‖iteratedFDeriv ℝ k u y‖ ≤ C * M ^ k * k.factorial := by
   set e := Real.exp 1
-  have he : 0 ≤ e := (Real.exp_pos 1).le
   refine ⟨CS * (2 * 2 ^ σ * K * B) * (σ.factorial * (2 * e * L) ^ σ), 2 * e * L, fun k y hy ↦ ?_⟩
   set s := k + σ with hs
-  have hL0 : 0 ≤ L := by linarith
 
   have hterm : ∀ j, j ≤ σ → ∑ ij ∈ antidiagonal j, (j.choose ij.1 : ℝ) *
       (K * ((k + σ : ℕ) : ℝ) ^ ij.1) * wN χ u (ij.2 + k) ≤ 2 ^ σ * K * (B * L ^ s * (s : ℝ) ^ s) := by
@@ -197,8 +192,6 @@ theorem exists_norm_iteratedFDeriv_le_of_wN {u : EuclideanSpace ℝ (Fin n) → 
           have hb := hN (ij.2 + k)
           have hp := powMul_self_le (s := s) (i := ij.1) (q := ij.2 + k) (by omega)
           have hLq : L ^ (ij.2 + k) ≤ L ^ s := pow_le_pow_right₀ hL (by omega)
-          have hsi : (0 : ℝ) ≤ (s : ℝ) ^ ij.1 := by positivity
-          have hqq : (0 : ℝ) ≤ ((ij.2 + k : ℕ) : ℝ) ^ (ij.2 + k) := by positivity
           calc (j.choose ij.1 : ℝ) * (K * ((k + σ : ℕ) : ℝ) ^ ij.1) * wN χ u (ij.2 + k)
               ≤ (j.choose ij.1 : ℝ) * (K * (s : ℝ) ^ ij.1) *
                   (B * L ^ (ij.2 + k) * ((ij.2 + k : ℕ) : ℝ) ^ (ij.2 + k)) := by
@@ -353,7 +346,6 @@ theorem analyticAt_of_elliptic_of_pos (hn : 0 < n) {m : ℕ} (hm : 1 ≤ m)
       (pow_le_pow_left₀ (Nat.cast_nonneg _) (le_max_right _ _) i).trans
         (pow_le_pow_right₀ (le_max_left _ _) hi)
     have hb := hK₁ s i x hi his
-    have hχ0 := (h01 x).1
     calc hsD i (fun y ↦ ((χ y : ℂ)) ^ s) x
         ≤ (n : ℝ) ^ i * ‖iteratedFDeriv ℝ i (fun y ↦ ((χ y : ℂ)) ^ s) x‖ :=
           hsD_le_norm_iteratedFDeriv _ _ _

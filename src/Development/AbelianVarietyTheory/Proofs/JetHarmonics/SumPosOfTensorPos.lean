@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.CharEqOfThetaCharEqMul
 public import Mathlib.LinearAlgebra.Matrix.PosDef
 public import Mathlib.NumberTheory.NumberField.Basic
 import Mathlib.Algebra.AffineMonoid.Basic
@@ -93,24 +94,7 @@ end Evaluations
 
 theorem posSemidef_of_int {ι : Type} [Fintype ι] {N : Matrix ι ι ℝ} (hH : N.IsHermitian)
     (hp : ∀ x : ι → ℤ, 0 ≤ (fun i => (x i : ℝ)) ⬝ᵥ N *ᵥ (fun i => (x i : ℝ))) : N.PosSemidef := by
-  have hq : ∀ x : ι → ℚ, 0 ≤ (fun i => (x i : ℝ)) ⬝ᵥ N *ᵥ (fun i => (x i : ℝ)) := by
-    intro x
-    obtain ⟨d, hd⟩ := IsLocalization.exist_integer_multiples_of_finite (nonZeroDivisors ℤ) x
-    choose y hy using hd
-    have hd0 : ((d : ℤ) : ℝ) ≠ 0 := by exact_mod_cast nonZeroDivisors.coe_ne_zero d
-    have hxy : (fun i => (y i : ℝ)) = ((d : ℤ) : ℝ) • (fun i => (x i : ℝ)) := by
-      funext i
-      have := congrArg (fun q : ℚ => (q : ℝ)) (hy i)
-      simpa [Submonoid.smul_def] using this
-    have h1 := hp y
-    rw [hxy, mulVec_smul, smul_dotProduct, dotProduct_smul, smul_eq_mul, smul_eq_mul, ← mul_assoc] at h1
-    exact nonneg_of_mul_nonneg_right h1 (mul_self_pos.2 hd0)
-  refine posSemidef_iff_dotProduct_mulVec.2 ⟨hH, fun x => ?_⟩
-  have hd : DenseRange (Pi.map fun (_ : ι) => (Rat.cast : ℚ → ℝ)) :=
-    DenseRange.piMap fun _ => Rat.denseRange_cast
-  refine hd.induction_on (p := fun x => 0 ≤ star x ⬝ᵥ N *ᵥ x) x ?_ (fun q => ?_)
-  · exact isClosed_le continuous_const (by fun_prop)
-  · exact hq q
+  apply GlobalTheory.ThetaCompare.posSemidef_of_int_nonneg <;> assumption
 
 theorem posDef_of_int {ι : Type} [Fintype ι] [DecidableEq ι] (M : Matrix ι ι ℤ) (hs : ∀ i j, M i j = M j i)
     (hp : ∀ x : ι → ℤ, x ≠ 0 → 0 < x ⬝ᵥ M *ᵥ x) :

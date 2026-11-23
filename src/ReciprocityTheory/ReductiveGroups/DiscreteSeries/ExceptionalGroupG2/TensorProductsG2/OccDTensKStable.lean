@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.OccDTensKStable
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.EqZeroOfDatumEmbeddingEqZero
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.HidaSetting
 import Mathlib.Algebra.Order.Floor.Extended
@@ -63,16 +64,7 @@ theorem occD_genSub_K {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ 
     {V : Submodule ℂ D} (hVf : FiniteDimensional ℂ V) (hVk : IsKStableSub ε E V)
     {k : Matrix (Fin n) (Fin n) ℂ} (hk : k ∈ Kset ε) {x : D} (hx : x ∈ genSub E V) :
     ∃ y ∈ genSub E V, (y : H) = σ k (x : H) := by
-  obtain ⟨m, hm⟩ := exists_layer_of_mem_genSub hD.glRep hVk hx
-  have hf : FiniteDimensional ℂ (layer ε E V m) := finiteDimensional_layer hVf m
-  obtain ⟨Z, hZ, rfl⟩ := exists_exp_eq_of_mem_Kset hk
-  have hs := KTypeIsomorphism.orbit_hasSum hσ hD hf (layer_kStable hD.glRep hVk m) hZ ⟨x, hm⟩
-  let P : Submodule ℂ H := LinearMap.range (D.subtype ∘ₗ (layer ε E V m).subtype)
-  have hmem : σ (NormedSpace.exp Z) (x : H) ∈ P :=
-    P.closed_of_finiteDimensional.mem_of_tendsto hs (Filter.Eventually.of_forall fun t =>
-      P.sum_mem fun j _ => P.smul_mem _ ⟨_, rfl⟩)
-  obtain ⟨w, hw⟩ := hmem
-  exact ⟨w, layer_le_genSub m w.2, hw⟩
+  apply ReciprocityTheory.ChartRestriction.DS.occD_genSub_K <;> assumption
 
 section Psi
 
@@ -86,27 +78,7 @@ theorem occD_eeF (dual : Bool) (hP : IsPsiFor ε lam T Ψ) (hP' : IsPsiFor ε la
       (genSub (smE ε (rreg ε)) (datumV ε Ψ' v₀')) ι) :
     ∀ x ∈ genSub (smE ε (rreg ε)) (datumV ε Ψ' v₀'),
       eeF dual (smE ε (rreg ε)) (ι x) = poleF dual lam s • ι x := by
-  intro x hx
-  have hE := (isDerivedOn_smE (rreg_isURepOn ε)).glRep
-  have h1 : casimir (tensF dual (smE ε (rreg ε))) (ι x) = ((casVal lam' : ℝ) : ℂ) • ι x := by
-    rw [← map_smul, ← casimir_genSub hE (datumV_casimir hP' v₀') x hx]
-
-    simp only [casimir, LinearMap.sum_apply, Module.End.mul_apply, map_sum]
-    refine sum_congr rfl fun a _ => sum_congr rfl fun b _ => ?_
-    rw [hι.2.2.1 a b _ (tset_genSub_E _ _ b a hx), hι.2.2.1 b a x hx]
-  have h2 : casimir (tensF dual (smE ε (rreg ε))) (ι x) = ((casVal lam : ℝ) : ℂ) • ι x + (n : ℂ) • ι x +
-      (2 : ℂ) • eeF dual (smE ε (rreg ε)) (ι x) := by
-    have h3 : diagOp (casimir (smE ε (rreg ε))) (ι x) = ((casVal lam : ℝ) : ℂ) • ι x := funext fun c => by
-      rw [diagOp_coord, casimir_genSub hE (datumV_casimir hP v₀) _ (tset_mem.mp (hι.1 x hx) c)]; rfl
-    rw [← h3]
-    cases dual
-    · exact LinearMap.congr_fun (casimir_tensV hE) _
-    · exact LinearMap.congr_fun (casimir_tensVd hE) _
-  rw [h1, hlam', ← casVal_shiftF] at h2
-  refine smul_right_injective _ (two_ne_zero (α := ℂ)) ?_
-  show (2 : ℂ) • _ = (2 : ℂ) • _
-  rw [smul_smul, ← add_right_inj (((casVal lam : ℝ) : ℂ) • ι x + (n : ℂ) • ι x), ← h2, ← add_smul, ← add_smul]
-  push_cast; rfl
+  apply ReciprocityTheory.ChartRestriction.DS.occD_eeF <;> assumption
 
 end Psi
 

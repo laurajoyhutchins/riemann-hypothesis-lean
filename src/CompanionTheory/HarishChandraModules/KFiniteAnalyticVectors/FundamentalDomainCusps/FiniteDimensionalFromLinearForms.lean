@@ -412,9 +412,6 @@ theorem finite_dimensional_from_linear_forms : FiniteDimensionalFromLinearForms 
 
 theorem representation_of_convolution : RepOfConv := by
   intro G _ _ _ _ _ _ _ _ μ _ Γ φ φ₀ s hφ hφ₀ hconv hs ⟨M, hM⟩ hΓ
-  have e : ∀ x, ∫ y, φ₀ y * s (x * y) ∂μ = ∫ y, φ₀ (x⁻¹ * y) * s y ∂μ := fun x => by
-    rw [← integral_mul_left_eq_self (fun y => φ₀ (x⁻¹ * y) * s y) x]
-    simp only [inv_mul_cancel_left]
   have hi : ∀ {θ : G → ℂ}, Integrable θ μ → ∀ x, Integrable (fun y => θ y * s (x * y)) μ := fun hθ x =>
     hθ.mul_bdd (hs.comp (measurable_const_mul x)).aestronglyMeasurable (Eventually.of_forall fun _ => hM _)
   have hb : ∀ {θ : G → ℂ}, Integrable θ μ → ∀ x, ‖∫ y, θ y * s (x * y) ∂μ‖ ≤ (∫ y, ‖θ y‖ ∂μ) * M := fun hθ x => by

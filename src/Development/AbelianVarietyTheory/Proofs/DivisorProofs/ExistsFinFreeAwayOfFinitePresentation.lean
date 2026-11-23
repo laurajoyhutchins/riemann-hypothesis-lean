@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelAmpleDiagonalDescendedBundleGaloisCover
 public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsSecOfFinite
 public import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AffineFiniteProjectiveRankAtStalk
@@ -110,28 +111,7 @@ theorem exists_finFree_away_of_finitePresentation {φ : A →+* B} (hf : φ.Fini
       {φ' : A' →+* B'},
       IsPushout (CommRingCat.ofHom φ) (CommRingCat.ofHom α) (CommRingCat.ofHom β)
         (CommRingCat.ofHom φ') → IsUnit (α r) → FinFree φ' := by
-  algebraize [φ]
-  have : Module.FinitePresentation A B := Module.FinitePresentation.of_finite_of_finitePresentation A B
-  have : Module.Free (Localization p.asIdeal.primeCompl) (LocalizedModule p.asIdeal.primeCompl B) :=
-    Module.free_of_flat_of_isLocalRing
-  obtain ⟨r, hr, hfree, -⟩ := Module.FinitePresentation.exists_free_localizedModule_powers
-    p.asIdeal.primeCompl (LocalizedModule.mkLinearMap p.asIdeal.primeCompl B)
-    (Localization p.asIdeal.primeCompl)
-  refine ⟨r, hr, ?_⟩
-  intro A' B' _ _ α β φ' H hu
-  algebraize [α, β, φ', φ'.comp α]
-  have : IsScalarTower A B B' := IsScalarTower.of_algebraMap_eq' (congrArg CommRingCat.Hom.hom H.w).symm
-  have P : Algebra.IsPushout A B A' B' := CommRingCat.isPushout_iff_isPushout.1 H
-  have hb : IsBaseChange A' (IsScalarTower.toAlgHom A B B').toLinearMap := P.symm.out
-  refine ⟨Module.Finite.equiv hb.equiv, ?_⟩
-  letI : Algebra (Localization.Away r) A' := (IsLocalization.Away.lift r (g := α) hu).toAlgebra
-  have : IsScalarTower A (Localization.Away r) A' :=
-    IsScalarTower.of_algebraMap_eq fun x => (IsLocalization.Away.lift_eq r hu x).symm
-  have h₁ : Module.Free (Localization.Away r) (TensorProduct A (Localization.Away r) B) :=
-    Module.Free.of_equiv (IsLocalizedModule.isBaseChange (.powers r) (Localization.Away r)
-      (LocalizedModule.mkLinearMap (.powers r) B)).equiv.symm
-  exact Module.Free.of_equiv
-    ((TensorProduct.AlgebraTensorModule.cancelBaseChange A (Localization.Away r) A' A' B).trans hb.equiv)
+  apply GlobalTheory.FiniteAmpleFP.exists_finFree_away_fp <;> assumption
 
 end Algebra
 

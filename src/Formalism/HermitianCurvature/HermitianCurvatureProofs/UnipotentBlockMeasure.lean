@@ -1,5 +1,6 @@
 module
 
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.GrowthOfBasic
 public import Formalism.HermitianCurvature.StatementPN
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.LocalVolumePositivity
 import Mathlib.Algebra.Order.Floor.Extended
@@ -473,28 +474,7 @@ theorem summable_pairs (a : ι → V) (ha : Summable (fun i => ‖a i‖)) :
 
 theorem normsq_tsum (a : ι → V) (ha : Summable (fun i => ‖a i‖)) :
     ‖∑' i, a i‖ ^ 2 = ∑' p : ι × ι, (inner ℂ (a p.1) (a p.2) : ℂ).re := by
-  have hS : HasSum a (∑' i, a i) := ha.of_norm.hasSum
-  have hP : Summable (fun p : ι × ι => (inner ℂ (a p.1) (a p.2) : ℂ).re) :=
-    Complex.reCLM.summable (summable_pairs a ha)
-  have hfib : ∀ i, HasSum (fun j => (inner ℂ (a i) (a j) : ℂ).re)
-      (inner ℂ (a i) (∑' j, a j) : ℂ).re := by
-    intro i
-    have h2 := Complex.reCLM.hasSum ((innerSL ℂ (a i)).hasSum hS)
-    simpa using h2
-  have hout : HasSum (fun i => (inner ℂ (a i) (∑' j, a j) : ℂ).re)
-      (inner ℂ (∑' j, a j) (∑' j, a j) : ℂ).re := by
-    have h2 : HasSum (fun i => (inner ℂ (∑' j, a j) (a i) : ℂ).re)
-        (inner ℂ (∑' j, a j) (∑' j, a j) : ℂ).re := by
-      simpa using Complex.reCLM.hasSum ((innerSL ℂ (∑' j, a j)).hasSum hS)
-    have he : (fun i => (inner ℂ (a i) (∑' j, a j) : ℂ).re)
-        = fun i => (inner ℂ (∑' j, a j) (a i) : ℂ).re := by
-      funext i
-      rw [← inner_conj_symm, Complex.conj_re]
-    rw [he]
-    exact h2
-  have heq := hout.unique (hP.hasSum.prod_fiberwise hfib)
-  rw [← heq]
-  exact (inner_self_eq_norm_sq (𝕜 := ℂ) _).symm
+  apply Formalism.FourierDecayAlt.P.GrowthPolynomialOperator.norm_sq_tsum <;> assumption
 
 end
 

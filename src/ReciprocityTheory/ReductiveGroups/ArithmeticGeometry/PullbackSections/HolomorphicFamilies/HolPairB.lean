@@ -64,7 +64,6 @@ private theorem valAt'_comp_lemma {Y Y' : Scheme.{0}} (x : Sp ℂ ⟶ Y) (φ : Y
     first
       | (rw [Scheme.comp_appLE]) <;> rfl
       | (rw [Scheme.Hom.comp_appLE]) <;> rfl
-      | simp [Scheme.comp_appLE]
   · have h' : ¬ ⊤ ≤ x ⁻¹ᵁ (φ ⁻¹ᵁ U) := h
     rw [dite_eq_right h', dite_eq_right h]
 
@@ -73,7 +72,6 @@ theorem valAt'_specMap {A C : CommRingCat.{0}} (φ : A ⟶ C) (x : Sp ℂ ⟶ Sp
   have key : (Spec.map φ).app ⊤ ((Scheme.ΓSpecIso A).inv a) = (Scheme.ΓSpecIso C).inv (φ a) := by
     first
       | exact (congrArg (fun g : A ⟶ Γ(Spec C, ⊤) => g a) (Scheme.ΓSpecIso_inv_naturality φ)).symm
-      | simp
   (rw [← valAt'_comp_lemma, key]) <;> rfl
 
 theorem valAt'_zero' {Y : Scheme.{0}} (x : Sp ℂ ⟶ Y) (U : Y.Opens) : valAt' x U 0 = 0 := by
@@ -87,20 +85,16 @@ private theorem valAt'_top_mul_lemma_2 {Y : Scheme.{0}} (x : Sp ℂ ⟶ Y) (f g 
   have h : ⊤ ≤ x ⁻¹ᵁ (⊤ : Y.Opens) := by
     first
       | exact le_top
-      | simp
   first
     | simp only [valAt', dif_pos h, valAt, map_mul]
-    | simp [valAt', valAt, h]
 
 private theorem valAt'_top_add_lemma_3 {Y : Scheme.{0}} (x : Sp ℂ ⟶ Y) (f g : Γ(Y, ⊤)) :
     valAt' x ⊤ (f + g) = valAt' x ⊤ f + valAt' x ⊤ g := by
   have h : ⊤ ≤ x ⁻¹ᵁ (⊤ : Y.Opens) := by
     first
       | exact le_top
-      | simp
   first
     | simp only [valAt', dif_pos h, valAt, map_add (f := _)]
-    | simp [valAt', valAt, h]
 
 theorem isHolTo_pullbackSpec {R S T : Type} [CommRing R] [CommRing S] [CommRing T] [Algebra R S] [Algebra R T]
     {B : Set V} (hB : IsOpen B)
@@ -115,7 +109,6 @@ theorem isHolTo_pullbackSpec {R S T : Type} [CommRing R] [CommRing S] [CommRing 
       (Spec.map (CommRingCat.ofHom (algebraMap R T)))) := by
     first
       | infer_instance
-      | exact isAffine_of_isIso (pullbackSpecIso R S T).hom
   refine isHolTo_of_affine hB ?_
   intro r
 
@@ -125,7 +118,6 @@ theorem isHolTo_pullbackSpec {R S T : Type} [CommRing R] [CommRing S] [CommRing 
     intro s b
     first
       | rw [← pullbackSpecIso_hom_fst R S T]
-      | rw [← Iso.hom_inv_id_assoc (pullbackSpecIso R S T) (pullback.fst _ _), pullbackSpecIso_inv_fst]
     (rw [← Category.assoc, valAt'_specMap]) <;> rfl
   have hR : ∀ (t : T) (b : V), valAt' (w b ≫ (pullbackSpecIso R S T).hom) ⊤
       ((Scheme.ΓSpecIso (CommRingCat.of (S ⊗[R] T))).inv ((1 : S) ⊗ₜ[R] t)) =
@@ -133,7 +125,6 @@ theorem isHolTo_pullbackSpec {R S T : Type} [CommRing R] [CommRing S] [CommRing 
     intro t b
     first
       | rw [← pullbackSpecIso_hom_snd R S T]
-      | rw [← Iso.hom_inv_id_assoc (pullbackSpecIso R S T) (pullback.snd _ _), pullbackSpecIso_inv_snd]
     (rw [← Category.assoc, valAt'_specMap]) <;> rfl
   have hS : ∀ s : S, DifferentiableOn ℂ (fun b => valAt' (w b ≫ (pullbackSpecIso R S T).hom) ⊤
       ((Scheme.ΓSpecIso (CommRingCat.of (S ⊗[R] T))).inv (s ⊗ₜ[R] (1 : T)))) B :=
@@ -167,7 +158,6 @@ theorem isHolTo_pullbackSpec {R S T : Type} [CommRing R] [CommRing S] [CommRing 
         (pullbackSpecIso R S T).inv.app ⊤ r := by
       first
         | exact Iso.hom_inv_id_apply _ _
-        | simp
     rw [hinv]
     have hw : w b = (w b ≫ (pullbackSpecIso R S T).hom) ≫ (pullbackSpecIso R S T).inv := by simp
     conv_lhs => rw [hw]

@@ -91,7 +91,6 @@ theorem coordMap_one : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [Num
   haveI := hlam
   have hSF : SigmaFinite lam := inferInstance
   let e : R ⊗[F] E ≃ₜ (Fin d → R) := (hh d b).homeomorph _
-  have he : ∀ y k, e y k = (Algebra.TensorProduct.basis R b).repr y k := fun _ _ => rfl
   let em : R ⊗[F] E ≃ᵐ (Fin d → R) := e.toMeasurableEquiv
   have hem : ∀ y k, em y k = (Algebra.TensorProduct.basis R b).repr y k := fun _ _ => rfl
   have hK : coordK R b lam = (Measure.pi fun _ => lam).map em.symm := coordK_eq_map b lam em hem

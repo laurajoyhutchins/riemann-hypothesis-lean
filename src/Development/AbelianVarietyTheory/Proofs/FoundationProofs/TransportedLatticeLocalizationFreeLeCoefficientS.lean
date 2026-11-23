@@ -266,18 +266,6 @@ theorem nabDelLoc_free_leVV : NabDelLoc ∧ NabDelFree ∧ NabLeVV := by
       intro τ
       first
       | exact hM τ
-      | have hcol : Submodule.span K (colLat (B τ) : Set (Fin n → K)) = ⊤ := by
-          rw [colLat, Submodule.span_span_of_tower]
-          change Submodule.span K (Set.range ((B τ : GL (Fin n) K) : Matrix (Fin n) (Fin n) K).col) = ⊤
-          rw [← Matrix.range_mulVecLin]
-          exact LinearMap.range_eq_top.mpr (Matrix.mulVec_surjective_iff_isUnit.mpr (B τ).isUnit)
-        refine { toIsLattice := hM τ, span_eq_top := ?_ }
-        rw [eq_top_iff, ← hcol, Submodule.span_le]
-        intro x hx
-        apply Submodule.span_le_restrictScalars (GlobalTheory.LatBasisAt.locRing w) K _
-        rw [← GlobalTheory.LatBasisAt.mem_localization_iff_mem_span, hB τ,
-          GlobalTheory.LatBasisAt.mem_localization_iff_mem_span]
-        exact Submodule.subset_span hx
     exact ⟨locP_transLat lam _ (GlobalTheory.StdLatSpan.std_fg_span K ι n lam).2.2.1 M hMfull
         (fun w B B' => GlobalTheory.T.nabIndep_and_delIndep_local_conditions.1 K ι n lam w M B B') w B hB,
       locP_transLat lam _ (GlobalTheory.StdLatSpan.std_fg_span K ι n lam).2.2.2 M hMfull

@@ -175,7 +175,6 @@ theorem integrable_one [CompleteSpace V] (β c : ℂ) {p : ℕ} (σ : Equiv.Perm
   have hE : 0 ≤ E := by positivity
   obtain ⟨Cst, hC⟩ := Formalism.FourierDecayAlt.P.top_cells p 1 β σ d hd le_rfl 0 (fun _ => E) (by
     intro i _
-    have hn : (0 : ℝ) < ((p + 1 : ℕ) : ℝ) := by positivity
     rw [lt_div_iff₀ (by positivity)]
     nlinarith)
   obtain ⟨K, hK⟩ := decay0 hΨ E hE

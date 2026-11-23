@@ -93,38 +93,20 @@ theorem det_of_shear (G : ℕ → Submodule ℝ E) (L : ℕ) (hG0 : G 0 = ⊤) (
     rw [hL, Submodule.mem_bot] at h
     rw [LinearMap.zero_apply]
     exact h
-  have hpowM : ∀ k, (LinearMap.toMatrix b b N) ^ k = LinearMap.toMatrix b b (N ^ k) := by
-    intro k
-    induction k with
-    | zero => rw [pow_zero, pow_zero]; exact (LinearMap.toMatrix_one b).symm
-    | succ k ih => rw [pow_succ, pow_succ, LinearMap.toMatrix_mul, ih]
   have hM : IsNilpotent (LinearMap.toMatrix b b N) := by
     obtain ⟨k, hk⟩ := hnil
-    exact ⟨k, by rw [hpowM, hk, map_zero]⟩
-  have key : ∀ M : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ,
-      IsNilpotent M → (1 + M).det = 1 := by
-    intro M hM
-    have hch : M.charpoly = Polynomial.X ^ Fintype.card (Fin (Module.finrank ℝ E)) :=
-      sub_eq_zero.mp (Matrix.isNilpotent_charpoly_sub_pow_of_isNilpotent hM).eq_zero
-    have hmat : (Matrix.charmatrix M).map (Polynomial.eval (-1 : ℝ)) = -(1 + M) := by
-      ext i j
-      by_cases h : i = j
-      · subst h
-        simp only [Matrix.map_apply, Matrix.charmatrix_apply, Matrix.diagonal_apply_eq,
-          Matrix.neg_apply, Matrix.add_apply, Matrix.one_apply_eq, Polynomial.eval_sub,
-          Polynomial.eval_X, Polynomial.eval_C]
-        ring
-      · simp only [Matrix.map_apply, Matrix.charmatrix_apply, Matrix.diagonal_apply_ne _ h,
-          Matrix.neg_apply, Matrix.add_apply, Matrix.one_apply_ne h, Polynomial.eval_sub,
-          Polynomial.eval_zero, Polynomial.eval_C]
-        ring
-    have hev : Polynomial.eval (-1 : ℝ) M.charpoly = (-(1 + M)).det := by
-      rw [← hmat, Matrix.charpoly, ← Polynomial.coe_evalRingHom, RingHom.map_det,
-        RingHom.mapMatrix_apply]
-    rw [hch, Matrix.det_neg, Polynomial.eval_pow, Polynomial.eval_X] at hev
-    have hne : ((-1 : ℝ)) ^ Fintype.card (Fin (Module.finrank ℝ E)) ≠ 0 :=
-      pow_ne_zero _ (by norm_num)
-    exact mul_left_cancel₀ hne (hev.symm.trans (mul_one _).symm)
+    exact ⟨k, by rw [LinearMap.toMatrix_pow, hk, map_zero]⟩
+  have key (M : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ)
+      (hM : IsNilpotent M) : (1 + M).det = 1 := by
+    have hch := sub_eq_zero.mp
+      (Matrix.isNilpotent_charpoly_sub_pow_of_isNilpotent hM).eq_zero
+    have heval := M.eval_charpoly (-1)
+    have hneg : Matrix.scalar _ (-1 : ℝ) - M = -(1 + M) := by
+      rw [map_neg, map_one]
+      abel
+    rw [hch, Polynomial.eval_pow, Polynomial.eval_X, hneg, Matrix.det_neg] at heval
+    exact mul_left_cancel₀ (pow_ne_zero _ (by norm_num))
+      (heval.symm.trans (mul_one _).symm)
   have hD' : LinearMap.toMatrix b b (D : E →ₗ[ℝ] E) = 1 + LinearMap.toMatrix b b N := by
     rw [← LinearMap.toMatrix_id b, ← map_add (f := _)]
     congr 1

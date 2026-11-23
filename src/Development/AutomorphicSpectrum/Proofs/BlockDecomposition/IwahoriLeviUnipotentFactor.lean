@@ -73,17 +73,10 @@ theorem kone_factor : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpac
   have hcP : c ∈ GlobalTheory.SplitWeil.KOne k (Fin n) := by
     first
     | exact hc.2
-    | exact hc.1
-    | exact (Subgroup.mem_inf.1 hc).2
-    | exact (Subgroup.mem_inf.1 hc).1
   have hcl : c⁻¹ ∈ GlobalTheory.SmGL.unipRadLower k e := by
     have hci := inv_mem hc
     first
     | exact hci.1
-    | exact hci.2
-    | exact (Subgroup.mem_inf.1 hci).1
-    | exact (Subgroup.mem_inf.1 hci).2
-    | exact hci
   obtain ⟨u, hu, hpu⟩ := GlobalTheory.SmGL.exists_levi_mul_unip k e ⟨g * c, hgc⟩
   let m := GlobalTheory.SmGL.leviProj k e ⟨g * c, hgc⟩
   have hpP : leviEmb k e m ∈ KOne k (Fin n) := by
@@ -106,10 +99,6 @@ theorem kone_factor : ∀ (k : Type) [Field k] [ValuativeRel k] [TopologicalSpac
     have hur : u ∈ GlobalTheory.SmGL.unipRad k e := by
       first
       | exact hu
-      | exact hu.1
-      | exact hu.2
-      | exact (Subgroup.mem_inf.1 hu).1
-      | exact (Subgroup.mem_inf.1 hu).2
     exact Subgroup.mem_inf.2 ⟨hur, huP⟩
   · show _ ∧ _
     exact ⟨inv_mem hcP, fun i j hij => GlobalTheory.CompanionTheory.KOneFactor.sub_one_apply_eq_zero e hcl i j hij⟩

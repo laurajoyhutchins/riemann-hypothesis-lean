@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsNoetherianModelOfDivisorOfConstants
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PointAtZero
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RingHomExtTensorAlt
 import Mathlib.Algebra.Order.Floor.Extended
@@ -80,25 +81,7 @@ theorem sub_C_coeff_mem {R : Type} [CommRing R] (p : Polynomial R) :
 
 theorem mem_originIdeal_iff {R : Type} [CommRing R] [IsLocalRing R] (f : Polynomial R) :
     f ∈ GlobalTheory.KeyOriginCut.originIdeal R ↔ f.coeff 0 ∈ maximalIdeal R := by
-  constructor
-  · intro hf
-    have hle : GlobalTheory.KeyOriginCut.originIdeal R ≤ (maximalIdeal R).comap (constantCoeff (R := R)) := by
-      refine sup_le ?_ ?_
-      · rw [Ideal.map_le_iff_le_comap]
-        intro a ha
-        simpa [Ideal.mem_comap] using ha
-      · rw [Ideal.span_le]
-        intro x hx
-        rw [Set.mem_singleton_iff] at hx
-        subst hx
-        simp [Ideal.mem_comap]
-    simpa [Ideal.mem_comap] using hle hf
-  · intro hf
-    have h1 : C (f.coeff 0) ∈ GlobalTheory.KeyOriginCut.originIdeal R :=
-      Ideal.mem_sup_left (Ideal.mem_map_of_mem _ hf)
-    have h2 : f - C (f.coeff 0) ∈ GlobalTheory.KeyOriginCut.originIdeal R :=
-      Ideal.mem_sup_right (sub_C_coeff_mem f)
-    simpa using Ideal.add_mem _ h2 h1
+  apply GlobalTheory.VertUnitsNoeth.mem_originIdeal_iff' <;> assumption
 
 theorem comap_maximalIdeal_eq_originIdeal {T O A₁ : Type} [CommRing T] [IsLocalRing T] [CommRing O]
     [IsLocalRing O] [Algebra T O] [Algebra (Polynomial T) O] [IsScalarTower T (Polynomial T) O]

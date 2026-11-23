@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.ExistsImage
 public import Development.AbelianVarietyTheory.Definitions.Degenerations.OfDerivationFnOn
 public import Development.AbelianVarietyTheory.Definitions.Degenerations.PlOrdSomeOfAssociated
 public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.LocallyOfFinitePresentationDiagMap
@@ -124,27 +125,7 @@ theorem torus_torsion (k : Type) [Field k] (X : Type) [AddCommGroup X] [Module.F
 theorem exists_lift {S : Scheme.{0}} {T N G : Over S} [IsReduced T.left] (ν : N ⟶ G)
     [IsClosedImmersion ν.left] (g : T ⟶ G) (h : Set.range g.left ⊆ Set.range ν.left) :
     ∃ l : T ⟶ N, l ≫ ν = g := by
-  open Scheme.IdealSheafData in
-  have hv : ∀ (Z : TopologicalSpace.Closeds G.left), Set.range g.left ⊆ Z → vanishingIdeal Z ≤ g.left.ker := by
-    intro Z hZ
-    refine le_ofIdeals_iff.mpr fun U a ha => ?_
-    rw [RingHom.mem_ker, ← basicOpen_eq_bot_iff, ← Scheme.preimage_basicOpen, eq_bot_iff]
-    intro t ht
-    have h1 : g.left t ∈ (vanishingIdeal Z).support := hZ ⟨t, rfl⟩
-    have h2 := ((coe_support_inter (vanishingIdeal Z) U).le
-      ⟨h1, G.left.basicOpen_le a ht⟩).1
-    exact ((Scheme.mem_zeroLocus_iff _ _ _).mp h2 a ha ht).elim
-  have h2 : ν.left.ker ≤ g.left.ker := by
-    refine le_trans ?_ (hv ν.left.ker.support ?_)
-    · rw [Scheme.IdealSheafData.vanishingIdeal_support]
-      exact Scheme.IdealSheafData.le_radical _
-    · rw [Scheme.Hom.support_ker]
-      exact h.trans subset_closure
-  have h3 := IsClosedImmersion.lift_fac ν.left g.left h2
-  refine ⟨Over.homMk (IsClosedImmersion.lift ν.left g.left h2) ?_, ?_⟩
-  · rw [← Over.w ν, ← Category.assoc, h3, Over.w]
-  · ext1
-    exact h3
+  apply GlobalTheory.AbelianImage.exists_lift <;> assumption
 
 theorem exists_basicOpen_eq {Y : Scheme.{0}} {M : LB Y} (hM : M.IsLB) (m n : ℕ) (hm : 0 < m)
     (t : ∀ i, Γ(Y, M.U i)ˣ) (e2 : ∀ i j, res (inf_le_left : M.U i ⊓ M.U j ≤ _) (t i) =

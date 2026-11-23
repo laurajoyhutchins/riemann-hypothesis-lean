@@ -45,6 +45,7 @@ import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Tactic.ReduceModChar
 import Mathlib.Topology.Sheaves.Init
 import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.WeightsTopGrid
 
 @[expose] public section
 
@@ -687,30 +688,7 @@ end Min
 
 theorem weights_top_grid : ∀ {D : D7} {T : Type} {L : LevCh D T} {sc : Consts} (G : GridData L sc) (τ : D.what₂.Tau),
     Formalism.L2.Col.Br.Interlace G.sp.topDec.rank.symm (wt G (.top D.R.m) τ) (listedWt G (.grid D.R.m D.R.m) τ) ∧
-      Formalism.L2.Col.Br.SameShift (wt G (.top D.R.m) τ) (listedWt G (.grid D.R.m D.R.m) τ) := by
-  intro D T L sc G τ
-  have r0 := rank_top G (j := D.R.m) le_rfl
-  have r1 := rank_grid G (i := D.R.m) le_rfl
-  have h0 := isHC_top D sc.cGap τ (j := D.R.m) le_rfl r0
-  have h1 := isHC_grid D sc.cGap τ (i := D.R.m) le_rfl r1
-  have hA := h0.1.card_entries.trans h0.2.1
-  have hB := h1.1.card_entries.trans h1.2.1
-  have eA : entries (Node.par D sc.cGap (.top D.R.m) τ) = (num D sc.cGap τ).weightX D.R.m := entries_plus _
-  have eB : entries (Node.par D sc.cGap (.grid D.R.m D.R.m) τ) = entries ((num D sc.cGap τ).parD D.R.m D.R.m) := by
-    have : entries (Node.par D sc.cGap (.grid D.R.m D.R.m) τ) =
-        entries (shift (if Odd (D.R.m + D.R.m) then -(1 / 2) else 0) ((num D sc.cGap τ).parD D.R.m (num D sc.cGap τ).m)) := rfl
-    rw [this, if_neg (by rw [Nat.odd_iff]; omega), shift_zero]
-    rfl
-  have hSI : StrictInterlace (entries (Node.par D sc.cGap (.top D.R.m) τ))
-      (entries (Node.par D sc.cGap (.grid D.R.m D.R.m) τ)) := by
-    rw [eA, eB]; exact strictInterlace_of_good (good_top_grid D sc.cGap τ)
-  have hn : 0 < (G.V (.grid D.R.m D.R.m)).rank := by rw [r1]; exact rankV_pos D _ _
-  refine ⟨interlace_wtOf G.sp.topDec.rank.symm hA hB h0.2.2 h1.2.2 hSI,
-    sameShift_wtOf G.sp.topDec.rank.symm hn hA hB h0.2.2 h1.2.2
-      (x := -((num D sc.cGap τ).e D.R.m : ℚ) - (D.R.t : ℚ) / 2) ?_ ?_ ?_ ?_⟩
-  · rw [eA]; exact low_mem_weightX D sc.cGap τ
-  · rw [eA]; exact fun y hy => min_weightX D sc.cGap τ hy
-  · rw [eB]; exact half_mem_parD D sc.cGap τ
-  · rw [eB]; exact fun y hy => min_parD D sc.cGap τ hy
+      Formalism.L2.Col.Br.SameShift (wt G (.top D.R.m) τ) (listedWt G (.grid D.R.m D.R.m) τ) :=
+  GlobalTheory.WtInterlace.weights_top_grid
 
 end GlobalTheory.WtInterlaceC

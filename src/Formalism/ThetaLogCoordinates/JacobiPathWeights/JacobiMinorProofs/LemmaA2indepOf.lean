@@ -1,5 +1,6 @@
 module
 
+import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.IndexWeightsDominance
 public import Formalism.ThetaLogCoordinates.JacobiPathWeights.IndexWeightsDominance
 public import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.ActFormContract
 public import Formalism.ThetaLogCoordinates.JacobiPathWeights.JacobiMinorProofs.IsWeightedHomogeneousZeroStripPathWord
@@ -245,32 +246,7 @@ theorem term_hom (hW : PsiWeight) {L : Type} [CommRing L] {n N : ℕ} {isVec : �
   exact (hW L n N isVec B μ I' hp hI').C_mul _
 
 theorem idxWeight_can {n : ℕ} {μ : Fin n → ℤ} (h : Antitone μ) : idxWeight (canIdx μ) = μ := by
-  funext m
-  unfold idxWeight
-  have h1 : {c : ℤ | 1 ≤ c ∧ m ∈ canIdx μ c} = ↑(Finset.Icc 1 (μ m)) := by
-    ext c
-    rw [Finset.mem_coe, Finset.mem_Icc]
-    constructor
-    · rintro ⟨a, b⟩
-      rw [A1hw.mem_can h, if_pos a] at b
-      exact ⟨a, b⟩
-    · rintro ⟨a, b⟩
-      refine ⟨a, ?_⟩
-      rw [A1hw.mem_can h, if_pos a]
-      exact b
-  have h2 : {c : ℤ | c ≤ 0 ∧ m ∈ canIdx μ c} = ↑(Finset.Ioc (μ m) 0) := by
-    ext c
-    rw [Finset.mem_coe, Finset.mem_Ioc]
-    constructor
-    · rintro ⟨a, b⟩
-      rw [A1hw.mem_can h, if_neg (by omega)] at b
-      exact ⟨b, a⟩
-    · rintro ⟨a, b⟩
-      refine ⟨b, ?_⟩
-      rw [A1hw.mem_can h, if_neg (by omega)]
-      exact a
-  rw [h1, h2, Set.ncard_coe_finset, Set.ncard_coe_finset, Int.card_Icc, Int.card_Ioc]
-  omega
+  apply Formalism.InvariantFactorPaths.GelfandTsetlinBases.A3comb.idxWeight_can <;> assumption
 
 end A3ev
 

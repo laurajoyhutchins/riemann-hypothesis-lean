@@ -108,7 +108,6 @@ lemma hh_bound {ε : ℝ} (hε : 0 < ε) (j : ℕ) {x : ℝ} (hx : ε ≤ x) :
   rw [heq, norm_iteratedFDeriv_eq_norm_iteratedDeriv, iteratedDeriv_eq_iterate]
   simp only [Real.iter_deriv_rpow_const]
   rw [norm_mul, Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (Real.rpow_pos_of_pos hx0 _)]
-  have hj : (0 : ℝ) ≤ j := Nat.cast_nonneg j
   have hexp : -(1 / 2 : ℝ) - j ≤ 0 := by linarith
   apply mul_le_mul_of_nonneg_left _ (abs_nonneg _)
   first

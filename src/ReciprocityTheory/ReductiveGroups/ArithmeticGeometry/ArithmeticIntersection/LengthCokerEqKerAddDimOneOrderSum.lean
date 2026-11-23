@@ -87,8 +87,6 @@ theorem length_quot_prime_ne_top_iff (q : Ideal A) [q.IsPrime] :
     rw [mul_one, ← mul_assoc, ← pow_succ]
     first
       | simpa [Algebra.smul_def, Ideal.Quotient.algebraMap_eq] using hy
-      | (rw [Algebra.smul_def, Algebra.smul_def, Ideal.Quotient.algebraMap_eq, map_pow, map_pow,
-          mul_one] at hy; exact hy)
   · intro hq
     have hs : IsSimpleModule A (A ⧸ q) := isSimpleModule_iff_isCoatom.2 hq.out
     rw [Module.length_eq_one_iff.2 hs]
@@ -152,16 +150,10 @@ theorem locLen_add {N₁ N₂ N₃ : Type v} [AddCommGroup N₁] [Module A N₁]
     (LocalizedModule.map p.asIdeal.primeCompl g) ?_ ?_ ?_
   · first
       | exact LocalizedModule.map_injective _ _ hf
-      | exact LocalizedModule.map_injective _ f hf
-      | exact LocalizedModule.map_injective hf
   · first
       | exact LocalizedModule.map_surjective _ _ hg
-      | exact LocalizedModule.map_surjective _ g hg
-      | exact LocalizedModule.map_surjective hg
   · first
       | exact LocalizedModule.map_exact _ _ _ hex
-      | exact LocalizedModule.map_exact _ f g hex
-      | exact LocalizedModule.map_exact hex
 
 theorem locLen_eq_zero_of_notMem {N : Type v} [AddCommGroup N] [Module A N] (p : PrimeSpectrum A)
     (hp : p ∉ support A N) : locLen N p = 0 := by
@@ -169,7 +161,6 @@ theorem locLen_eq_zero_of_notMem {N : Type v} [AddCommGroup N] [Module A N] (p :
   have hs : Subsingleton (LocalizedModule p.asIdeal.primeCompl N) := by
     first
       | exact Module.notMem_support_iff.1 hp
-      | exact Module.not_mem_support_iff.1 hp
   exact Module.length_eq_zero_iff.2 hs
 
 theorem locLen_self {N : Type v} [AddCommGroup N] [Module A N] (q : PrimeSpectrum A)
@@ -269,8 +260,6 @@ theorem dim_quot_eq_one_iff (hdim : ringKrullDim A = 1) (q : Ideal A) [q.IsPrime
       have hs : (s.length : WithBot ℕ∞) ≤ Order.krullDim (PrimeSpectrum (A ⧸ q)) := by
         first
           | exact Order.LTSeries.length_le_krullDim s
-          | exact LTSeries.length_le_krullDim s
-          | exact Order.length_le_krullDim s
       have hk : (s.length : WithBot ℕ∞) ≤ 0 := hs.trans hle
       have hlen : s.length = 1 := rfl
       rw [hlen] at hk
@@ -301,8 +290,6 @@ theorem eq_of_not_max_of_le (hdim : ringKrullDim A = 1) {p q : Ideal A} [p.IsPri
   have hs : (s.length : WithBot ℕ∞) ≤ Order.krullDim (PrimeSpectrum A) := by
     first
       | exact Order.LTSeries.length_le_krullDim s
-      | exact LTSeries.length_le_krullDim s
-      | exact Order.length_le_krullDim s
   have hlen : s.length = 2 := by
     first | rfl | simp [s, RelSeries.snoc_length, RelSeries.singleton_length]
   have hk : Order.krullDim (PrimeSpectrum A) = 1 := hdim

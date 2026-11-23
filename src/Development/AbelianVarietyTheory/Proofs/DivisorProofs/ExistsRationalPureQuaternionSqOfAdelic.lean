@@ -49,6 +49,7 @@ import Mathlib.Tactic.Polynomial.Basic
 import Mathlib.Tactic.ReduceModChar
 import Mathlib.Tactic.TypeStar
 import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsBasisOfIsQuadraticExtension
 
 @[expose] public section
 
@@ -64,20 +65,7 @@ theorem mul_self_of_re_eq_zero {R : Type*} [CommRing R] {a b : R} (p : ℍ[R, a,
 
 theorem exists_completion_hom_of_real {K : Type} [Field K] (σ : K →+* ℝ) :
     ∃ (w : InfinitePlace K) (f : w.Completion →+* ℝ), ∀ x : K, f (algebraMap K w.Completion x) = σ x := by
-  have hφ : ComplexEmbedding.IsReal (Complex.ofRealHom.comp σ) := by
-    rw [ComplexEmbedding.isReal_iff]
-    ext x
-    simp
-  have hw : (InfinitePlace.mk (Complex.ofRealHom.comp σ)).IsReal := InfinitePlace.isReal_mk_iff.2 hφ
-  refine ⟨_, InfinitePlace.Completion.extensionEmbeddingOfIsReal hw, fun x => ?_⟩
-  have he := InfinitePlace.Completion.extensionEmbeddingOfIsReal_coe hw
-    ((WithAbs.equiv _).symm x)
-  rw [AbsoluteValue.Completion.algebraMap_def, WithAbs.algebraMap_right_apply,
-    Algebra.algebraMap_self_apply]
-  refine Eq.trans he ?_
-  apply Complex.ofReal_injective
-  rw [InfinitePlace.embedding_of_isReal_apply, InfinitePlace.embedding_mk_eq_of_isReal hφ]
-  simp
+  apply _root_.GlobalTheory.QuadSymbol.exists_completion_hom_real <;> assumption
 
 variable {F : Type} [Field F] [NumberField F]
 

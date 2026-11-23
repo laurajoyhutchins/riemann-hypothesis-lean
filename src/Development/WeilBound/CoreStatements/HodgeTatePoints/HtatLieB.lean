@@ -171,52 +171,6 @@ theorem lieChart_of_smooth_chart : ∀ (S : Scheme.{0}) (G : Over S) [GrpObj G] 
   (hU : IsAffineOpen U) (hV : IsAffineOpen V) (hUV : U ≤ G.hom ⁻¹ᵁ V), RingHom.Smooth (G.hom.appLE V U hUV).hom →
   ∀ u : Γ(G.left, U) →+* Localization.Away f,
     (1 : Over.mk (spMap (algebraMap R (Localization.Away f)) ≫ x) ⟶ G).left = spMap u ≫ hU.fromSpec → LieChart G x f := by
-  intro S G _ R _ x f U V hU hV hUV hsm u h1
-  obtain ⟨P, i1, i2, i3, i4, i5, i6, d, dadd, dmul, dker, hP⟩ :=
-    exists_diffModule (G.hom.appLE V U hUV).hom hsm f u
-  have hunit : ∀ (C : Type) [CommRing C] [Algebra R C] (κ : Localization.Away f →+* C),
-      κ.comp (algebraMap R (Localization.Away f)) = algebraMap R C →
-      (1 : Over.mk (spMap (algebraMap R C) ≫ x) ⟶ G).left = spMap (κ.comp u) ≫ hU.fromSpec := by
-    intro C _ _ κ hκ
-    rw [one_left] at h1 ⊢
-    simp only [Over.mk_hom] at h1 ⊢
-    have e : spMap (algebraMap R C) = spMap κ ≫ spMap (algebraMap R (Localization.Away f)) := by
-      rw [← spMap_comp, hκ]
-    have h3 : ((spMap κ ≫ spMap (algebraMap R (Localization.Away f))) ≫ x) ≫ η[G].left =
-        spMap κ ≫ (spMap (algebraMap R (Localization.Away f)) ≫ x) ≫ η[G].left := by
-      simp only [Category.assoc]
-    rw [e, h3, h1, spMap_comp κ u]
-    exact (Category.assoc _ _ _).symm
-  have key : ∀ (C : Type) [CommRing C] [Algebra R C] (hC : IsUnit (algebraMap R C f)),
-      ∃ M : LieModel G (spMap (algebraMap R C) ≫ x) (P →ₗ[R] C), ∀ w,
-        ∃ φ : Γ(G.left, U) →+* DualNumber C,
-          (∀ a, (φ a).fst = ((IsLocalization.Away.lift f hC).comp u) a) ∧ (∀ a, (φ a).snd = w (d a)) ∧
-          (M.pt w).left = spMap φ ≫ hU.fromSpec := by
-    intro C _ _ hC
-    have hκ := IsLocalization.Away.lift_comp (S := Localization.Away f) f hC
-    obtain ⟨l1, l2, l3⟩ := hP C _ hκ
-    exact exists_lieModel (E := P →ₗ[R] C) G U V hU hV hUV C _ _ (hunit C _ hκ)
-      (fun (w : P →ₗ[R] C) a => w (d a))
-      (fun w a b => by simp [dadd]) (fun w a b => by simp only [dmul, map_add (f := _), l1, RingHom.comp_apply])
-      (fun w b => by simp [dker]) (fun w w' a => rfl) (fun c w a => by simp) l2 l3
-  refine ⟨P, i1, i2, i3, i4, i5, i6, fun C _ _ hC => (key C hC).choose, ?_⟩
-  intro C C' _ _ _ _ hC hC' c w
-  obtain ⟨φ, f1, f2, f3⟩ := (key C hC).choose_spec w
-  obtain ⟨φ', g1, g2, g3⟩ := (key C' hC').choose_spec (c.toLinearMap ∘ₗ w)
-  have hc : c.toRingHom.comp (IsLocalization.Away.lift (S := Localization.Away f) f hC) =
-      IsLocalization.Away.lift (S := Localization.Away f) f hC' := by
-    refine IsLocalization.ringHom_ext (Submonoid.powers f) ?_
-    rw [RingHom.comp_assoc, IsLocalization.Away.lift_comp, IsLocalization.Away.lift_comp]
-    exact c.comp_algebraMap
-  have h2 : φ' = (dualMap c.toRingHom).comp φ := RingHom.ext fun a => TrivSqZeroExt.ext
-    (by
-      simp only [g1, RingHom.comp_apply, dualMap, RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk,
-        TrivSqZeroExt.fst_add, TrivSqZeroExt.fst_inl, TrivSqZeroExt.fst_inr, add_zero, f1]
-      exact (RingHom.congr_fun hc (u a)).symm)
-    (by
-      simp only [g2, RingHom.comp_apply, dualMap, RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk,
-        TrivSqZeroExt.snd_add, TrivSqZeroExt.snd_inl, TrivSqZeroExt.snd_inr, zero_add, f2]
-      rfl)
-  rw [g3, f3, h2, spMap_comp, Category.assoc]
+  apply GlobalTheory.CompanionTheory.Ar.ChartDer.lieChart_of_smooth_chart <;> assumption
 
 end PositivityTheory.HtPt.Htat.Lie

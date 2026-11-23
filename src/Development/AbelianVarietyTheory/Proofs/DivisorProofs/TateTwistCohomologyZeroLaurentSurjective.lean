@@ -1,5 +1,6 @@
 module
 
+import Development.EtaleCohomology.CohomologicalPurity.WeightedVectorLaurentEvalHomTOne
 public import Development.AbelianVarietyTheory.Definitions.Divisors.PullHlComp
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.AdelicPrimitiveVectorCompactRescale
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HZeroPullbackTwistBijective
@@ -59,24 +60,7 @@ namespace GlobalTheory.EtC.MultiplicativeGroupGlobalSections
 open LaurentPolynomial in
 theorem laurent_ringHom_ext {R S : Type} [CommRing R] [CommRing S] {f g : LaurentPolynomial R →+* S}
     (hC : f.comp C = g.comp C) (hT : f (T 1) = g (T 1)) : f = g := by
-  have h1 : f (T 1) * f (T (-1)) = 1 := by rw [← map_mul, ← T_add]; simp
-  have h2 : g (T 1) * g (T (-1)) = 1 := by rw [← map_mul, ← T_add]; simp
-  have hTm : f (T (-1)) = g (T (-1)) :=
-    calc f (T (-1)) = f (T (-1)) * (g (T 1) * g (T (-1))) := by rw [h2, mul_one]
-      _ = (f (T 1) * f (T (-1))) * g (T (-1)) := by rw [← hT]; ring
-      _ = g (T (-1)) := by rw [h1, one_mul]
-  have hTn : ∀ n : ℤ, f (T n) = g (T n) := by
-    intro n
-    induction n using Int.induction_on with
-    | zero => simp [T_zero]
-    | succ n ih => rw [T_add, map_mul, map_mul, ih, hT]
-    | pred n ih => rw [sub_eq_add_neg, T_add, map_mul, map_mul, ih, hTm]
-  apply AddMonoidAlgebra.ringHom_ext
-  · intro b
-    rw [single_eq_C]
-    exact congrArg (fun φ : R →+* S => φ b) hC
-  · intro n
-    exact hTn n
+  apply LateralTheory.CohomologicalPurity.Thom.ExcP.Chart.ExcisionChartRatio.laurent_ext <;> assumption
 
 theorem pull_spMap_id (q : ℕ) (A : Type) [CommRing A] (n i : ℤ) (x : Ht q (sp A) n i) :
     pull _ (spMap (RingHom.id A)) _ n x = x := by

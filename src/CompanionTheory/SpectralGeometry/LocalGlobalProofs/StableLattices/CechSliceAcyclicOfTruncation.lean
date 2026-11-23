@@ -65,6 +65,30 @@ namespace GlobalTheory.CompanionTheory.PointSurjectivity
 
 
 open GlobalTheory.Cube in
+private noncomputable def suppHom {ν κ : Type} [LinearOrder ν] [LinearOrder κ] {R : Type} [CommRing R]
+    (A : GlobalTheory.Cube.{0} (ν ⊕ₗ κ) R) (P P' : Set (Finset (ν ⊕ₗ κ)))
+    (hP : P.OrdConnected) (hP' : P'.OrdConnected)
+    (h : ∀ ⦃s t⦄, s ⊆ t → s ∈ P → t ∈ P' → (t ∈ P ↔ s ∈ P')) :
+    supp A P hP ⟶ supp A P' hP' := by
+  classical
+  refine Cube.homMk _ _ (suppMapApp (𝟙 A) hP hP') ?_
+  intro s t hst x
+  by_cases hs : s ∈ P
+  · refine supp_ext fun ht' => ?_
+    by_cases ht : t ∈ P
+    · have hs' := (h hst hs ht').1 ht
+      rw [suppEquiv_suppMapApp (𝟙 A) ht, suppEquiv_res hst hs, suppEquiv_res hst hs',
+        suppEquiv_suppMapApp (𝟙 A) hs, app_res]
+    · have hs' := mt (h hst hs ht').2 ht
+      have := subsingleton_supp A hP ht
+      have := subsingleton_supp A hP' hs'
+      rw [Subsingleton.elim (res _ hst x) 0, Subsingleton.elim (suppMapApp (𝟙 A) hP hP' s x) 0]
+      simp only [map_zero]
+  · have := subsingleton_supp A hP hs
+    rw [Subsingleton.elim x 0]
+    simp only [map_zero]
+
+open GlobalTheory.Cube in
 theorem isZero_homology_supp_singleton {ν κ : Type} [LinearOrder ν] [LinearOrder κ] {R : Type}
     [CommRing R] (A : GlobalTheory.Cube.{0} (ν ⊕ₗ κ) R) {Q : Set (Finset ν)} (hQ : Q.OrdConnected)
     (hT₁ : Set.OrdConnected {t : Finset κ | t.card = 1}) (j : κ) (n : ℕ)
@@ -72,26 +96,6 @@ theorem isZero_homology_supp_singleton {ν κ : Type} [LinearOrder ν] [LinearOr
       {t : Finset κ | t.card = 1}) (ordConnected_partsIn _ _ hQ hT₁))).homology n)) :
     Limits.IsZero ((GlobalTheory.cubeComplex (supp A (partsIn (inlEmb ν κ) (inrEmb ν κ) Q {{j}})
       (ordConnected_partsIn _ _ hQ Set.ordConnected_singleton))).homology n) := by
-  let suppMap : ∀ (P P' : Set (Finset (ν ⊕ₗ κ))) (hP : P.OrdConnected) (hP' : P'.OrdConnected),
-      (∀ ⦃s t⦄, s ⊆ t → s ∈ P → t ∈ P' → (t ∈ P ↔ s ∈ P')) →
-      (supp A P hP ⟶ supp A P' hP') := fun P P' hP hP' h => by
-    classical
-    refine Cube.homMk _ _ (suppMapApp (𝟙 A) hP hP') ?_
-    intro s t hst x
-    by_cases hs : s ∈ P
-    · refine supp_ext fun ht' => ?_
-      by_cases ht : t ∈ P
-      · have hs' := (h hst hs ht').1 ht
-        rw [suppEquiv_suppMapApp (𝟙 A) ht, suppEquiv_res hst hs, suppEquiv_res hst hs',
-          suppEquiv_suppMapApp (𝟙 A) hs, app_res]
-      · have hs' := mt (h hst hs ht').2 ht
-        have := subsingleton_supp A hP ht
-        have := subsingleton_supp A hP' hs'
-        rw [Subsingleton.elim (res _ hst x) 0, Subsingleton.elim (suppMapApp (𝟙 A) hP hP' s x) 0]
-        simp only [map_zero]
-    · have := subsingleton_supp A hP hs
-      rw [Subsingleton.elim x 0]
-      simp only [map_zero]
   have hsub : ∀ u, u ∈ partsIn (inlEmb ν κ) (inrEmb ν κ) Q {{j}} →
       u ∈ partsIn (inlEmb ν κ) (inrEmb ν κ) Q {t : Finset κ | t.card = 1} := by
     intro u hu
@@ -110,13 +114,13 @@ theorem isZero_homology_supp_singleton {ν κ : Type} [LinearOrder ν] [LinearOr
         (ordConnected_partsIn _ _ hQ Set.ordConnected_singleton) ⟶
       supp A (partsIn (inlEmb ν κ) (inrEmb ν κ) Q {t : Finset κ | t.card = 1})
         (ordConnected_partsIn _ _ hQ hT₁) :=
-    suppMap _ _ _ _ fun s t hst hs ht => iff_of_true
+    suppHom A _ _ _ _ fun s t hst hs ht => iff_of_true
       ⟨ht.1, heq (monotone_part _ hst) hs.2 ht.2⟩ (hsub s hs)
   let r : supp A (partsIn (inlEmb ν κ) (inrEmb ν κ) Q {t : Finset κ | t.card = 1})
         (ordConnected_partsIn _ _ hQ hT₁) ⟶
       supp A (partsIn (inlEmb ν κ) (inrEmb ν κ) Q {{j}})
         (ordConnected_partsIn _ _ hQ Set.ordConnected_singleton) :=
-    suppMap _ _ _ _ fun s t hst hs ht => iff_of_true (hsub t ht)
+    suppHom A _ _ _ _ fun s t hst hs ht => iff_of_true (hsub t ht)
       ⟨hs.1, heq' (monotone_part _ hst) hs.2 ht.2⟩
   have hir : i ≫ r = 𝟙 _ := by
     ext s x
@@ -142,26 +146,6 @@ theorem cechComplex_sliceFst_singleton_acyclic_of_trunc₂ : ∀ {ν κ : Type} 
     (hA : ∀ t : Finset κ, 2 ≤ t.card → (GlobalTheory.cechComplex (GlobalTheory.Cube.sliceFst A t)).Acyclic)
     (hT : ∀ n, Limits.IsZero ((GlobalTheory.cubeComplex (GlobalTheory.Cube.trunc₂ A)).homology (n + 2))) (j : κ), (GlobalTheory.cechComplex (GlobalTheory.Cube.sliceFst A {j})).Acyclic := by
   intro ν κ _ _ _ _ R _ A hA hT j
-  let suppMap : ∀ (P P' : Set (Finset (ν ⊕ₗ κ))) (hP : P.OrdConnected) (hP' : P'.OrdConnected),
-      (∀ ⦃s t⦄, s ⊆ t → s ∈ P → t ∈ P' → (t ∈ P ↔ s ∈ P')) →
-      (supp A P hP ⟶ supp A P' hP') := fun P P' hP hP' h => by
-    classical
-    refine Cube.homMk _ _ (suppMapApp (𝟙 A) hP hP') ?_
-    intro s t hst x
-    by_cases hs : s ∈ P
-    · refine supp_ext fun ht' => ?_
-      by_cases ht : t ∈ P
-      · have hs' := (h hst hs ht').1 ht
-        rw [suppEquiv_suppMapApp (𝟙 A) ht, suppEquiv_res hst hs, suppEquiv_res hst hs',
-          suppEquiv_suppMapApp (𝟙 A) hs, app_res]
-      · have hs' := mt (h hst hs ht').2 ht
-        have := subsingleton_supp A hP ht
-        have := subsingleton_supp A hP' hs'
-        rw [Subsingleton.elim (res _ hst x) 0, Subsingleton.elim (suppMapApp (𝟙 A) hP hP' s x) 0]
-        simp only [map_zero]
-    · have := subsingleton_supp A hP hs
-      rw [Subsingleton.elim x 0]
-      simp only [map_zero]
   have hcompl := isCompl_range_inlEmb_inrEmb ν κ
   have hQ : Set.OrdConnected {s : Finset ν | s.Nonempty} := ordConnected_nonempty
   have hU₂ : IsUpperSet {t : Finset κ | 2 ≤ t.card} :=
@@ -194,8 +178,8 @@ theorem cechComplex_sliceFst_singleton_acyclic_of_trunc₂ : ∀ {ν κ : Type} 
     omega
   have hu : ∀ ⦃s t⦄, s ⊆ t → s ∈ P₁ → t ∈ P → t ∈ P₁ :=
     fun _ _ hst hs ht => ⟨ht.1, hU₂ (monotone_part _ hst) hs.2⟩
-  let f := suppMap P₁ P hp₁ hp fun s _ hst hs ht => iff_of_true (hu hst hs ht) ((h s).2 (Or.inl hs))
-  let g := suppMap P P₂ hp hp₂ fun s t hst hs ht => iff_of_true ((h t).2 (Or.inr ht))
+  let f := suppHom A P₁ P hp₁ hp fun s _ hst hs ht => iff_of_true (hu hst hs ht) ((h s).2 (Or.inl hs))
+  let g := suppHom A P P₂ hp hp₂ fun s t hst hs ht => iff_of_true ((h t).2 (Or.inr ht))
     (((h s).1 hs).resolve_left fun hs₁ => hd t (hu hst hs₁ ((h t).2 (Or.inr ht))) ht)
   have hfg : f ≫ g = 0 := by
     ext s x

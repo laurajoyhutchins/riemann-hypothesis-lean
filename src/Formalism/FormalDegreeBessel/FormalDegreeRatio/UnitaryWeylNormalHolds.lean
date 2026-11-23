@@ -1,5 +1,6 @@
 module
 
+import Formalism.LocalToGlobal.SiegelLatticeTheory.HaarTransversals.UnitaryHaarProducts.LocalWeightCharts.MulVecApplyOfRow
 public import Formalism.FormalDegreeBessel.StatementG
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -347,22 +348,7 @@ theorem uw_fixed_col {z : Fin (2 * r + k + 1) → ℂ}
     {h : Matrix (Fin (2 * r + k + 1)) (Fin (2 * r + k + 1)) ℂ} (hh : h ∈ UWset k r z)
     (c : Fin (2 * r + k + 1)) (hc : c.val < r ∨ r + k < c.val) (p : Fin (2 * r + k + 1)) :
     h p c = if p = c then 1 else 0 := by
-  simp only [UWset, Set.mem_setOf_eq] at hh
-  obtain ⟨_, hfix, _⟩ := hh
-  rcases hc with hc | hc
-  · have e := (hfix ⟨c.val, hc⟩).1
-    have he : eI k r ⟨c.val, hc⟩ = c := Fin.ext rfl
-    rw [he] at e
-    exact col_of_fix e p
-  · have hcl := c.isLt
-    have hc' : 2 * r + k - c.val < r := by omega
-    have e := (hfix ⟨2 * r + k - c.val, hc'⟩).2
-    have he : esI k r ⟨2 * r + k - c.val, hc'⟩ = c := by
-      apply Fin.ext
-      show 2 * r + k - (2 * r + k - c.val) = c.val
-      omega
-    rw [he] at e
-    exact col_of_fix e p
+  apply WlocSk.UnitaryGroupBasics.uw_fixed_col <;> assumption
 
 theorem tau_out (i : Fin (2 * r + k + 1)) (hi : i.val < r ∨ r + k < i.val) :
     (tau k r i).val < r ∨ r + k < (tau k r i).val := by

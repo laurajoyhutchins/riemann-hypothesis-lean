@@ -394,10 +394,6 @@ theorem cf_decay (hGL : GNLower) (ha : 0 ≤ X.a) {T T' : Set (Mt k r)} (hT : Is
     · rw [Set.indicator_of_notMem hxT,
         show Ψ (Matrix.of x) = 0 from image_eq_zero_of_notMem_tsupport (fun h => hxT (hsT h)),
         zero_smul, inner_zero_right, norm_zero]
-  have hQ0 : 0 ≤ Q := by
-    rw [hQ]
-    exact mul_nonneg measureReal_nonneg (mul_nonneg hM0 (mul_nonneg (le_max_right _ _)
-      (mul_nonneg (Real.rpow_nonneg (by linarith) _) (Real.rpow_nonneg (gN_nonneg _) _))))
   have hout : ‖cf D X Ψ Ψ' g‖ ≤ D.μG.real T' * (M' * Q) := by
     unfold cf mc
     rw [norm_inner_symm]

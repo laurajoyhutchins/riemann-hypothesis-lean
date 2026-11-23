@@ -87,7 +87,6 @@ private lemma natCast_le_coe_infty (k : ℕ) : (k : ℕ∞ω) ≤ ((⊤ : ℕ∞
     | exact WithTop.coe_le_coe.2 le_top
     | exact_mod_cast le_top
     | (norm_cast; exact le_top)
-    | simp
 
 theorem gm_exp_ck (n : ℕ) (z : M → V n) (ph : M → ℝ) (hph : SmoothR n z ph) (s : ℝ) (k : ℕ) :
     Ck n z k (fun y => (Real.exp (s * ph y) : ℂ)) := by
@@ -122,7 +121,6 @@ theorem gm_form_hcs {n : ℕ} (f : M → V n) (hf : ∀ k, HasCompactSupport (fu
   ext k
   first
     | simpa using image_eq_zero_of_notMem_tsupport (hx k)
-    | simpa using image_eq_zero_of_nmem_tsupport (hx k)
 
 end helpers
 
@@ -193,7 +191,6 @@ private lemma continuous_d_of_ck_two {n : ℕ} {z : M → V n} (hz : IsLocalHome
     have hG : ContinuousOn (fun y => fderiv ℝ (g ∘ e0.symm) y) e0.target := by
       first
         | exact (hg e0 hc0).continuousOn_fderiv_of_isOpen e0.open_target (by norm_num)
-        | exact (hg e0 hc0).continuousOn_fderiv_of_isOpen e0.open_target (by simp)
     have hzc : ContinuousAt z x0 := by
       rw [he0]
       exact e0.continuousAt hx0
@@ -232,7 +229,6 @@ private lemma d_eq_zero_of_not_mem_tsupport {n : ℕ} {z : M → V n} {g : M →
     have hU : g =ᶠ[𝓝 x] 0 := by
       first
         | exact notMem_tsupport_iff_eventuallyEq.1 hx
-        | exact not_mem_tsupport_iff_eventuallyEq.1 hx
     have hT : Tendsto e.symm (𝓝 (e x)) (𝓝 x) := by
       have := (e.continuousAt_symm (e.map_source he.2)).tendsto
       rwa [e.left_inv he.2] at this
@@ -268,7 +264,6 @@ private lemma ck_one_of_ck_two {n : ℕ} {z : M → V n} {f : M → ℂ} (h : Ck
   first
     | norm_num
     | exact_mod_cast (show (1 : ℕ) ≤ 2 by norm_num)
-    | exact WithTop.coe_le_coe.2 (by norm_num)
 
 theorem gm_tstar_add (n : ℕ) (z : M → V n) (ph : M → ℝ) (hph : SmoothR n z ph)
     (f g : M → V n) (hf : IsTestForm n z f) (hg : IsTestForm n z g) (x : M) :
@@ -390,7 +385,6 @@ theorem gm_hcs_of {E F : Type*} [Zero E] [Zero F] (t : M → E) (G : M → F) (h
     (h : ∀ x, t x = 0 → G x = 0) : HasCompactSupport G := by
   first
     | exact ht.mono fun x hx h0 => hx (h x h0)
-    | exact ht.mono' (closure_mono fun x hx h0 => hx (h x h0))
 
 theorem gm_memLp_tstar (n : ℕ) (z : M → V n) (hz : IsLocalHomeomorph z) (ph : M → ℝ)
     (hph : SmoothR n z ph) (f : M → V n) (hf : IsTestForm n z f) :
@@ -447,7 +441,6 @@ theorem gm_ipV_smul (n : ℕ) (z : M → V n) (ph : M → ℝ) (v : M → V n) (
   simp only [ipV, Pi.smul_apply, inner_smul_right, mul_assoc]
   first
     | exact integral_const_mul c _
-    | exact integral_mul_left c _
 
 def gmTheta (n : ℕ) (z : M → V n) (hz : IsLocalHomeomorph z) (ph : M → ℝ)
     (hph : SmoothR n z ph) : gmTestForms n z →ₗ[ℂ] Lp ℂ 2 (wvol n z ph) where
@@ -567,7 +560,6 @@ theorem locL2_sub_weightedL2 (n : ℕ) (z : M → V n) (hz : IsLocalHomeomorph z
     rw [wvol]
     first
       | exact withDensity_absolutelyContinuous' hm.aemeasurable hne
-      | exact withDensity_absolutelyContinuous' hm hne
   have hu : AEStronglyMeasurable (fun x => u x) (vol n z) := (Lp.aestronglyMeasurable u).mono_ac hac
   have hmeas : AEStronglyMeasurable (fun x => F0 x - u x) (vol n z) :=
     hF0.aestronglyMeasurable.sub hu
@@ -578,7 +570,6 @@ theorem locL2_sub_weightedL2 (n : ℕ) (z : M → V n) (hz : IsLocalHomeomorph z
   haveI : IsFiniteMeasure ((vol n z).restrict C) := by
     first
       | exact isFiniteMeasure_restrict.2 hCfin.ne
-      | exact ⟨by rw [Measure.restrict_apply_univ]; exact hCfin⟩
   have hF0C : MemLp F0 2 ((vol n z).restrict C) :=
     MemLp.of_bound hF0.aestronglyMeasurable.restrict B
       ((ae_restrict_iff' hC.measurableSet).2 (Eventually.of_forall hB))
@@ -595,7 +586,6 @@ theorem locL2_sub_weightedL2 (n : ℕ) (z : M → V n) (hz : IsLocalHomeomorph z
         (ENNReal.ofReal (Real.exp (-ph x)) * ‖u x‖ₑ ^ (2:ℝ)) ∂vol n z := by
     first
       | exact setLIntegral_le_lintegral _ _
-      | exact lintegral_mono' Measure.restrict_le_self le_rfl
   have huC : MemLp (fun x => u x) 2 ((vol n z).restrict C) := by
     rw [gm_memLp_two_iff _ hu.restrict]
     calc ∫⁻ x, ‖u x‖ₑ ^ (2:ℝ) ∂(vol n z).restrict C

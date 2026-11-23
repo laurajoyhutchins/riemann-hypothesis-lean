@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.EulerCharacteristicCounts.BkMain
 public import Formalism.SharpRestriction.LevelLetterCocycles.LocCoh
 public import Formalism.GaloisCohomology.LocalTateDualityK
 public import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
@@ -62,23 +63,7 @@ namespace GlobalTheory.EulerCharH1
 
 theorem le_of_pow_le {q a b C : ℕ} (hq : 2 ≤ q) (h : ∀ r : ℕ, q ^ (r * a) ≤ C * q ^ (r * b)) :
     a ≤ b := by
-  by_contra hab
-  push_neg at hab
-  have key : ∀ r : ℕ, q ^ r ≤ C := by
-    intro r
-    have h1 := h r
-    have hpos : 0 < q ^ (r * b) := pow_pos (by omega) _
-    have : q ^ (r * a) ≥ q ^ (r * b) * q ^ r := by
-      rw [← pow_add]
-      apply Nat.pow_le_pow_right (by omega)
-      nlinarith
-    have : q ^ (r * b) * q ^ r ≤ C * q ^ (r * b) := le_trans this h1
-    rw [mul_comm (q ^ (r * b))] at this
-    exact Nat.le_of_mul_le_mul_right this hpos
-  have h2 := key C
-  have h3 : C < 2 ^ C := Nat.lt_two_pow_self
-  have h4 : 2 ^ C ≤ q ^ C := Nat.pow_le_pow_left hq C
-  omega
+  apply PositivityTheory.LocalTateOrthogonality.Bk.le_of_growth <;> assumption
 
 theorem stableSub_span_smul {G LL O V : Type} [Group G] [Field LL] [CommRing O] [Algebra O LL]
     [AddCommGroup V] [Module LL V] [Module O V] [IsScalarTower O LL V]

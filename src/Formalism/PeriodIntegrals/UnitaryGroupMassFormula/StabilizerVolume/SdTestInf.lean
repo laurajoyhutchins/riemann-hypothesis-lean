@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ArchimedeanOrbitMeasures.SdTest
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.StabilizerVolume.SdUniq
 public import Mathlib.Analysis.Complex.Circle
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.AdelicLocalCompactness.AdeleLC
@@ -184,60 +185,11 @@ variable {W : Type} [NormedAddCommGroup W] [InnerProductSpace ℝ W] [FiniteDime
 theorem testEx_kernel (μ : Measure W) [μ.IsAddHaarMeasure] (χ : W → W → ℂ)
     (hadd : ∀ x x' y, χ (x + x') y = χ x y * χ x' y) (hc : ∀ y, Continuous fun x => χ x y)
     (t : W) (ht0 : t ≠ 0) (ht : ∀ y, χ t y = 1) : SdUniqW.TestEx μ χ := by
-  have hpos : 0 < ‖t‖ := norm_pos_iff.2 ht0
-  let f : ContDiffBump (0 : W) := ⟨‖t‖ / 4, ‖t‖ / 2, by positivity, by linarith⟩
-  let φ : W → ℂ := fun x => ((f x : ℝ) : ℂ)
-  have hφc : Continuous φ := Complex.continuous_ofReal.comp f.continuous
-  have hφs : HasCompactSupport φ := f.hasCompactSupport.comp_left Complex.ofReal_zero
-  let Φ : W → ℂ := fun x => φ (x + t) - φ x
-  have hΦc : Continuous Φ := (hφc.comp (continuous_id.add continuous_const)).sub hφc
-  have hΦs : HasCompactSupport Φ := by
-    have h1 : HasCompactSupport fun x => φ (x + t) := hφs.comp_homeomorph (Homeomorph.addRight t)
-    exact h1.sub hφs
-  have hT : ∀ y, ∫ x, Φ x * χ x y ∂μ = 0 := by
-    intro y
-    let g : W → ℂ := fun x => φ x * χ x y
-    have hg : Integrable g μ := (hφc.mul (hc y)).integrable_of_hasCompactSupport hφs.mul_right
-    have e : (fun x => Φ x * χ x y) = fun x => g (x + t) - g x := by
-      funext x; simp only [Φ, g, hadd, ht, mul_one, sub_mul]
-    rw [e, integral_sub (hg.comp_add_right t) hg, integral_add_right_eq_self, sub_self]
-  refine ⟨Φ, hΦc, hΦs, ?_, 0, ?_⟩
-  · have e : (fun y => ∫ x, Φ x * χ x y ∂μ) = fun _ => 0 := funext hT
-    rw [e]; exact integrable_zero _ _ _
-  · simp only [Φ, φ, neg_zero, zero_add]
-    rw [f.zero_of_le_dist (by rw [dist_zero_right]; show ‖t‖ / 2 ≤ ‖t‖; linarith),
-      f.one_of_mem_closedBall (Metric.mem_closedBall_self (by positivity))]
-    norm_num
+  apply PI.AprimeInfW.ST.testEx_kernel <;> assumption
 
 theorem testEx_fourier (μ : Measure W) [μ.IsAddHaarMeasure] (A : W ≃L[ℝ] W) :
     SdUniqW.TestEx μ (fun x y => (Real.fourierChar ⟪x, A y⟫ : ℂ)) := by
-  let f : ContDiffBump (0 : W) := ⟨1, 2, one_pos, one_lt_two⟩
-  let φ : W → ℂ := fun x => ((f x : ℝ) : ℂ)
-  have hφd : ContDiff ℝ ∞ φ := Complex.ofRealCLM.contDiff.comp f.contDiff
-  have hφs : HasCompactSupport φ := f.hasCompactSupport.comp_left Complex.ofReal_zero
-  let S : 𝓢(W, ℂ) := hφs.toSchwartzMap hφd
-  let B : W ≃L[ℝ] W := A.trans (ContinuousLinearEquiv.neg ℝ)
-  set c : NNReal := μ.addHaarScalarFactor volume
-  have hμ : μ = c • volume := Measure.isAddLeftInvariant_eq_smul μ volume
-  have hT : ∀ y, ∫ x, φ x * (Real.fourierChar ⟪x, A y⟫ : ℂ) ∂μ =
-      ((c : ℝ) : ℂ) * (𝓕 S : 𝓢(W, ℂ)) (B y) := by
-    intro y
-    rw [hμ, integral_smul_nnreal_measure, NNReal.smul_def, Complex.real_smul]
-    congr 1
-    rw [SchwartzMap.fourier_coe, Real.fourier_eq]
-    refine integral_congr_ae (ae_of_all _ fun x => ?_)
-    simp [B, S, φ, inner_neg_right, Circle.smul_def, mul_comm]
-  have hB : (Measure.map B μ).IsAddHaarMeasure := B.isAddHaarMeasure_map μ
-  have hI : Integrable (fun y => (𝓕 S : 𝓢(W, ℂ)) (B y)) μ := by
-    have h1 : Integrable (𝓕 S : 𝓢(W, ℂ)) (Measure.map B μ) := (𝓕 S).integrable
-    exact (integrable_map_measure h1.aestronglyMeasurable B.continuous.measurable.aemeasurable).1 h1
-  refine ⟨φ, hφd.continuous, hφs, ?_, 0, ?_⟩
-  · have e : (fun y => ∫ x, φ x * (Real.fourierChar ⟪x, A y⟫ : ℂ) ∂μ) =
-        fun y => ((c : ℝ) : ℂ) * (𝓕 S : 𝓢(W, ℂ)) (B y) := funext hT
-    rw [e]; exact hI.const_mul _
-  · simp only [φ, neg_zero]
-    rw [f.one_of_mem_closedBall (Metric.mem_closedBall_self zero_le_one)]
-    norm_num
+  apply PI.AprimeInfW.ST.testEx_fourier <;> assumption
 
 theorem testEx_bichar (μ : Measure W) [μ.IsAddHaarMeasure] {χ : W → W → ℂ} (h : IsBichar χ) :
     SdUniqW.TestEx μ χ := by

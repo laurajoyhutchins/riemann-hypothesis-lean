@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsGlobalVectorFieldOfOneFormFunctional
 public import Development.AbelianVarietyTheory.Definitions.Divisors.AxesVanishingStructureSheafDegOne
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -53,27 +54,7 @@ theorem exists_vf_of_frame {R : Type} [CommRing R] {C : Type} [Category.{0} C] (
     ∃ δ : ∀ T : C, Ω[F.obj T⁄R] →ₗ[F.obj T] F.obj T,
       (∀ ⦃T T' : C⦄ (φ : T ⟶ T') (ω : Ω[F.obj T⁄R]), δ T' (p1 F φ ω) = mp F φ (δ T ω)) ∧
       ∀ (w : Glob1 F) T, δ T (w.1 T) = algebraMap R (F.obj T) (l w) := by
-  obtain ⟨m, ⟨fr⟩⟩ := hF
-  refine ⟨fun T ↦ ∑ i, algebraMap R (F.obj T) (l (fr.w i)) • fr.δ i T, fun T T' φ ω ↦ ?_, fun w T ↦ ?_⟩
-
-  · simp only [LinearMap.sum_apply, LinearMap.smul_apply, fr.nat, smul_eq_mul, map_sum,
-    map_mul, AlgHom.commutes]
-  · have hc : ∀ i, ∃ c : R, ∀ T, fr.δ i T (w.1 T) = algebraMap R (F.obj T) c := fun i ↦ by
-      obtain ⟨c, hc, -⟩ := h0 (fun T ↦ fr.δ i T (w.1 T)) (by
-        funext T T' φ
-        simp only [amitsur_d0_apply, Pi.zero_apply]
-        rw [w.2 φ, fr.nat, sub_self])
-      exact ⟨c, hc⟩
-    choose c hc using hc
-    have hw : w = ∑ i, c i • fr.w i := by
-      refine Subtype.ext (funext fun T ↦ ?_)
-      rw [fr.sum T (w.1 T)]
-      simp only [hc, algebraMap_smul, Submodule.coe_sum, Submodule.coe_smul, Finset.sum_apply, Pi.smul_apply]
-    conv_rhs => rw [hw]
-
-    simp only [LinearMap.sum_apply, LinearMap.smul_apply, map_sum, LinearMap.map_smul, hc, smul_eq_mul,
-    map_mul]
-    exact Finset.sum_congr rfl fun i _ ↦ mul_comm _ _
+  apply GlobalTheory.AbCoh.exists_vectorField_of_functional <;> assumption
 
 end GlobalTheory.AbCoh
 

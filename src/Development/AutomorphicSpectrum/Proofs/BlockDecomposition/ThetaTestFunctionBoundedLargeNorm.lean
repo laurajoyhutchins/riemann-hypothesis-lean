@@ -1,5 +1,7 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.LeftSideFormula
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ThetaTestFunctionRayAsymptotic
 public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.OfE
 public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.FiniteAdeleHaarEqProductLocalMeasures
 public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.BaseOneSide.PsiSide
@@ -86,54 +88,12 @@ variable {F E : Type} [Field F] [NumberField F] [Field E] [Algebra F E]
 
 theorem scale_one (v : HeightOneSpectrum (𝓞 F)) (Q : Set (Fv F v)) (hQ : IsCompact Q) :
     ∃ N : ℕ, 0 < N ∧ ∀ t ∈ Q, (N : Fv F v) * t ∈ v.adicCompletionIntegers F := by
-  set p : ℕ := Ideal.absNorm v.asIdeal with hp
-  have hp0 : 0 < p := Nat.pos_of_ne_zero fun h => v.ne_bot (Ideal.absNorm_eq_zero_iff.1 h)
-  have hp1 : Valued.v (p : Fv F v) < 1 := by
-    have h1 : ((p : 𝓞 F)) ∈ v.asIdeal := by
-      simpa [hp] using Ideal.absNorm_mem v.asIdeal
-    have h2 := (v.valuation_lt_one_iff_mem (K := F) (p : 𝓞 F)).2 h1
-    have h3 : (p : Fv F v) = algebraMap (𝓞 F) (Fv F v) (p : 𝓞 F) := (map_natCast _ p).symm
-    rw [h3]
-    exact (HeightOneSpectrum.valuedAdicCompletion_eq_valuation v (p : 𝓞 F)).trans_lt h2
-  have hO : IsOpen {t : Fv F v | Valued.v t ≤ 1} := Valued.isOpen_integer (Fv F v)
-  have hopen : ∀ k : ℕ, IsOpen {t : Fv F v | Valued.v ((p : Fv F v) ^ k * t) ≤ 1} := fun k =>
-    hO.preimage (continuous_const.mul continuous_id)
-  obtain ⟨k, hk⟩ := hQ.elim_directed_cover (fun k : ℕ => {t : Fv F v | Valued.v ((p : Fv F v) ^ k * t) ≤ 1}) hopen
-    (fun t _ => by
-      by_cases ht : t = 0
-      · exact Set.mem_iUnion.2 ⟨0, by simp [ht]⟩
-      · have hvt : Valued.v t ≠ 0 := (Valuation.ne_zero_iff _).2 ht
-        obtain ⟨n, hn⟩ := exists_pow_lt₀ hp1 (Units.mk0 _ (inv_ne_zero hvt))
-        refine Set.mem_iUnion.2 ⟨n, ?_⟩
-        simp only [Set.mem_setOf_eq, map_mul, map_pow]
-        exact (mul_le_mul' hn.le le_rfl).trans (inv_mul_cancel₀ hvt).le)
-    (directed_of_isDirected_le fun i j hij t ht => by
-      simp only [Set.mem_setOf_eq] at ht ⊢
-      rw [← Nat.sub_add_cancel hij, pow_add, mul_assoc, map_mul, map_pow]
-      exact mul_le_one' (pow_le_one' hp1.le _) ht)
-  exact ⟨p ^ k, pow_pos hp0 k, fun t ht => (HeightOneSpectrum.mem_adicCompletionIntegers (𝓞 F) F v).2 (by
-    rw [Nat.cast_pow]
-    exact hk ht)⟩
+  apply _root_.GlobalTheory.CompanionTheory.SW.LS.scale_one <;> assumption
 
 theorem scale_lat [NumberField E] (σ : E →ₐ[F] E) (hcm : IsCMExt F E σ) {d : ℕ} (b : Module.Basis (Fin d) F E)
     (v : HeightOneSpectrum (𝓞 F)) (K : Set (Fin 1 → Fin 1 → Fv F v ⊗[F] E)) (hK : IsCompact K) :
     ∃ N : ℕ, 0 < N ∧ ∀ Y ∈ K, (fun a i => (N : Fv F v ⊗[F] E) * Y a i) ∈ latV b v := by
-  obtain ⟨_, _, _, _, -⟩ := GlobalTheory.T.completion_is_local_ring F v
-  have hh := (GlobalTheory.T.tensor_locally_compact_ring F E σ hcm (Fv F v)).2.2.2.2.2.2.1 d b
-  have hc : ∀ q : Fin 1 × Fin 1 × Fin d, Continuous fun Y : Fin 1 → Fin 1 → Fv F v ⊗[F] E => cK (Fv F v) b (Y q.1 q.2.1) q.2.2 :=
-    fun q => (continuous_apply q.2.2).comp (hh.continuous.comp (continuous_apply_apply q.1 q.2.1))
-  choose n hn0 hn using fun q => scale_one v _ (hK.image (hc q))
-  refine ⟨∏ q, n q, Finset.prod_pos fun q _ => hn0 q, fun Y hY a i k => ?_⟩
-  change cK (Fv F v) b (((∏ q, n q : ℕ) : Fv F v ⊗[F] E) * Y a i) k ∈ _
-  rw [cK_nat_mul]
-  obtain ⟨c, hc'⟩ := Finset.dvd_prod_of_mem n (Finset.mem_univ (a, i, k))
-  rw [hc']
-  have h1 := hn (a, i, k) _ ⟨Y, hY, rfl⟩
-  have e : ((n (a, i, k) * c : ℕ) : Fv F v) * cK (Fv F v) b (Y a i) k =
-      (c : Fv F v) * ((n (a, i, k) : Fv F v) * cK (Fv F v) b (Y a i) k) := by
-    push_cast; ring
-  rw [e]
-  exact mul_mem (natCast_mem _ c) h1
+  apply _root_.GlobalTheory.CompanionTheory.SW.RankOneSiegelWeil.Box.scale_lat <;> assumption
 
 theorem nat_mul_latV {d : ℕ} (b : Module.Basis (Fin d) F E) (v : HeightOneSpectrum (𝓞 F)) (N : ℕ)
     {Y : Fin 1 → Fin 1 → Fv F v ⊗[F] E} (hY : Y ∈ latV b v) :

@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.ThetaLifts.LocalTheory.ArchimedeanBumps.SliceAn
 public import Development.AbelianVarietyTheory.PublishedTheorems.TwistedTraceFormula.MetaplecticRepresentation
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -71,21 +72,7 @@ instance (p : Seminorm ℂ E) : NormedSpace ℂ (WithSemi p) where
 theorem bounded_of_weak [TopologicalSpace E] [IsTopologicalAddGroup E] {T : Type} (f : T → E)
     (h : ∀ l : E →L[ℂ] ℂ, ∃ C : ℝ, ∀ t, ‖l (f t)‖ ≤ C) (p : Seminorm ℂ E) (hp : Continuous p) :
     ∃ C : ℝ, ∀ t, p (f t) ≤ C := by
-  let j₀ : E →ₗ[ℂ] WithSemi p := LinearMap.id
-  have hj : Continuous j₀ := by
-    refine continuous_of_continuousAt_zero j₀ ?_
-    rw [ContinuousAt, map_zero, tendsto_zero_iff_norm_tendsto_zero]
-    have := hp.tendsto 0
-    rw [map_zero] at this
-    exact this
-  let j : E →L[ℂ] WithSemi p := ⟨j₀, hj⟩
-  obtain ⟨C, hC⟩ := banach_steinhaus (g := fun t => NormedSpace.inclusionInDoubleDual ℂ (WithSemi p) (j (f t)))
-    (fun φ => h (φ.comp j))
-  refine ⟨C, fun t => ?_⟩
-  have := hC t
-  rw [show NormedSpace.inclusionInDoubleDual ℂ (WithSemi p) (j (f t)) =
-    NormedSpace.inclusionInDoubleDualLi ℂ (j (f t)) from rfl, LinearIsometry.norm_map] at this
-  exact this
+  apply PositivityTheory.ThKG.Loc.Bump.weak_bounded <;> assumption
 
 end Weak
 

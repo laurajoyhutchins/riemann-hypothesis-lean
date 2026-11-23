@@ -1,9 +1,7 @@
 module
 
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.SplitSt
-public import Development.AbelianVarietyTheory.Proofs.TorusSplitting.CmCharactersOfNearestPlaneOfShortIntegersStatement
 public import Development.AbelianVarietyTheory.Proofs.TorusSplitting.ExistsShortIntegersSpan
-public import Development.AbelianVarietyTheory.Proofs.TorusSplitting.ExistsShortIntegralRationalBasis
 public import Development.AbelianVarietyTheory.Proofs.TorusSplitting.NearestPlaneRounding
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -43,6 +41,7 @@ import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Topology.Sheaves.Init
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.GCauchyHolds
 
 @[expose] public section
 
@@ -51,7 +50,6 @@ open NumberField Complex ReciprocityTheory.ChartRestriction.G.I2
 namespace GlobalTheory
 
 theorem charStatement_holds : CharStatement :=
-  GlobalTheory.T.cmCharacters_of_nearestPlane_of_short_integers nearestPlane_rounding
-    (exists_short_integral_rational_basis exists_short_integers_span)
+  ReciprocityTheory.ChartRestriction.G.I2.char_holds
 
 end GlobalTheory

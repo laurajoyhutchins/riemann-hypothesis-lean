@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.FlagFramesGenericModelLeft
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GlueApplyOfNotInFibre
 public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.FiniteEtaleSurjectiveOfPullback
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenMapStalkMap
@@ -210,22 +211,7 @@ end Pure
 
 theorem isExtOver_mk (Ω G V : Type) [Field Ω] [Field G] [Algebra Ω G] [AddCommGroup V] [Module Ω V] :
     IsExtOver (algebraMap Ω G) (TensorProduct.mk Ω G V 1).toAddMonoidHom := by
-  refine ⟨fun a e => ?_, fun n b hb => ?_⟩
-  · show (1 : G) ⊗ₜ[Ω] (a • e) = algebraMap Ω G a • ((1 : G) ⊗ₜ[Ω] e)
-    rw [TensorProduct.smul_tmul', ← TensorProduct.smul_tmul, smul_eq_mul, mul_one,
-      Algebra.algebraMap_eq_smul_one]
-  · classical
-    have hb' : LinearIndependent Ω b := hb
-    have hs := hb'.linearIndepOn_id
-    let Bs := Module.Basis.extend hs
-    let f : Fin n → hs.extend (Set.range b).subset_univ := fun k => ⟨b k, hs.subset_extend _ ⟨k, rfl⟩⟩
-    have hinj : Function.Injective f := fun x y hxy =>
-      hb'.injective (by simpa only [f, Subtype.mk.injEq] using hxy)
-    have hli := (Bs.baseChange G).linearIndependent.comp f hinj
-    convert hli using 1
-    all_goals try (funext k; simp only [Function.comp_apply, Module.Basis.baseChange_apply, Bs, f,
-      Module.Basis.extend_apply_self])
-    all_goals rfl
+  apply GlobalTheory.CompanionTheory.Ar.FlagBun.Flags.isExtOver_mk <;> assumption
 
 end PositivityTheory.Xgp.c_fm_exists_flags_dualflag
 

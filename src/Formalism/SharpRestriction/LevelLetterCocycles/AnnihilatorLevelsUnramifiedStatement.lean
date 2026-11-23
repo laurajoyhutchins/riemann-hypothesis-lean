@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.LevelLetterCocycles.RingConditionOfDeltaInvariants
 public import Formalism.SharpRestriction.LevelLetterCocycles.AnnihilatorLevelsOfGrading
 public import Formalism.SharpRestriction.LevelLetterCocycles.LemmasUnramifiedOfRingCondition
 public import Mathlib.RingTheory.PowerSeries.Binomial
@@ -73,27 +74,7 @@ theorem exists_trunc_add (f : PowerSeries O) (N : ℕ) :
 
 theorem algHom_ext_X (τ σ : PowerSeries O →ₐ[O] PowerSeries O) (hX : τ X = σ X)
     (h0 : constantCoeff (τ X) = 0) : τ = σ := by
-  have hpoly : ∀ p : Polynomial O, τ (p : PowerSeries O) = σ (p : PowerSeries O) := by
-    intro p
-    have := congrArg (fun φ : Polynomial O →ₐ[O] PowerSeries O => φ p)
-      (Polynomial.algHom_ext (f := τ.comp (Polynomial.coeToPowerSeries.algHom O))
-        (g := σ.comp (Polynomial.coeToPowerSeries.algHom O))
-        (by simp [Polynomial.coeToPowerSeries.algHom_apply, hX]))
-    simpa [Polynomial.coeToPowerSeries.algHom_apply] using this
-  have hd : X ∣ τ X := X_dvd_iff.mpr h0
-  ext f k
-  obtain ⟨g, hg⟩ := exists_trunc_add f (k + 1)
-  have h1 : X ^ (k + 1) ∣ τ X ^ (k + 1) * τ g := Dvd.dvd.mul_right (pow_dvd_pow_of_dvd hd _) _
-  have h2 : X ^ (k + 1) ∣ σ X ^ (k + 1) * σ g := by
-    rw [← hX]; exact Dvd.dvd.mul_right (pow_dvd_pow_of_dvd hd _) _
-  have hτ : τ f = τ (trunc (k + 1) f : PowerSeries O) + τ X ^ (k + 1) * τ g := by
-    conv_lhs => rw [hg]
-    rw [map_add (f := _), map_mul, map_pow]
-  have hσ : σ f = σ (trunc (k + 1) f : PowerSeries O) + σ X ^ (k + 1) * σ g := by
-    conv_lhs => rw [hg]
-    rw [map_add (f := _), map_mul, map_pow]
-  rw [hτ, hσ, map_add (f := _), map_add (f := _), hpoly,
-    X_pow_dvd_iff.mp h1 k (Nat.lt_succ_self k), X_pow_dvd_iff.mp h2 k (Nat.lt_succ_self k)]
+  apply Formalism.MainNotions.WachCoordinates.Br.algHom_ext_X <;> assumption
 
 theorem algHom_eq_subst (τ : PowerSeries O →ₐ[O] PowerSeries O) (h0 : constantCoeff (τ X) = 0)
     (f : PowerSeries O) : τ f = subst (τ X) f := by

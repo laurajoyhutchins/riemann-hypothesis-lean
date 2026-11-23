@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsPureTypicalCurveWithIntegralTangent
 public import Development.AbelianVarietyTheory.Definitions.TeichmullerDepth.HasTeich
 public import Formalism.LocalToGlobal.CharacterGerms.ConstMemTypeSetOfNonneg
 public import Formalism.LocalToGlobal.CharacterGerms.ValNonnegLeadingCoeffOfMemTySet
@@ -209,23 +210,7 @@ theorem coeff_mvExp_two {τ : Type} {F : MvPowerSeries τ C} (hF : ((2 : ℕ) : 
   simp [Finset.sum_range_succ, h2, coeff_one, hm0]
 
 theorem ge_zero_of_pow_eq_one (V : VF C) {N : ℕ} (hN : N ≠ 0) {a : C} (ha : a ^ N = 1) : V.Ge 0 a := by
-  have h := V.v.map_pow a N
-  rw [ha, V.v.map_one] at h
-  unfold VF.Ge
-  induction hv : V.v a using WithTop.recTopCoe with
-  | top => exact le_top
-  | coe t =>
-    rw [hv] at h
-    have h' : ((0 : ℝ) : WithTop ℝ) = ((N • t : ℝ) : WithTop ℝ) := by
-      rw [WithTop.coe_nsmul]; exact h
-    have h'' : (0 : ℝ) = N • t := by exact_mod_cast h'
-    rw [nsmul_eq_mul] at h''
-    have hN' : (N : ℝ) ≠ 0 := by exact_mod_cast hN
-    have : t = 0 := by
-      rcases mul_eq_zero.1 h''.symm with h | h
-      · exact absurd h hN'
-      · exact h
-    rw [this]
+  apply GlobalTheory.RowLaw.PureTypical.ge_of_pow_eq_one <;> assumption
 
 theorem ge_zero_of_sub_mul (V : VF C) {N : ℕ} (hN : V.v (N : C) = 0) {a b z : C} (ha : a ^ N = 1)
     (hb : b ^ N = 1) (hab : a ≠ b) (hz : V.Ge 0 ((a - b) * z)) : V.Ge 0 z := by

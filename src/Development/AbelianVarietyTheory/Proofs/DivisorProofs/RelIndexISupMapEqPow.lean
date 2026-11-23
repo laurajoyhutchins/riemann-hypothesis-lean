@@ -44,6 +44,7 @@ import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Topology.Sheaves.Init
 import Std.Tactic.BVDecide.Normalize.Prop
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.CardFilterLowerHeckeRepsEqRelIndexPow
 
 @[expose] public section
 
@@ -53,19 +54,7 @@ namespace GlobalTheory.SumIndex
 
 theorem relIndex_pi_pi_of {ι G : Type} [Fintype ι] [AddCommGroup G] (A B : ι → AddSubgroup G) :
     (AddSubgroup.pi Set.univ A).relIndex (AddSubgroup.pi Set.univ B) = ∏ i, (A i).relIndex (B i) := by
-  let g : (∀ i, B i) →+ (AddSubgroup.pi Set.univ B) :=
-    { toFun := fun v => ⟨fun i => (v i : G), fun i _ => (v i).2⟩
-      map_zero' := rfl
-      map_add' := fun _ _ => rfl }
-  have hg : Function.Surjective g := fun x => ⟨fun i => ⟨x.1 i, x.2 i (Set.mem_univ i)⟩, rfl⟩
-  have hc : ((AddSubgroup.pi Set.univ A).addSubgroupOf (AddSubgroup.pi Set.univ B)).comap g =
-      AddSubgroup.pi Set.univ fun i => (A i).addSubgroupOf (B i) := by
-    ext v
-    simp [g, AddSubgroup.mem_addSubgroupOf, AddSubgroup.mem_pi]
-  rw [AddSubgroup.relIndex, ← AddSubgroup.index_comap_of_surjective _ hg, hc]
-  simp_rw [AddSubgroup.relIndex, AddSubgroup.index, ← Nat.card_pi]
-  refine Nat.card_congr ((Quotient.congrRight (fun x y ↦ ?_)).trans (Setoid.piQuotientEquiv _).symm)
-  rw [QuotientAddGroup.leftRel_pi]
+  apply _root_.GlobalTheory.LowerHeckeCount.relIndex_pi_univ <;> assumption
 
 theorem eq_zero_of_sum_eq_zero {ι R V : Type} [Fintype ι] [DecidableEq ι] [Ring R] [AddCommGroup V]
     [Module R V] (S : ι → Submodule R V) (hS : iSupIndep S) (y : ι → V) (hy : ∀ a, y a ∈ S a)

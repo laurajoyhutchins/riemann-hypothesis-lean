@@ -44,6 +44,7 @@ import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Tactic.Polynomial.Basic
 import Mathlib.Tactic.ReduceModChar
 import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.DoubledUnitaryCharacterTrivialOfSiegelStatement
 
 @[expose] public section
 
@@ -243,20 +244,7 @@ theorem PositivityTheory.ThKF0.local_global_character_interpolation : ∀ (F E :
   exact (tendsto_mix' g.1.1).prodMk_nhds ((MulOpposite.continuous_op.tendsto _).comp (tendsto_mix' (g.1⁻¹).1))
 
 open PositivityTheory.ThKF0.Sg GlobalTheory.LocalGlobalChar in
-theorem PositivityTheory.ThKF0.parabolic_character_trivial_on_diagonal : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E), IsCMExt F E σ → ∀ (n : ℕ) (J : Matrix (Fin n) (Fin n) E) (ε : ℤˣ), (∀ i j, σ (J j i) = ((ε : ℤ) : E) * J i j) → J.det ≠ 0 → ∀ c : UG (cA σ) (dbl (incM F J)) →* ℂˣ, Continuous c → (∀ (p : UG (cA σ) (dbl (incM F J))) (t : GL (Fin n) (AE F E)), (p.1.1 : Matrix _ _ (AE F E)) * diagCols (Fin n) = diagCols (Fin n) * t.1 → c p = 1) → c = 1 := by
-  intro F E _ _ _ _ _ σ hσ n J ε _ hdet c hc hP
-  have hJ : IsUnit (incM F J).det := by
-    have h := (isUnit_iff_ne_zero.mpr hdet).map (inclR (F := F) (AF F))
-    rwa [RingHom.map_det] at h
-  refine MonoidHom.ext fun g => ?_
-  obtain ⟨q, hq, hlim⟩ := PositivityTheory.ThKF0.local_global_character_interpolation F E σ (dbl (incM F J)) g
-  have h1 : ∀ S, c (q S) = 1 := fun S => triv_piece hσ _ hJ c hP S (q S) fun i j =>
-    ⟨(g.1.1 - 1 : Matrix _ _ (AE F E)) i j, by
-      rw [hq S]
-      simp only [Matrix.sub_apply, Matrix.add_apply, Matrix.smul_apply, smul_eq_mul]
-      ring⟩
-  have h2 : Tendsto (fun S => c (q S)) atTop (𝓝 (c g)) := (hc.tendsto g).comp hlim
-  simp only [h1] at h2
-  exact (tendsto_nhds_unique tendsto_const_nhds h2).symm
+theorem PositivityTheory.ThKF0.parabolic_character_trivial_on_diagonal : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (σ : E →ₐ[F] E), IsCMExt F E σ → ∀ (n : ℕ) (J : Matrix (Fin n) (Fin n) E) (ε : ℤˣ), (∀ i j, σ (J j i) = ((ε : ℤ) : E) * J i j) → J.det ≠ 0 → ∀ c : UG (cA σ) (dbl (incM F J)) →* ℂˣ, Continuous c → (∀ (p : UG (cA σ) (dbl (incM F J))) (t : GL (Fin n) (AE F E)), (p.1.1 : Matrix _ _ (AE F E)) * diagCols (Fin n) = diagCols (Fin n) * t.1 → c p = 1) → c = 1 :=
+  _root_.GlobalTheory.T.doubledUnitary_character_trivial_of_siegel
 
 end

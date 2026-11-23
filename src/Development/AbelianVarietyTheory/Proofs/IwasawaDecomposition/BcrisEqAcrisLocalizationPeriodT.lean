@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.AcrisFrobeniusFontaineTEqMul
 public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsCrisP
 public import Development.AbelianVarietyTheory.CrystallinePeriods.CrisIncl
 public import Development.AbelianVarietyTheory.CrystallinePeriods.CrisLoc
@@ -80,21 +81,7 @@ attribute [local irreducible] Per.Acris Per.Bcris
 theorem isLog_pow (j : Per.Acris l →+* Per.BdRp l) (hj : IsCrisP j) (e : Per.Fl l) (he : e.untilt = 1)
     (x : Per.BdRp l) (hx : Per.IsLog l e x) (n : ℕ) :
     ∀ y : Per.BdRp l, Per.IsLog l (e ^ n) y → y = (n : Per.BdRp l) * x := by
-  induction n with
-  | zero =>
-    intro y hy
-    rw [pow_zero] at hy
-    have h1 : (1 : Per.Fl l).untilt = 1 := map_one _
-    have h := LogAdd.log_add l 1 1 y y y h1 h1 hy hy (by rwa [mul_one])
-    rw [Nat.cast_zero, zero_mul]
-    exact left_eq_add.1 h
-  | succ n ih =>
-    intro y hy
-    have hn : (e ^ n).untilt = 1 := by rw [map_pow, he, one_pow]
-    obtain ⟨t, u, ht, -, -⟩ := GlobalTheory.T.exists_log_teichmuller_acris_eq_mu_mul_unit l (e ^ n) hn
-    have h1 := (GlobalTheory.T.acris_logTeichmuller_unique_galois_frobenius_bdR l (e ^ n) t hn ht).2.2.2 j hj
-    have h := LogAdd.log_add l (e ^ n) e (j t) x y hn he h1 hx (by rwa [← pow_succ])
-    rw [h, ih _ h1, Nat.cast_succ, add_mul, one_mul]
+  apply GlobalTheory.MemLoc.TPhi.log_pow <;> assumption
 
 theorem phi_log (j : Per.Acris l →+* Per.BdRp l) (hj : IsCrisP j) (e : Per.Fl l) (he : e.untilt = 1)
     (t : Per.Acris l) (ht : IsLogA e t) : phiA l t = (l : Per.Acris l) ^ 1 * t := by

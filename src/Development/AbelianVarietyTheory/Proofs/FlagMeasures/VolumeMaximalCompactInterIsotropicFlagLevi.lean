@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.CuspSpanNormBounds.NonemptyParameterModels.UnitaryPointsRankZeroSubsingleton
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.DefClassNum
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.CompleteIsotropicFrameSignatureEigenvectorsStatement
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.ExistsBlockDiagUnitaryProductHomStatement
@@ -68,30 +69,7 @@ theorem continuous_hs_uMat {n : ℕ} (ε : Fin n → Bool) :
   exact ((continuous_apply k).comp ((continuous_apply i).comp (hc.sub continuous_const))).norm.pow 2
 
 theorem compactSpace_allPos (N : ℕ) : CompactSpace (Formalism.REAL.UJ (allPos N)) := by
-  obtain ⟨hE, hR⟩ := Formalism.REAL.uJEmb N (allPos N)
-  have hJ : Formalism.REAL.Jm (allPos N) = 1 := by
-    simp [Formalism.REAL.Jm, allPos, Matrix.diagonal_one]
-  rw [← isCompact_univ_iff, hE.isCompact_iff, Set.image_univ, hR]
-  have hcl : IsClosed {g : Matrix (Fin N) (Fin N) ℂ | Formalism.REAL.inUJ (allPos N) g} := by
-    simp only [Formalism.REAL.inUJ]
-    exact isClosed_eq (by fun_prop) continuous_const
-  have hK : IsCompact (Set.univ.pi fun _ : Fin N => Set.univ.pi fun _ : Fin N =>
-      Metric.closedBall (0 : ℂ) 1) :=
-    isCompact_univ_pi fun _ => isCompact_univ_pi fun _ => isCompact_closedBall _ _
-  refine hK.of_isClosed_subset hcl ?_
-  intro g hg i _ k _
-  simp only [Formalism.REAL.inUJ, hJ, Matrix.mul_one] at hg
-  have h := congrFun (congrFun hg k) k
-  simp only [Matrix.one_apply_eq] at h
-  have h2 : ∑ r, (Complex.normSq (g r k) : ℂ) = 1 := by
-    rw [← h]; refine Finset.sum_congr rfl fun r _ => ?_
-    rw [Complex.normSq_eq_conj_mul_self]; rfl
-  have h3 : ∑ r, Complex.normSq (g r k) = 1 := by exact_mod_cast h2
-  have h4 : Complex.normSq (g i k) ≤ 1 :=
-    h3 ▸ Finset.single_le_sum (fun r _ => Complex.normSq_nonneg (g r k)) (Finset.mem_univ i)
-  rw [Metric.mem_closedBall, dist_zero_right]
-  have h5 : ‖g i k‖ ^ 2 ≤ 1 := by rw [Complex.sq_norm]; exact h4
-  nlinarith [norm_nonneg (g i k)]
+  apply Formalism.MainNotions.S.Inh.aut_compact_allPos <;> assumption
 
 theorem exists_eq_mul_preimage {G H : Type} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G]
     [SecondCountableTopology G] [MeasurableSpace G] [BorelSpace G] [Group H] [TopologicalSpace H]

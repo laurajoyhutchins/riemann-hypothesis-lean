@@ -203,7 +203,6 @@ theorem arith {x y q C : ℝ} {k : ℕ} (hq : 1 ≤ q) (hk : 2 ≤ k) (hx : |x -
     (hy : |y - 1| ≤ C / q ^ 2) : |x * y - 1| ≤ (3 * |C| + 2) / q ^ 2 := by
   have hq0 : 0 < q ^ 2 := by positivity
   set e : ℝ := 1 / q ^ 2 with he
-  have he0 : 0 < e := by positivity
   have he1 : e ≤ 1 := by
     rw [he, div_le_one hq0]
     nlinarith
@@ -215,7 +214,6 @@ theorem arith {x y q C : ℝ} {k : ℕ} (hq : 1 ≤ q) (hk : 2 ≤ k) (hx : |x -
     refine hy.trans ?_
     rw [he, mul_one_div]
     exact div_le_div_of_nonneg_right (le_abs_self C) hq0.le
-  have hC : 0 ≤ |C| := abs_nonneg C
   have hdec : x * y - 1 = (x - 1) * (y - 1) + (x - 1) + (y - 1) := by ring
   have hprod : |(x - 1) * (y - 1)| ≤ 2 * |C| * e := by
     rw [abs_mul]

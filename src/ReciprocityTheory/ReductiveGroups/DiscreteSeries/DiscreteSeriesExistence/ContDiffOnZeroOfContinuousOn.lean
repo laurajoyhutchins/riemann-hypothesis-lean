@@ -69,21 +69,16 @@ theorem slm_le_inf (N : ℕ) : (N : WithTop ℕ∞) + 1 ≤ ∞ := by
   first
   | exact_mod_cast (le_top : ((N + 1 : ℕ) : ℕ∞) ≤ ⊤)
   | (norm_cast; exact le_top)
-  | exact WithTop.coe_le_coe.mpr le_top
-  | simp
 
 theorem slm_le_inf' (N : ℕ) : (N : WithTop ℕ∞) ≤ ∞ := by
   first
   | exact_mod_cast (le_top : ((N : ℕ) : ℕ∞) ≤ ⊤)
   | (norm_cast; exact le_top)
-  | exact WithTop.coe_le_coe.mpr le_top
-  | simp
 
 theorem slm_hd_iff {f : ℝ → Matrix (Fin n) (Fin n) ℂ} {f' : Matrix (Fin n) (Fin n) ℂ} {s : ℝ} :
     HasDerivAt f f' s ↔ ∀ i j, HasDerivAt (fun t => f t i j) (f' i j) s := by
   first
   | exact hasDerivAt_pi.trans (forall_congr' fun i => hasDerivAt_pi)
-  | exact (hasDerivAt_pi (Φ := f)).trans (forall_congr' fun i => hasDerivAt_pi)
 
 theorem slm_hd_mul {f g : ℝ → Matrix (Fin n) (Fin n) ℂ} {f' g' : Matrix (Fin n) (Fin n) ℂ} {s : ℝ}
     (hf : HasDerivAt f f' s) (hg : HasDerivAt g g' s) :
@@ -94,7 +89,6 @@ theorem slm_hd_mul {f g : ℝ → Matrix (Fin n) (Fin n) ℂ} {f' g' : Matrix (F
   simp only [Matrix.mul_apply, Matrix.add_apply, ← Finset.sum_add_distrib]
   first
   | exact HasDerivAt.fun_sum fun k _ => (hf' i k).mul (hg' k j)
-  | exact HasDerivAt.sum fun k _ => (hf' i k).mul (hg' k j)
 
 theorem slm_hd_conjT {f : ℝ → Matrix (Fin n) (Fin n) ℂ} {f' : Matrix (Fin n) (Fin n) ℂ} {s : ℝ}
     (hf : HasDerivAt f f' s) : HasDerivAt (fun t => (f t)ᴴ) f'ᴴ s := by
@@ -152,9 +146,7 @@ theorem slmG_cd {V : Set X} (hV : IsOpen V) {γ : X → Y} (hγ : ContDiffOn ℝ
   unfold slmG
   first
   | exact ContDiffOn.sum fun i _ => (contDiffOn_const.clm_comp hfd).smulRight (hw i)
-  | exact ContDiffOn.fun_sum fun i _ => (contDiffOn_const.clm_comp hfd).smulRight (hw i)
   | simp only [ContinuousLinearMap.sum_apply]
-    exact ContDiffOn.sum fun i _ => (contDiffOn_const.clm_comp hfd).smulRight (hw i)
 
 theorem contDiffOn_zero_of_continuousOn {V : Set X} {f : X → E} (h : ContinuousOn f V) : ContDiffOn ℝ ((0 : ℕ) : WithTop ℕ∞) f V := by
   first

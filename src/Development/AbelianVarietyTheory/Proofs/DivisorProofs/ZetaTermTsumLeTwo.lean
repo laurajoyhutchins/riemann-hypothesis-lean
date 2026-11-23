@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.LValEtaBounds
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -53,23 +54,7 @@ namespace GlobalTheory
 
 theorem zetaTerm_tsum_le_two (i : ℕ) (hi : 2 ≤ i) :
     ∑' n : ℕ, 1/((n:ℝ)+1)^i ≤ 2 := by
-  have h2 : HasSum (fun n : ℕ => (1:ℝ)/((n:ℝ)+1)^2) (π^2/6) := by
-    have := (hasSum_nat_add_iff' 1).mpr hasSum_zeta_two
-    simpa using this
-  have hle : ∀ n : ℕ, (1:ℝ)/((n:ℝ)+1)^i ≤ 1/((n:ℝ)+1)^2 := by
-    intro n
-    have h1 : (1:ℝ) ≤ (n:ℝ)+1 := by linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)]
-    apply one_div_le_one_div_of_le (by positivity)
-    exact pow_le_pow_right₀ h1 hi
-  have hnn : ∀ n : ℕ, (0:ℝ) ≤ 1/((n:ℝ)+1)^i := fun n => by positivity
-  have hs : Summable (fun n : ℕ => (1:ℝ)/((n:ℝ)+1)^i) :=
-    Summable.of_nonneg_of_le hnn hle h2.summable
-  calc ∑' n : ℕ, 1/((n:ℝ)+1)^i ≤ ∑' n : ℕ, 1/((n:ℝ)+1)^2 := hs.tsum_le_tsum hle h2.summable
-    _ = π^2/6 := h2.tsum_eq
-    _ ≤ 2 := by
-      have := Real.pi_lt_d2
-      have := Real.pi_pos
-      nlinarith
+  apply GlobalTheory.EtaValueBound.zeta_le_two <;> assumption
 
 theorem volumeConstant_le (r : ℕ) (hr : 2 ≤ r) :
     √r * ∏ i ∈ Finset.Icc 2 r, (∑' n : ℕ, 1/((n:ℝ)+1)^i) ≤ 2^(r*(r-1)/2) * (2*π)^(r-1) * √r := by

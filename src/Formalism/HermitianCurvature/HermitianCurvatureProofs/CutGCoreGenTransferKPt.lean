@@ -357,7 +357,6 @@ theorem gauge_kappa_pointwise_holds : GTKPt := by
   set n := Module.finrank ℂ Wq with hn
   set b := hC.eigenvectorBasis hn.symm with hbdef
   set lam : Fin n → ℝ := hC.eigenvalues hn.symm with hlamdef
-  have hCb : ∀ i, C (b i) = (lam i : ℂ) • b i := fun i => hC.apply_eigenvectorBasis hn.symm i
 
   classical
   let ρ₀ : M.Ty P := Classical.arbitrary _

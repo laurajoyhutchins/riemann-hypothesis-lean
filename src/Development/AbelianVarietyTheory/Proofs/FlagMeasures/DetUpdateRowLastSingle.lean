@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DetFromBlocksSingle
 public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -106,21 +107,6 @@ theorem det_gram_two_frames {K : Type} [CommRing K] (r : ℕ)
       (Matrix.diagonal fun i => if i = Fin.last r then -T' else 0)).det
       = (-1) ^ (r + 1) * (Z.det * W.det - T * T' * ((Z.submatrix Fin.castSucc Fin.castSucc).det
           * (W.submatrix Fin.castSucc Fin.castSucc).det)) := by
-  have hs : (Matrix.fromBlocks 0 1 1 0 :
-      Matrix (Fin (r + 1) ⊕ Fin (r + 1)) (Fin (r + 1) ⊕ Fin (r + 1)) K).det = (-1) ^ (r + 1) := by
-    have h : (Matrix.fromBlocks 0 1 1 0 :
-        Matrix (Fin (r + 1) ⊕ Fin (r + 1)) (Fin (r + 1) ⊕ Fin (r + 1)) K)
-        = Matrix.fromBlocks 1 (-1) 0 1 * Matrix.fromBlocks 1 1 1 0 := by
-      simp [Matrix.fromBlocks_multiply]
-    rw [h, Matrix.det_mul, Matrix.det_fromBlocks_zero₂₁, Matrix.det_fromBlocks_one₁₁]
-    simp [Matrix.det_neg]
-  have hm : Matrix.fromBlocks (Matrix.diagonal fun i => if i = Fin.last r then -T else 0) Z W
-      (Matrix.diagonal fun i => if i = Fin.last r then -T' else 0)
-      = Matrix.fromBlocks Z (Matrix.diagonal fun i => if i = Fin.last r then -T else 0)
-        (Matrix.diagonal fun i => if i = Fin.last r then -T' else 0) W
-        * Matrix.fromBlocks 0 1 1 0 := by
-    simp [Matrix.fromBlocks_multiply]
-  rw [hm, Matrix.det_mul, hs, det_fromBlocks_corner]
-  ring
+  apply GlobalTheory.SA.TransvG.det_fromBlocks_last <;> assumption
 
 end GlobalTheory

@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenOfUnit
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsGenericFlag
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -63,25 +64,7 @@ theorem uZpow {a : Ω} (ha : unitAt ξ p a) (n : ℤ) : unitAt ξ p (a ^ n) := b
     · simpa [zpow_negSucc] using pow_mem h1 (m + 1)
 
 theorem gen_unit {Λ : Lat ξ Ω} {s t : Ω} (hs : Λ.IsGenAt p s) (ht : Λ.IsGenAt p t) : unitAt ξ p (s / t) := by
-  obtain ⟨hs0, hs⟩ := hs
-  obtain ⟨ht0, ht⟩ := ht
-  have h1 : s ∈ Submodule.span (regAt ξ p) {t} := by
-    rw [← ht, hs]
-    exact Submodule.mem_span_singleton_self s
-  have h2 : t ∈ Submodule.span (regAt ξ p) {s} := by
-    rw [← hs, ht]
-    exact Submodule.mem_span_singleton_self t
-  obtain ⟨u, hu⟩ := Submodule.mem_span_singleton.mp h1
-  obtain ⟨w, hw⟩ := Submodule.mem_span_singleton.mp h2
-  refine ⟨div_ne_zero hs0 ht0, ?_, ?_⟩
-  · have e : s / t = (u : Ω) := by
-      rw [← hu, Subring.smul_def, smul_eq_mul, mul_div_assoc, div_self ht0, mul_one]
-    rw [e]
-    exact u.2
-  · have e : (s / t)⁻¹ = (w : Ω) := by
-      rw [inv_div, ← hw, Subring.smul_def, smul_eq_mul, mul_div_assoc, div_self hs0, mul_one]
-    rw [e]
-    exact w.2
+  apply GlobalTheory.CompanionTheory.Ar.Cusp.DetNef.gen_unit <;> assumption
 
 theorem gen_of_unit {Λ : Lat ξ Ω} {s t : Ω} (ht : Λ.IsGenAt p t) (hu : unitAt ξ p (s / t)) : Λ.IsGenAt p s := by
   obtain ⟨ht0, ht⟩ := ht
@@ -101,44 +84,7 @@ theorem gen_of_unit {Λ : Lat ξ Ω} {s t : Ω} (ht : Λ.IsGenAt p t) (hu : unit
 
 theorem gen_untens {Λ : Lat ξ Ω} {σ : ℤ} (hσ : σ * σ = 1) {t : Ω}
     (h : (Lat.tens (fun _ : Unit => Λ) fun _ => σ).IsGenAt p t) : Λ.IsGenAt p (t ^ σ) := by
-  obtain ⟨ht0, htl⟩ := h
-  have hg : ∃ g, Λ.IsGenAt p g := by
-    by_contra hno
-    push_neg at hno
-    have hmem : t ∈ (Lat.tens (fun _ : Unit => Λ) fun _ => σ) p := by
-      rw [htl]
-      exact Submodule.mem_span_singleton_self t
-    have hbot : (Lat.tens (fun _ : Unit => Λ) fun _ => σ) p = ⊥ := by
-      unfold Lat.tens
-      rw [Submodule.span_eq_bot]
-      rintro x ⟨s, hs, -⟩
-      exact absurd (hs ()) (hno (s ()))
-    rw [hbot, Submodule.mem_bot] at hmem
-    exact ht0 hmem
-  obtain ⟨g, hg⟩ := hg
-  have hg0 : g ≠ 0 := hg.1
-  have hT : (Lat.tens (fun _ : Unit => Λ) fun _ => σ).IsGenAt p (g ^ σ) := by
-    refine ⟨zpow_ne_zero σ hg0, ?_⟩
-    unfold Lat.tens
-    apply le_antisymm
-    · rw [Submodule.span_le]
-      rintro x ⟨s, hs, rfl⟩
-      have hu := uZpow (gen_unit (hs ()) hg) σ
-      have e : ∏ i : Unit, s i ^ σ = (⟨(s () / g) ^ σ, hu.2.1⟩ : regAt ξ p) • g ^ σ := by
-        rw [Subring.smul_def, smul_eq_mul, Fintype.prod_unique]
-        show s () ^ σ = (s () / g) ^ σ * g ^ σ
-        rw [div_zpow, div_mul_cancel₀ _ (zpow_ne_zero σ hg0)]
-      rw [SetLike.mem_coe, e]
-      exact Submodule.smul_mem _ _ (Submodule.mem_span_singleton_self _)
-    · rw [Submodule.span_singleton_le_iff_mem]
-      apply Submodule.subset_span
-      exact ⟨fun _ => g, fun _ => hg, by simp⟩
-  have hu := gen_unit ⟨ht0, htl⟩ hT
-  have hu2 := uZpow hu σ
-  have heq : (t / g ^ σ) ^ σ = t ^ σ / g := by
-    rw [div_zpow, ← zpow_mul, hσ, zpow_one]
-  rw [heq] at hu2
-  exact gen_of_unit hg hu2
+  apply GlobalTheory.CompanionTheory.Ar.Cusp.DetNef.gen_untens <;> assumption
 
 variable {K : Type} [Fintype K] {J : K → Type} {y : (Σ k, J k) → Ω}
 

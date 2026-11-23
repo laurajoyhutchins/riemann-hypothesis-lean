@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RelAmpleDiagonalDescendedBundleGaloisCover
 public import Development.AbelianVarietyTheory.Proofs.UniformizationProofs.ExistsSecOfFinite
 public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.FiniteFlatLocallyFreeAffine
 import Mathlib.Algebra.Order.Floor.Extended
@@ -58,26 +59,7 @@ variable {X Y : Scheme.{0}} (π : Y ⟶ X) [IsFinite π] [Flat π] [LocallyOfFin
 
 theorem exists_finFree_app_of_finitePresentation {x : X} {U : X.Opens} (hx : x ∈ U) :
     ∃ V : X.Opens, IsAffineOpen V ∧ x ∈ V ∧ V ≤ U ∧ FinFree (π.app V).hom := by
-  obtain ⟨V0, hV0, hxV0, hV0U⟩ := (Opens.isBasis_iff_nbhd.mp X.isBasis_affineOpens) hx
-  have hfin : (π.app V0).hom.Finite := IsFinite.finite_app π V0 hV0
-  have hfl : (π.app V0).hom.Flat := by
-    have := HasRingHomProperty.appLE @Flat π inferInstance ⟨V0, hV0⟩ ⟨π ⁻¹ᵁ V0, hV0.preimage π⟩ le_rfl
-    rwa [Scheme.Hom.appLE_eq_app] at this
-  have hfp : (π.app V0).hom.FinitePresentation := by
-    have := HasRingHomProperty.appLE @LocallyOfFinitePresentation π inferInstance ⟨V0, hV0⟩
-      ⟨π ⁻¹ᵁ V0, hV0.preimage π⟩ le_rfl
-    rwa [Scheme.Hom.appLE_eq_app] at this
-  obtain ⟨r, hr, H⟩ := GlobalTheory.CompanionTheory.FreeQuotProof.Nbhd.exists_finFree_away_of_finitePresentation hfin hfl hfp
-    (hV0.primeIdealOf ⟨x, hxV0⟩)
-  refine ⟨X.basicOpen r, hV0.basicOpen r, ?_, (X.basicOpen_le r).trans hV0U, ?_⟩
-  · have h1 : hV0.primeIdealOf ⟨x, hxV0⟩ ∈
-        (TopologicalSpace.Opens.map hV0.fromSpec.base).obj (X.basicOpen r) := by
-      rw [hV0.fromSpec_preimage_basicOpen]
-      exact hr
-    have h2 : hV0.fromSpec (hV0.primeIdealOf ⟨x, hxV0⟩) ∈ X.basicOpen r := h1
-    rwa [hV0.fromSpec_primeIdealOf] at h2
-  · exact H (isPushout_app π hV0 (hV0.basicOpen r) (X.basicOpen_le r))
-      (RingedSpace.isUnit_res_basicOpen _ r)
+  apply GlobalTheory.FiniteAmpleFP.exists_finFree_app_fp <;> assumption
 
 abbrev FreeOpen (V : X.Opens) : Type := {W : X.Opens // IsAffineOpen W ∧ W ≤ V ∧ FinFree (π.app W).hom}
 

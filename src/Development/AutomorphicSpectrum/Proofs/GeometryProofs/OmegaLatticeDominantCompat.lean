@@ -70,6 +70,7 @@ import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Tactic.Polynomial.Basic
 import Mathlib.Tactic.ReduceModChar
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.EigLat
+import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.HeightPullbackDominatingMap
 
 @[expose] public section
 
@@ -374,99 +375,5 @@ theorem om_decomp {R : Type} [CommRing R] [IsLocalRing R] {X : Scheme.{0}} {x : 
 
 end GlobalTheory.CompanionTheory.Ar.HTPull
 
-theorem GlobalTheory.CompanionTheory.Ar.HTPull.main : ∀ (X X' : Scheme.{0}) (Ω Ω' : Type) [Field Ω] [Field Ω'] (ξ : Sp Ω ⟶ X) (ξ' : Sp Ω' ⟶ X') (f : X' ⟶ X) (i : Ω →+* Ω') (G : Over X) (G' : Over X') [GrpObj G] [IsCommMonObj G] [GrpObj G'] [IsCommMonObj G'] (φ : G'.left ⟶ G.left) (V V' : Type) [AddCommGroup V] [Module Ω V] [AddCommGroup V'] [Module Ω' V'] (M : LieModel G ξ V) (M' : LieModel G' ξ' V') (j : V →+ V'), IsCptGen ξ → IsCptGen ξ' → GlobalTheory.CompanionTheory.Ar.Dominates ξ' ξ f i → IsGrpPullback G' G f φ → Smooth G.hom → (∀ e, (M'.pt (j e)).left ≫ φ = Spec.map (CommRingCat.ofHom (dualMap i)) ≫ (M.pt e).left) → ∀ (jd : Module.Dual Ω V →+ Module.Dual Ω' V'), (∀ w e, jd w (j e) = i (w e)) → ∀ (N : ℕ), 0 < N → ∀ (p' : Cpt ξ') (h : genPt ξ ⤳ f p'.1), IsIntegrallyClosed (X.presheaf.stalk (f p'.1)) → IsNoetherianRing (X.presheaf.stalk (f p'.1)) → (∃ ζ : Ω, IsPrimitiveRoot ζ N) → M.IsHTFormAt N ⟨f p'.1, h⟩ 0 → M'.htLat N p' = (M.htLat N).pull ξ' f jd p' := by
-  intro X X' Ω Ω' _ _ ξ ξ' f i G G' _ _ _ _ φ V V' _ _ _ _ M M' j gen gen' dom hφ hsm hj jd hjd N hN p' h hic hnoe
-    hroot h0
-  obtain ⟨ζ, hζ⟩ := hroot
-  obtain ⟨hext, hspan, hlat⟩ := GlobalTheory.T.lie_lattice_dominant_compat X X' Ω Ω' ξ ξ' f i G G' φ V V' M M' j gen gen' dom hφ hsm hj
-  have hsm' : Smooth G'.hom := MorphismProperty.of_isPullback hφ.1 hsm
-  let p : Cpt ξ := ⟨f p'.1, h⟩
-  let k := genMap ξ p
-  let k' := genMap ξ' p'
-  have hkinj : Function.Injective k := gen.inj p
-  have hk'inj : Function.Injective k' := gen'.inj p'
-  haveI : IsDomain (X.presheaf.stalk (f p'.1)) := hkinj.isDomain k
-  haveI : IsDomain (X'.presheaf.stalk p'.1) := hk'inj.isDomain k'
-  letI : Algebra (X.presheaf.stalk (f p'.1)) (X'.presheaf.stalk p'.1) := (f.stalkMap p'.1).hom.toAlgebra
-  have hk : ∀ r, k' (algebraMap (X.presheaf.stalk (f p'.1)) (X'.presheaf.stalk p'.1) r) = i (k r) :=
-    GlobalTheory.CompanionTheory.Ar.Flat.PullReg.stalkMap_comp_genMap dom p' h
-  have hs : Function.Injective (algebraMap (X.presheaf.stalk (f p'.1)) (X'.presheaf.stalk p'.1)) := by
-    intro a b e
-    exact hkinj (i.injective (by rw [← hk, ← hk, e]))
-  have hx : X'.fromSpecStalk p'.1 ≫ f = Spec.map (CommRingCat.ofHom
-      (algebraMap (X.presheaf.stalk (f p'.1)) (X'.presheaf.stalk p'.1))) ≫ X.fromSpecStalk (f p'.1) :=
-    (Scheme.SpecMap_stalkMap_fromSpecStalk f).symm
-  have hξ : ξ = Spec.map (CommRingCat.ofHom k) ≫ X.fromSpecStalk (f p'.1) := (RegAtDom.spec_genMap ξ _ h).symm
-  have hξ' : ξ' = Spec.map (CommRingCat.ofHom k') ≫ X'.fromSpecStalk p'.1 :=
-    (RegAtDom.spec_genMap ξ' p'.1 p'.2).symm
-  haveI := hic
-  haveI := hnoe
-  haveI : NeZero N := ⟨hN.ne'⟩
-
-  have hfr := RegAtRing.regAt_ring X Ω ξ gen p
-  haveI : IsFractionRing (regAt ξ p) Ω := hfr.1
-  haveI : IsIntegrallyClosed (regAt ξ p) := hfr.2.2 hic
-  have hζint : IsIntegral (regAt ξ p) ζ :=
-    IsIntegral.of_pow hN (by rw [hζ.pow_eq_one]; exact isIntegral_one)
-  obtain ⟨y, hy⟩ := IsIntegrallyClosed.isIntegral_iff.1 hζint
-  obtain ⟨z, hz⟩ := y.2
-  have hkz : k z = ζ := hz.trans hy
-  have hzp : IsPrimitiveRoot z N := IsPrimitiveRoot.of_map_of_injective (by rw [hkz]; exact hζ : IsPrimitiveRoot (k z) N) hkinj
-  have hN0 : (N : X'.presheaf.stalk p'.1) ≠ 0 := by
-    intro e
-    have e' : (N : Ω') = 0 := by simpa using congrArg k' e
-    have e'' : (N : Ω) = 0 := i.injective (by simpa using e')
-    exact (hζ.neZero').out e''
-  have hjds : ∀ (a : Ω) (w : Module.Dual Ω V), jd (a • w) = i a • jd w := by
-    intro a w
-    refine LinearMap.ext_on hspan ?_
-    rintro _ ⟨e, rfl⟩
-    rw [hjd, LinearMap.smul_apply, LinearMap.smul_apply, hjd, smul_eq_mul, smul_eq_mul, map_mul]
-  have hreg : ∀ c ∈ regAt ξ p, i c ∈ regAt ξ' p' := by
-    rintro _ ⟨r, rfl⟩
-    exact ⟨_, hk r⟩
-  have hC : ∀ u' ∈ M'.omLat p', N • u' ∈ (M.htLat N).pull ξ' f jd p' := by
-    intro u' hu'
-    have hu'' : ∀ e ∈ M'.lat p', u' e ∈ regAt ξ' p' := hu'
-    obtain ⟨n, δ, b, hb, hδ, hdec⟩ := HTPull.om_decomp (M := M) hξ hsm i j hext.1 hspan jd hjd
-    have hδom : ∀ a, δ a ∈ M.omLat p := by
-      intro a
-      show ∀ e ∈ M.lat p, δ a e ∈ regAt ξ p
-      intro e he
-      obtain ⟨v, hv, hev⟩ := ((lieLat_carrier X G Ω ξ V M p).1 e).1 he
-      exact hδ a e v hv hev
-    have hNδ : ∀ a, (N : Ω) • δ a ∈ M.htLat N p := fun a =>
-      (GlobalTheory.T.hodge_tate_lattice_le_omega X Ω ξ G V M N p gen hsm).2 h0 (δ a) (hδom a)
-    have hc : ∀ a, u' (j (b a)) ∈ regAt ξ' p' := by
-      intro a
-      apply hu''
-      rw [hlat]
-      exact Submodule.subset_span ⟨h, b a, Submodule.subset_span (hb a), rfl⟩
-    rw [hdec u', Finset.smul_sum]
-    refine sum_mem fun a _ => ?_
-    have e1 : N • (u' (j (b a)) • jd (δ a)) = u' (j (b a)) • jd ((N : Ω) • δ a) := by
-      rw [Nat.cast_smul_eq_nsmul, map_nsmul, smul_comm]
-    rw [e1]
-    exact Submodule.smul_mem _ (⟨_, hc a⟩ : regAt ξ' p') (Submodule.subset_span ⟨h, _, hNδ a, rfl⟩)
-  apply le_antisymm
-  · refine Submodule.span_le.2 fun w' hw' => ?_
-    obtain ⟨w, hwF, u', rfl, hu⟩ := HTPull.backward (M := M) (M' := M') hs hx hφ hsm hk hξ hξ' hj hN hN0 hzp h0 jd hjd hw'
-    have hu' : u' ∈ M'.omLat p' := by
-      intro e he
-      obtain ⟨v, hv, hev⟩ := ((lieLat_carrier X' G' Ω' ξ' V' M' p').1 e).1 he
-      exact hu e v hv hev
-    exact add_mem (Submodule.subset_span ⟨h, w, Submodule.subset_span hwF, rfl⟩) (hC u' hu')
-  · refine Submodule.span_le.2 ?_
-    rintro _ ⟨h', e, he, rfl⟩
-    show jd e ∈ M'.htLat N p'
-    have he' : e ∈ M.htLat N p := he
-    clear he
-    induction he' using Submodule.span_induction with
-    | mem w hw =>
-      exact Submodule.subset_span (HTPull.forward (M := M) (M' := M') hs hx hφ hsm hk hξ' hj (hjd w) hw)
-    | zero => simp
-    | add a b _ _ ha hb => simpa using add_mem ha hb
-    | smul c a _ ha =>
-      have e1 : jd (c • a) = i c • jd a := hjds c a
-      rw [e1]
-      exact Submodule.smul_mem _ (⟨i c, hreg c c.2⟩ : regAt ξ' p') ha
+theorem GlobalTheory.CompanionTheory.Ar.HTPull.main : ∀ (X X' : Scheme.{0}) (Ω Ω' : Type) [Field Ω] [Field Ω'] (ξ : Sp Ω ⟶ X) (ξ' : Sp Ω' ⟶ X') (f : X' ⟶ X) (i : Ω →+* Ω') (G : Over X) (G' : Over X') [GrpObj G] [IsCommMonObj G] [GrpObj G'] [IsCommMonObj G'] (φ : G'.left ⟶ G.left) (V V' : Type) [AddCommGroup V] [Module Ω V] [AddCommGroup V'] [Module Ω' V'] (M : LieModel G ξ V) (M' : LieModel G' ξ' V') (j : V →+ V'), IsCptGen ξ → IsCptGen ξ' → GlobalTheory.CompanionTheory.Ar.Dominates ξ' ξ f i → IsGrpPullback G' G f φ → Smooth G.hom → (∀ e, (M'.pt (j e)).left ≫ φ = Spec.map (CommRingCat.ofHom (dualMap i)) ≫ (M.pt e).left) → ∀ (jd : Module.Dual Ω V →+ Module.Dual Ω' V'), (∀ w e, jd w (j e) = i (w e)) → ∀ (N : ℕ), 0 < N → ∀ (p' : Cpt ξ') (h : genPt ξ ⤳ f p'.1), IsIntegrallyClosed (X.presheaf.stalk (f p'.1)) → IsNoetherianRing (X.presheaf.stalk (f p'.1)) → (∃ ζ : Ω, IsPrimitiveRoot ζ N) → M.IsHTFormAt N ⟨f p'.1, h⟩ 0 → M'.htLat N p' = (M.htLat N).pull ξ' f jd p' :=
+  GlobalTheory.CompanionTheory.Ar.HTPullK.main

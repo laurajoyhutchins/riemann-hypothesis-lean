@@ -82,7 +82,6 @@ theorem measurePreserving_pi {K : Type} [CommRing K] [TopologicalSpace K] [IsTop
   let B : Measure ({k // p k} → K) := Measure.pi fun _ => ν
   let A : Measure ({k // ¬ p k} → K) := Measure.pi fun _ => ν
   have hmp := measurePreserving_piEquivPiSubtypeProd (fun _ : ι => ν) p
-  let e := MeasurableEquiv.piEquivPiSubtypeProd (fun _ : ι => K) p
   let g : ({k // p k} → K) → ({k // ¬ p k} → K) → ({k // ¬ p k} → K) :=
     fun b a => (fun _ => t.c * b ⟨t.j, hj⟩) + a
   have hgm : Measurable (Function.uncurry g) := by

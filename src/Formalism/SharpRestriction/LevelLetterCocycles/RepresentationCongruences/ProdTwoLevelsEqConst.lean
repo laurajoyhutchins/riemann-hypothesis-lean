@@ -154,22 +154,7 @@ theorem inFr_ea (a : ZMod n) {N D : PowerSeries O} {f : W.EE} (h : InFr W a (Br.
 theorem p_zero : Br.P.p 0 = X := rfl
 
 theorem ps_cst (s : ℕ) : ps W s = Br.cst (Br.P.p s) := by
-  induction s with
-  | zero =>
-    unfold Formalism.MainNotions.ArcLiftingSetup.ps
-    rw [pow_zero, AlgHom.one_apply]
-    funext i
-    show W.π₀₁ + ((PD.p : ℕ) : PowerSeries O) = Br.ι X
-    rw [Br.ι_X, map_natCast]
-  | succ s ih =>
-    unfold Formalism.MainNotions.ArcLiftingSetup.ps at ih ⊢
-    rw [pow_succ', AlgHom.mul_apply, ih]
-    funext i
-    show W.φ₀ (Br.ι (Br.P.p s)) = Br.ι (Br.P.p (s + 1))
-    rw [← Br.ι_φ]
-    congr 1
-    show Br.P.φ ((Br.P.φ : PowerSeries O → PowerSeries O)^[s] X) = (Br.P.φ : PowerSeries O → PowerSeries O)^[s + 1] X
-    rw [Function.iterate_succ_apply']
+  apply Formalism.MainNotions.N.FrobeniusPowerSeries.PhiBridge.ps_eq <;> assumption
 
 theorem prod_two_levels_eq_const (F : ℕ → ℕ) :
     (∏ s ∈ Finset.range 2, ps W s ^ F s) = Br.cst (X ^ F 0 * Br.P.p 1 ^ F 1) := by

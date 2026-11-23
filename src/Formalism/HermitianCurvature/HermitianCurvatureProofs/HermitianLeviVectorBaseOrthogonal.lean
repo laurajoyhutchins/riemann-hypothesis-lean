@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TailIntegrals.RankOneLeviComm
 public import Formalism.HermitianCurvature.WeylElementCommutesLevelOne
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CmHalfIntegralGeneratorMemAlgebraicClosure
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CompactGroupHaarExists
@@ -262,35 +263,7 @@ private lemma iotaLev_apply_of_first_index_outside (g : Mat k r') (p : Fin (2 * 
   rw [dif_neg hp]
 
 lemma lev_mul (g h : Mat k r') : ιLev k 1 r' (g * h) = ιLev k 1 r' g * ιLev k 1 r' h := by
-  ext p q
-  rw [Matrix.mul_apply]
-  rcases mid_or p with ⟨i, rfl⟩ | hp
-  · rcases mid_or q with ⟨j, rfl⟩ | hq
-    · rw [lev_mid, Matrix.mul_apply]
-      have hsub : ∑ m, ιLev k 1 r' g (levPos k 1 r' i) m * ιLev k 1 r' h m (levPos k 1 r' j) =
-          ∑ m ∈ Finset.univ.map ⟨levPos k 1 r', levPos_inj⟩,
-            ιLev k 1 r' g (levPos k 1 r' i) m * ιLev k 1 r' h m (levPos k 1 r' j) := by
-        symm
-        apply Finset.sum_subset (Finset.subset_univ _)
-        intro m _ hm
-        rcases mid_or m with ⟨l, rfl⟩ | hm'
-        · exact absurd (Finset.mem_map_of_mem _ (Finset.mem_univ l)) hm
-        · rw [iotaLev_levPos_apply_of_col_outside g i m hm', zero_mul]
-      rw [hsub, Finset.sum_map]
-      refine Finset.sum_congr rfl (fun l _ => ?_)
-      simp only [Function.Embedding.coeFn_mk]
-      rw [lev_mid, lev_mid]
-    · rw [iotaLev_levPos_apply_of_col_outside _ i q hq]
-      symm
-      apply Finset.sum_eq_zero
-      intro m _
-      rcases mid_or m with ⟨l, rfl⟩ | hm
-      · rw [iotaLev_levPos_apply_of_col_outside h l q hq, mul_zero]
-      · rw [iotaLev_levPos_apply_of_col_outside g i m hm, zero_mul]
-  · rw [iotaLev_apply_of_first_index_outside (g * h) p hp q]
-    simp only [iotaLev_apply_of_first_index_outside g p hp, ite_mul, one_mul, zero_mul, Finset.sum_ite_eq, Finset.sum_ite_eq',
-      Finset.mem_univ, if_true]
-    rw [iotaLev_apply_of_first_index_outside h p hp q]
+  apply ReciprocityTheory.ChartRestriction.DS.Xi.StepA.lev_mul <;> assumption
 
 lemma lev_inv (g : Mat k r') (hg : IsUnit g.det) : (ιLev k 1 r' g)⁻¹ = ιLev k 1 r' g⁻¹ := by
   apply Matrix.inv_eq_right_inv

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.LatExistsOfSteps
 public import Formalism.LocalToGlobal.SiegelLatticeTheory.ClosedLocalOrbits.GaugeLatticeShifts.LocalDiscriminantIsUnit
 public import Formalism.LocalToGlobal.SiegelLatticeTheory.FlagStabilizerTensors.RootLatticeThresholds.LocalAdditiveCharContinuous
 public import Formalism.PeriodIntegrals.LocLatEq
@@ -495,23 +496,7 @@ theorem lf_form_int {Λ : Submodule (𝓞 D.host.E) (VS D).V} (hU : Formalism.He
     exact mul_mem o.2 h
 
 theorem lf_riesz (φ : (VS D).V →ₗ[D.host.E] D.host.E) : ∃ μ : (VS D).V, ∀ v, (VS D).hT μ v = φ v := by
-  classical
-  obtain ⟨bs, hbs⟩ := Formalism.HermitianLatticesTheory.dualLattice_dualBasis (VS D).hT (VS D).nondeg (VS D).frame
-  refine ⟨∑ j, star (φ ((VS D).frame j)) • bs j, fun v => ?_⟩
-  have key : (VS D).hT (∑ j, star (φ ((VS D).frame j)) • bs j) = φ := by
-    apply (VS D).frame.ext
-    intro i
-
-    rw [map_sum, LinearMap.sum_apply]
-    have hs : ∀ j, (VS D).hT (star (φ ((VS D).frame j)) • bs j) ((VS D).frame i) =
-        φ ((VS D).frame j) * (if i = j then 1 else 0) := by
-      intro j
-      rw [LinearMap.map_smulₛₗ, LinearMap.smul_apply, smul_eq_mul, starRingEnd_apply, star_star]
-      congr 1
-      rw [← (VS D).herm.eq ((VS D).frame i) (bs j), hbs]
-      split_ifs <;> simp
-    simp only [hs, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
-  rw [key]
+  apply GlobalTheory.St.Lat.lat_riesz <;> assumption
 
 private theorem lf_span_eq_top_of_unimodular {Λ : Submodule (𝓞 D.host.E) (VS D).V}
     (hL : Λ.FG) (hU : Formalism.HermitianLatticesTheory.IsUnimodular (VS D).hT Λ) :

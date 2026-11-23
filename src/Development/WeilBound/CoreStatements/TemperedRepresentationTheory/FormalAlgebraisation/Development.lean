@@ -1,12 +1,6 @@
 module
 
 public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.FormalAlgebraisation
-public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FormalAlgebraisationSchemesStatement
-public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FormalMorphismExistenceStatement
-public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.FormalMorphismUniquenessStatement
-public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GrothendieckExistenceClosedProjStatement
-public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.GrothendieckExistenceClosedStatement
-public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.IsoOfThickeningsStatement
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
 import Mathlib.Algebra.Order.Interval.Basic
@@ -45,20 +39,13 @@ import Mathlib.Tactic.NormNum.Ordinal
 import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.FormalAlgebraisation
 
 @[expose] public section
 
-set_option autoImplicit false
-
-open CategoryTheory CategoryTheory.Limits AlgebraicGeometry ReciprocityTheory.ChartRestriction.G.Out PositivityTheory.FormalThickening
-
 namespace PositivityTheory.FormalThickening
 
-theorem formalAlgebraisation : GlobalTheory.Published.FormalAlgebraisation := by
-  refine ⟨?_, GlobalTheory.T.formal_algebraisation_schemes GlobalTheory.T.grothendieck_existence_closed_proj⟩
-  intro R _ _ I hI X Z hX hZs hZl hZq Y β b hb hβ f hf hfβ
-  obtain ⟨g, hg⟩ := GlobalTheory.T.formal_morphism_existence GlobalTheory.T.grothendieck_existence_closed GlobalTheory.T.iso_of_thickenings R I hI X Z hX hZs hZl hZq Y β b hb hβ f hf hfβ
-  refine ⟨g, hg, fun g' hg' => ?_⟩
-  exact GlobalTheory.T.formal_morphism_uniqueness R I hI X Z hX hZs Y b hb g' g (fun e => (hg' e).trans (hg e).symm)
+theorem formalAlgebraisation : GlobalTheory.Published.FormalAlgebraisation :=
+  GlobalTheory.formalAlgebraisation
 
 end PositivityTheory.FormalThickening

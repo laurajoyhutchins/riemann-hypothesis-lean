@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.BesselToJacobiFlatMapVacuumAtGoodPlace
 public import Development.AbelianVarietyTheory.Definitions.LatticeFrames.PlacesToAdeles
 public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.MemHomLatticeCompletionIffSupportedMaps
 import Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.MemRangeOfOneTmulMem
@@ -66,28 +67,7 @@ variable {D : D7}
 theorem smul_mem_latA {S : HSp D} {L : Lat S} {P : Pl D → Prop} {a : D.host.E} (ha : a ∈ D.host.AA)
     {y : Fin S.rank → AE D} (hy : y ∈ latV S L P) :
     (fun i => ((1 : AF D.host.F) ⊗ₜ[D.host.F] a) * y i) ∈ latA S L P := by
-  induction hy using AddSubgroup.closure_induction with
-  | mem z hz =>
-    obtain ⟨β, hβi, hβ, c, hc, x, hx, rfl⟩ := hz
-    rw [Set.mem_singleton_iff] at hc
-    subst hc
-    refine AddSubgroup.subset_closure ⟨β, hβi, hβ, a, ha, x, hx, ?_⟩
-    funext i
-    simp only [Algebra.TensorProduct.tmul_mul_tmul, one_mul]
-  | zero =>
-    have : (fun i => ((1 : AF D.host.F) ⊗ₜ[D.host.F] a) * (0 : Fin S.rank → AE D) i) = 0 := by
-      funext i; simp
-    rw [this]; exact zero_mem _
-  | add z z' _ _ hz hz' =>
-    have : (fun i => ((1 : AF D.host.F) ⊗ₜ[D.host.F] a) * (z + z') i) =
-        (fun i => ((1 : AF D.host.F) ⊗ₜ[D.host.F] a) * z i) + (fun i => ((1 : AF D.host.F) ⊗ₜ[D.host.F] a) * z' i) := by
-      funext i; simp [mul_add]
-    rw [this]; exact add_mem hz hz'
-  | neg z _ hz =>
-    have : (fun i => ((1 : AF D.host.F) ⊗ₜ[D.host.F] a) * (-z) i) =
-        -(fun i => ((1 : AF D.host.F) ⊗ₜ[D.host.F] a) * z i) := by
-      funext i; simp
-    rw [this]; exact neg_mem hz
+  apply _root_.GlobalTheory.FinPl.VacFlat.smul_mem_latA <;> assumption
 
 end GlobalTheory.FinPl.LastDiag
 

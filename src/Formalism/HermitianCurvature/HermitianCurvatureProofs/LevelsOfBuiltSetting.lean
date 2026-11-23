@@ -140,7 +140,6 @@ private theorem hpk_levPos_apply_eq_zero_of_outside (j : Fin (2 * r' + k + 1)) (
     (hq : ¬(i ≤ q.val ∧ q.val < 2 * r' + k + 1 + i)) :
     Hpk k (i + r') (levPos k i r' j) q = 0 := by
   have hj := j.isLt
-  have hq' := q.isLt
   simp only [Hpk, levPos, Fin.ext_iff, Fin.val_mk]
   split_ifs <;> (try split_ifs) <;> (try split_ifs) <;> first | rfl | (exfalso; omega)
 
@@ -539,7 +538,6 @@ theorem rho_bounds (hOK : P.OK) (ρ : M.Ty P) (i : ℕ) (hi1 : 1 ≤ i) (hi2 : i
       | exact Nat.lt_succ_iff.mp hw
       | omega
   have hv : ((ρ ⟨i - 1, by omega⟩ : ℕ) : ℝ) ≤ ((⌊P.hi i - P.lo i⌋₊ : ℕ) : ℝ) := by exact_mod_cast hv'
-  have h0 : (0 : ℝ) ≤ ((ρ ⟨i - 1, by omega⟩ : ℕ) : ℝ) := Nat.cast_nonneg _
   unfold M.rho
   rw [dif_pos ⟨hi1, hi2⟩]
   constructor

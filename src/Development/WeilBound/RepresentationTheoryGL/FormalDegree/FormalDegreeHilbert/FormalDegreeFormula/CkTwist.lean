@@ -1,5 +1,6 @@
 module
 
+import CompanionTheory.RealGroups.FormalDegrees.ArchimedeanFormalDegrees.FormalDegreeFormula.CkTwist
 public import Development.WeilBound.RepresentationTheoryGL.FormalDegree.FormalDegreeHilbert.FormalDegreeFormula.ModelFunctionsMultiply
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.HighestWeights.ModelTwist
 import Mathlib.Algebra.Order.Floor.Extended
@@ -119,28 +120,7 @@ theorem twTau_irred {ε : Fin n → Bool} {Λ : Fin n → ℝ} (T : KType ε Λ)
 theorem twTau_hasDeriv {ε : Fin n → Bool} {Λ : Fin n → ℝ} (T : KType ε Λ) (c : ℤ) (X : Matrix (Fin n) (Fin n) ℂ)
     (hX : inK ε X) (γ : ℝ → KG ε) (hγ : ∀ t : ℝ, toMK (γ t) = NormedSpace.exp ((t : ℂ) • X)) :
     HasDerivAt (fun t => ((twTau T c (γ t) : unitary (T.V →L[ℂ] T.V)) : T.V →L[ℂ] T.V)) (twD T c X) 0 := by
-  have hT := T.hasDeriv X hX γ hγ
-  have h0 : γ 0 = 1 := twist_toMK_inj (by
-    rw [hγ 0, Complex.ofReal_zero, zero_smul, NormedSpace.exp_zero]; rfl)
-  have hD := twist_hasDerivAt_det_exp X
-  have hD0 : (NormedSpace.exp (((0 : ℝ) : ℂ) • X)).det = 1 := by
-    rw [Complex.ofReal_zero, zero_smul, NormedSpace.exp_zero, Matrix.det_one]
-  have hZ : HasDerivAt (fun t : ℝ => (NormedSpace.exp ((t : ℂ) • X)).det ^ c) ((c : ℂ) * X.trace) 0 := by
-    have h := (hasDerivAt_zpow c _ (Or.inl (by rw [hD0]; exact one_ne_zero))).comp (0 : ℝ) hD
-    rw [hD0, _root_.one_zpow, mul_one] at h
-    exact h
-  have hP := hZ.smul hT
-  have e : (fun t => ((twTau T c (γ t) : unitary (T.V →L[ℂ] T.V)) : T.V →L[ℂ] T.V)) =
-      (fun t : ℝ => (NormedSpace.exp ((t : ℂ) • X)).det ^ c • T.op (γ t)) := by
-    funext t
-    rw [twTau_apply]
-    show (toMK (γ t)).det ^ c • T.op (γ t) = _
-    rw [hγ t]
-  rw [e]
-  refine HasDerivAt.congr_deriv hP ?_
-  rw [hD0, _root_.one_zpow, one_smul, h0, map_one]
-  show T.dτ X + ((c : ℂ) * X.trace) • (1 : T.V →L[ℂ] T.V) = T.dτ X + X.trace • ((c : ℂ) • (1 : T.V →L[ℂ] T.V))
-  rw [smul_smul, mul_comm]
+  apply CompanionTheory.RgFd.twTau_hasDeriv <;> assumption
 
 theorem twD_wt {ε : Fin n → Bool} {Λ : Fin n → ℝ} (T : KType ε Λ) (c : ℤ) (a : Fin n) :
     twD T c (Matrix.single a a 1) T.w = (((Λ a + (c : ℝ) : ℝ)) : ℂ) • T.w := by

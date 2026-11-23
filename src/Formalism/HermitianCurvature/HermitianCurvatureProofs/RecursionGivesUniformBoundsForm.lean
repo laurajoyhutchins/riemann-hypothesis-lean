@@ -73,7 +73,6 @@ theorem form_gives_theorem_A : Formalism.FourierDecayAlt.J.FormGivesMain := by
     (by
       show B.c0 * B.c0' * (B.KV / (B.e1 * B.n0c)) ≤ (1 + B.δ) * B.IntN
       rw [← mul_div_assoc, div_le_iff₀ hen]
-      have e : (1 + B.δ) * B.e1 * (B.n0c * B.IntN) = (1 + B.δ) * B.IntN * (B.e1 * B.n0c) := by ring
       linarith)
     hJ hNu hInf hVol hLev hMas hCol hOrd hTyp hInd
   exact key

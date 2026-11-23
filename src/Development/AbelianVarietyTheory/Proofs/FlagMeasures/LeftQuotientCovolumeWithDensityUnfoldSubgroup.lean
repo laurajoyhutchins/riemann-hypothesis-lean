@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.IsInvInvariantOfRight
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.DefClassNum
 public import Development.AbelianVarietyTheory.Proofs.TorusHaarMeasure.ExistsStrictMeasurableFundamentalSetOfDiscrete
 import Mathlib.Algebra.Order.Floor.Extended
@@ -100,36 +101,7 @@ theorem covol_eq_of_strict {G : Type} [Group G] [MeasurableSpace G] [MeasurableM
 theorem isInvInvariant {G : Type} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
     [LocallyCompactSpace G] [SecondCountableTopology G] [MeasurableSpace G] [BorelSpace G] (μ : Measure G)
     [μ.IsHaarMeasure] [μ.IsMulRightInvariant] : μ.IsInvInvariant := by
-
-  obtain ⟨K, hK, hK1⟩ := exists_compact_mem_nhds (1 : G)
-  have hUo : IsOpen (interior K) := isOpen_interior
-  have hUpos : μ (interior K) ≠ 0 :=
-    (hUo.measure_pos μ ⟨1, mem_interior_iff_mem_nhds.2 hK1⟩).ne'
-  have hUfin : μ (interior K) ≠ ⊤ :=
-    (lt_of_le_of_lt (measure_mono interior_subset) hK.measure_lt_top).ne
-  have hc := Measure.isMulLeftInvariant_eq_smul μ.inv μ
-  set c := Measure.haarScalarFactor μ.inv μ
-  have key : ∀ s : Set G, MeasurableSet s → μ (Inv.inv ⁻¹' s) = (c : ENNReal) * μ s := by
-    intro s hs
-    have e : μ.inv s = (c • μ) s := by rw [← hc]
-    rw [Measure.inv_def, Measure.map_apply measurable_inv hs, Measure.smul_apply,
-      ENNReal.smul_def, smul_eq_mul] at e
-    exact e
-  have h1 := key (interior K) hUo.measurableSet
-  have h2 := key (Inv.inv ⁻¹' interior K) (hUo.measurableSet.preimage measurable_inv)
-  have hUU : (Inv.inv ⁻¹' (Inv.inv ⁻¹' interior K) : Set G) = interior K := by
-    ext x
-    simp
-  rw [hUU, h1, ← mul_assoc] at h2
-  have hcc : (c : ENNReal) * c = 1 :=
-    (ENNReal.mul_left_inj hUpos hUfin).1 (h2.symm.trans (one_mul _).symm)
-  have hc1 : c = 1 := by
-    have hnn : c * c = 1 := by exact_mod_cast hcc
-    have hr : (c : ℝ) * c = 1 := by exact_mod_cast hnn
-    have h0 : (0 : ℝ) ≤ c := c.2
-    exact NNReal.eq (by push_cast; nlinarith)
-  constructor
-  rw [hc, hc1, one_smul]
+  apply GlobalTheory.CartanInt.isInvInvariant_of_right <;> assumption
 
 private lemma exists_nhds_one_inter_discrete_subgroup_eq_one {H : Type} [Group H] [TopologicalSpace H] (Γ : Subgroup H)
     [DiscreteTopology Γ] : ∃ V ∈ nhds (1 : H), ∀ γ ∈ Γ, γ ∈ V → γ = 1 := by

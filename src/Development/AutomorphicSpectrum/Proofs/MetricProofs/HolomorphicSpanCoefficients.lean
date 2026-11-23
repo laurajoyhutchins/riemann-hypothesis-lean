@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.PlurisubharmonicCones.FiniteOfTorsion
 public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.IsEigFrames
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -139,27 +140,7 @@ theorem differentiableOn_det {n k : ℕ} {W : Set (Fin n → ℂ)}
 
 theorem gram_det_re_pos (R : RiemLat E g Λ) {k : ℕ} (u : Fin k → Fin g → ℂ)
     (hu : LinearIndependent ℂ u) : 0 < (R.gram u).det.re := by
-  have hH : (R.gram u).IsHermitian := by
-    ext a b
-    simp only [RiemLat.gram, Matrix.conjTranspose_apply, Matrix.of_apply]
-    exact star_ip R _ _
-  have hq : ∀ x : Fin k → ℂ, star x ⬝ᵥ (R.gram u) *ᵥ x = R.ip (∑ i, x i • u i) (∑ i, x i • u i) := by
-    intro x
-    simp only [ip_sum_left, ip_sum_right, dotProduct, mulVec, RiemLat.gram, Matrix.of_apply,
-      Finset.mul_sum, Pi.star_apply]
-    rw [Finset.sum_comm]
-    refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
-    ring
-  have hP : (R.gram u).PosDef := by
-    refine PosDef.of_dotProduct_mulVec_pos hH fun x hx => ?_
-    rw [hq]
-    set w := ∑ i, x i • u i with hw
-    have hw0 : w ≠ 0 := fun h0 =>
-      hx (funext (Fintype.linearIndependent_iff.1 hu x h0))
-    refine Complex.pos_iff.2 ⟨R.pos w hw0, ?_⟩
-    have := Complex.conj_eq_iff_im.1 (star_ip R w w)
-    simpa using this.symm
-  exact (Complex.pos_iff.1 hP.det_pos).1
+  apply LevelTowerAlt.gram_det_pos <;> assumption
 
 theorem log_gram_frame_change : ∀ (E : Type) [Field E] [NumberField E] [IsCMField E] (g : ℕ) (Λ : Type) [AddCommGroup Λ] [Module (𝓞 E) Λ] (n m : ℕ) (W : Set (Fin n → ℂ)) (R : (Fin n → ℂ) → RiemLat E g Λ) (b c : Fin m → (Fin n → ℂ) → Fin g → ℂ) (t₀ : Fin n → ℂ), IsOpen W → t₀ ∈ W → (∀ i, DifferentiableOn ℂ (b i) W) → (∀ i, DifferentiableOn ℂ (c i) W) → (∀ t ∈ W, LinearIndependent ℂ fun i => b i t) → (∀ t ∈ W, ∀ i, c i t ∈ Submodule.span ℂ (Set.range fun j => b j t)) → LinearIndependent ℂ (fun i => c i t₀) → ∃ V : Set (Fin n → ℂ), IsOpen V ∧ t₀ ∈ V ∧ V ⊆ W ∧ ∃ G : (Fin n → ℂ) → ℂ, DifferentiableOn ℂ G V ∧ ∀ t ∈ V, LinearIndependent ℂ (fun i => c i t) ∧ Real.log ((R t).gram fun i => c i t).det.re = Real.log ((R t).gram fun i => b i t).det.re + (G t).re := by
   intro E _ _ _ g Λ _ _ n m W R b c t₀ hW ht₀ hb hc hbi hcs hci

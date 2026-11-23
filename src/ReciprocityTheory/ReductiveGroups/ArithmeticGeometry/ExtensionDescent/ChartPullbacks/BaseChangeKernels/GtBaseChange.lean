@@ -48,6 +48,7 @@ public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDesc
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.BaseChangeKernels.SurjOfCover
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.UniformBaseChange.PullGt
 import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SemiabelianSchemes.PrecompleteBases.PsbLb
+import Development.AbelianVarietyTheory.Proofs.AbelianSchemeLawProofs.CoordOfHasWeight
 
 @[expose] public section
 
@@ -168,17 +169,7 @@ private lemma gen_div_self_lemma_2 {X : Scheme.{0}} (M : LB X) (hM : M.IsLB) :
   rw [← e1] at e3
   exact e3.trans (mul_right_comm _ _ _)
 
-theorem gtBaseChange : GtBaseChangeSt := by
-  intro S S' f E G _ hG
-  obtain ⟨d⟩ := hG
-  refine ⟨pullExt f E, AddEquiv.refl _, Iso.refl _, ?_, fun χ => ?_, Nonempty.intro (datum f E d)⟩
-  · first
-    | exact (inferInstance : IsMonHom (𝟙 ((Over.pullback f).obj E.B)))
-    | (rw [Iso.refl_hom]; infer_instance)
-    | (constructor <;> simp <;> rfl)
-  · show ∃ w : LB.Iso ((E.O χ).L.pull (𝟙 (pullback E.B.hom f) ≫ pullback.fst E.B.hom f))
-        ((E.O χ).L.pull (mB f E).F), w.IsGen
-    rw [mB_F, Category.id_comp]
-    exact gen_div_self_lemma_2 _ (LB.isLB_pull (E.O χ).isLB _)
+theorem gtBaseChange : GtBaseChangeSt :=
+  GlobalTheory.gtBaseChange
 
 end ReciprocityTheory.ChartRestriction.G.Out.GtBCPf

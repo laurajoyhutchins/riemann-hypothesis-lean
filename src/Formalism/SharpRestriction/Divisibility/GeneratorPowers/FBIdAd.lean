@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.FrameBiextDictionarySecondPartialLaw
 public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.GermCut
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.DivCalc
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.RosVal
@@ -242,19 +243,7 @@ include hf
 
 theorem frame_biext_dictionary_first_partial_law (u v w : Q S d n) : VV m y (E3 ph1 u v w) = (cubV t.cub y J (PP m x u) (PP m x v) (PP m x w) *
     (ee x e y J (op (FQ G) u v) w)⁻¹ * ee x e y J u w * ee x e y J v w).val := by
-  obtain ⟨U, hU, h⟩ := hf.ph1 m
-  have hc := gm_unit (y := y) U ![u, v, w]
-  have e₀ := val_peG x hJ e ![u, v, w] ![fun j => psIn d m ![0, 1] (G.F j), fun j => MvPolynomial.X ((2 : Fin 3), j)] (op (FQ G) (gen 0) (gen 1)) (gen 2)
-    (by rintro ⟨l, j⟩; fin_cases l; exacts [hF 0 1 j, hX 2 j])
-    (by rintro ⟨l, j⟩; fin_cases l; exacts [(cc_psIn d m _ _).trans (G.const j), MvPolynomial.constantCoeff_X _ _])
-  rw [sq_op, sq_gen, sq_gen, sq_gen] at e₀
-  have k := (val_th hJ ![u, v, w] 0 1 2).symm.trans ((val_corr hJ h _).trans ((val_scale hJ _ _ _).trans (congrArg₂ (· * ·) rfl
-    ((val_mul hJ _ _ _).trans (congrArg₂ (· * ·) e₀ ((val_mul hJ _ _ _).trans (congrArg₂ (· * ·)
-      ((val_inv _ _).trans (congrArg (·⁻¹) (peXX hJ _ 0 2))) ((val_inv _ _).trans (congrArg (·⁻¹) (peXX hJ _ 1 2))))))))))
-  refine (hc _ hU).symm.trans (congrArg Units.val (Additive.ofMul.injective ?_))
-  have k' := congrArg Additive.ofMul k
-  simp only [ofMul_mul, ofMul_inv, Matrix.cons_val] at k' ⊢
-  linear_combination (norm := abel) -k'
+  apply GlobalTheory.FrameBiextId.frame_biext_dictionary_first_partial_law <;> assumption
 
 theorem frame_biext_dictionary_second_partial_law (u v w : Q S d n) : VV m y (E3 ph2 u v w) = (cubV t.cub y J (PP m x u) (PP m x v) (PP m x w) *
     (ee x e y J u (op (FQ G) v w))⁻¹ * ee x e y J u v * ee x e y J u w).val := by
@@ -321,19 +310,7 @@ theorem dict_ad (a : 𝓞 E) {K : Type} [Fintype K] {φ : K → ((t.G ⊗ t.G).l
       (scaleGenG t _ _ (unitΓ U) (peG t x0 d x e m ![fun j => MvPolynomial.X ((0 : Fin 2), j), fun j => psIn d m ![1] (A.act (H.bar a) j)])))
     (u v : Q S d n) : VV m y (E2 (ad a) u v) = (val₂ wL y J (PP m x u) (PP m x v) * ee x e y J (ac (AQ A a) u) v *
       (ee x e y J u (ac (AQ A (H.bar a)) v))⁻¹).val := by
-  have hc := gm_unit (y := y) U ![u, v]
-  have e₀ := val_peG x hJ e ![u, v] ![fun j => psIn d m ![0] (A.act a j), fun j => MvPolynomial.X ((1 : Fin 2), j)] (ac (AQ A a) (gen 0)) (gen 1)
-    (by rintro ⟨l, j⟩; fin_cases l; exacts [hA a 0 j, hX 1 j])
-    (by rintro ⟨l, j⟩; fin_cases l; exacts [(cc_psIn d m _ _).trans (A.const _ j), MvPolynomial.constantCoeff_X _ _])
-  have e₁ := val_peG x hJ e ![u, v] ![fun j => MvPolynomial.X ((0 : Fin 2), j), fun j => psIn d m ![1] (A.act (H.bar a) j)] (gen 0) (ac (AQ A (H.bar a)) (gen 1))
-    (by rintro ⟨l, j⟩; fin_cases l; exacts [hX 0 j, hA _ 1 j])
-    (by rintro ⟨l, j⟩; fin_cases l; exacts [MvPolynomial.constantCoeff_X _ _, (cc_psIn d m _ _).trans (A.const _ j)])
-  rw [sq_ac, sq_gen, sq_gen] at e₀ e₁
-  have e₂ := val_ros wL (homAt x0 (jQ m ![u, v])) hJ (jptG t x0 d x m (0 : Fin 2)) (jptG t x0 d x m (1 : Fin 2))
-  simp only [PP_gen, PP_sq, sq_gen] at e₂
-  have k := ((val_mul hJ _ _ _).trans (congrArg₂ (· * ·) (by simpa only [PP_gen] using e₂) e₀)).symm.trans
-    ((val_corr hJ h _).trans ((val_scale hJ _ _ _).trans (congrArg₂ (· * ·) rfl e₁)))
-  exact (hc _ hU).symm.trans (congrArg Units.val (eq_mul_inv_of_mul_eq k.symm))
+  apply GlobalTheory.FrameBiextId.dict_ad <;> assumption
 
 omit hf in
 theorem dict_ax (ha : FrAxes t x0 d x e) (u : Q S d n) : ee x e y J 0 u = 1 ∧ ee x e y J u 0 = 1 := by

@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.JInvCharA
 public import Formalism.HermitianCurvature.StatementQ
 public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
 public import Formalism.FormalDegreeBessel.FinalWR
@@ -107,45 +108,7 @@ section Lie
 variable {k r : ℕ}
 
 theorem hpk_sq' : Hpk k r * Hpk k r = 1 := by
-  ext a b
-  rw [Matrix.mul_apply, Matrix.one_apply]
-  have ha := a.isLt
-  have hb := b.isLt
-  by_cases hm : r ≤ a.val ∧ a.val ≤ r + k
-  · rw [Finset.sum_eq_single a]
-    · by_cases hab : a = b
-      · subst hab
-        rw [if_pos rfl]
-        simp only [Hpk, eq_self_iff_true, and_true]
-        split_ifs <;> (try simp only [Fin.ext_iff] at *) <;> first | (simp; done) | omega
-      · rw [if_neg hab]
-        have hab' : a.val ≠ b.val := fun e => hab (Fin.ext e)
-        simp only [Hpk]
-        split_ifs <;> (try simp only [Fin.ext_iff] at *) <;> first | (simp; done) | omega
-    · intro c _ hc
-      have hc' : c.val ≠ a.val := fun e => hc (Fin.ext e)
-      simp only [Hpk]
-      split_ifs <;> (try simp only [Fin.ext_iff] at *) <;> first | (simp; done) | omega
-    · intro h
-      exact absurd (Finset.mem_univ _) h
-  · obtain ⟨c₀, hc₀⟩ : ∃ c₀ : Fin (2 * r + k + 1), c₀.val = 2 * r + k - a.val :=
-      ⟨⟨2 * r + k - a.val, by omega⟩, rfl⟩
-    rw [Finset.sum_eq_single c₀]
-    · by_cases hab : a = b
-      · subst hab
-        rw [if_pos rfl]
-        simp only [Hpk, eq_self_iff_true, and_true]
-        split_ifs <;> (try simp only [Fin.ext_iff] at *) <;> first | (simp; done) | omega
-      · rw [if_neg hab]
-        have hab' : a.val ≠ b.val := fun e => hab (Fin.ext e)
-        simp only [Hpk]
-        split_ifs <;> (try simp only [Fin.ext_iff] at *) <;> first | (simp; done) | omega
-    · intro c _ hc
-      have hc' : c.val ≠ c₀.val := fun e => hc (Fin.ext e)
-      simp only [Hpk]
-      split_ifs <;> (try simp only [Fin.ext_iff] at *) <;> first | (simp; done) | omega
-    · intro h
-      exact absurd (Finset.mem_univ _) h
+  apply ReciprocityTheory.ChartRestriction.DS.Mult1.InvChr.Hpk_sq <;> assumption
 
 theorem hpk_h : (Hpk k r)ᴴ = Hpk k r := by
   ext a b

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.RootsReverseProd
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.RootsMinpolyPhi
 public import Mathlib.RepresentationTheory.Coinduced
 import Mathlib.Algebra.AffineMonoid.UniqueSums
@@ -70,22 +71,7 @@ theorem phi_conj (L : LabelDatum g) (x : Fbar g) : GalSer.phi L (starRingAut : �
 
 theorem roots_reverse {K : Type} [Field K] (s : Multiset K) (hs : (0 : K) ∉ s) :
     ((s.map fun x => X - C x).prod.reverse).roots = s.map (·⁻¹) := by
-  induction s using Multiset.induction_on with
-  | empty => simp [reverse]
-  | cons a s ih =>
-    rw [Multiset.mem_cons, not_or] at hs
-    have ha : a ≠ 0 := fun h => hs.1 h.symm
-    have hX : (X : K[X]).reverse = 1 := by simp [reverse]
-    have e : (X - C a : K[X]).reverse = C (-a) * (X - C a⁻¹) := by
-      rw [sub_eq_add_neg, ← C_neg, reverse_add_C, natDegree_X, hX, mul_sub, ← C_mul, neg_mul,
-        mul_inv_cancel₀ ha]
-      simp [add_comm]
-    have hm : (s.map fun x => X - C x).prod ≠ 0 :=
-      (monic_multiset_prod_of_monic _ _ fun x _ => monic_X_sub_C x).ne_zero
-    rw [Multiset.map_cons, Multiset.prod_cons, reverse_mul_of_domain, e, roots_mul, roots_C_mul _ (neg_ne_zero.2 ha),
-      roots_X_sub_C, ih hs.2, Multiset.map_cons, Multiset.singleton_add]
-    exact mul_ne_zero (mul_ne_zero (C_ne_zero.2 (neg_ne_zero.2 ha)) (X_sub_C_ne_zero _))
-      (by rwa [Ne, reverse_eq_zero])
+  apply GlobalTheory.DualLabel.roots_reverse_prod <;> assumption
 
 theorem rel_dual (L : LabelDatum g) {f : (ZMod g)[X]} (hm : f.Monic) (h0 : f.coeff 0 ≠ 0) :
     GalSer.Rel L (starRingAut : ℂ ≃+* ℂ) f (C (f.coeff 0)⁻¹ * f.reverse) := by

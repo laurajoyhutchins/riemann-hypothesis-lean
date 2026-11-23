@@ -101,7 +101,6 @@ def blk0 (z : Fin (2 * ρ + k + 1) → ℂ) : Fin (2 * 0 + k + 1) → ℂ := fun
 
 theorem lift_vector_zero_block {z : Fin (2 * ρ + k + 1) → ℂ} (hz : inWb k ρ z) : liftVec k ρ 0 (blk0 z) = z := by
   funext p
-  have hp := p.isLt
   unfold liftVec blk0
   split_ifs with h
   · congr 1

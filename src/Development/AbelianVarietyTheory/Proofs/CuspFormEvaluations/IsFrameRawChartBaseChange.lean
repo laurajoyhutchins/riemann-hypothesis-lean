@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.IsRawChartBaseChangeJetPoints
 public import Formalism.SharpRestriction.Divisibility.GeneratorPowers.CIndBC
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ValCalc
 import Mathlib.Algebra.Order.Floor.Extended
@@ -116,25 +117,7 @@ theorem copy_square (d m n : ℕ) (i : Fin n) :
     homAt (spMap ψ ≫ x0) (jetCopy d m i : Jet S' (Fin 1 × Fin d) m →ₐ[S'] Jet S' (Fin n × Fin d) m) ≫
         rjBC ψ x0 d m 1 =
       rjBC ψ x0 d m n ≫ homAt x0 (jetCopy d m i : Jet S (Fin 1 × Fin d) m →ₐ[S] Jet S (Fin n × Fin d) m) := by
-  unfold rjBC Formalism.L2.Pj.homAt jetCopy
-  apply Over.OverMorphism.ext
-  simp only [Over.comp_left, Over.homMk_left]
-  rw [spec_comp, spec_comp]
-  congr 1
-  have hS : ∀ p : Fin 1 × Fin d, (X (i, p.2) : MvPolynomial (Fin n × Fin d) S) ∈ orig S (Fin n × Fin d) := by
-    intro p
-    simp only [orig]
-    exact Ideal.subset_span ⟨_, rfl⟩
-  have hS' : ∀ p : Fin 1 × Fin d,
-      MvPolynomial.map ψ (X (i, p.2) : MvPolynomial (Fin n × Fin d) S) ∈ orig S' (Fin n × Fin d) := by
-    intro p
-    rw [MvPolynomial.map_X]
-    simp only [orig]
-    exact Ideal.subset_span ⟨_, rfl⟩
-  have h := ReciprocityTheory.ChartRestriction.G.PullbackSections.jetMap_comp_jetBC ψ m (fun p : Fin 1 × Fin d => (X (i, p.2) : MvPolynomial (Fin n × Fin d) S)) hS hS'
-  rw [jetMap_congr (g := fun p : Fin 1 × Fin d => MvPolynomial.map ψ (X (i, p.2) : MvPolynomial (Fin n × Fin d) S))
-    (funext fun p => (MvPolynomial.map_X ψ (i, p.2)).symm) _ hS']
-  exact h
+  apply GlobalTheory.RawChartBC.sq_copy <;> assumption
 
 variable {ψ x0} {d : ℕ} {x : ∀ m, rjO x0 d m 1 ⟶ Xo.univ.t.G} {x' : ∀ m, rjO (spMap ψ ≫ x0) d m 1 ⟶ Xo.univ.t.G}
 

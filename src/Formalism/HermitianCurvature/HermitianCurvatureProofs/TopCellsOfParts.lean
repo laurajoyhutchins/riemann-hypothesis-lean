@@ -276,7 +276,6 @@ theorem topCells_of (hZ : ZjAffine) (hST : SizesTop) (hIT : IntTop) : TopCells :
   haveI i11 : SecondCountableTopology ((Fin s → Fin p → ℂ) × (Fin p → Fin s → ℂ)) := inferInstance
   haveI i12 : SecondCountableTopology ((LW σ → ℂ) × (G.UT p → ℂ)) := inferInstance
   haveI : OpensMeasurableSpace (XiH p s σ) := inferInstance
-  have hN : (1 : ℝ) ≤ ((p + s : ℕ) : ℝ) := by exact_mod_cast (by omega : 1 ≤ p + s)
   have h5N : (0 : ℝ) < 5 * ((p + s : ℕ) : ℝ) := by positivity
   have hepos : ∀ i ≤ q, 0 ≤ e i := by
     intro i hi

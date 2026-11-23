@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.MollifiedIntegrability.GBLink
 public import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.MollifiedIntegrability.ClsBoundA
 import Mathlib.Algebra.Order.Archimedean.Real.Hom
 import Mathlib.Algebra.Order.Floor.Extended
@@ -147,21 +148,7 @@ theorem hc_eq (w : Fin n → Fin n → ℂ) :
 
 theorem hc_vkl (k l : Fin n) :
     herm (fun a b => (vkl k l a b).re) + Complex.I • herm (fun a b => (vkl k l a b).im) = Matrix.single l k 1 := by
-  rw [hc_eq]
-  have c1 : (1 + Complex.I) / 2 * ((1 + Complex.I) / 2) + (1 - Complex.I) / 2 * ((1 - Complex.I) / 2) = 0 := by
-    apply Complex.ext <;> simp <;> norm_num
-  have c2 : (1 + Complex.I) / 2 * ((1 - Complex.I) / 2) + (1 - Complex.I) / 2 * ((1 + Complex.I) / 2) = 1 := by
-    apply Complex.ext <;> simp <;> norm_num
-  ext i j
-  have e1 : (j = k ∧ i = l) ↔ (i = l ∧ j = k) := and_comm
-  have e2 : (j = l ∧ i = k) ↔ (i = k ∧ j = l) := and_comm
-  have e3 : (l = i ∧ k = j) ↔ (i = l ∧ j = k) := ⟨fun h => ⟨h.1.symm, h.2.symm⟩, fun h => ⟨h.1.symm, h.2.symm⟩⟩
-  simp only [vkl, Matrix.single_apply, e1, e2, e3]
-  by_cases hA : i = k ∧ j = l <;> by_cases hB : i = l ∧ j = k
-  · rw [if_pos hA, if_pos hA, if_pos hB, if_pos hB, if_pos hB]; linear_combination c1 + c2
-  · rw [if_pos hA, if_pos hA, if_neg hB, if_neg hB, if_neg hB]; linear_combination c1
-  · rw [if_neg hA, if_neg hA, if_pos hB, if_pos hB, if_pos hB]; linear_combination c2
-  · rw [if_neg hA, if_neg hA, if_neg hB, if_neg hB, if_neg hB]; ring
+  apply PositivityTheory.Rg.Sw.WR.K.GB.herm_re_im_vkl <;> assumption
 
 theorem trace_mul_single (M : Matrix (Fin n) (Fin n) ℂ) (k l : Fin n) : (M * Matrix.single l k (1 : ℂ)).trace = M k l := by
   simp only [Matrix.trace, Matrix.diag, Matrix.mul_apply, Matrix.single_apply]

@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.ThetaLifts.SmallCones.SchInt
 public import Mathlib.Analysis.CStarAlgebra.Classes
 public import Mathlib.Analysis.Distribution.SchwartzSpace.Basic
 import Mathlib.Algebra.Order.Floor.Extended
@@ -125,30 +126,7 @@ theorem int_D (j : ℕ) (x : V) : Integrable (fun a => iteratedFDeriv ℝ j (G a
 
 theorem deriv_D (j : ℕ) (x : V) : HasFDerivAt (fun y => ∫ a, iteratedFDeriv ℝ j (G a) y ∂μ)
     (∫ a, iteratedFDeriv ℝ (j + 1) (G a) x ∂μ).curryLeft x := by
-  have hcurry : ∀ (f : SchwartzMap V ℂ) (y : V),
-      HasFDerivAt (iteratedFDeriv ℝ j f) (iteratedFDeriv ℝ (j + 1) f y).curryLeft y := by
-    intro f y
-    have hd : DifferentiableAt ℝ (iteratedFDeriv ℝ j f) y :=
-      ((cd f (j + 1)).differentiable_iteratedFDeriv (by exact_mod_cast Nat.lt_succ_self j)) y
-    convert hd.hasFDerivAt using 1
-    ext v m
-    rw [ContinuousMultilinearMap.curryLeft_apply, iteratedFDeriv_succ_apply_left]
-    simp
-  have hL : (∫ a, iteratedFDeriv ℝ (j + 1) (G a) x ∂μ).curryLeft =
-      ∫ a, (iteratedFDeriv ℝ (j + 1) (G a) x).curryLeft ∂μ :=
-    ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (j + 1) => V) ℂ).toContinuousLinearEquiv.integral_comp_comm _).symm
-  rw [hL]
-  refine hasFDerivAt_integral_of_dominated_of_fderiv_le (F := fun y a => iteratedFDeriv ℝ j (G a) y)
-    (F' := fun y a => (iteratedFDeriv ℝ (j + 1) (G a) y).curryLeft)
-    (bound := fun a => SchwartzMap.seminorm ℂ 0 (j + 1) (G a)) Filter.univ_mem
-    (Filter.Eventually.of_forall fun y => (cont_D hG j y).aestronglyMeasurable) (int_D hG hI j x) ?_ ?_
-    (hI 0 (j + 1)) ?_
-  · exact ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (j + 1) => V) ℂ).continuous.comp
-      (cont_D hG (j + 1) x)).aestronglyMeasurable
-  · refine Filter.Eventually.of_forall fun a y _ => ?_
-    exact ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (j + 1) => V) ℂ).norm_map _).trans_le
-      (bd_D (G a) (j + 1) y)
-  · exact Filter.Eventually.of_forall fun a y _ => hcurry (G a) y
+  apply PositivityTheory.ThKCT.SchI.deriv_D <;> assumption
 
 theorem taylor : HasFTaylorSeriesUpTo ∞ (fun x => ∫ a, G a x ∂μ) fun x j => ∫ a, iteratedFDeriv ℝ j (G a) x ∂μ := by
   refine ⟨?_, fun m _ x => deriv_D hG hI m x, fun m _ => ?_⟩

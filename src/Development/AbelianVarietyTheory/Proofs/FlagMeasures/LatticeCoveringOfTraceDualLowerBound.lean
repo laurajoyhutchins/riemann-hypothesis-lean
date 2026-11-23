@@ -1,5 +1,6 @@
 module
 
+import Formalism.HarderNarasimhan.HarderNarasimhanProofs.DualPl
 public import Mathlib.Algebra.Module.LinearMap.Rat
 public import Mathlib.Analysis.CStarAlgebra.Classes
 public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
@@ -112,23 +113,7 @@ theorem eq_zero_of_sum_re_lin {ι : Type} [Fintype ι] (g : InfinitePlace K → 
 
 theorem trace_eq_sum (a : K) :
     ((Algebra.trace ℚ K a : ℚ) : ℝ) = ∑ w : InfinitePlace K, 2 * (w.embedding a).re := by
-  classical
-  have e := congrArg Complex.re (trace_eq_sum_embeddings ℂ (K := ℚ) (L := K) (x := a))
-  simp only [eq_ratCast, Complex.ratCast_re, Complex.re_sum] at e
-  rw [e, ← (RingHom.equivRatAlgHom (R := K) (S := ℂ)).sum_comp,
-    ← Finset.univ.sum_fiberwise (fun φ : K →+* ℂ => InfinitePlace.mk φ)]
-  refine Finset.sum_congr rfl fun w _ => ?_
-  have : ∀ φ ∈ Finset.univ.filter (fun φ : K →+* ℂ => InfinitePlace.mk φ = w),
-      ((RingHom.equivRatAlgHom (R := K) (S := ℂ)) φ a).re = (w.embedding a).re := by
-    intro φ hφ
-    have h1 : InfinitePlace.mk φ = InfinitePlace.mk w.embedding := by
-      rw [InfinitePlace.mk_embedding]; simpa using hφ
-    rcases InfinitePlace.mk_eq_iff.1 h1 with h2 | h2
-    · rw [← h2]; rfl
-    · rw [← h2]; simp [RingHom.equivRatAlgHom]
-  rw [Finset.sum_congr rfl this, Finset.sum_const, InfinitePlace.card_filter_mk_eq,
-    (IsTotallyComplex.isComplex w).mult_eq_two]
-  simp
+  apply Formalism.HN.DualPolygon.ident_trace_eq <;> assumption
 
 
 omit [_root_.NumberField.IsTotallyComplex K] in

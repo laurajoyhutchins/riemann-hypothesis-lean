@@ -5,7 +5,6 @@ public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.Forma
 public import Formalism.LocalToGlobal.TorsionIntegrality.EisensteinTranslationProducts.EisensteinS2LimitFormula
 import Formalism.GaussJetBounds.GaussJetProofs.NormNatCastEqPowPadicValNat
 public import Formalism.LocalToGlobal.GlobalTheory.GL3.CubicFields.WeierstrassUniqueness.ExistsPeriodPairOfIsLat
-public import Formalism.LocalToGlobal.GlobalTheory.GL3.ExistsTorsionPointOfLattice
 public import Formalism.LocalToGlobal.InertKernelTheory.InertCoprimeLemmas.PowerSeriesEmbedding
 public import Formalism.LocalToGlobal.TorsionIntegrality.CMGoodModels.CmAll
 public import Formalism.LocalToGlobal.TorsionIntegrality.ComplexLatticeClosure.LamConjTheta0
@@ -52,6 +51,8 @@ import Mathlib.Tactic.NormNum.Ordinal
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.OddThetaFunctionExistenceUniqueness
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PeriodLatticeSesquilinearFormIsHerm
 
 @[expose] public section
 
@@ -87,8 +88,10 @@ theorem sgSer_eq {p : ℕ} [Fact p.Prime] (lam : Formalism.MainNotions.TaylorLog
     have hn := congrArg (PowerSeries.coeff n) hT
     unfold Formalism.L2.Th1.F.taylor0 at hn
     rw [PowerSeries.coeff_mk, PowerSeries.coeff_map] at hn
+    have hsg : Formalism.MainNotions.TaylorLogMetric.sgStar L.lattice.toAddSubgroup = Formalism.L2.Th1.F.sgStar L := by
+      rw [GlobalTheory.OddTheta.sgStar_eq L L.lattice.toAddSubgroup (fun _ => Iff.rfl), GlobalTheory.Mem.Col2.ThetaVec.sgStar_eq]
     unfold Formalism.MainNotions.TaylorLogMetric.sgSer
-    rw [PowerSeries.coeff_mk, PowerSeries.coeff_map, Formalism.L2.GlobalTheoryTheory.IntegralLatticeDensity.RestA.sgStar_eq L, hn]
+    rw [PowerSeries.coeff_mk, PowerSeries.coeff_map, hsg, hn]
     exact lamC_coe lam _
   have hm := Formalism.L2.Th1.F.seriesMap Formalism.MainNotions.TaylorLogMetric.Qbar ℂ_[p] lam a2 a3 s0 (Formalism.L2.Th1.F.pOf a2 a3)
   rw [e, hm.2.2.2.2.2, hm.2.2.1]

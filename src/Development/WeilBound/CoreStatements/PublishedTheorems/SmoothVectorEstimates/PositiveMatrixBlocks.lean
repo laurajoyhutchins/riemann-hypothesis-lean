@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.PublishedTheorems.JacquetShalikaRigidity.ColumnBlockEquiv
 public import Development.WeilBound.CoreStatements.PublishedTheorems.SmoothVectorEstimates.MirabolicColumnBlock
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -58,23 +59,7 @@ variable {R : Type} [CommRing R] {a : ℕ}
 theorem posM_col (m : ℕ) (y : UnipotentBlockColumnIndex a m m → R) (i k : Fin a) :
     posM (Subtype.val : UnipotentBlockColumnIndex a m m → Fin a × Fin a) y i k =
       if hik : (i : ℕ) < m ∧ (k : ℕ) = m then y ⟨(i, k), hik.1, hik.2.ge, hik.2.le⟩ else 0 := by
-  rw [posM, Matrix.sum_apply]
-  split_ifs with hik
-  · rw [Finset.sum_eq_single ⟨(i, k), hik.1, hik.2.ge, hik.2.le⟩]
-    · simp
-    · intro b _ hb
-      rw [Matrix.single_apply, if_neg]
-      rintro ⟨h1, h2⟩
-      exact hb (Subtype.ext (Prod.ext h1 h2))
-    · intro h
-      exact absurd (Finset.mem_univ _) h
-  · refine Finset.sum_eq_zero fun t _ => ?_
-    rw [Matrix.single_apply, if_neg]
-    rintro ⟨h1, h2⟩
-    apply hik
-    have := t.2
-    rw [← h1, ← h2]
-    omega
+  apply _root_.PositivityTheory.AdelicQuotientData.ColumnBlockEquiv.pm_col <;> assumption
 
 theorem posM_mul_apply {ι : Type} [Fintype ι] (p : ι → Fin a × Fin a) (y : ι → R)
     (M : Matrix (Fin a) (Fin a) R) (i k : Fin a) :

@@ -1,5 +1,6 @@
 module
 
+import Development.ResolutionOfSingularities.EmbeddedResolution.StrictTransformCharts.StrictTransformSubscheme
 public import Development.ResolutionOfSingularities.EmbeddedResolution.EtaleCoordinates.IdealSheafOpenRestriction
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -210,23 +211,7 @@ private theorem ideal_le_of_basicOpen_cover {X : Scheme.{u}} (A B : X.IdealSheaf
 
 theorem idealSheafData_eq_of_forall_restrictIdeal_eq {X : Scheme.{u}} (I J : X.IdealSheafData)
     (h : ∀ x : X, ∃ U : X.Opens, x ∈ U ∧ restrictIdeal I U = restrictIdeal J U) : I = J := by
-  have hloc : ∀ W : X.affineOpens, ∀ x ∈ (W : X.Opens),
-      ∃ f : Γ(X, (W : X.Opens)), x ∈ X.basicOpen f ∧
-        I.ideal (X.affineBasicOpen f) = J.ideal (X.affineBasicOpen f) := by
-    intro W x hx
-    obtain ⟨U, hxU, hU⟩ := h x
-    have hU' : I.comap U.ι = J.comap U.ι := hU
-    obtain ⟨f, hfU, hxf⟩ := W.2.exists_basicOpen_le (⟨x, hxU⟩ : ↥U) hx
-    refine ⟨f, hxf, ?_⟩
-    have hbo : I.comap (X.basicOpen f).ι = J.comap (X.basicOpen f).ι := by
-      rw [← Scheme.homOfLE_ι X hfU, Scheme.IdealSheafData.comap_comp,
-        Scheme.IdealSheafData.comap_comp, hU']
-    exact ideal_eq_of_comap_opensι_eq I J (X.basicOpen f) (W.2.basicOpen f) hbo
-  refine Scheme.IdealSheafData.ext
-    (funext fun W => le_antisymm (ideal_le_of_basicOpen_cover I J W (hloc W)) ?_)
-  refine ideal_le_of_basicOpen_cover J I W (fun x hx => ?_)
-  obtain ⟨f, hxf, hf⟩ := hloc W x hx
-  exact ⟨f, hxf, hf.symm⟩
+  apply FunctorialResolution.EmbeddedResolution.eq_of_locally_restrictIdeal_eq <;> assumption
 
 theorem mem_of_subschemeMapOfComap_apply_mem {X Y : Scheme.{u}} (g : Y ⟶ X) (Z : X.IdealSheafData)
     (A : Set X) (W : Z.subscheme.Opens) (W' : (Z.comap g).subscheme.Opens)

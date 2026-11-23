@@ -121,8 +121,6 @@ theorem cfg_interlaces (r : ℕ) (hm : c.m = 2 * r + 2) (hk : 2 ≤ c.k) (hok : 
     ring
   refine ⟨?_, fun i => ⟨fun hi => ?_, fun hi => ?_⟩⟩
   · intro s t hst
-    have hst' : (s : ℕ) < t := hst
-    have ht := t.isLt
     show c.lam ((t : ℕ) + 1) < c.lam ((s : ℕ) + 1)
     by_cases h1 : (t : ℕ) + 1 < c.k
     · rw [hlamv _ h1, hlamv _ (by omega)]

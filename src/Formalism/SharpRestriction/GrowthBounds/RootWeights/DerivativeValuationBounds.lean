@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.GrowthBounds.ProjectionOfIsotypicDecomposition
 public import Formalism.SharpRestriction.GrowthBounds.CovariantDegrees
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -263,21 +264,7 @@ theorem flt_lam1S_le {R : Type*} [CommRing R] {ι : Type*} {n : ℕ} [NeZero n] 
 
 theorem flt_withTop_le {a b : WithTop ℤ} {N : ℤ}
     (h : ∀ t : ℤ, (t : WithTop ℤ) ≤ a → ((t - N : ℤ) : WithTop ℤ) ≤ b) : a ≤ b + (N : WithTop ℤ) := by
-  induction a with
-  | top =>
-    induction b with
-    | top => simp
-    | coe y =>
-      exfalso
-      have h1 := WithTop.coe_le_coe.1 (h (y + N + 1) le_top)
-      linarith
-  | coe x =>
-    have hx := h x le_rfl
-    induction b with
-    | top => simp
-    | coe y =>
-      rw [← WithTop.coe_add]
-      exact WithTop.coe_le_coe.2 (by have h1 := WithTop.coe_le_coe.1 hx; linarith)
+  apply Formalism.MainNotions.G.Joints.withTop_le_add_of_forall <;> assumption
 
 theorem flt_withBot_le {a b : WithBot ℤ} {N : ℤ}
     (h : ∀ M : ℤ, b ≤ (M : WithBot ℤ) → a ≤ ((M + N : ℤ) : WithBot ℤ)) : a ≤ b + (N : WithBot ℤ) := by
@@ -449,21 +436,7 @@ theorem flt_twist_monomial_mem {R : Type*} [CommRing R] {ι : Type*} {n : ℕ} (
   rwa [AddMonoidHom.neg_apply] at h1
 
 theorem flt_gL_mul_gLinv (R : Type*) [CommRing R] (n : ℕ) : gL R n * gLinv R n = 1 := by
-  have key : ∀ a b, (gL R n * gLinv R n) a b = LaurentPolynomial.C
-      (IsLocalization.Away.invSelf (genMat R n).det *
-        algebraMap _ (GLCoord R n) ((genMat R n * (genMat R n).adjugate) a b)) := by
-    intro a b
-
-    simp only [gL, gLinv, Matrix.mul_apply, Matrix.map_apply, ← _root_.map_mul, _root_.map_sum, Finset.mul_sum]
-    refine Finset.sum_congr rfl fun c _ => ?_
-    congr 1
-    rw [_root_.map_mul]
-    ring
-  ext a b
-  rw [key, Matrix.mul_adjugate, Matrix.smul_apply, Matrix.one_apply, Matrix.one_apply]
-  split_ifs
-  · rw [smul_eq_mul, mul_one, mul_comm, IsLocalization.Away.mul_invSelf, _root_.map_one]
-  · rw [smul_zero, _root_.map_zero, mul_zero, _root_.map_zero]
+  apply Formalism.MainNotions.G.Joints.genericMatrix_mul_inverse_eq_one <;> assumption
 
 theorem flt_gLinv_mul_gL (R : Type*) [CommRing R] (n : ℕ) : gLinv R n * gL R n = 1 := by
   have key : ∀ a b, (gLinv R n * gL R n) a b = LaurentPolynomial.C

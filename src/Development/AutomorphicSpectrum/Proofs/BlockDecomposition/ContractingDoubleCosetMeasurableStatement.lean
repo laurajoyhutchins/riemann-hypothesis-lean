@@ -63,27 +63,7 @@ variable {k : Type} [Field k] [ValuativeRel k]
 theorem coe_leviEmb_zj {h N : ℕ} (d : Fin h → ℕ) (hd : ∑ a, d a = N) (t : kˣ) (j : Fin h) :
     (leviEmb k (stdBlocks d hd) (Zl.JC.zj d t j) : Matrix (Fin N) (Fin N) k) =
       diagonal fun i => if Zl.JC.blockIdx d hd i ≤ j then (t : k) else 1 := by
-  ext x y
-  obtain ⟨⟨a, i⟩, rfl⟩ := (stdBlocks d hd).surjective x
-  obtain ⟨⟨b, l⟩, rfl⟩ := (stdBlocks d hd).surjective y
-  by_cases hab : a = b
-  · subst hab
-    rw [leviEmb_apply_same]
-    by_cases hil : i = l
-    · subst hil
-      rw [diagonal_apply_eq]
-      simp only [Zl.JC.zj, Zl.JC.blockIdx, Equiv.symm_apply_apply]
-      split_ifs <;> simp
-    · have hne : stdBlocks d hd ⟨a, i⟩ ≠ stdBlocks d hd ⟨a, l⟩ := fun e =>
-        hil (by simpa using (stdBlocks d hd).injective e)
-      rw [diagonal_apply_ne _ hne]
-      simp only [Zl.JC.zj]
-      split_ifs
-      · simp [Matrix.GeneralLinearGroup.scalar, Matrix.scalar_apply, diagonal_apply_ne _ hil]
-      · simp [Matrix.one_apply_ne hil]
-  · have hne : stdBlocks d hd ⟨a, i⟩ ≠ stdBlocks d hd ⟨b, l⟩ := fun e =>
-      hab (congrArg Sigma.fst ((stdBlocks d hd).injective e))
-    rw [diagonal_apply_ne _ hne, leviEmb_apply_ne k _ _ hab]
+  apply GlobalTheory.CompanionTheory.ContractingCosets.coe_leviEmb_zj <;> assumption
 
 variable [TopologicalSpace k] [IsNonarchimedeanLocalField k]
 

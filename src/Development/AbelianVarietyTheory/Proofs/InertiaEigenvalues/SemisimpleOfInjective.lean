@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.PolarizedGaloisRep
 public import Development.AbelianVarietyTheory.BlockTheory.NonGaloisCusps.BlockComplementLattice
 public import Development.AbelianVarietyTheory.BlockTheory.TorsionBlocks.CongruenceMaxGalois
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.GaloisSideTwistedSelmerAuxiliaryPrimes
@@ -268,37 +269,7 @@ variable {R : Ranks} {H : Host R} {what₂ : Rows.Data R}
 
 theorem isSplitPl_of_degree_one (v : PlE H) (hf : v.asIdeal.inertiaDeg ℤ = 1)
     (he : v.asIdeal.ramificationIdx ℤ = 1) : IsSplitPl H v := by
-  have hG : IsGalois ℚ H.E := H.hostE_isGalois
-  have := v.isPrime
-  have h3 := Ideal.card_stabilizer_eq (G := H.E ≃ₐ[ℚ] H.E) (v.asIdeal.under ℤ) v.asIdeal
-  rw [Ideal.ramificationIdxIn_eq_ramificationIdx _ v.asIdeal (H.E ≃ₐ[ℚ] H.E),
-    Ideal.inertiaDegIn_eq_inertiaDeg _ v.asIdeal (H.E ≃ₐ[ℚ] H.E), he, hf] at h3
-  have hb : MulAction.stabilizer (H.E ≃ₐ[ℚ] H.E) v.asIdeal = ⊥ := Subgroup.card_eq_one.1 h3
-  by_contra hn
-  unfold IsSplitPl at hn
-  push Not at hn
-  have hle : H.conj • v.asIdeal ≤ v.asIdeal := by
-    intro y hy
-    rw [Ideal.mem_pointwise_smul_iff_inv_smul_mem] at hy
-    obtain ⟨z, hz, hzv⟩ := hn _ hy
-    have e : z = y := RingOfIntegers.ext (hz.trans (H.conj.apply_symm_apply (y : H.E)))
-    exact e ▸ hzv
-  have hm : (H.conj • v.asIdeal).IsMaximal := by
-    have := v.isMaximal
-    exact (Ideal.isMaximal_map_iff_of_bijective _ (MulAction.bijective H.conj)).2 this
-  have heq : H.conj ∈ MulAction.stabilizer (H.E ≃ₐ[ℚ] H.E) v.asIdeal :=
-    hm.eq_of_le v.isPrime.ne_top hle
-  rw [hb, Subgroup.mem_bot] at heq
-  have hc := H.conj_sqrtMinusD
-  have hsq := H.sqrtMinusD_sq
-  rw [heq] at hc
-  have hc' : H.sqrtMinusD = -H.sqrtMinusD := hc
-  have h0 : H.sqrtMinusD = 0 := by linear_combination (1 / 2 : H.E) * hc'
-  rw [h0] at hsq
-  have h1 : (H.d : H.E) = 0 := by linear_combination hsq
-  have h2 : H.d = 0 := by exact_mod_cast h1
-  have := H.qd_big.2
-  omega
+  apply GlobalTheory.Proof.SemisimpleRepresentationIntegralConjugate.isSplitPl_of_degree_one <;> assumption
 
 variable (N : NData R H what₂)
 

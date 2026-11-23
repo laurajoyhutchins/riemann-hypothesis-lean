@@ -84,7 +84,6 @@ theorem levC_X (i : ZMod n) (ζ : LL) (hζ : IsPrimitiveRoot ζ PD.p) :
   have h3 : levC W i ζ PowerSeries.X = W.lev i ζ letπ := by
     first
     | rfl
-    | exact (lev_eq_levC W i ζ letπ).symm
   rw [h3]
   linear_combination h2
 
@@ -93,7 +92,6 @@ private theorem coeff_zero_derivative_eq_coeff_one {R : Type} [CommRing R] (f : 
   first
   | (rw [show PowerSeries.derivative (R := R) f = f.derivativeFun from rfl, PowerSeries.coeff_derivativeFun]; simp)
   | simp [PowerSeries.coeff_derivativeFun]
-  | simp [PowerSeries.derivative, PowerSeries.coeff_derivativeFun]
 
 theorem X_dvd_levC_q (i : ZMod n) (ζ : LL) (hζ : IsPrimitiveRoot ζ PD.p) (hp : 2 ≤ PD.p) :
     PowerSeries.X ∣ levC W i ζ W.q₀ := by
@@ -132,7 +130,6 @@ theorem residue_q₀ [IsLocalRing O] (hp : PD.p.Prime) (hpm : ((PD.p : ℕ) : O)
   haveI : CharP (PowerSeries (IsLocalRing.ResidueField O)) PD.p := by
     first
     | exact (CharP.charP_iff_prime_eq_zero hp).mpr hK
-    | exact (charP_iff_prime_eq_zero hp).mpr hK
   have h := congrArg (PowerSeries.map (IsLocalRing.residue O)) W.q₀_def
   simp only [map_mul, map_sub, map_pow, map_add (f := _), map_one, PowerSeries.map_X] at h
   rw [add_pow_char, one_pow, add_sub_cancel_left] at h
@@ -151,7 +148,6 @@ private theorem eq_of_mul_mul_eq_of_det_ne_zero (i : ZMod n) (ζ : LL) (hζ : Is
   have e : (PowerSeries.C ζ * E) ^ PD.p = E ^ PD.p := by
     first
     | rw [mul_pow, ← map_pow, hζ.pow_eq_one, map_one, one_mul]
-    | simp [mul_pow, ← map_pow, hζ.pow_eq_one]
   have h1' : (PowerSeries.C ζ * E - 1) * w * PowerSeries.X = E ^ PD.p - 1 := by
     rw [← e]
     linear_combination h1
@@ -167,7 +163,6 @@ private theorem eq_of_mul_mul_eq_of_det_ne_zero (i : ZMod n) (ζ : LL) (hζ : Is
     have e2 : PowerSeries.coeff 1 (E ^ PD.p - 1) = PowerSeries.coeff 1 (E ^ PD.p) := by
       first
       | simp
-      | simp [PowerSeries.coeff_one]
     rw [← hD, ← e2, ← hc, PowerSeries.coeff_zero_eq_constantCoeff_apply, map_mul, h0, mul_zero]
   have hwU : IsUnit w := by
     rw [PowerSeries.isUnit_iff_constantCoeff]
@@ -176,8 +171,6 @@ private theorem eq_of_mul_mul_eq_of_det_ne_zero (i : ZMod n) (ζ : LL) (hζ : Is
   have h2 := (mul_dvd_mul_iff_left PowerSeries.X_ne_zero).mp h
   first
   | exact hwU.dvd_mul_left.mp h2
-  | exact (IsUnit.dvd_mul_left hwU).mp h2
-  | exact (Units.dvd_mul_left (u := hwU.unit)).mp h2
 
 private theorem q0_dvd_of_X_dvd_levC_primitive_roots [IsLocalRing O] [IsAdicComplete (IsLocalRing.maximalIdeal O) O]
     (hp : PD.p.Prime) (hpm : ((PD.p : ℕ) : O) ∈ IsLocalRing.maximalIdeal O)
@@ -203,8 +196,6 @@ private theorem q0_dvd_of_X_dvd_levC_primitive_roots [IsLocalRing O] [IsAdicComp
   have hdeg : r.degree < ((PD.p - 1 : ℕ) : WithBot ℕ) := by
     first
     | (rw [ENat.toNat_coe] at hdeg0; exact hdeg0)
-    | exact hdeg0
-    | simpa only [ENat.toNat_coe] using hdeg0
   have hroots : ∀ ζ ∈ primitiveRoots PD.p LL, (r.map (algebraMap O LL)).eval (ζ - 1) = 0 := by
     intro ζ hζm
     have hζ : IsPrimitiveRoot ζ PD.p := (mem_primitiveRoots hp.pos).mp hζm
@@ -214,7 +205,6 @@ private theorem q0_dvd_of_X_dvd_levC_primitive_roots [IsLocalRing O] [IsAdicComp
       have hc := (levC W i ζ).commutes c
       first
       | simpa [PowerSeries.algebraMap_apply] using hc
-      | simpa [PowerSeries.algebraMap_apply'] using hc
     have key : ∀ s : Polynomial O, PowerSeries.constantCoeff (levC W i ζ (s : PowerSeries O)) =
         (s.map (algebraMap O LL)).eval (ζ - 1) := by
       intro s
@@ -236,7 +226,6 @@ private theorem q0_dvd_of_X_dvd_levC_primitive_roots [IsLocalRing O] [IsAdicComp
     have hRdeg : (r.map (algebraMap O LL)).degree < ((PD.p - 1 : ℕ) : WithBot ℕ) := by
       first
       | exact lt_of_le_of_lt Polynomial.degree_map_le hdeg
-      | exact lt_of_le_of_lt (Polynomial.degree_map_le _ _) hdeg
     have hnd : (r.map (algebraMap O LL)).natDegree < PD.p - 1 :=
       (Polynomial.natDegree_lt_iff_degree_lt hR).mpr hRdeg
     apply hR
@@ -266,8 +255,6 @@ theorem q_pow_dvd [IsLocalRing O] [IsAdicComplete (IsLocalRing.maximalIdeal O) O
     rw [h0, AddValuation.map_zero] at h1
     first
     | exact WithTop.top_ne_one h1
-    | exact absurd h1 (by simp)
-    | simp at h1
   induction b generalizing a with
   | zero => exact ⟨a, by simp⟩
   | succ b ih =>

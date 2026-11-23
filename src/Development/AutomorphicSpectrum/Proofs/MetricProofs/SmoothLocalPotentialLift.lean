@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.LocalHolomorphicSectionOfPotential
 public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.FrameDefinitions.Weights
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -63,18 +64,7 @@ def ReHolAt (A : FinHolAtlas e X) (f : X → ℝ) (y₀ : X) : Prop :=
 
 theorem holoOn_continuousOn {A : FinHolAtlas e X} {W : Set X} {f : X → ℂ} (h : A.HoloOn W f) :
     ContinuousOn f W := by
-  intro z hz
-  obtain ⟨j, hj⟩ := A.cover z
-  have h1 : (A.chart j).symm (A.chart j z) = z := (A.chart j).left_inv hj
-  have hu : A.chart j z ∈ (A.chart j).target ∩ (A.chart j).symm ⁻¹' W :=
-    ⟨(A.chart j).map_source hj, by rw [Set.mem_preimage, h1]; exact hz⟩
-  have hc : ContinuousAt (f ∘ (A.chart j).symm) (A.chart j z) := (h j _ hu).continuousAt
-  have hc2 : ContinuousAt ((f ∘ (A.chart j).symm) ∘ (A.chart j)) z :=
-    ContinuousAt.comp hc ((A.chart j).continuousAt hj)
-  have hev : ((f ∘ (A.chart j).symm) ∘ (A.chart j)) =ᶠ[𝓝 z] f := by
-    filter_upwards [(A.chart j).open_source.mem_nhds hj] with y hy
-    simp [(A.chart j).left_inv hy]
-  exact (hc2.congr hev).continuousWithinAt
+  apply _root_.GlobalTheory.CompanionTheory.Ar.Giv.SecPot.holoOn_continuousOn' <;> assumption
 
 theorem ReHolAt.congr {A : FinHolAtlas e X} {f g : X → ℝ} {y₀ : X} (hg : ReHolAt A g y₀)
     (h : f =ᶠ[𝓝 y₀] g) : ReHolAt A f y₀ := by

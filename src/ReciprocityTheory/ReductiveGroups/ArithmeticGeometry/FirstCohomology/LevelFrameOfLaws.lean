@@ -134,7 +134,6 @@ theorem sval_scal {X Y Y' Z : Scheme.{0}} {L : LB X} {K K' : Type} [Fintype K] [
   first
     | rfl
     | erw [CommRingCat.comp_apply]
-    | simp only [CommRingCat.hom_comp, RingHom.comp_apply]
 
 theorem cst_mul {V : Type} [CommRing V] {Z : Scheme.{0}} (q : Z ⟶ Sp V) (z : Z) (a b : V) :
     cst q z (a * b) = cst q z a * cst q z b := by
@@ -175,7 +174,6 @@ theorem gs_spec {A C : Type} [CommRing A] [CommRing C] (φ : A →+* C) (z : Sp 
     have := congrArg (fun g => g.hom a) (Scheme.ΓSpecIso_inv_naturality (CommRingCat.ofHom φ))
     first
       | exact this.symm
-      | simp
       | (simp only [CommRingCat.comp_apply] at this; exact this.symm)
   have h1 : (spMap φ) z ∈ (⊤ : (Sp A).Opens) := trivial
   have h2 : (𝟙 (Sp C) : Sp C ⟶ Sp C) z ∈ (⊤ : (Sp C).Opens) := trivial
@@ -205,25 +203,18 @@ theorem gs_fromSpec {X Z : Scheme.{0}} {U W : X.Opens} (hU : IsAffineOpen U) (le
   erw [← Scheme.Hom.germ_stalkMap_apply, ← Scheme.Hom.germ_stalkMap_apply]
   first
     | rw [Scheme.Hom.stalkMap_comp]
-    | rw [Scheme.stalkMap_comp]
     | erw [Scheme.Hom.stalkMap_comp]
   first
     | erw [CommRingCat.comp_apply]
-    | rw [CommRingCat.hom_comp, RingHom.comp_apply]
-    | simp only [CommRingCat.hom_comp, RingHom.comp_apply]
     | erw [ConcreteCategory.comp_apply]
   congr 1
   erw [Scheme.Hom.germ_stalkMap_apply]
   rw [hU.fromSpec_app_of_le W le]
   first
     | erw [CommRingCat.comp_apply]
-    | rw [CommRingCat.hom_comp, RingHom.comp_apply]
-    | simp only [CommRingCat.hom_comp, RingHom.comp_apply]
     | erw [ConcreteCategory.comp_apply]
   try (first
       | erw [CommRingCat.comp_apply]
-      | rw [CommRingCat.hom_comp, RingHom.comp_apply]
-      | simp only [CommRingCat.hom_comp, RingHom.comp_apply]
       | erw [ConcreteCategory.comp_apply])
   erw [TopCat.Presheaf.germ_res_apply]
   rfl

@@ -66,7 +66,6 @@ theorem bracket_le (k r : ℕ) (lam v : ℕ → ℝ) (e : ℕ) (c g b Y ε : ℝ
     rw [mem_Icc] at hs ht
     omega
   have hε0 : |ε| ≤ 1 := by rcases hε with h0 | h0 <;> simp [h0]
-  have hb : 0 ≤ b := le_trans (abs_nonneg Y) hY
 
   have hnode : ∏ s ∈ Icc k (k + 2 * r + 1), (|Y + ε + lam s| + c) ≤ (3 * b) ^ (2 * r + 2) := by
     have hcard : (Icc k (k + 2 * r + 1)).card = 2 * r + 2 := by
@@ -92,7 +91,6 @@ theorem bracket_le (k r : ℕ) (lam v : ℕ → ℝ) (e : ℕ) (c g b Y ε : ℝ
     exact mul_le_mul_of_nonneg_left hcloud hb3
   have hcl0 : 0 ≤ ∏ s ∈ Icc 1 (k - 1), (|Y + ε + lam s| + c) :=
     prod_nonneg fun s _ => by positivity
-  have hnode0 : 0 ≤ (3 * b) ^ (2 * r + 2) := pow_nonneg hb3 _
   rw [hsplit, prod_union hdisj]
   calc (∏ s ∈ Icc 1 (k - 1), (|Y + ε + lam s| + c)) *
         ∏ s ∈ Icc k (k + 2 * r + 1), (|Y + ε + lam s| + c)

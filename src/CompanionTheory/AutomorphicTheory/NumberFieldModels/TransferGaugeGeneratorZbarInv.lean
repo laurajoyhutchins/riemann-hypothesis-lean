@@ -1,5 +1,6 @@
 module
 
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.SquareIntegrableGammaZetabarInv
 public import CompanionTheory.AutomorphicTheory.NumberFieldModels.NFTieProv
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ActualAdjointnessFromHermitian
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.CutGaugeVLem
@@ -154,23 +155,7 @@ theorem gg_apply (q : MA.Qp r TT) :
 
 theorem inv_apply (φ : MA.SmQ r TT) (hφ : ∀ q, (φ : MA.Qp r TT → ℂ) q ≠ 0) (q : MA.Qp r TT) :
     ((Ring.inverse φ : MA.SmQ r TT) : MA.Qp r TT → ℂ) q = ((φ : MA.Qp r TT → ℂ) q)⁻¹ := by
-  have hsm : (fun q : MA.Qp r TT => ((φ : MA.Qp r TT → ℂ) q)⁻¹) ∈ MA.smSub r TT := by
-    show ContDiffOn ℝ MA.sm (MA.ext fun q : MA.Qp r TT => ((φ : MA.Qp r TT → ℂ) q)⁻¹) (MA.Qset r TT)
-    have h0 : ContDiffOn ℝ MA.sm (MA.ext (φ : MA.Qp r TT → ℂ)) (MA.Qset r TT) := φ.2
-    refine (h0.inv fun x hx => ?_).congr fun x hx => ?_
-    · simp only [MA.ext, hx, dif_pos]; exact hφ _
-    · simp [MA.ext, hx]
-  let w : MA.SmQ r TT := ⟨_, hsm⟩
-  have h1 : φ * w = 1 := by
-    apply Subtype.ext; funext q
-    exact mul_inv_cancel₀ (hφ q)
-  have h2 : w * φ = 1 := by
-    apply Subtype.ext; funext q
-    exact inv_mul_cancel₀ (hφ q)
-  let u : (MA.SmQ r TT)ˣ := ⟨φ, w, h1, h2⟩
-  have hu : (u : MA.SmQ r TT) = φ := rfl
-  rw [← hu, Ring.inverse_unit]
-  rfl
+  apply Formalism.FourierDecayAlt.P.MAx2.Adj.inv_val <;> assumption
 
 end coords
 

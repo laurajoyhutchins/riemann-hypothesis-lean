@@ -166,11 +166,6 @@ theorem reach_tor {l m : K} (hml : m * σ l = 1) (b : ι → K) :
     intro g v
     simp only [dotProduct, mulVec, hf, Function.comp, Finset.sum_mul]
     exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
-  have hE : ∀ (g w v : ι → K) (d : K), eich σ J g w d *ᵥ v =
-      v + hf σ J v g • w - hf σ J v w • g + (d * hf σ J v g) • g := by
-    intro g w v d
-    simp only [eich, Matrix.add_mulVec, Matrix.sub_mulVec, Matrix.smul_mulVec,
-      Matrix.one_mulVec, hvmv, hdot, smul_smul]
   refine ⟨tor σ J e f l m, ⟨1, Submonoid.one_mem _, l, m, hml, by rw [Matrix.one_mul]⟩,
     fun j => ?_, rfl⟩
   simp only [tor, Matrix.add_mulVec, Matrix.smul_mulVec, Matrix.one_mulVec, hvmv, hdot,

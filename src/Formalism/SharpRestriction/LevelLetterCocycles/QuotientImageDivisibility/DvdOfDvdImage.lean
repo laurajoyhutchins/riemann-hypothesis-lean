@@ -102,8 +102,6 @@ theorem poly_eq_zero : ∀ (k : ℕ) (r : Polynomial O), r.degree < k →
           (Polynomial.X + Polynomial.C l) * Polynomial.divByMonic r (Polynomial.X + Polynomial.C l) = r := by
         first
           | exact Polynomial.modByMonic_add_div r (Polynomial.X + Polynomial.C l)
-          | exact Polynomial.modByMonic_add_div r _ hmon
-          | exact Polynomial.modByMonic_add_div r hmon
       rw [hrem] at h1
       exact h1.symm
     have hqdeg : (Polynomial.divByMonic r (Polynomial.X + Polynomial.C l)).degree < k := by
@@ -111,19 +109,15 @@ theorem poly_eq_zero : ∀ (k : ℕ) (r : Polynomial O), r.degree < k →
       · rw [hq0, Polynomial.degree_zero]
         first
           | exact WithBot.bot_lt_coe _
-          | simp
       · have hr0 : r ≠ 0 := by
           rintro rfl
           exact hq0 (Polynomial.zero_divByMonic _)
         have hpos : 0 < (Polynomial.X + Polynomial.C l : Polynomial O).degree := by
           first
             | (rw [Polynomial.degree_X_add_C]; exact zero_lt_one)
-            | simp
         have h1 : (Polynomial.divByMonic r (Polynomial.X + Polynomial.C l)).degree < r.degree := by
           first
             | exact Polynomial.degree_divByMonic_lt r (Polynomial.X + Polynomial.C l) hr0 hpos
-            | exact Polynomial.degree_divByMonic_lt r _ hmon hr0 hpos
-            | exact Polynomial.degree_divByMonic_lt r hmon hr0 hpos
         rw [Polynomial.degree_eq_natDegree hq0, Polynomial.degree_eq_natDegree hr0] at h1
         rw [Polynomial.degree_eq_natDegree hr0] at hr
         rw [Polynomial.degree_eq_natDegree hq0]
@@ -148,7 +142,6 @@ theorem poly_eq_zero : ∀ (k : ℕ) (r : Polynomial O), r.degree < k →
     first
       | simp only [map_add (f := _), map_mul, PowerSeries.constantCoeff_C, PowerSeries.constantCoeff_X,
           zero_mul, add_zero] at hX
-      | simp at hX
     have hc0 : c = 0 := hinj (hX.trans (map_zero _).symm)
     simp only [hc0, map_zero, zero_add] at hψr
     rw [hψr, pow_succ'] at hdvd
@@ -173,10 +166,8 @@ theorem dvd_of_dvd_image [IsLocalRing O] [IsAdicComplete (IsLocalRing.maximalIde
     have hz : Ideal.Quotient.mk (IsLocalRing.maximalIdeal O) l = 0 := Ideal.Quotient.eq_zero_iff_mem.mpr hlm
     first
       | simpa [hz, PowerSeries.order_X_pow] using h
-      | simpa [hz] using h
       | (rw [hres, PowerSeries.order_X_pow, ENat.toNat_coe] at h; exact h)
       | (simp only [hres, PowerSeries.order_X_pow, ENat.toNat_coe] at h; exact h)
-      | simpa [hres] using h
   have hψa : ψ a = (PowerSeries.X * u) ^ k * ψ q + ψ (r : PowerSeries O) := by
     rw [hdiv.eq_mul_add, map_add (f := _), map_mul, map_pow, hψ]
   have h1 : PowerSeries.X ^ k ∣ (PowerSeries.X * u) ^ k * ψ q :=
@@ -185,7 +176,6 @@ theorem dvd_of_dvd_image [IsLocalRing O] [IsAdicComplete (IsLocalRing.maximalIde
     rw [hψa] at ha
     first
       | exact (dvd_add_right h1).mp ha
-      | simpa using dvd_sub ha h1
   have hr0 : r = 0 := poly_eq_zero hinj l ψ hψC u hu hψ k r hdeg h2
   rw [hdiv.eq_mul_add, hr0, Polynomial.coe_zero, add_zero]
   exact dvd_mul_right _ _

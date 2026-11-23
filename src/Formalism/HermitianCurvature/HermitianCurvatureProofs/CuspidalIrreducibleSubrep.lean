@@ -205,7 +205,6 @@ theorem redIntegrable : RedIntegrable := by
   have hJ := jacobian (m + 1) β t ht
   have hfun : blockIntegrand β (m + 1) Φ t c = Fint β m Φ t c ∘ coordMap (m + 1) t :=
     funext (blockIntegrand_eq β m Φ t c ht)
-  have hpos : (0 : ℝ) < ‖t‖ := norm_pos_iff.2 ht
   set κ : NNReal := Real.toNNReal ((‖t‖ ^ ((m + 1) * (m + 1 + 3)))⁻¹) with hκ
   have hκ0 : κ ≠ 0 := by
     rw [hκ]
@@ -252,9 +251,7 @@ theorem redIntegrable : RedIntegrable := by
 theorem innerXYOfReduced : InnerXYOfReduced := by
   intro hOm hRI hSplit hAmp m β t c ht V _ _ _ Φ hint
   have hmp := (hSplit m β).2
-  have i1 : PolishSpace (XY m) := inferInstance
   have i2 : StandardBorelSpace (XY m) := inferInstance
-  have i3 : SecondCountableTopology (RedCoord m) := inferInstance
   have i4 : MeasurableSpace.CountablyGenerated (RedCoord m) := inferInstance
   have i5 : MeasurableSpace.CountablySeparated (RedCoord m) := inferInstance
   have hemb : MeasurableEmbedding (redOf m) := hmp.measurable.measurableEmbedding (hSplit m β).1.injective

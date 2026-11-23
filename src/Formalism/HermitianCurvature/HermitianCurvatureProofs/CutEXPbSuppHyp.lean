@@ -73,17 +73,13 @@ theorem rev_cs (a b : Fin (m + 1) → ℂ) (c : ℂ) (t : ℝ) (ht : 0 < t)
   set A := ‖a (Fin.last m)‖ with hA
   set Bn := ‖b (Fin.last m)‖ with hBn
   set P := ∑ i : Fin m, ‖a i.castSucc‖ * ‖b i.castSucc‖ with hPdef
-  have hP0 : 0 ≤ P := Finset.sum_nonneg fun i _ => mul_nonneg (norm_nonneg _) (norm_nonneg _)
   have hCS : P ^ 2 ≤ (∑ i : Fin m, ‖a i.castSucc‖ ^ 2) * (∑ i : Fin m, ‖b i.castSucc‖ ^ 2) :=
     Finset.sum_mul_sq_le_sq_mul_sq _ _ _
   have hsb : 0 ≤ ∑ i : Fin m, ‖b i.castSucc‖ ^ 2 := Finset.sum_nonneg fun i _ => by positivity
   have hA0 : 0 ≤ A := norm_nonneg _
-  have hB0 : 0 ≤ Bn := norm_nonneg _
-  have hBt : t ≤ Bn ^ 2 := by linarith
   have hP2 : P ^ 2 ≤ A ^ 2 * (Bn ^ 2 - t) := hCS.trans (mul_le_mul ha hb hsb (sq_nonneg _))
   have key : 2 * Bn * P ≤ A * (2 * Bn ^ 2 - t) := by
     have hR : 0 ≤ A * (2 * Bn ^ 2 - t) := mul_nonneg hA0 (by linarith)
-    have hL : 0 ≤ 2 * Bn * P := by positivity
     have hsq : (2 * Bn * P) ^ 2 ≤ (A * (2 * Bn ^ 2 - t)) ^ 2 := by
       have e1 : (2 * Bn * P) ^ 2 = 4 * Bn ^ 2 * P ^ 2 := by ring
       have e2 : (A * (2 * Bn ^ 2 - t)) ^ 2 = 4 * Bn ^ 2 * (A ^ 2 * (Bn ^ 2 - t)) + A ^ 2 * t ^ 2 := by ring
@@ -243,8 +239,6 @@ theorem entry_bound (μ : Matrix (Fin (m + 1)) (Fin (m + 1)) ℂ)
       rw [hy, Matrix.mulVec, dotProduct, Fin.sum_univ_castSucc]; ring
     rw [hyL]; exact this
   have h3 := entry_le_last μ hμ i j
-  have hzL : 0 ≤ ‖z (Fin.last m)‖ := norm_nonneg _
-  have hz'L : 0 ≤ ‖z' (Fin.last m)‖ := norm_nonneg _
   calc ‖μ i j‖ * (T * T') ≤ ‖μ (Fin.last m) (Fin.last m)‖ * T' * T := by
         rw [mul_comm T T', ← mul_assoc]; exact mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right h3 hT'.le) hT.le
     _ ≤ 2 * ‖z' (Fin.last m)‖ * ‖y (Fin.last m)‖ * T := mul_le_mul_of_nonneg_right h2 hT.le

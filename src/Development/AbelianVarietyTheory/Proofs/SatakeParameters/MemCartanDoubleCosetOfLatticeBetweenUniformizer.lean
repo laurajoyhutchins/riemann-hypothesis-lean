@@ -62,19 +62,7 @@ variable {O K : Type} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [Fie
 
 theorem coord_of_mem_std {x : Fin r → K} (hx : x ∈ (std O K r).1) (i : Fin r) :
     ∃ a : O, algebraMap O K a = x i := by
-  induction hx using Submodule.span_induction with
-  | mem x hx =>
-    obtain ⟨j, rfl⟩ := hx
-    by_cases h : i = j
-    · exact ⟨1, by simp [h]⟩
-    · exact ⟨0, by simp [h]⟩
-  | zero => exact ⟨0, by simp⟩
-  | add x y _ _ hx hy =>
-    obtain ⟨a, ha⟩ := hx; obtain ⟨b, hb⟩ := hy
-    exact ⟨a + b, by simp [ha, hb]⟩
-  | smul c x _ hx =>
-    obtain ⟨a, ha⟩ := hx
-    exact ⟨c * a, by simp [ha, Algebra.smul_def]⟩
+  apply _root_.GlobalTheory.LatHecke.coord_of_mem_std <;> assumption
 
 end Dvr
 

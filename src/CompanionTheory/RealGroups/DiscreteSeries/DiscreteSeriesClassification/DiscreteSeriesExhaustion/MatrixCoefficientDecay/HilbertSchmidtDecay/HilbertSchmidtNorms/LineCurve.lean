@@ -203,7 +203,6 @@ theorem back_line (H : Hyp ε S m A ν τ r Z M c₁ R₀ C) (hn : 0 < n) (j : F
     simp only [mul_zero, Real.exp_zero, mul_one] at h0
     rw [← hX] at h0
     by_contra hC
-    have hC' := not_le.mp hC
     nlinarith
   have hCpos : 0 < C := lt_of_lt_of_le one_pos hC1
   calc ENNReal.ofReal (Formalism.REAL.hs X ^ s) *
@@ -232,8 +231,6 @@ theorem back_line (H : Hyp ε S m A ν τ r Z M c₁ R₀ C) (hn : 0 < n) (j : F
           have e1 : Real.exp (2 * (r j + s) * t) = Real.exp (2 * r j * t) * Real.exp (2 * t * s) := by
             rw [← Real.exp_add]; ring_nf
           rw [e1]
-          have hpos : 0 ≤ C ^ (-s) := Real.rpow_nonneg hCpos.le _
-          have hE : 0 ≤ Real.exp (2 * r j * t) := (Real.exp_pos _).le
           calc Formalism.REAL.hs X ^ s * (Real.exp (2 * r j * t) * Real.exp (2 * t * s))
               = C ^ (-s) * (C ^ s * Real.exp (2 * t * s) * Formalism.REAL.hs X ^ s) * Real.exp (2 * r j * t) := by
                 rw [← mul_assoc (C ^ (-s)), ← mul_assoc (C ^ (-s)), hCC]; ring

@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeCompDescentSecond
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.ConjugateHermitianLineIsometries
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHodgeLine
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
@@ -156,23 +157,7 @@ theorem flagStep_comp (f : E →ₗ[Ω] E') {r : ℕ} (b : Fin r → E) (i : ℕ
 
 theorem exists_scale {r : ℕ} {b₁ b₂ : Fin r → E} (hF : ∀ s : ℕ, flagStep Ω b₁ s = flagStep Ω b₂ s)
     (hb : LinearIndependent Ω b₁) (j : Fin r) : ∃ μ : Ω, μ ≠ 0 ∧ b₁ j - μ • b₂ j ∈ flagStep Ω b₂ j := by
-  have hmem : b₁ j ∈ flagStep Ω b₂ ((j : ℕ) + 1) := by
-    rw [← hF]
-    exact Submodule.subset_span ⟨j, by simp, rfl⟩
-  have hsub : flagStep Ω b₂ ((j : ℕ) + 1) ≤ Submodule.span Ω {b₂ j} ⊔ flagStep Ω b₂ j := by
-    refine Submodule.span_le.2 ?_
-    rintro _ ⟨l, hl, rfl⟩
-    rcases Nat.lt_succ_iff_lt_or_eq.1 hl with h | h
-    · exact Submodule.mem_sup_right (Submodule.subset_span ⟨l, h, rfl⟩)
-    · have : l = j := Fin.ext h
-      subst this
-      exact Submodule.mem_sup_left (Submodule.mem_span_singleton_self _)
-  obtain ⟨a, ha, c, hc, e⟩ := Submodule.mem_sup.1 (hsub hmem)
-  obtain ⟨μ, rfl⟩ := Submodule.mem_span_singleton.1 ha
-  have hd : b₁ j - μ • b₂ j ∈ flagStep Ω b₂ j := by rw [← e]; simpa using hc
-  refine ⟨μ, fun h0 => ?_, hd⟩
-  rw [h0, zero_smul, sub_zero, ← hF] at hd
-  exact hb.notMem_span_image (s := {k | (k : ℕ) < j}) (x := j) (by simp) hd
+  apply GlobalTheory.CompanionTheory.Ar.Chg.GP.exists_coeff <;> assumption
 
 variable {X : Scheme.{0}} {ξ : Spec (CommRingCat.of Ω) ⟶ X}
 

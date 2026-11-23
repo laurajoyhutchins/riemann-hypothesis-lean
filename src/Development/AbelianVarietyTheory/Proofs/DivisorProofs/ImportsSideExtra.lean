@@ -1,9 +1,6 @@
 module
 
 public import Development.AbelianVarietyTheory.PublishedTheorems.Divisors₂.GaussManinPeriods
-public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ConstantCycleExtensionTaylorPeriodOfThickeningCoStatement
-public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaussManinPeriodsOfSpanAndTaylorClausesStatement
-public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.PeriodsSpanDeRhamHomologyRankTwoGStatement
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
 import Mathlib.Algebra.Order.Interval.Basic
@@ -40,12 +37,13 @@ import Mathlib.Tactic.NormNum.Ordinal
 import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.GaussManinPeriodsHolds
 
 @[expose] public section
 
 namespace GlobalTheory.GaussManinTop
 
 theorem main : GlobalTheory.Published.GaussManinPeriods :=
-  GlobalTheory.T.gaussManinPeriods_of_span_and_taylor_clauses GlobalTheory.T.periods_span_deRhamHomology_rank_two_g GlobalTheory.T.constantCycleExtension_taylorPeriod_of_thickeningComparison
+  GlobalTheory.PeriodFamily.gaussManinPeriods_holds
 
 end GlobalTheory.GaussManinTop

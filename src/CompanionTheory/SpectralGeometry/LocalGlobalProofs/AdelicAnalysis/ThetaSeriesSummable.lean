@@ -211,7 +211,6 @@ theorem gauss_bound {M : ℕ} {B : Matrix ι ι F} {ρ : InfinitePlace F → (F 
           have : w (x j) ≤ ‖v w‖ := by
             rw [hwv]
             exact norm_le_pi_norm (v w) j
-          have h0 : 0 ≤ w (x j) := AbsoluteValue.nonneg _ _
           gcongr
       _ = _ := by simp
   have h3 : d * ∑ w, ‖v w‖ ^ 2 ≤ ∑ w, Real.pi * (τ w).im *
@@ -261,7 +260,6 @@ theorem summable_thTerm {M : ℕ} {B : Matrix ι ι F} {ρ : InfinitePlace F →
   obtain ⟨C, hC⟩ := hφ.1.continuous.bounded_above_of_compact_support hφ.2
   obtain ⟨a, ha, hg⟩ := gauss_bound hQ hO.2 hτ
   have hNF : (N : F) ≠ 0 := Nat.cast_ne_zero.2 hN.ne'
-  have hNR : (0 : ℝ) < N := Nat.cast_pos.2 hN
   let i : (ι → 𝓞 F) → (ι → F) := fun r j => (r j : F) / N
   have hi : Function.Injective i := fun r s h => funext fun j => by
     have := congrFun h j

@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.HodgeTateWeilEndomorphism
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsHodgeGram
 public import Development.WeilBound.CoreStatements.SesquilinearFractions.FrameBCLin
 public import Development.WeilBound.CoreStatements.SesquilinearFractions.GBridge
@@ -58,24 +59,7 @@ open scoped ComplexOrder
 namespace PositivityTheory.Xgf.EigenspaceComposition
 
 theorem epi_spMap {K L : Type} [Field K] [Field L] (a : K →+* L) : Epi (spMap a) := by
-  constructor
-  intro X g₁ g₂ h
-  obtain ⟨⟨x₁, φ₁⟩, rfl⟩ := (Scheme.SpecToEquivOfField K X).symm.surjective g₁
-  obtain ⟨⟨x₂, φ₂⟩, rfl⟩ := (Scheme.SpecToEquivOfField K X).symm.surjective g₂
-  have h' : (Scheme.SpecToEquivOfField L X).symm ⟨x₁, φ₁ ≫ CommRingCat.ofHom a⟩ =
-      (Scheme.SpecToEquivOfField L X).symm ⟨x₂, φ₂ ≫ CommRingCat.ofHom a⟩ := by
-    simpa [Scheme.SpecToEquivOfField, spMap, Spec.map_comp, Category.assoc] using h
-  have h'' := (Scheme.SpecToEquivOfField L X).symm.injective h'
-  rw [Scheme.SpecToEquivOfField_eq_iff] at h''
-  obtain ⟨e, he⟩ := h''
-  dsimp only at e he
-  subst e
-  have hφ : φ₁ = φ₂ := by
-    ext z
-    have hz := congrArg (fun m => m.hom z) he
-    simp at hz
-    exact a.injective hz
-  rw [hφ]
+  apply GlobalTheory.CompanionTheory.Ar.HtEnd.epiSp <;> assumption
 
 theorem one_left' {S : Scheme.{0}} (G : Over S) [GrpObj G] (Y : Over S) :
     (1 : Y ⟶ G).left = Y.hom ≫ (η[G] : 𝟙_ (Over S) ⟶ G).left := by

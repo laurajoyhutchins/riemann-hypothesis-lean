@@ -1,5 +1,6 @@
 module
 
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.RestrictionIrrelevantDoubleLevelOperator
 public import Formalism.FormalDegreeBessel.FormalDegreeRatio.GBasic
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.SumDualVectorEqZeta
 public import Formalism.HermitianCurvature.HermitianCurvatureProofs.ChainRecursionFromSingleDescent
@@ -423,41 +424,7 @@ theorem mulVec_bvec {m : ℕ} (g : Matrix (Fin m) (Fin m) ℂ) (i j : Fin m) : (
   simp [mulVec, dotProduct, bvec, Pi.single_apply]
 
 theorem Nlev_last {k r : ℕ} {n : Mx k r} (hn : n ∈ Nlev k r (Fin.last r)) : n = 1 := by
-  obtain ⟨⟨hU, -, h3⟩, -, hfix⟩ := hn
-  ext i j
-  by_cases hj1 : j.val < r
-  · have h := (hfix ⟨j.val, hj1⟩ (by simpa using hj1)).1
-    have e : eI k r ⟨j.val, hj1⟩ = j := Fin.ext rfl
-    rw [e] at h
-    have := congrFun h i
-    rw [mulVec_bvec] at this
-    rw [this, Matrix.one_apply, bvec, Pi.single_apply]
-  by_cases hj2 : r + k < j.val
-  · have hjl := j.isLt
-    have ha : 2 * r + k - j.val < r := by omega
-    have h := (hfix ⟨2 * r + k - j.val, ha⟩ (by simpa using ha)).2
-    have e : esI k r ⟨2 * r + k - j.val, ha⟩ = j := Fin.ext (by simp only [esI]; omega)
-    rw [e] at h
-    have := congrFun h i
-    rw [mulVec_bvec] at this
-    rw [this, Matrix.one_apply, bvec, Pi.single_apply]
-  by_cases hi : r ≤ i.val
-  · rw [h3 i j (by omega) (by omega) hi, Matrix.one_apply]
-  · have hi' : i.val < r := by omega
-    have h := (hfix ⟨i.val, hi'⟩ (by simpa using hi')).2
-    have h1 := herm_UH hU (bvec j) (bvec (esI k r ⟨i.val, hi'⟩))
-    rw [h, herm_bvec_right, herm_bvec_right, Hpk_mulVec, Hpk_mulVec] at h1
-    have es : GBasic.sig k r (esI k r ⟨i.val, hi'⟩) = i := by
-      apply Fin.ext
-      have hv : (esI k r ⟨i.val, hi'⟩).val = 2 * r + k - i.val := rfl
-      rw [GBasic.sig_hi k r _ (by rw [hv]; omega), hv]
-      omega
-    have sg : GBasic.sgn k r (esI k r ⟨i.val, hi'⟩) = 1 := by
-      have hv : (esI k r ⟨i.val, hi'⟩).val = 2 * r + k - i.val := rfl
-      unfold GBasic.sgn
-      rw [if_neg (by rw [hv]; omega)]
-    rw [es, sg, one_mul, one_mul, mulVec_bvec] at h1
-    rw [h1, Matrix.one_apply, bvec, Pi.single_apply]
+  apply Formalism.FourierDecayAlt.P.Qx8.Nlev_last <;> assumption
 
 theorem psi_one {k r : ℕ} {z : Fin (2 * r + k + 1) → ℂ} (hz : inWb k r z) (c : ℂ) : psi k r z c 1 = 1 := by
   have : ell k r z 1 = 0 := by

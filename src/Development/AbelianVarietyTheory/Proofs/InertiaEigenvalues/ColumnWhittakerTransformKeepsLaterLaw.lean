@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CuspidalBlockAverageLastColumnEqZero
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.UnipotentBlockColumnIndex
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -63,21 +64,7 @@ variable {R : Type} [CommRing R] {a : ℕ}
 theorem posM_blk_apply {r m : ℕ} (x : UnipotentBlockColumnIndex a r m → R) (i l : Fin a) :
     posM (Subtype.val : UnipotentBlockColumnIndex a r m → Fin a × Fin a) x i l =
       if h : (i : ℕ) < r ∧ r ≤ (l : ℕ) ∧ (l : ℕ) ≤ m then x ⟨(i, l), h⟩ else 0 := by
-  simp only [posM, Matrix.sum_apply, Matrix.single_apply]
-  split_ifs with h
-  · rw [Finset.sum_eq_single ⟨(i, l), h⟩]
-    · simp
-    · rintro ⟨⟨i', l'⟩, h'⟩ _ hne
-      rw [if_neg]
-      rintro ⟨rfl, rfl⟩
-      exact hne rfl
-    · simp
-  · refine Finset.sum_eq_zero fun t _ => ?_
-    rw [if_neg]
-    rintro ⟨e1, e2⟩
-    apply h
-    rw [← e1, ← e2]
-    exact t.2
+  apply GlobalTheory.CuspGeneric.posM_apply_of_blkIx <;> assumption
 
 theorem posM_mul_posM_eq_zero {ι κ : Type} [Fintype ι] [Fintype κ] {p : ι → Fin a × Fin a}
     {q : κ → Fin a × Fin a} (h : ∀ s t, (p s).2 ≠ (q t).1) (x : ι → R) (y : κ → R) :

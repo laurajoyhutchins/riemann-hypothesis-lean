@@ -59,7 +59,6 @@ private lemma vthp_nonneg_of_ok (c : Cfg) (h : c.Ok) : 0 ≤ c.vthp := by
   unfold Cfg.vthp
   split_ifs with ht
   · obtain ⟨h1, _⟩ := h.htop ht
-    have hb1 : (1:ℝ) ≤ c.b 1 := h.hb1
     have hbp : 0 < c.bp := by linarith
     have hD : (1:ℝ) ≤ c.Del := h.hDel
     exact div_nonneg (mul_nonneg (mul_nonneg (by norm_num) (Nat.cast_nonneg _)) (by linarith)) hbp.le
@@ -69,7 +68,6 @@ private lemma vthp_le_one_tenth_of_small (c : Cfg) (h : c.Ok) (bb : ℝ) (hs : c
   unfold Cfg.vthp
   split_ifs with ht
   · obtain ⟨h1, _⟩ := h.htop ht
-    have hb1 : (1:ℝ) ≤ c.b 1 := h.hb1
     have hbp : 0 < c.bp := by linarith
     have hm : (2:ℝ) ≤ c.m := by exact_mod_cast h.hm
     have hk : (0:ℝ) ≤ c.k := Nat.cast_nonneg _
@@ -123,8 +121,6 @@ lemma rho_nonneg (c : Cfg) (de de' : ℕ → ℝ) (Y : ℝ) (l i : ℕ) (h : c.O
   split_ifs with ht
   · obtain ⟨h1, _⟩ := h.htop ht.1
     have hY' : 5 / 2 ≤ c.v l + Y ∧ c.v l + Y ≤ c.Del / 2 := hY
-    have hD : (1:ℝ) ≤ c.Del := h.hDel
-    have hb1 : (1:ℝ) ≤ c.b 1 := h.hb1
     have hv : 4 * c.Del ≤ c.v l := by
       unfold Cfg.v
       have hkl : (l:ℝ) + 2 ≤ c.k := by exact_mod_cast hlk
@@ -178,7 +174,6 @@ lemma edge_bound (c : Cfg) (de de' : ℕ → ℝ) (Y : ℝ) (l : ℕ) (h : c.Ok)
           mul_le_mul hU1 hr1 hr0 hx.le
       _ ≤ 8 / (c.a - c.v 1) := by rw [e]; linarith
   · obtain ⟨hbp1, _⟩ := h.htop htop
-    have hb1 : (1:ℝ) ≤ c.b 1 := h.hb1
     have hbp : 0 < c.bp := by linarith
     have hk0 : (c.k:ℝ) ≠ 0 := (by linarith : (0:ℝ) < c.k).ne'
     have hD0 : c.Del ≠ 0 := (by linarith : (0:ℝ) < c.Del).ne'
@@ -239,9 +234,6 @@ theorem betaOnCut_of_tcritLower (HT : TcritLower) : BetaOnCut := by
     Finset.prod_nonneg (fun i _ => rho_nonneg c de de' Y l i h hlk hY)
   have hRl0 := rho_nonneg c de de' Y l l h hlk hY
   have hRk0 := rho_nonneg c de de' Y l (c.k - 1) h hlk hY
-  have hN0 : 0 ≤ c.Nd (-Y) := by
-    unfold Cfg.Nd
-    exact Finset.prod_nonneg (fun j _ => Real.sqrt_nonneg _)
   have hU0 : 0 < c.U1 (-Y) := (edgeFactorBound c Y l h hl hlk hY).1
   have hsq : Real.sqrt (14 * (c.v l + Y) / (5 * c.Del)) =
       Real.sqrt (14 / 5) * Real.sqrt ((c.v l + Y) / c.Del) := by

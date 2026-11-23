@@ -78,8 +78,6 @@ private lemma rs_rs' {T : Scheme.{0}} {O1 O2 O3 : T.Opens} (h1 : O2 ≤ O1) (h2 
     (x : Γ(T, O1)) : rs h2 (rs h1 x) = rs (h2.trans h1) x := by
   first
     | (simp only [rs]; rw [← CommRingCat.comp_apply, ← Functor.map_comp]; rfl)
-    | (change _ = (T.presheaf.map ((homOfLE h1).op ≫ (homOfLE h2).op)).hom x
-       rw [Functor.map_comp]; rfl)
 
 private lemma res_res_eq_res_trans' {T : Scheme.{0}} {O1 O2 O3 : T.Opens} (h1 : O2 ≤ O1) (h2 : O3 ≤ O2)
     (z : Γ(T, O1)ˣ) : res h2 (res h1 z) = res (h2.trans h1) z := by
@@ -105,8 +103,6 @@ lemma tu_pull (h : Z ⟶ Y) {W : Y.Opens} {V : Z.Opens} (hV : V ≤ h ⁻¹ᵁ W
   rw [tu_def hW, tu_def hV', pullU_res_eq_res_map_homOfLE, res_res_eq_res_trans']
   first
     | rfl
-    | (ext1; rfl)
-    | (ext1; simp only [res, pullU, Units.coe_map, MonoidHom.coe_coe, Scheme.comp_app]; rfl)
 
 end TU
 
@@ -256,7 +252,6 @@ lemma g_self_res (hA : A.IsLB) (a : A.ι) {V : Y.Opens} (h : V ≤ A.U a ⊓ A.U
 lemma divLe (a : A.ι) (b : B.ι) : A.U a ⊓ B.U b ≤ (LB.div B A).U (b, a) := by
   first
     | exact le_inf inf_le_right inf_le_left
-    | (show A.U a ⊓ B.U b ≤ B.U b ⊓ A.U a; exact le_inf inf_le_right inf_le_left)
 
 def isoCand (a : A.ι) (b : B.ι) : Γ(Y, A.U a ⊓ B.U b) :=
   (((res (divLe a b) (u.s (b, a)))⁻¹ : Γ(Y, A.U a ⊓ B.U b)ˣ) : Γ(Y, A.U a ⊓ B.U b)) *
@@ -382,7 +377,6 @@ lemma secOfIsoF_compat (hu : u.IsGen) (hA : A.IsLB) (hB : B.IsLB) (a a' : A.ι) 
     (fun b b' => by
       first
         | (simp only [rs_rs']; done)
-        | (simp only [rs_rs']; rfl)
         | rfl)
   exact (huniq (rs (inf_le_left : A.U a ⊓ A.U a' ≤ A.U a) (secOfIsoF t hu hA hB a)) (fun b => rfl)).trans
     (huniq (((A.g a a' : Γ(Y, A.U a ⊓ A.U a')ˣ) : Γ(Y, A.U a ⊓ A.U a')) *
@@ -422,8 +416,6 @@ private lemma res_pullU_res_pullU_id {T S : Scheme.{0}} (h : S ⟶ T) {O Q : T.O
   rw [pullU_res_eq_res_map_homOfLE, res_res_eq_res_trans']
   first
     | rfl
-    | (ext1; rfl)
-    | (ext1; simp [res, pullU, Scheme.id_app])
 
 private lemma linComb_fin_one_g (L : LB X) (k : ℤ) (a b : Fin 1 → L.ι) :
     (LB.LinComb L (K := Fin 1) (fun _ => 𝟙 X) (fun _ => k)).g a b =
@@ -439,8 +431,6 @@ private lemma res_pullU_id_eq_res {T : Scheme.{0}} {Q W : T.Opens} (c : W ≤ (�
     res c (pullU (𝟙 T) Q z) = res (c : W ≤ Q) z := by
   first
     | rfl
-    | (ext1; rfl)
-    | (ext1; simp [res, pullU, Scheme.id_app])
 
 private lemma res_zpow_res_pullU_id {T : Scheme.{0}} {O Q V : T.Opens} (hV : V ≤ O) (e : O ≤ (𝟙 T) ⁻¹ᵁ Q)
     (c : V ≤ Q) (z : Γ(T, Q)ˣ) (k : ℤ) :

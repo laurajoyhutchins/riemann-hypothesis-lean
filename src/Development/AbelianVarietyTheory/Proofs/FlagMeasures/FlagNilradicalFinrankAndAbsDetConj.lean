@@ -1,5 +1,6 @@
 module
 
+import CompanionTheory.SpectralGeometry.LocalGlobalProofs.StableLattices.InitialStatement
 public import Development.AbelianVarietyTheory.Definitions.SemilocalFrames.DefClassNum
 public import Development.AbelianVarietyTheory.Proofs.FlagMeasures.DetConjOnMatricesKillingIntoSubspaceStatement
 import Development.AbelianVarietyTheory.Proofs.FlagMeasures.IsotropicFlagLeviMaxCompactClosedSubgroups
@@ -172,25 +173,7 @@ theorem homSub_stable {f g : Matrix (Fin n) (Fin n) ℂ} {P Q : Submodule ℂ (F
 
 theorem detOn_pos {f g : Matrix (Fin n) (Fin n) ℂ} (hgf : g * f = 1) (V : Submodule ℂ (Fin n → ℂ))
     (hV : ∀ y ∈ V, f *ᵥ y ∈ V) : 0 < detOn f V := by
-  have hf : ∀ y ∈ V, Matrix.toLin' f y ∈ V := fun y hy => by
-    rw [Matrix.toLin'_apply]
-    exact hV y hy
-  have hg : ∀ y ∈ V, Matrix.toLin' g y ∈ V := fun y hy => by
-    rw [Matrix.toLin'_apply]
-    exact GlobalTheory.FlagLeviGroup.inv_keeps hgf V hV y hy
-  unfold detOn
-  rw [dite_eq_left hf]
-  apply norm_pos_iff.2
-  intro h0
-  have hcomp : ((Matrix.toLin' g).restrict hg).comp ((Matrix.toLin' f).restrict hf) =
-      LinearMap.id := by
-    apply LinearMap.ext
-    rintro ⟨y, hy⟩
-    apply Subtype.ext
-    simp [Matrix.mulVec_mulVec, hgf]
-  have := congrArg LinearMap.det hcomp
-  rw [LinearMap.det_comp, h0, mul_zero, LinearMap.det_id] at this
-  exact zero_ne_one this
+  apply GlobalTheory.CompanionTheory.RgStart.detOn_pos_of_left_inv <;> assumption
 
 def killing (N : Submodule ℂ (Matrix (Fin n) (Fin n) ℂ)) (V : Submodule ℂ (Fin n → ℂ)) :
     Submodule ℂ (Matrix (Fin n) (Fin n) ℂ) := N ⊓ homSub V ⊤

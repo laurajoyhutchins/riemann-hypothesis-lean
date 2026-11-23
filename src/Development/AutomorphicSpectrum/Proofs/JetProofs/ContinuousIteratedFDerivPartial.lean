@@ -1,5 +1,6 @@
 module
 
+import CompanionTheory.HarishChandraModules.KFiniteAnalyticVectors.AdmissibleSmoothVectors.GardingAvg
 public import Mathlib.Analysis.Calculus.ContDiff.Defs
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
 public import GroundTheory.AutomorphicForms.GKModules.ParametricIntegral
@@ -57,22 +58,7 @@ theorem continuous_iteratedFDeriv_partial {P Q E : Type*} [NormedAddCommGroup P]
     [NormedAddCommGroup Q] [NormedSpace ℝ Q] [NormedAddCommGroup E] [NormedSpace ℝ E]
     (Ψ : P × Q → E) (hΨ : ContDiff ℝ ∞ Ψ) (k : ℕ) :
     Continuous fun z : P × Q => iteratedFDeriv ℝ k (fun y => Ψ (y, z.2)) z.1 := by
-  have key : ∀ z : P × Q, iteratedFDeriv ℝ k (fun y => Ψ (y, z.2)) z.1 =
-      (iteratedFDeriv ℝ k Ψ z).compContinuousLinearMap
-        (fun _ => ContinuousLinearMap.inl ℝ P Q) := by
-    intro z
-    have h1 : (fun y => Ψ (y, z.2)) =
-        (fun w => Ψ (((0 : P), z.2) + w)) ∘ ContinuousLinearMap.inl ℝ P Q := by
-      funext y; simp
-    have h2 : ContDiff ℝ ∞ (fun w => Ψ (((0 : P), z.2) + w)) :=
-      hΨ.comp (contDiff_const.add contDiff_id)
-    rw [h1, ContinuousLinearMap.iteratedFDeriv_comp_right _ h2 _ (by exact_mod_cast le_top),
-      iteratedFDeriv_comp_add_left]
-    simp
-  simp_rw [key]
-  exact (ContinuousMultilinearMap.compContinuousLinearMapL
-    (fun _ : Fin k => ContinuousLinearMap.inl ℝ P Q)).continuous.comp
-    (hΨ.continuous_iteratedFDeriv (by exact_mod_cast le_top))
+  apply CompanionTheory.D.gk.admitted.Gard.continuous_iter_partial <;> assumption
 
 theorem contDiff_integral_comp_compact {P Q E β : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     [FiniteDimensional ℝ P] [NormedAddCommGroup Q] [NormedSpace ℝ Q] [NormedAddCommGroup E]

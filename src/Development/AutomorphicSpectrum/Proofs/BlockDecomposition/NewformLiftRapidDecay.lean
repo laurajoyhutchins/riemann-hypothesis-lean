@@ -180,7 +180,6 @@ theorem pow_mul_exp_le (c : ℝ) (hc : 0 < c) (n : ℕ) :
   have h := Real.pow_div_factorial_le_exp (c * y) (by positivity) n
   rw [div_le_iff₀ (by positivity)] at h
   rw [le_div_iff₀ (by positivity), neg_mul, Real.exp_neg]
-  have hE := Real.exp_pos (c * y)
   rw [mul_pow] at h
   calc y ^ n * (Real.exp (c * y))⁻¹ * c ^ n = (c ^ n * y ^ n) * (Real.exp (c * y))⁻¹ := by ring
     _ ≤ (Real.exp (c * y) * n.factorial) * (Real.exp (c * y))⁻¹ := by gcongr
@@ -195,13 +194,10 @@ theorem real_decay {F : ℍ → ℂ} {k : ℤ} {c C₁ : ℝ} (hc : 0 < c)
   rw [atImInfty, eventually_comap, eventually_atTop] at hD0
   obtain ⟨A₀, hA⟩ := hD0
   set A := max A₀ 1 with hAdef
-  have hA1 : 1 ≤ A := le_max_right _ _
   obtain ⟨K, hK0, hK⟩ := pow_mul_exp_le c hc (k.natAbs + M)
   refine ⟨|D0| * K + |C₁| * A ^ M, fun z hz => ?_⟩
   have hy : 0 < z.im := z.im_pos
   have hsq1 : 1 ≤ Real.sqrt z.im := Real.one_le_sqrt.2 hz
-  have hsq0 : 0 < Real.sqrt z.im ^ k := zpow_pos (by linarith) _
-  have hinv : 0 ≤ (z.im⁻¹) ^ M := by positivity
   rcases le_total A z.im with h1 | h1
   · have h2 := hA z.im ((le_max_left _ _).trans h1) z rfl
     rw [Real.norm_of_nonneg (Real.exp_pos _).le] at h2
@@ -320,8 +316,6 @@ theorem idele_split (a : Jd) : ∃ (α : ℚˣ) (t : ℝˣ) (b : Afˣ), (t : ℝ
     have hs := (IdeleGroup.mem_standardOpenSubgroup ℚ).1 h1
     have hb : ((IdeleGroup.toFinite ℚ p.1 : Afˣ) : Af) ∈ integralFiniteAdeles (𝓞 ℚ) ℚ := fun v => (hs v).1
     have hbi : (((IdeleGroup.toFinite ℚ p.1)⁻¹ : Afˣ) : Af) ∈ integralFiniteAdeles (𝓞 ℚ) ℚ := fun v => (hs v).2
-    have h0 : (0 : Af) ∈ integralFiniteAdeles (𝓞 ℚ) ℚ := zero_mem _
-    have h1' : (1 : Af) ∈ integralFiniteAdeles (𝓞 ℚ) ℚ := one_mem _
     rw [GroundTheory.Automorphic.AdelicGLn.mem_integralFiniteGL_iff]
     have hi : ((dg2 (IdeleGroup.toFinite ℚ p.1) 1)⁻¹ : GL (Fin 2) Af) = dg2 (IdeleGroup.toFinite ℚ p.1)⁻¹ 1 := by
       refine inv_eq_of_mul_eq_one_right (Units.ext (Matrix.ext fun i j => ?_))
@@ -453,9 +447,6 @@ theorem selfDualLattice_projection_mem_of_unit_length (x : 𝔸[ℚ]) (a : Jd) (
     rw [ht]; exact (IdeleGroup.ideleModule ℚ a).2
   have he' : uni2 e ∈ integralFiniteGL ℚ 2 := by
     rw [GroundTheory.Automorphic.AdelicGLn.mem_integralFiniteGL_iff]
-    have h0 : (0 : Af) ∈ integralFiniteAdeles (𝓞 ℚ) ℚ := zero_mem _
-    have h1 : (1 : Af) ∈ integralFiniteAdeles (𝓞 ℚ) ℚ := one_mem _
-    have hn : -e ∈ integralFiniteAdeles (𝓞 ℚ) ℚ := neg_mem he
     refine ⟨fun i j => ?_, fun i j => ?_⟩
     · fin_cases i <;> fin_cases j <;> simpa [uni2]
     · have hi : ((uni2 e)⁻¹ : GL (Fin 2) Af) = uni2 (-e) := by

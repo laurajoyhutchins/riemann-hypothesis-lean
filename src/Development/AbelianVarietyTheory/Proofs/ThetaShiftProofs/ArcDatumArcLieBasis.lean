@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.ExistsIsArcFr
 public import Development.AbelianVarietyTheory.Proofs.HomogeneousIdeals.HomLieEquivScalarTmul
 public import Development.AbelianVarietyTheory.Definitions.ArchimedeanThetaValues.IsFramedPointChangedByLetters
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.SecBaseChangeAnySt
@@ -224,21 +225,7 @@ theorem tan_iff (w : epsR S ⟶ t'.G) : IsTanAt x (w.left ≫ m.φ) ↔ IsTangen
 theorem eig_iff (w : epsR S ⟶ t'.G) (a : 𝓞 E) (s : S) :
     (w.left ≫ m.φ) ≫ (Xo.univ.t.act.act a).left = spMap (epsMul s) ≫ w.left ≫ m.φ ↔
       (w ≫ t'.act.act a).left = spMap (epsScaleR s) ≫ w.left := by
-  have hw : w.left ≫ t'.G.hom = spMap (algebraMap S (DualNumber S)) := Over.w w
-  have e : (w.left ≫ m.φ) ≫ (Xo.univ.t.act.act a).left = (w ≫ t'.act.act a).left ≫ m.φ := by
-    rw [Over.comp_left, Category.assoc, Category.assoc, m.act]
-  have sc : spMap (epsScaleR s) ≫ spMap (algebraMap S (DualNumber S)) = spMap (algebraMap S (DualNumber S)) := by
-    rw [← spMap_comp]
-    congr 1
-    ext r <;> simp [epsScaleR, TrivSqZeroExt.algebraMap_eq_inl]
-  rw [e]
-  constructor
-  · intro h
-    apply m.cart.1.hom_ext
-    · rw [Category.assoc]; exact h
-    · rw [Over.w, Category.assoc, hw, sc]; rfl
-  · intro h
-    rw [h, Category.assoc]; rfl
+  apply GlobalTheory.ArcQ.ExFr.eig_iff <;> assumption
 
 theorem comb_iff {n : ℕ} (v : Fin n → (epsR S ⟶ t'.G)) (cf : Fin n → S) (w : epsR S ⟶ t'.G) :
     IsCombAt x (fun i => (v i).left ≫ m.φ) cf (w.left ≫ m.φ) ↔ IsLieComb cf v w :=

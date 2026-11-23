@@ -1,7 +1,6 @@
 module
 
 public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.HasLenOfLatLen
-public import Development.AutomorphicSpectrum.Proofs.TwistedProofs.LeviDecompositionExists
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
 import Mathlib.Algebra.Order.Interval.Basic
@@ -40,10 +39,11 @@ import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
 import Mathlib.Topology.Sheaves.Init
+import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ExistsUnitaryBlockDiagonalLeviElement
 
 @[expose] public section
 
 open GlobalTheory.InertZeta
 
-theorem _root_.GlobalTheory.T.levi_decomposition_exists : LeviExists := by
-  first | exact @GlobalTheory.CompanionTheory.InertLevi.leviExists | exact GlobalTheory.CompanionTheory.InertLevi.leviExists | (intros; apply GlobalTheory.CompanionTheory.InertLevi.leviExists <;> assumption)
+theorem _root_.GlobalTheory.T.levi_decomposition_exists : LeviExists :=
+  @_root_.GlobalTheory.InertZeta.leviExists

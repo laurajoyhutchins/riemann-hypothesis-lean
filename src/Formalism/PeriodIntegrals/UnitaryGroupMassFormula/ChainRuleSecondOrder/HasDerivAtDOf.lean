@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.MapConjLebesgueCommonStabilizerNormalForm
 public import Formalism.HermitianCurvature.StatementB
 public import Mathlib.Analysis.LocallyConvex.AbsConvexOpen
 import Mathlib.Algebra.Order.Floor.Extended
@@ -94,23 +95,7 @@ lemma sgI_eq_iff (i : Fin (2 * r + k + 1)) : sgI k r i.val = r + k ↔ i.val = r
   split_ifs <;> constructor <;> intro h <;> omega
 
 theorem hpk_mul_self : Hpk k r * Hpk k r = 1 := by
-  ext i j
-  rw [Matrix.mul_apply, Matrix.one_apply]
-  rw [Finset.sum_eq_single (⟨sgI k r i.val, sgI_lt i⟩ : Fin (2 * r + k + 1))]
-  · rw [hpk_apply, hpk_apply]
-    simp only [Fin.val_mk, sgI_sgI, sgI_eq_iff, eq_self_iff_true, if_true]
-    by_cases hij : i = j
-    · subst hij
-      simp only [eq_self_iff_true, if_true]
-      split_ifs <;> norm_num
-    · have hji : j.val ≠ i.val := fun h => hij (Fin.ext h).symm
-      simp [hij, hji]
-  · intro l _ hl
-    rw [hpk_apply i l, if_neg, zero_mul]
-    intro h
-    exact hl (Fin.ext h)
-  · intro h
-    exact absurd (Finset.mem_univ _) h
+  apply GlobalTheory.Amp.RConj.H_sq <;> assumption
 
 theorem hpk_det_ne : (Hpk k r).det ≠ 0 := by
   intro h

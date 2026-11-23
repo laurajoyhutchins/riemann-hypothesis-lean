@@ -63,7 +63,6 @@ theorem latV_compact_open_mass : ∀ (F E : Type) [Field F] [NumberField F] [Fie
   let f : Fv F v ⊗[F] E → Fin d → Fv F v :=
     fun y k => (Algebra.TensorProduct.basis (Fv F v) b).repr y k
   let e : (Fv F v ⊗[F] E) ≃ₜ (Fin d → Fv F v) := (hH d b).homeomorph f
-  have hef : ∀ y, e y = f y := fun _ => rfl
   let O : Set (Fv F v) := (v.adicCompletionIntegers F : Set (Fv F v))
   have hOo : IsOpen O := Valued.isOpen_valuationSubring _
   have hOc : IsCompact O :=

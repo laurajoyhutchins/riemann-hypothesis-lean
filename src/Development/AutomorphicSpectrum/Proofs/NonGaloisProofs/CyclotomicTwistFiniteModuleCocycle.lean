@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.LocalDualityPerfectPairFiniteModules
 public import Mathlib.Topology.Instances.ZMod
 public import ReciprocityTheory.Hypotheses.GalCohDefs
 public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CardDualZmodModuleEqCard
@@ -185,41 +186,6 @@ theorem exists_equiv_dual {n : ℕ} [NeZero n] {M : Type} [AddCommGroup M] [Modu
     {M' : Type} [AddCommGroup M'] [Module (ZMod n) M'] [Finite M'] (P : M →+ M' →+ ZMod n)
     (h1 : ∀ x, (∀ y, P x y = 0) → x = 0) (h2 : ∀ y, (∀ x, P x y = 0) → y = 0) :
     ∃ e : M' ≃+ ReciprocityTheory.Gal.TDual (ZMod n) M, ∀ y x, e y x = P x y := by
-  classical
-  have hfin : ∀ (A : Type) [AddCommGroup A] [Module (ZMod n) A] [Finite A],
-      Finite (Module.Dual (ZMod n) A) := fun A _ _ _ => (GlobalTheory.CocycleCount.card_linear_le n A).1
-  let f : M' →+ Module.Dual (ZMod n) M :=
-    { toFun := fun y => (P.flip y).toZModLinearMap n
-      map_zero' := LinearMap.ext fun x => by
-        show P x 0 = 0
-        exact map_zero (P x)
-      map_add' := fun y y' => LinearMap.ext fun x => by
-        show P x (y + y') = P x y + P x y'
-        exact map_add (P x) y y' }
-  let g : M → Module.Dual (ZMod n) M' := fun x => (P x).toZModLinearMap n
-  have hf : Function.Injective f := by
-    intro y y' hyy
-    have hyx : ∀ x, P x (y - y') = 0 := by
-      intro x
-      have hx := LinearMap.congr_fun hyy x
-      change P x y = P x y' at hx
-      rw [map_sub, hx, sub_self]
-    exact sub_eq_zero.1 (h2 _ hyx)
-  have hg : Function.Injective g := by
-    intro x x' hxx
-    have hxy : ∀ y, P (x - x') y = 0 := by
-      intro y
-      have hy := LinearMap.congr_fun hxx y
-      change P x y = P x' y at hy
-      rw [map_sub, AddMonoidHom.sub_apply, hy, sub_self]
-    exact sub_eq_zero.1 (h1 _ hxy)
-  haveI := hfin M
-  haveI := hfin M'
-  have c1 := Nat.card_le_card_of_injective f hf
-  have c2 := Nat.card_le_card_of_injective g hg
-  rw [GlobalTheory.ZModDual.card_dual_eq] at c1 c2
-  have hb : Function.Bijective f :=
-    hf.bijective_of_nat_card_le (by rw [GlobalTheory.ZModDual.card_dual_eq]; exact c2)
-  exact ⟨AddEquiv.ofBijective f hb, fun y x => rfl⟩
+  apply GlobalTheory.LocalPair.exists_dual_equiv <;> assumption
 
 end GlobalTheory.CompanionTheory.LocDual.Pair

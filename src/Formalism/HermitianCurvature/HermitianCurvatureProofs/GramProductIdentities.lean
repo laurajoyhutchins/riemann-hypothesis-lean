@@ -81,7 +81,6 @@ theorem exp_le_one_add {x : ℝ} (hx : |x| ≤ 1 / 2) : Real.exp (-2 * |x|) ≤ 
   · have hu : |x| = -x := abs_of_neg h0
     set u := -x with hu'
     have hu0 : 0 ≤ u := by linarith
-    have hu1 : u ≤ 1 / 2 := by rw [← hu]; exact hx
     have h1 : 1 + 2 * u ≤ Real.exp (2 * u) := by linarith [Real.add_one_le_exp (2 * u)]
     have h2 : Real.exp (-2 * u) * Real.exp (2 * u) = 1 := by rw [← Real.exp_add]; simp
     have h3 : Real.exp (-2 * u) * (1 + 2 * u) ≤ 1 := by
@@ -89,7 +88,6 @@ theorem exp_le_one_add {x : ℝ} (hx : |x| ≤ 1 / 2) : Real.exp (-2 * |x|) ≤ 
             mul_le_mul_of_nonneg_left h1 (Real.exp_pos _).le
         _ = 1 := h2
     rw [hu]
-    have he := Real.exp_pos (-2 * u)
     nlinarith [mul_nonneg hu0 (by linarith : (0:ℝ) ≤ 1 - 2 * u)]
 
 theorem prod_bounds {ι : Type} (g : ι → ℝ) (ε : ℝ) (hε : ε ≤ 1 / 2) :

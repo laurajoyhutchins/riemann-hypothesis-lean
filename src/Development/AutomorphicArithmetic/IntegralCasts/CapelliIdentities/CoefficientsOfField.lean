@@ -1,8 +1,6 @@
 module
 
 public import Development.AutomorphicArithmetic.AutomorphicVarieties.HeightAndVanishing.DirichletPrimeToLPartMulLPowerPart
-public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.IsDiscreteValuationRingIntegralClosure
-public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.IsIntegralIffNormLeOne
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
 import Mathlib.Algebra.Order.Interval.Basic
@@ -40,23 +38,14 @@ import Mathlib.Tactic.NormNum.Ordinal
 import Mathlib.Tactic.NormNum.Parity
 import Mathlib.Tactic.NormNum.Prime
 import Mathlib.Tactic.NormNum.RealSqrt
+import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.ReducedCoefficients
 
 @[expose] public section
 
 theorem UpperTheory.Reformulated.B.CoefficientsOfField.coef_of_field :
-    ∀ {l : ℕ} [inst : Fact (Nat.Prime l)]
+    ∀ {l : ℕ} [_inst : Fact (Nat.Prime l)]
     (K : IntermediateField ℚ_[l] (PadicAlgCl l)) [FiniteDimensional ℚ_[l] ↥K],
     ∃ (c : UpperTheory.V.HV.Coef l),
       ∀ x ∈ K,
-        ‖x‖ ≤ (1 : ℝ) → x ∈ c.O := by
-  intro l _ K _
-  let f : K →ₐ[ℤ_[l]] PadicAlgCl l := K.val.restrictScalars ℤ_[l]
-  have hf : Function.Injective f := Subtype.val_injective
-  let e := (integralClosure ℤ_[l] K).equivMapOfInjective f hf
-  have hd : IsDiscreteValuationRing (integralClosure ℤ_[l] K) := UpperTheory.integralClosure_isDVR K
-  have hfin : Module.Finite ℤ_[l] (integralClosure ℤ_[l] K) :=
-    IsIntegralClosure.finite ℤ_[l] ℚ_[l] K _
-  refine ⟨⟨(integralClosure ℤ_[l] K).map f,
-    IsDiscreteValuationRing.RingEquivClass.isDiscreteValuationRing e,
-    Module.Finite.equiv e.toLinearEquiv⟩, fun x hx h1 => ⟨⟨x, hx⟩, ?_, rfl⟩⟩
-  exact (isIntegral_algHom_iff f hf).1 ((UpperTheory.padicAlgCl_isIntegral_iff_norm_le_one x).2 h1)
+        ‖x‖ ≤ (1 : ℝ) → x ∈ c.O :=
+  @UpperTheory.Reformulated.B.CoefficientRingContainingIntegers.rc_coef

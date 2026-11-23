@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.HomogeneousNonvanishing.RCombine
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.InterNamed
 public import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.Birational
 public import Development.AutomorphicSpectrum.Proofs.DivisibilityProofs.LogIntegralMultilinearStatement
@@ -71,40 +72,7 @@ theorem comb_a {J : Type} [Fintype J] (ℓ : J → HermLine ι) (n : J → ℤ) 
     (combLine ℓ n).a = ∑ j, n j • (ℓ j).a := rfl
 
 theorem exists_smooth (b : K → ℤ) : ∃ B : HermLine ι, IsSmoothHerm B ∧ B.a = b := by
-  classical
-  let ℓ : K → HermLine ι := fun k =>
-    { a := Pi.single k 1
-      h := fun z => Real.sqrt (∑ i, ‖z ⟨k, i⟩‖ ^ 2)
-      pos := by
-        intro z hz
-        obtain ⟨i, hi⟩ := hz k
-        apply Real.sqrt_pos.mpr
-        exact Finset.sum_pos' (fun _ _ => by positivity)
-          ⟨i, Finset.mem_univ _, pow_pos (norm_pos_iff.mpr hi) 2⟩
-      smul := by
-        intro c z hc
-        have hprod : ∏ k', ‖c k'‖ ^ ((Pi.single k (1 : ℤ) : K → ℤ) k') = ‖c k‖ := by
-          rw [Fintype.prod_eq_single k]
-          · simp
-          · intro k' hk'
-            simp [Pi.single_apply, hk']
-        rw [hprod]
-        simp only [norm_mul, mul_pow]
-        rw [← Finset.mul_sum, Real.sqrt_mul (by positivity), Real.sqrt_sq (norm_nonneg _)] }
-  refine ⟨combLine ℓ b, smooth_comb (fun k => ?_) b, ?_⟩
-  · show ContDiffOn ℝ ((⊤ : ℕ∞) : WithTop ℕ∞)
-      (fun z : (k : K) × ι k → ℂ => Real.sqrt (∑ i, ‖z ⟨k, i⟩‖ ^ 2))
-      {z : (k : K) × ι k → ℂ | ∀ k, ∃ i, z ⟨k, i⟩ ≠ 0}
-    apply ContDiffOn.sqrt
-    · exact (ContDiff.sum (fun i _ => (contDiff_norm_sq ℂ).comp
-        (contDiff_apply (𝕜 := ℝ) (F' := fun _ => ℂ) (⟨k, i⟩ : (k : K) × ι k)))).contDiffOn
-    · intro z hz
-      obtain ⟨i, hi⟩ := hz k
-      exact (Finset.sum_pos' (fun _ _ => by positivity)
-        ⟨i, Finset.mem_univ _, pow_pos (norm_pos_iff.mpr hi) 2⟩).ne'
-  · rw [comb_a]
-    funext k'
-    simp [ℓ, Finset.sum_apply, Pi.single_apply]
+  apply PositivityTheory.UnitarySelfGeneration.RC.exists_line <;> assumption
 
 theorem smooth_snoc {e : ℕ} {L : Fin e → HermLine ι} {X : HermLine ι} (hL : ∀ j, IsSmoothHerm (L j))
     (hX : IsSmoothHerm X) (j : Fin (e + 1)) :

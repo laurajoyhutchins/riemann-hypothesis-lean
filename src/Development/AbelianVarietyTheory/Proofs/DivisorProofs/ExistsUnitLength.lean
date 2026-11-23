@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.FinsumNormNeg
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.UnitLemmaGroup
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -62,55 +63,7 @@ open Polynomial IsLocalRing
 
 theorem ff_norm {k : Type} [Field k] [Finite k] (σ : k →+* k) (hσ : ∀ x, σ (σ x) = x)
     (hne : ∃ x, σ x ≠ x) (u : k) (hu : σ u = u) : ∃ w, w * σ w = u := by
-  classical
-  let F : Subfield k := RingHom.eqLocusField σ (RingHom.id k)
-  have hF : ∀ x : k, x ∈ F ↔ σ x = x := fun x => Iff.rfl
-  let σ' : k ≃ₐ[F] k :=
-    { toFun := σ, invFun := σ, left_inv := hσ, right_inv := hσ, map_mul' := σ.map_mul,
-      map_add' := σ.map_add, commutes' := fun r => (hF r).1 r.2 }
-  have hσ' : ∀ x, σ' x = σ x := fun _ => rfl
-  have h1 : ∀ (τ : k ≃ₐ[F] k) (x : k), τ x = x ∨ τ x = σ x := by
-    intro τ x
-    have hs : τ (x + σ x) = x + σ x :=
-      τ.commutes ⟨x + σ x, (hF _).2 (by rw [map_add (f := _), hσ, add_comm])⟩
-    have hn : τ (x * σ x) = x * σ x :=
-      τ.commutes ⟨x * σ x, (hF _).2 (by rw [map_mul, hσ, mul_comm])⟩
-    rw [map_add (f := _)] at hs
-    rw [map_mul] at hn
-    have : (τ x - x) * (τ x - σ x) = 0 := by
-      linear_combination (τ x) * hs - hn
-    rcases mul_eq_zero.1 this with h | h
-    · exact Or.inl (sub_eq_zero.1 h)
-    · exact Or.inr (sub_eq_zero.1 h)
-  have h2 : ∀ τ : k ≃ₐ[F] k, τ = 1 ∨ τ = σ' := by
-    intro τ
-    by_contra hc
-    push Not at hc
-    obtain ⟨a, ha⟩ : ∃ a, τ a ≠ a := by
-      by_contra h; push Not at h
-      exact hc.1 (AlgEquiv.ext h)
-    obtain ⟨b, hb⟩ : ∃ b, τ b ≠ σ b := by
-      by_contra h; push Not at h
-      exact hc.2 (AlgEquiv.ext h)
-    have ha' := (h1 τ a).resolve_left ha
-    have hb' := (h1 τ b).resolve_right hb
-    rcases h1 τ (a + b) with h | h
-    · rw [map_add (f := _), hb'] at h
-      exact ha (add_right_cancel h)
-    · rw [map_add (f := _), map_add (f := _), ha'] at h
-      exact hb (add_left_cancel h)
-  have h3 : (1 : k ≃ₐ[F] k) ≠ σ' := by
-    obtain ⟨x, hx⟩ := hne
-    intro h
-    apply hx
-    rw [← hσ', ← h]; rfl
-  have h4 : (Finset.univ : Finset (k ≃ₐ[F] k)) = {1, σ'} := by
-    ext τ; simpa using h2 τ
-  obtain ⟨w, hw⟩ := FiniteField.norm_surjective F k ⟨u, (hF u).2 hu⟩
-  refine ⟨w, ?_⟩
-  have := Algebra.norm_eq_prod_automorphisms F w
-  rw [hw, h4, Finset.prod_pair h3] at this
-  exact this.symm
+  apply GlobalTheory.NormGauss.exists_norm_eq <;> assumption
 
 section Local
 

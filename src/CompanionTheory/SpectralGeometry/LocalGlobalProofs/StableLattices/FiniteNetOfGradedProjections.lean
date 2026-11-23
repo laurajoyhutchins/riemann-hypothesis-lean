@@ -64,14 +64,12 @@ theorem norm_entry_sq_le_hs (M : Matrix (Fin n) (Fin n) ℂ) (i j : Fin n) :
 theorem norm_entry_le {M : Matrix (Fin n) (Fin n) ℂ} (h : Formalism.REAL.hs M ≤ n) (i j : Fin n) :
     ‖M i j‖ ≤ (n : ℝ) + 1 := by
   have h1 := (norm_entry_sq_le_hs M i j).trans h
-  have h0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
   by_contra hc
   push Not at hc
   nlinarith
 
 theorem hs_le_quarter {M : Matrix (Fin n) (Fin n) ℂ}
     (h : ∀ i j, ‖M i j‖ < 1 / (2 * ((n : ℝ) + 1))) : Formalism.REAL.hs M ≤ 1 / 4 := by
-  have h0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
   have h1 : Formalism.REAL.hs M ≤ ∑ _a : Fin n, ∑ _b : Fin n, (1 / (2 * ((n : ℝ) + 1))) ^ 2 := by
     unfold Formalism.REAL.hs
     exact Finset.sum_le_sum fun a _ => Finset.sum_le_sum fun b _ =>
@@ -129,7 +127,6 @@ theorem exists_net (n : ℕ) (ε : Fin n → Bool) :
       ∀ A' : Matrix (Fin n) (Fin n) ℂ, IsGrad ε A' →
         ∃ j, Formalism.REAL.hs (Pm (A j) - Pm A') ≤ 1 / 4 ∧ Formalism.REAL.hs (Pp (A j) - Pp A') ≤ 1 / 4 := by
   classical
-  have h0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
   let f : Matrix (Fin n) (Fin n) ℂ → (Fin n → Fin n → ℂ) × (Fin n → Fin n → ℂ) :=
     fun A => (fun i j => Pm A i j, fun i j => Pp A i j)
   have hb : Bornology.IsBounded (f '' {A | IsGrad ε A}) := by

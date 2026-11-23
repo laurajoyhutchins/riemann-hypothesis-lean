@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.HodgeFontaineExactness.OneNotMemFilOne
 public import Formalism.SharpRestriction.LevelLetterCocycles.FrobeniusPowUniformizerFactorisation
 import Formalism.CoboundaryTransfers.GammaStableTransfers.MemCoboundariesOfIsOneCoboundary
 import Formalism.CoboundaryTransfers.GammaStableTransfers.TorsionKilledCriterionHolds
@@ -1460,21 +1461,7 @@ theorem lone_K_mem (c : K) (a : ℤ) (ha : a ≤ 0) : algebraMap K BdR c ∈ PD.
 
 include PD in
 theorem lone_one_notMem : (1 : BdR) ∉ PD.Fil 1 := by
-  intro h
-  have := lone_nontrivial_BdR PD
-  have hk : ∀ k : ℕ, (1 : BdR) ∈ PD.Fil ((k : ℤ) + 1) := by
-    intro k
-    induction k with
-    | zero => simpa using h
-    | succ k ih =>
-      have := PD.Fil_mul _ _ 1 1 ih h
-      rw [mul_one] at this
-      push_cast
-      exact this
-  apply one_ne_zero (α := BdR)
-  apply PD.Fil_sep
-  intro a
-  exact lone_Fil_anti PD (by have := Int.self_le_toNat a; omega : a ≤ ((a.toNat : ℕ) : ℤ) + 1) (hk a.toNat)
+  apply PI.HodgeOfFon.W.Triv.one_not_mem_fil_one <;> assumption
 
 
 include PD in

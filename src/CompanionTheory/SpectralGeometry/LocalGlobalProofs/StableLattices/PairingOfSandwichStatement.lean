@@ -70,7 +70,6 @@ theorem smul_mem_of_isLat {Λ : AddSubgroup V} (hΛ : IsLat L Λ) {a : L} (ha : 
 theorem exists_smul_mem_of_isLat {Λ : AddSubgroup V} (hΛ : IsLat L Λ) (v : V) :
     ∃ a : L, a ≠ 0 ∧ a • v ∈ Λ := by
   obtain ⟨m, b, hb⟩ := hΛ
-  have hS0 : 0 ≤ ∑ i, ‖b.repr v i‖ := Finset.sum_nonneg fun _ _ => norm_nonneg _
   obtain ⟨a, ha0, ha⟩ := NormedField.exists_norm_lt L
     (show (0 : ℝ) < 1 / (1 + ∑ i, ‖b.repr v i‖) by positivity)
   refine ⟨a, norm_pos_iff.mp ha0, (hb _).2 fun i => ?_⟩
@@ -147,7 +146,6 @@ theorem adjoin_integral (hs : IsInv s) (hδ : IsDelta s δ) (hh : IsHerm s h) {�
     (hq : ‖h x x‖ ≤ ‖p‖ ^ 2) (hsmall : ∀ y ∈ Λ, ‖h x y‖ ≤ ‖p‖ * ‖δ‖) :
     ∀ z ∈ adjoin (L := L) Λ (p⁻¹ • x), ‖h z z‖ ≤ 1 := by
   rintro _ ⟨l, hl, a, ha, rfl⟩
-  have hpn : 0 < ‖p‖ := norm_pos_iff.mpr hp0
   rw [herm_add_add hh]
   have hb : ‖h l (a • p⁻¹ • x)‖ ≤ ‖δ‖ := by
     rw [hh.2.1, hh.2.1, hh.2.2.1 x l, norm_mul, norm_mul, norm_inv, hs.2.1]

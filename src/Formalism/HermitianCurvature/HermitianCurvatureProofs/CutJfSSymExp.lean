@@ -170,7 +170,6 @@ lemma herm_bvec_bvec (p q : Fin (2 * r + k + 1)) : herm (Hpk k r) (bvec p) (bvec
 lemma hpk_col_eI (c : Fin r) (i : Fin (2 * r + k + 1)) :
     Hpk k r i (eI k r c) = if i = esI k r c then 1 else 0 := by
   have hc := c.isLt
-  have hi := i.isLt
   unfold Hpk
   simp only [eI, esI, Fin.ext_iff]
   split_ifs <;> first | rfl | (exfalso; omega)

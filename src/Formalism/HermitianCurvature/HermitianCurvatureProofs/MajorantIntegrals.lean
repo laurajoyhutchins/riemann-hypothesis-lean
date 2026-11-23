@@ -102,7 +102,6 @@ theorem majIntegral_ok : MajIntegral := by
     rw [← Real.rpow_natCast, ← Real.rpow_add hx]
     rw [show (K : ℝ) + (1 - K + 1) = ((2 : ℕ) : ℝ) by push_cast; ring, Real.rpow_natCast]
   have hK2 : (K : ℝ) - 2 ≠ 0 := by linarith
-  have hK3 : (1 : ℝ) - K + 1 ≠ 0 := by linarith
   simp only [nsmul_eq_mul, smul_eq_mul, Nat.cast_ofNat]
   rw [neg_div, mul_neg, ← mul_div_assoc, e]
   have hK4 : (1 : ℝ) - K + 1 = -((K : ℝ) - 2) := by ring

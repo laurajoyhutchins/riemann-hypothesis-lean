@@ -1,5 +1,6 @@
 module
 
+import GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.PSectionBounded
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.CoordsAt
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ArithmeticHilbertSamuelLowerBound
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RegAtIffChartLocalizationStatement
@@ -93,22 +94,7 @@ theorem homog_C (n : ℤ) : IsMultiHomog (C n : MRing J) (0 : K → ℕ) := by
   simp [this]
 
 theorem homog_X [DecidableEq K] (p : Σ k, J k) : IsMultiHomog (X p : MRing J) (Pi.single p.1 1) := by
-  classical
-  intro m hm k
-  have : m = Finsupp.single p 1 := by
-    have h := MvPolynomial.support_X (R := ℤ) (n := p) ▸ hm
-    simpa using h
-  subst this
-  obtain ⟨j, i⟩ := p
-  by_cases hk : k = j
-  · subst hk
-    simp [Finsupp.single_apply]
-  · have : ∀ x : J k, (Finsupp.single (⟨j, i⟩ : Σ k, J k) 1 : (Σ k, J k) →₀ ℕ) ⟨k, x⟩ = 0 := by
-      intro x
-      rw [Finsupp.single_apply, if_neg]
-      intro h
-      exact hk (congrArg Sigma.fst h).symm
-    simp [this, Pi.single_apply, hk]
+  apply GroundTheory.Heights₂.Heights.HilbertSamuel.SectionBounded.homog_X <;> assumption
 
 def cMon (c : ∀ k, J k) (d : K → ℕ) : MRing J := ∏ k, X ⟨k, c k⟩ ^ d k
 

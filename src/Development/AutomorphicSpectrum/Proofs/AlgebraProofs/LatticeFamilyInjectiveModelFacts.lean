@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.TorusUniformisation.ChowMahlerFamilies.XFamConstr
 public import Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IsLatticeFamily
 public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.AffineGenerators
 public import Development.AutomorphicSpectrum.Proofs.AlgebraProofs.LocallyFreeFiniteProjectiveBaseChange
@@ -265,39 +266,6 @@ theorem af_gens (D : LieLatticeData Ω F n Sg r s) (R : Subalgebra o Ω) (p N : 
 end Gens
 
 theorem main : ∀ (O : Type) [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] (Ω : Type) [Field Ω] [Algebra O Ω] (K : Type) [Fintype K] [DecidableEq K] (ι : K → Type) [∀ k, Fintype (ι k)] (x : (Σ k, ι k) → Ω), Function.Injective (algebraMap O Ω) → ∀ {F : Type} [Zero F] [One F] [Fintype F] {n : ℕ} {Sg : Type} [Fintype Sg] {r s : Sg → ℕ} (p : ℕ), p.Prime → ∀ (w : O) (χ : Sg → F → O) (φ : Equiv.Perm Sg) (D : (∀ k, ι k) → LieLatticeData Ω F n Sg r s), IsLatticeFamily O x p w χ φ D → IsLatFamily O x (fun c => (D c).l1 (chartRing O (mseg x) c) p) ∧ ∀ τ, IsLatFamily O x (fun c => (D c).af (chartRing O (mseg x) c) p (fun a => algebraMap O Ω (χ τ a))) ∧ (∀ i, IsLatFamily O x (fun c => (D c).xId (fun a => algebraMap O Ω (χ τ a)) i) ∧ IsLatFamily O x (fun c => (D c).stepGraph τ (fun a => algebraMap O Ω (χ τ a)) i)) ∧ (∀ i, IsLatFamily O x (fun c => (D c).kk τ i)) ∧ IsLatFamily O x (fun c => dotDual (chartRing O (mseg x) c) ((D c).lie τ)) ∧ ((∀ c, mseg x c ≠ 0 → (D c).Good₁ (chartRing O (mseg x) c) p (fun τ a => algebraMap O Ω (χ τ a))) → IsLatFamily O x (fun c => (D c).hh (chartRing O (mseg x) c) p (fun a => algebraMap O Ω (χ τ a))) ∧ IsLatFamily O x (fun c => (D c).imH (chartRing O (mseg x) c) p τ (fun a => algebraMap O Ω (χ τ a)))) := by
-  intro O _ _ _ Ω _ _ K _ _ ι _ x _ F _ _ _ n Sg _ r s p _ w χ φ D h
-  have hl1 : IsLatFamily O x (fun c => (D c).l1 (chartRing O (mseg x) c) p) := by
-    have := sup O h.famM (map O (DistribSMul.toAddMonoidHom ((Fin n → F) → Ω) (p : Ω))
-      (fun a v => smul_comm _ _ _) (std O (x := x) (Fin n → F)))
-    exact this
-  have haf : ∀ χ' : F → Ω, IsLatFamily O x (fun c => (D c).af (chartRing O (mseg x) c) p χ') := by
-    intro χ'
-    have := comap O (linMap n χ').toAddMonoidHom (fun a v => map_smul (linMap n χ') a v) hl1
-    exact this
-  refine ⟨hl1, fun τ => ⟨haf _, fun i => ⟨?_, ?_⟩, fun i => ?_, ?_, fun hg => ?_⟩⟩
-  · have := comap O (LinearMap.toSpanSingleton Ω ((Fin n → F) → Ω)
-      fun y => algebraMap O Ω (χ τ (y i))).toAddMonoidHom (fun a v => map_smul (LinearMap.toSpanSingleton Ω
-        ((Fin n → F) → Ω) fun y => algebraMap O Ω (χ τ (y i))) a v)
-      (sup O h.famM (sub O (vanSub Ω F n ((i : ℕ) + 1))))
-    exact this
-  · have := comap O ((LinearMap.toSpanSingleton Ω ((Fin n → F) → Ω)
-      fun y => algebraMap O Ω (χ τ (y i))).toAddMonoidHom.prodMap (AddMonoidHom.id (Fin (r τ) → Ω)))
-      (fun a v => Prod.ext (map_smul (LinearMap.toSpanSingleton Ω
-        ((Fin n → F) → Ω) fun y => algebraMap O Ω (χ τ (y i))) a v.1) rfl)
-      (sup O (h.fam τ).2.2.2.2.2.2 (prod O (sub O (vanSub Ω F n ((i : ℕ) + 1))) (bot O)))
-    exact this
-  · have := map O (AddMonoidHom.snd ((Fin n → F) → Ω) (Fin (r τ) → Ω)) (fun a v => rfl)
-      (inf O (h.fam τ).2.2.2.2.2.2 (prod O (sub O (vanSub Ω F n i)) (top O)))
-    exact this
-  · exact dual O (h.fam τ).1 fun c hc => exists_gens _ _ _ ((h.base c hc).free τ).1
-  · have h01 := (h.char.2.2.2.2 τ)
-    have hh : IsLatFamily O x (fun c => (D c).hh (chartRing O (mseg x) c) p
-        (fun a => algebraMap O Ω (χ τ a))) :=
-      dual O (haf _) fun c hc => af_gens (D c) _ p _ _ (by simp [h01.1]) (by simp [h01.2])
-        (hg c hc).l1 ((hg c hc).lin τ)
-    refine ⟨hh, ?_⟩
-    have := map O (AddMonoidHom.snd (Fin n → Ω) (Fin (s τ) → Ω)) (fun a v => rfl)
-      (inf O (h.fam τ).2.2.2.2.2.1 (prod O hh (top O)))
-    exact this
+  apply PositivityTheory.Xgn.t_fam_constr <;> assumption
 
 end GlobalTheory.CompanionTheory.Ar.Num.FamConstr

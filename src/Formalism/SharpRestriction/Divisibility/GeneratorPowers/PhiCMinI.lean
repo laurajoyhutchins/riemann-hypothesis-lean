@@ -99,7 +99,6 @@ private theorem pos_lemma {cj : E → E} (hcj : ∀ (φ : E →+* ℂ) (z : E), 
     intro a
     first
       | (rw [Complex.mul_conj, Complex.ofReal_re])
-      | (simp only [Complex.mul_re, Complex.conj_re, Complex.conj_im, Complex.normSq_apply]; ring)
   have hmem : β ∈ SymB cj Y := by
     show _ ∧ _
     refine ⟨fun a b => ?_, fun c c' hc a b => ?_⟩
@@ -119,7 +118,6 @@ private theorem pos_lemma {cj : E → E} (hcj : ∀ (φ : E →+* ℂ) (z : E), 
     have h2 : β a₀ a₀ = 0 := by
       first
         | exact congrArg (fun γ : SymB cj Y => (γ : Y →ₗ[ℤ] Y →ₗ[ℤ] ℝ) a₀ a₀) h
-        | simpa using congrArg (fun γ : SymB cj Y => (γ : Y →ₗ[ℤ] Y →ₗ[ℤ] ℝ) a₀ a₀) h
     rw [hβ, hsq] at h2
     exact ha₀ (Complex.normSq_eq_zero.mp h2)
   have hl : l ⟨β, hmem⟩ = ∑ i, (comp η σ (x i) * conj (comp η σ (x' i))).re :=
@@ -132,15 +130,11 @@ private theorem normb_lemma_2 {t : E} (ht : t ∈ Dinv E * Dinv E) (ht0 : t ≠ 
   have h : ((differentIdeal ℤ (𝓞 E) : Ideal (𝓞 E)) : FractionalIdeal (𝓞 E)⁰ E) = (Dinv E)⁻¹ := by
     first
       | exact coeIdeal_differentIdeal (A := ℤ) (K := ℚ) (L := E) (B := 𝓞 E)
-      | exact coeIdeal_differentIdeal ℤ ℚ
-      | exact coeIdeal_differentIdeal ℤ ℚ (𝓞 E) E
   have h3 : FractionalIdeal.absNorm ((differentIdeal ℤ (𝓞 E) : Ideal (𝓞 E)) :
       FractionalIdeal (𝓞 E)⁰ E) = ((discr E).natAbs : ℚ) := by
     first
       | (rw [FractionalIdeal.coeIdeal_absNorm, absNorm_differentIdeal])
       | (rw [FractionalIdeal.coeIdeal_absNorm, NumberField.absNorm_differentIdeal (K := E)])
-      | (rw [FractionalIdeal.coeIdeal_absNorm, NumberField.absNorm_differentIdeal E])
-      | (rw [FractionalIdeal.coeIdeal_absNorm]; exact_mod_cast NumberField.absNorm_differentIdeal)
   rw [h, map_inv₀] at h3
   have hdinv : FractionalIdeal.absNorm (Dinv E) = ((discr E).natAbs : ℚ)⁻¹ := by
     rw [← h3, inv_inv]
@@ -167,9 +161,6 @@ private theorem normb_lemma_2 {t : E} (ht : t ∈ Dinv E * Dinv E) (ht0 : t ≠ 
             | exact mul_le_mul_left' hle _
             | exact FractionalIdeal.mul_le_mul_left hle _
             | exact mul_right_mono hle
-            | exact mul_le_mul_left hle _
-            | (rw [mul_comm _ (FractionalIdeal.spanSingleton (𝓞 E)⁰ t), mul_comm _ (Dinv E * Dinv E)];
-               exact mul_left_mono hle)
       _ = 1 := inv_mul_cancel₀ hD2
   obtain ⟨I, hI⟩ := FractionalIdeal.le_one_iff_exists_coeIdeal.mp hJ1
   have hJ0 : J ≠ 0 := by
@@ -187,13 +178,11 @@ private theorem normb_lemma_2 {t : E} (ht : t ∈ Dinv E * Dinv E) (ht0 : t ≠ 
       Nat.one_le_iff_ne_zero.mpr (fun h => hI0 (Ideal.absNorm_eq_zero_iff.mp h))
     first
       | (rw [FractionalIdeal.coeIdeal_absNorm]; exact_mod_cast hI1)
-      | (rw [FractionalIdeal.absNorm_eq' 1 I (by first | (rw [one_smul]; rfl) | simp [IsLocalization.coeSubmodule] | rfl)]; simp; exact_mod_cast hI1)
   have h1 : |Algebra.norm ℚ t| =
       FractionalIdeal.absNorm (Dinv E * Dinv E) * FractionalIdeal.absNorm J := by
     rw [← map_mul, ← hspan]
     first
       | exact (FractionalIdeal.absNorm_span_singleton (R := 𝓞 E) t).symm
-      | exact (FractionalIdeal.absNorm_span_singleton t).symm
   have h2 : FractionalIdeal.absNorm (Dinv E * Dinv E) = (((discr E).natAbs : ℚ) ^ 2)⁻¹ := by
     rw [map_mul, hdinv, sq, mul_inv]
   rw [h1, h2]
@@ -224,8 +213,6 @@ private theorem normprod_lemma_4 (t : E) (w : (E →+* ℂ) → ℝ) (hw : ∀ �
   have h : algebraMap ℚ ℂ (Algebra.norm ℚ t) = ∏ σ : E →ₐ[ℚ] ℂ, σ t := by
     first
       | exact Algebra.norm_eq_prod_embeddings ℚ ℂ t
-      | exact Algebra.norm_eq_prod_embeddings (K := ℚ) (E := ℂ) t
-      | exact Algebra.norm_eq_prod_embeddings t
   have h2 : (∏ σ : E →ₐ[ℚ] ℂ, σ t) = ∏ σ : E →+* ℂ, σ t :=
     Fintype.prod_equiv (RingHom.equivRatAlgHom E ℂ).symm _ _ (fun σ => rfl)
   rw [h2, Finset.prod_congr rfl (fun σ _ => hw σ), ← Complex.ofReal_prod] at h

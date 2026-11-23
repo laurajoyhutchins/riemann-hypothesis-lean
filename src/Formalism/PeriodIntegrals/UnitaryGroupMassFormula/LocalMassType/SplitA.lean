@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.ValuationLocalVolumes.HRSmulERight
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalMassType.UnitaryLocalMassIdentity
 public import Formalism.PeriodIntegrals.SplitIntLoc
 import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LocalMassOrder.SelfDualMeasureSFinite
@@ -202,25 +203,7 @@ theorem oev_one : (1 : Fv F v ⊗[F] E) ∈ OEv (E := E) v := by
 
 theorem oev_mul {a b : Fv F v ⊗[F] E} (ha : a ∈ OEv (E := E) v) (hb : b ∈ OEv (E := E) v) :
     a * b ∈ OEv (E := E) v := by
-  change a ∈ Submodule.span (v.adicCompletionIntegers F)
-    ((fun x : 𝓞 E => inclR (F := F) (Fv F v) (x : E)) '' Set.univ) at ha
-  change b ∈ Submodule.span (v.adicCompletionIntegers F)
-    ((fun x : 𝓞 E => inclR (F := F) (Fv F v) (x : E)) '' Set.univ) at hb
-  change a * b ∈ Submodule.span (v.adicCompletionIntegers F)
-    ((fun x : 𝓞 E => inclR (F := F) (Fv F v) (x : E)) '' Set.univ)
-  induction ha using Submodule.span_induction with
-  | mem a' ha' =>
-    obtain ⟨α, -, rfl⟩ := ha'
-    induction hb using Submodule.span_induction with
-    | mem b' hb' =>
-      obtain ⟨β, -, rfl⟩ := hb'
-      exact Submodule.subset_span ⟨α * β, trivial, by simp [map_mul]⟩
-    | zero => rw [mul_zero]; exact Submodule.zero_mem _
-    | add x y _ _ hx hy => rw [mul_add]; exact Submodule.add_mem _ hx hy
-    | smul c x _ hx => rw [mul_smul_comm]; exact Submodule.smul_mem _ c hx
-  | zero => rw [zero_mul]; exact Submodule.zero_mem _
-  | add x y _ _ hx hy => rw [add_mul]; exact Submodule.add_mem _ hx hy
-  | smul c x _ hx => rw [smul_mul_assoc]; exact Submodule.smul_mem _ c hx
+  apply Formalism.L2.SG.Pf.NcVal.OmVSt.OmW.oev_mul <;> assumption
 
 def OEvR : Subring (Fv F v ⊗[F] E) where
   carrier := OEv (E := E) v

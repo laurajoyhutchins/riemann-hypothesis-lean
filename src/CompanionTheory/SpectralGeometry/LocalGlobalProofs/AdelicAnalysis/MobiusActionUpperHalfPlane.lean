@@ -88,7 +88,6 @@ theorem comp_frac (a b c d a' b' c' d' : ℝ) (hdet : a * d - b * c = 1)
     rw [im_frac a' b' c' d' hdet' τ h]
     have : 0 < ‖(c' : ℂ) * τ + d'‖ := norm_pos_iff.mpr h'
     positivity
-  have h2 := den_ne a b c d hdet _ hX
   have e1 : (c : ℂ) * (((a' : ℂ) * τ + b') / ((c' : ℂ) * τ + d')) + d =
       (((c * a' + d * c' : ℝ) : ℂ) * τ + ((c * b' + d * d' : ℝ) : ℂ)) / ((c' : ℂ) * τ + d') := by
     rw [eq_div_iff h', add_mul, mul_assoc, div_mul_cancel₀ _ h']

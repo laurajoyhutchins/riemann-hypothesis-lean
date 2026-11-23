@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.InvariantTopologyComparison.LinearIndependentOneBeta
 public import Formalism.LocalToGlobal.SiegelLatticeTheory.FundamentalEquivalence.AdBridge
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -76,23 +77,7 @@ def KgS (g : ℕ) : Set I.Gf :=
     ∀ y ∈ I.Lf, ∃ z ∈ I.Lf, (I.fmat x - 1) *ᵥ y = (g : EAf I) • z}
 
 theorem exists_beta : ∃ β : I.E, β ∈ Formalism.UG.intOE I.E ∧ β ∉ Set.range (algebraMap I.F I.E) := by
-  by_contra hcon
-  push_neg at hcon
-  have hall : ∀ z : I.E, z ∈ Set.range (algebraMap I.F I.E) := by
-    intro z
-    obtain ⟨a, b, _, rfl⟩ := IsFractionRing.div_surjective (A := 𝓞 I.E) z
-    obtain ⟨x, hx⟩ := hcon _ (by exact RingHom.mem_range.mpr ⟨a, rfl⟩)
-    obtain ⟨y, hy⟩ := hcon _ (by exact RingHom.mem_range.mpr ⟨b, rfl⟩)
-    exact ⟨x / y, by rw [map_div₀, hx, hy]⟩
-  have hw : ∀ w : I.E, ∃ c : I.F, c • (1 : I.E) = w := fun w => by
-    obtain ⟨c, hc⟩ := hall w
-    exact ⟨c, by rw [← hc, Algebra.algebraMap_eq_smul_one]⟩
-  have hle : Module.finrank I.F I.E ≤ 1 := by
-    first
-      | exact finrank_le_one (1 : I.E) hw
-      | exact Module.finrank_le_one (1 : I.E) hw
-  have h2 := I.cm.deg2
-  omega
+  apply PI.InvTopW.exists_beta <;> assumption
 
 def beta : I.E := (exists_beta I).choose
 

@@ -104,40 +104,7 @@ theorem UpperTheory.cuspDecay_archConv_finAvg :
   obtain ⟨Ch, hCh0, hCh⟩ := exists_height_le_normOne (K := K) (n := n) hω
   obtain ⟨e, he⟩ : ∃ e, e = 2 * Fintype.card (InfinitePlace K) := ⟨_, rfl⟩
   rw [← he] at hCh
-  have exists_le_max_pow (hn : 2 ≤ n) (ρ : Fin n → ℝ) (hρ : ∀ i, 0 < ρ i) :
-      ∃ (r : ℕ) (hr : 0 < r) (hrn : r < n), ∀ i j : Fin n, i < j →
-        ρ i / ρ j ≤ max 1 (ρ ⟨r - 1, by omega⟩ / ρ ⟨r, hrn⟩) ^ n := by
-    have : Nonempty (Fin (n - 1)) := ⟨⟨0, by omega⟩⟩
-    obtain ⟨l₀, hl₀⟩ := Finite.exists_max fun l : Fin (n - 1) =>
-      ρ ⟨l, by omega⟩ / ρ ⟨l + 1, by omega⟩
-    refine ⟨l₀ + 1, by omega, by omega, fun i j hij => ?_⟩
-    set M := max 1 (ρ ⟨l₀ + 1 - 1, by omega⟩ / ρ ⟨l₀ + 1, by omega⟩)
-    have hM1 : 1 ≤ M := le_max_left _ _
-    have hstep : ∀ l : ℕ, ∀ (hl : l + 1 < n), ρ ⟨l, by omega⟩ ≤ M * ρ ⟨l + 1, hl⟩ := by
-      intro l hl
-      have h1 := hl₀ ⟨l, by omega⟩
-      rw [← div_le_iff₀ (hρ _)]
-      exact h1.trans (le_max_right _ _)
-    have hchain : ∀ d : ℕ, ∀ (a : ℕ) (ha : a + d < n), ρ ⟨a, by omega⟩ ≤ M ^ d * ρ ⟨a + d, ha⟩ := by
-      intro d
-      induction d with
-      | zero => intro a ha; simp
-      | succ d ih =>
-        intro a ha
-        calc ρ ⟨a, by omega⟩ ≤ M ^ d * ρ ⟨a + d, by omega⟩ := ih a (by omega)
-          _ ≤ M ^ d * (M * ρ ⟨a + d + 1, by omega⟩) :=
-              mul_le_mul_of_nonneg_left (hstep (a + d) (by omega)) (pow_nonneg (by linarith) _)
-          _ = M ^ (d + 1) * ρ ⟨a + (d + 1), ha⟩ := by rw [pow_succ]; ring_nf
-    have hij' : (i : ℕ) < j := hij
-    have h1 := hchain (j - i) i (by omega)
-    have hj : (⟨(i : ℕ) + (j - i), by omega⟩ : Fin n) = j := Fin.ext (by simp; omega)
-    rw [hj] at h1
-    rw [div_le_iff₀ (hρ _)]
-    calc ρ i = ρ ⟨i, by omega⟩ := rfl
-      _ ≤ M ^ ((j : ℕ) - i) * ρ j := h1
-      _ ≤ M ^ n * ρ j := mul_le_mul_of_nonneg_right (pow_le_pow_right₀ hM1 (by omega)) (hρ _).le
-  
-  
+  have exists_le_max_pow := @GroundTheory.Automorphic.CuspidalSpectrum.exists_le_max_pow
   have exists_norm_rconv_le_decay {β : ArchMatrix K n → ℝ}
       (hβ : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) β) (hβc : HasCompactSupport β)
       (hβu : tsupport β ⊆ Set.range (Units.val : ArchUnits K n → ArchMatrix K n))

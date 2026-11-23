@@ -1,5 +1,6 @@
 module
 
+import Formalism.LocalRingCardinality.SpanPowerMembership.HaarDensityNeZero
 public import Formalism.LocalRingCardinality.DataCD
 public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.CompactSpaceUpqTZeroRight
 public import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsPosFiniteDensityOfAlmostTranslationInvaria
@@ -239,32 +240,7 @@ theorem image_expU {P Q : ℕ} (S : Set (lieU P Q)) :
 attribute [local instance] sumNormedAddCommGroup sumNormedSpace in
 theorem exists_omegaDensity {P Q : ℕ} (μ : Measure (UpqT P Q)) [μ.IsHaarMeasure] :
     ∃ c : ℝ≥0∞, c ≠ 0 ∧ c ≠ ⊤ ∧ OmegaDensity μ c := by
-  haveI : IsTopologicalGroup (UpqT P Q) := inferInstanceAs (IsTopologicalGroup (Formalism.UG.Upq P Q))
-  haveI : BorelSpace (UpqT P Q) := ⟨rfl⟩
-  haveI : T2Space (UpqT P Q) := inferInstanceAs (T2Space (Formalism.UG.Upq P Q))
-  obtain ⟨lam, hlam⟩ := GlobalTheory.CompactDualOmega.exists_isOmegaLeb P Q
-  have hball : ∀ r : ℝ, ball (0 : lieU P Q) r = ballU P Q r := by
-    intro r
-    ext X
-    rw [mem_ball_zero_iff, Submodule.coe_norm, sum_norm_def]
-    rfl
-  let L₀ : Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ →ₗ[ℝ]
-      (Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ →L[ℝ] Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ) :=
-    LinearMap.toContinuousLinearMap.toLinearMap ∘ₗ LinearMap.mul ℝ _
-  have hL₀ : Continuous L₀ := L₀.continuous_of_finiteDimensional
-  obtain ⟨c, hc0, hct, hc⟩ := @exists_density_of_chart (lieU P Q)
-    (Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ) (UpqT P Q) _ _ _ _ ⟨rfl⟩ _ _ _ _ _ _ _ _
-    lam hlam.1 μ _ expU UpqT.mat
-    (lieU P Q).subtypeₗᵢ (fun g => L₀ g.mat) continuous_expU
-    (mat_injective (by rw [mat_expU]; exact (NormedSpace.exp_zero (𝔸 := Matrix (Fin P ⊕ Fin Q) (Fin P ⊕ Fin Q) ℂ))))
-    (HasStrictFDerivAt.comp (0 : lieU P Q) (g := NormedSpace.exp) (f := Subtype.val)
-      exp_strict (lieU P Q).subtypeL.hasStrictFDerivAt)
-    (hL₀.comp continuous_mat).continuousAt
-    (by ext1 A; exact Matrix.one_mul A) (fun g h => rfl)
-    (fun r hr => by rw [image_expU, hball]; exact GlobalTheory.ExpBallNhds.exp_ballU_mem_nhds P Q r hr)
-  refine ⟨c, hc0, hct, lam, hlam, ?_⟩
-  simp only [image_expU, hball] at hc
-  exact hc
+  apply Formalism.BasicNotions.Examples₂.CD.omegaDensity_haar <;> assumption
 
 theorem exists_haar_of_density (P Q : ℕ) (c : ℝ≥0∞) (h0 : c ≠ 0) (ht : c ≠ ⊤) :
     ∃ μ : Measure (UpqT P Q), μ.IsHaarMeasure ∧ OmegaDensity μ c := by

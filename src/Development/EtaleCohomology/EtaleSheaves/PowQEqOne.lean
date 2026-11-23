@@ -1,5 +1,6 @@
 module
 
+import Development.EtaleCohomology.KummerTheory.PrimTorsPf
 public import Mathlib.RingTheory.Polynomial.Cyclotomic.Basic
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -67,23 +68,7 @@ theorem pow_q_eq_one {q : ℕ} {B : Type} [CommRing B] (x : B)
 
 theorem local_eq {q : ℕ} [NeZero q] {B : Type} [CommRing B] [IsLocalRing B] (hq : IsUnit (q : B)) {x y : B}
     (hx : x ^ q = 1) (hy : y ^ q = 1) (hr : IsLocalRing.residue B x = IsLocalRing.residue B y) : x = y := by
-  have hg := geom_sum₂_mul x y q
-  rw [hx, hy, sub_self] at hg
-  have hyu : IsUnit y := IsUnit.of_pow_eq_one hy (NeZero.ne q)
-  have hres : IsLocalRing.residue B (∑ i ∈ Finset.range q, x ^ i * y ^ (q - 1 - i)) =
-      IsLocalRing.residue B ((q : B) * y ^ (q - 1)) := by
-
-    rw [map_sum, map_mul, map_pow, map_natCast]
-    rw [Finset.sum_congr rfl (g := fun _ => IsLocalRing.residue B y ^ (q - 1))]
-    · simp
-    · intro i hi
-      rw [map_mul, map_pow, map_pow, hr, ← pow_add]
-      congr 1; have := Finset.mem_range.1 hi; omega
-  have hu' : IsUnit (∑ i ∈ Finset.range q, x ^ i * y ^ (q - 1 - i)) := by
-    have h1 : IsUnit (IsLocalRing.residue B ((q : B) * y ^ (q - 1))) := (hq.mul (hyu.pow _)).map _
-    rw [← hres] at h1
-    exact (isUnit_map_iff (IsLocalRing.residue B) _).1 h1
-  exact sub_eq_zero.1 ((IsUnit.mul_right_eq_zero hu').1 hg)
+  apply (config := { allowSynthFailures := true }) LateralTheory.KummerTheory.PrimitiveRootTorsion.uniq <;> assumption
 
 theorem res_root {q : ℕ} {B : Type} [CommRing B] [IsLocalRing B] (z : B)
     (hz : Polynomial.aeval z (Polynomial.cyclotomic q ℤ) = 0) :

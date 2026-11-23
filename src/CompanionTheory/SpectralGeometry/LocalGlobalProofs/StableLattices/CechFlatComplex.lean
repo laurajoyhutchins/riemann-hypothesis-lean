@@ -189,7 +189,6 @@ theorem exists_localization_fibre (R C : Type) [CommRing R] [CommRing C] [Algebr
   have hθ : ∀ c, θ ((1 : p.ResidueField) ⊗ₜ[R] c) = cA c := fun c => by
     simp [θ]
   letI : Algebra (p.Fiber C) (B ⧸ J) := θ.toRingHom.toAlgebra
-  have hal : ∀ x, algebraMap (p.Fiber C) (B ⧸ J) x = θ x := fun _ => rfl
   let Q : Ideal (p.Fiber C) := (maximalIdeal (B ⧸ J)).comap (algebraMap (p.Fiber C) (B ⧸ J))
   haveI hQ : Q.IsPrime := inferInstance
   have hunit : ∀ t : C, t ∉ q → ((1 : p.ResidueField) ⊗ₜ[R] t : p.Fiber C) ∈ Q.primeCompl := by

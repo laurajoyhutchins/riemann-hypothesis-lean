@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.MultiplicityOne.HpkMulVecMulVec
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.EquivariantL2Space
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -75,26 +76,7 @@ theorem hpk_mid {i : Fin (2 * r + k + 1)} (h : ¬(i.val < r ∨ r + k < i.val)) 
 theorem hpk_mulVec (v : Fin (2 * r + k + 1) → ℂ) (i : Fin (2 * r + k + 1)) :
     (Hpk k r *ᵥ v) i = if i.val < r ∨ r + k < i.val then v ⟨2 * r + k - i.val, by omega⟩
       else if i.val = r + k then -v i else v i := by
-  have key : ∀ (c : ℕ) (hc : c < 2 * r + k + 1) (a : ℂ),
-      ∑ j : Fin (2 * r + k + 1), (if j.val = c then a else 0) * v j = a * v ⟨c, hc⟩ := by
-    intro c hc a
-    rw [Finset.sum_eq_single ⟨c, hc⟩]
-    · simp
-    · intro b _ hb
-      have hbc : b.val ≠ c := fun h => hb (Fin.ext h)
-      simp [hbc]
-    · intro h
-      exact absurd (Finset.mem_univ _) h
-  have hi := i.isLt
-  simp only [Matrix.mulVec, dotProduct]
-  by_cases h : i.val < r ∨ r + k < i.val
-  · rw [if_pos h]
-    simp only [hpk_out k r h]
-    rw [key _ (by omega), one_mul]
-  · rw [if_neg h]
-    simp only [hpk_mid k r h]
-    rw [key i.val hi]
-    split_ifs <;> simp
+  apply ReciprocityTheory.ChartRestriction.DS.Mult1.TopH.hpk_mulVec <;> assumption
 
 theorem hpk_mulVec_mulVec (v : Fin (2 * r + k + 1) → ℂ) : Hpk k r *ᵥ (Hpk k r *ᵥ v) = v := by
   funext i

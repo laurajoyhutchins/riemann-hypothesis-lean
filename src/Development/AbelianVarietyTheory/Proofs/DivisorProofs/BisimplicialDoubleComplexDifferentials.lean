@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HomogeneousClassSubstitution
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.HasTotalBiChains
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -54,22 +55,7 @@ noncomputable section
 namespace GlobalTheory.EZ
 
 theorem fc_eq_δ (n : ℕ) (i : Fin (n + 2)) : fc (n + 1) n i = SimplexCategory.δ i := by
-  ext j
-  simp only [fc, clampHom, faceFun, SimplexCategory.δ, SimplexCategory.mkHom, SimplexCategory.Hom.toOrderHom_mk,
-    OrderHom.coe_mk, OrderEmbedding.toOrderHom_coe, Fin.succAboveOrderEmb_apply]
-  rcases Fin.lt_or_le (Fin.castSucc j) i with hj | hj
-  · rw [Fin.succAbove_of_castSucc_lt _ _ hj]
-    have : (j : ℕ) < i := hj
-    simp only [this, if_true, Fin.coe_castSucc]
-    have := j.isLt
-    simp only [SimplexCategory.len_mk] at this ⊢
-    omega
-  · rw [Fin.succAbove_of_le_castSucc _ _ hj]
-    have : ¬ (j : ℕ) < i := by simpa [Fin.le_iff_val_le_val] using hj
-    simp only [this, if_false, Fin.val_succ]
-    have := j.isLt
-    simp only [SimplexCategory.len_mk] at this ⊢
-    omega
+  apply GlobalTheory.EZ.fc_succ_eq_delta <;> assumption
 
 theorem idc_self (n : ℕ) : idc n n = 𝟙 _ := by
   ext j

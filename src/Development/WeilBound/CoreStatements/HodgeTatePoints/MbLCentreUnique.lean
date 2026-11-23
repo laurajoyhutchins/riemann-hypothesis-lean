@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.RegularFunctionsTwoComponents
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.GlueApplyOfNotInFibre
 public import Development.WeilBound.CoreStatements.HodgeTatePoints.MaBase
 public import Development.WeilBound.CoreStatements.HodgeTatePoints.MbLCentre
@@ -88,21 +89,7 @@ theorem eq_of_dominated_of_inChart {o : Type} [CommRing o] {Ω : Type} [Field Ω
     (dq : (∀ a ∈ regAt M.ξ q, i a ∈ regAt ξ' p') ∧ ∀ a ∈ regAt M.ξ q, unitAt ξ' p' (i a) → unitAt M.ξ q a)
     (dr : (∀ a ∈ regAt M.ξ r, i a ∈ regAt ξ' p') ∧ ∀ a ∈ regAt M.ξ r, unitAt ξ' p' (i a) → unitAt M.ξ r a) :
     q = r := by
-  have cq := (PositivityTheory.HtPt.Ma.regat_loc o Ω κ x M c q hq).1
-  have cr := (PositivityTheory.HtPt.Ma.regat_loc o Ω κ x M c r hr).1
-  haveI := isLocalRing_regAt M.ξ q
-  let f : chRing o x c →+* regAt M.ξ q :=
-    ((chRing o x c).val : chRing o x c →+* Ω).codRestrict (regAt M.ξ q) fun u => cq _ u.2
-  have hP : ∀ u : chRing o x c, u ∈ (IsLocalRing.maximalIdeal (regAt M.ξ q)).comap f ↔ ¬ unitAt M.ξ q (u : Ω) := by
-    intro u
-    rw [Ideal.mem_comap, IsLocalRing.mem_maximalIdeal, mem_nonunits_iff, isUnit_regAt_iff]
-    rfl
-  obtain ⟨p, -, huniq⟩ := PositivityTheory.HtPt.Ma.prime_pt o Ω κ x M c hq.1 _
-    (inferInstance : ((IsLocalRing.maximalIdeal (regAt M.ξ q)).comap f).IsPrime)
-  have e1 := huniq q ⟨hq, hP⟩
-  have e2 := huniq r ⟨hr, fun u => by
-    rw [hP, unitAt_iff_of_dominated dq (cq _ u.2), unitAt_iff_of_dominated dr (cr _ u.2)]⟩
-  exact e1.trans e2.symm
+  apply (config := { allowSynthFailures := true }) GlobalTheory.CompanionTheory.Ar.Centre.Sep.eq_of_dominated_of_inChart <;> assumption
 
 theorem eq_of_dominated : ∀ {o : Type} [CommRing o] {Ω : Type} [Field Ω] [Algebra o Ω] {κ : Type} [Finite κ] {x : κ → Ω} (M : PModel o x) {X' : Scheme.{0}} {Ω' : Type} [Field Ω'] (ξ' : Spec (CommRingCat.of Ω') ⟶ X') (i : Ω →+* Ω') (p' : Cpt ξ') (q₁ q₂ : Cpt M.ξ), ((∀ a ∈ regAt M.ξ q₁, i a ∈ regAt ξ' p') ∧ ∀ a ∈ regAt M.ξ q₁, unitAt ξ' p' (i a) → unitAt M.ξ q₁ a) → ((∀ a ∈ regAt M.ξ q₂, i a ∈ regAt ξ' p') ∧ ∀ a ∈ regAt M.ξ q₂, unitAt ξ' p' (i a) → unitAt M.ξ q₂ a) → q₁ = q₂ := by
   intro o _ Ω _ _ κ _ x M X' Ω' _ ξ' i p' q₁ q₂ d₁ d₂

@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.WeylProduct.WeylProd
 public import Formalism.PeriodIntegrals.WeylForU
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -52,27 +53,7 @@ open Finset PI.UpqRep Formalism.BasicNotions
 theorem denom_range (n : ℕ) :
     ∏ i ∈ range n, ∏ j ∈ Ico (i + 1) n, ((j : ℝ) - (i : ℝ)) =
       ∏ i ∈ range n, ((i.factorial : ℕ) : ℝ) := by
-  induction n with
-  | zero => simp
-  | succ n ih =>
-    have h1 : ∀ i ∈ range n, ∏ j ∈ Ico (i + 1) (n + 1), ((j : ℝ) - (i : ℝ)) =
-        (∏ j ∈ Ico (i + 1) n, ((j : ℝ) - (i : ℝ))) * ((n : ℝ) - (i : ℝ)) := by
-      intro i hi
-      exact Finset.prod_Ico_succ_top (Nat.succ_le_of_lt (Finset.mem_range.mp hi)) _
-    have h2 : ∀ k : ℕ, ∏ i ∈ range k, ((k : ℝ) - (i : ℝ)) = ((k.factorial : ℕ) : ℝ) := by
-      intro k
-      induction k with
-      | zero => simp
-      | succ k ihk =>
-        have e : ∀ i ∈ range k, (((k + 1 : ℕ) : ℝ) - ((i + 1 : ℕ) : ℝ)) = (k : ℝ) - (i : ℝ) := by
-          intro i _
-          push_cast
-          ring
-        rw [Finset.prod_range_succ', Finset.prod_congr rfl e, ihk, Nat.factorial_succ]
-        push_cast
-        ring
-    rw [Finset.prod_range_succ, Finset.prod_range_succ, Finset.Ico_self, Finset.prod_empty, mul_one,
-      Finset.prod_congr rfl h1, Finset.prod_mul_distrib, ih, h2 n]
+  apply PI.WeylProdWork.denom_eq <;> assumption
 
 theorem row_fin (n : ℕ) (a : Fin n) :
     ∏ b ∈ univ.filter (fun b : Fin n => a < b), (((b : ℕ) : ℝ) - ((a : ℕ) : ℝ)) =

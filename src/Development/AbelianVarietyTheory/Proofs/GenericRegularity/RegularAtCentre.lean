@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.GenericRegularity.CombinedBoundAtTrivialValuationsOfCharts
 public import Development.AbelianVarietyTheory.Definitions.RegularCharts.SCharts
 public import Formalism.LocalToGlobal.ProjectiveLattices.RegModelC
 import Mathlib.Algebra.Order.Floor.Extended
@@ -59,16 +60,7 @@ section Basic
 variable {V : Type} [CommRing V] [IsDomain V] [IsDiscreteValuationRing V]
 
 theorem vV_nonneg (w : V) (hw : w ≠ 0) : 0 ≤ vV V (algebraMap V (FractionRing V) w) := by
-  have hw' : algebraMap V (FractionRing V) w ≠ 0 := by
-    intro h; apply hw; exact IsFractionRing.injective V (FractionRing V) (by rw [h, map_zero])
-  have h1 := IsDedekindDomain.HeightOneSpectrum.valuation_le_one
-    (IsDiscreteValuationRing.maximalIdeal V) (K := FractionRing V) w
-  have h0 : valV V (algebraMap V (FractionRing V) w) ≠ 0 := valV_ne_zero hw'
-  have h2 : WithZero.log (valV V (algebraMap V (FractionRing V) w)) ≤ WithZero.log (1 : WithZero (Multiplicative ℤ)) :=
-    (WithZero.log_le_log h0 one_ne_zero).2 h1
-  rw [WithZero.log_one] at h2
-  unfold vV
-  omega
+  apply GlobalTheory.Reg.TrivBound.vV_nonneg <;> assumption
 
 theorem vV_unit (u : V) (hu : u ∉ maximalIdeal V) : vV V (algebraMap V (FractionRing V) u) = 0 := by
   have h1 : (IsDiscreteValuationRing.maximalIdeal V).valuation (FractionRing V) (algebraMap V _ u) = 1 :=
@@ -79,20 +71,7 @@ theorem vV_unit (u : V) (hu : u ∉ maximalIdeal V) : vV V (algebraMap V (Fracti
 
 theorem mem_of_vV_nonneg (y : FractionRing V) (hy : y ≠ 0) (h : 0 ≤ vV V y) :
     ∃ w : V, algebraMap V (FractionRing V) w = y := by
-  have h0 : valV V y ≠ 0 := valV_ne_zero hy
-  have hle : valV V y ≤ 1 := by
-    rw [← WithZero.log_le_log h0 one_ne_zero, WithZero.log_one]
-    unfold vV at h
-    omega
-  obtain ⟨w, hw⟩ := IsDedekindDomain.HeightOneSpectrum.mem_integers_of_valuation_le_one (R := V)
-    (K := FractionRing V) y (fun v => by
-      have hv : v = IsDiscreteValuationRing.maximalIdeal V := by
-        have hm : v.asIdeal.IsMaximal := v.isPrime.isMaximal v.ne_bot
-        ext1
-        exact IsLocalRing.eq_maximalIdeal hm
-      rw [hv]
-      exact hle)
-  exact ⟨w, hw⟩
+  apply GlobalTheory.Reg.TrivBound.mem_of_vV_nonneg <;> assumption
 
 theorem nval_nonneg (e : ℕ) (w : V) : 0 ≤ nval V e (algebraMap V (FractionRing V) w) := by
   by_cases hw : w = 0
@@ -118,58 +97,12 @@ variable {A : Type} [CommRing A] [IsDomain A]
 theorem chval_eq (φ : A →+* V) (e : ℕ) (f : FractionRing A) (r : EReal) (h : ChV φ e f r) (a b : A)
     (hab : f * algebraMap A (FractionRing A) b = algebraMap A (FractionRing A) a) (hb : φ b ≠ 0) :
     r = nval V e (algebraMap V (FractionRing V) (φ a)) - nval V e (algebraMap V (FractionRing V) (φ b)) := by
-  obtain ⟨x, s, hs, hfs, rfl⟩ := h
-  have has : a * s = x * b := by
-    apply IsFractionRing.injective A (FractionRing A)
-    rw [map_mul, map_mul, ← hab, ← hfs]
-    ring
-  have hφ : φ a * φ s = φ x * φ b := by rw [← map_mul, ← map_mul, has]
-  by_cases ha : φ a = 0
-  · have hx : φ x = 0 := by
-      rw [ha, zero_mul] at hφ
-      exact (mul_eq_zero.1 hφ.symm).resolve_right hb
-    rw [ha, hx, map_zero, nval_zero, nval_of_ne (ne_zero_map hs), nval_of_ne (ne_zero_map hb),
-      EReal.top_sub_coe, EReal.top_sub_coe]
-  · have hx : φ x ≠ 0 := by
-      intro hx
-      rw [hx, zero_mul] at hφ
-      exact mul_ne_zero ha hs hφ
-    have hv := congrArg (vV V) (congrArg (algebraMap V (FractionRing V)) hφ)
-    rw [map_mul, map_mul, vV_mul (ne_zero_map ha) (ne_zero_map hs),
-      vV_mul (ne_zero_map hx) (ne_zero_map hb)] at hv
-    rw [nval_of_ne (ne_zero_map ha), nval_of_ne (ne_zero_map hb), nval_of_ne (ne_zero_map hx),
-      nval_of_ne (ne_zero_map hs), ← EReal.coe_sub, ← EReal.coe_sub, div_sub_div_same, div_sub_div_same]
-    congr 2
-    have : ((vV V (algebraMap V (FractionRing V) (φ x)) : ℤ) : ℝ) -
-        (vV V (algebraMap V (FractionRing V) (φ s)) : ℤ) =
-        ((vV V (algebraMap V (FractionRing V) (φ a)) : ℤ) : ℝ) - (vV V (algebraMap V (FractionRing V) (φ b)) : ℤ) := by
-      have : (vV V (algebraMap V (FractionRing V) (φ x)) : ℤ) - vV V (algebraMap V (FractionRing V) (φ s)) =
-          vV V (algebraMap V (FractionRing V) (φ a)) - vV V (algebraMap V (FractionRing V) (φ b)) := by omega
-      exact_mod_cast this
-    exact this
+  apply GlobalTheory.Reg.TrivBound.chval_eq <;> assumption
 
 theorem chval_div (φ : A →+* V) (e : ℕ) (he : 0 < e) (f : FractionRing A) (r : EReal) (h : ChV φ e f r)
     (hr : 0 ≤ r) (a b : A) (hab : f * algebraMap A (FractionRing A) b = algebraMap A (FractionRing A) a)
     (hb : φ b ≠ 0) : ∃ w : V, φ a = w * φ b := by
-  by_cases ha : φ a = 0
-  · exact ⟨0, by rw [ha, zero_mul]⟩
-  rw [chval_eq φ e f r h a b hab hb, nval_of_ne (ne_zero_map ha), nval_of_ne (ne_zero_map hb),
-    ← EReal.coe_sub, EReal.coe_nonneg, div_sub_div_same] at hr
-  have he' : (0 : ℝ) < e := by exact_mod_cast he
-  have hle : (vV V (algebraMap V (FractionRing V) (φ b)) : ℝ) ≤ vV V (algebraMap V (FractionRing V) (φ a)) := by
-    have := (div_nonneg_iff.1 hr)
-    rcases this with ⟨h1, -⟩ | ⟨-, h2⟩
-    · linarith
-    · linarith
-  have hle' : vV V (algebraMap V (FractionRing V) (φ b)) ≤ vV V (algebraMap V (FractionRing V) (φ a)) := by
-    exact_mod_cast hle
-  set y := algebraMap V (FractionRing V) (φ a) / algebraMap V (FractionRing V) (φ b)
-  have hy0 : y ≠ 0 := div_ne_zero (ne_zero_map ha) (ne_zero_map hb)
-  have hyv : vV V y + vV V (algebraMap V (FractionRing V) (φ b)) = vV V (algebraMap V (FractionRing V) (φ a)) := by
-    rw [← vV_mul hy0 (ne_zero_map hb), div_mul_cancel₀ _ (ne_zero_map hb)]
-  obtain ⟨w, hw⟩ := mem_of_vV_nonneg y hy0 (by omega)
-  refine ⟨w, IsFractionRing.injective V (FractionRing V) ?_⟩
-  rw [map_mul, hw, div_mul_cancel₀ _ (ne_zero_map hb)]
+  apply GlobalTheory.Reg.TrivBound.chval_div <;> assumption
 
 theorem chval_nonneg (φ : A →+* V) (e : ℕ) (f : FractionRing A) (r : EReal) (h : ChV φ e f r) (a s : A)
     (hfs : f * algebraMap A (FractionRing A) s = algebraMap A (FractionRing A) a) (hs : φ s ∉ maximalIdeal V) :
@@ -208,18 +141,7 @@ theorem vr_one (e : ℕ) : vr e (1 : V) = 0 := by
 theorem chval_fin_iff (φ : A →+* V) (e : ℕ) (f : FractionRing A) (u : ℝ) :
     ChV φ e f (u : EReal) ↔ ∃ x s : A, φ s ≠ 0 ∧ φ x ≠ 0 ∧
       f * algebraMap A (FractionRing A) s = algebraMap A (FractionRing A) x ∧ u = vr e (φ x) - vr e (φ s) := by
-  constructor
-  · rintro ⟨x, s, hs, hfs, hu⟩
-    have hx : φ x ≠ 0 := by
-      intro hx
-      rw [hx, map_zero, nval_zero, nval_of_ne (ne_zero_map hs), EReal.top_sub_coe] at hu
-      exact EReal.coe_ne_top u hu
-    refine ⟨x, s, hs, hx, hfs, ?_⟩
-    rw [nval_eq_vr e hx, nval_eq_vr e hs, ← EReal.coe_sub] at hu
-    exact EReal.coe_injective hu
-  · rintro ⟨x, s, hs, hx, hfs, hu⟩
-    refine ⟨x, s, hs, hfs, ?_⟩
-    rw [nval_eq_vr e hx, nval_eq_vr e hs, ← EReal.coe_sub, hu]
+  apply GlobalTheory.Reg.TrivBound.chval_fin_iff <;> assumption
 
 theorem chval_fin_mul (φ : A →+* V) (e : ℕ) {f1 f2 : FractionRing A} {u1 u2 : ℝ}
     (h1 : ChV φ e f1 (u1 : EReal)) (h2 : ChV φ e f2 (u2 : EReal)) :
@@ -248,17 +170,7 @@ theorem chval_fin_pow (φ : A →+* V) (e : ℕ) {f : FractionRing A} {u : ℝ} 
 
 theorem chval_fin_inv (φ : A →+* V) (e : ℕ) {f : FractionRing A} {u : ℝ} (h : ChV φ e f (u : EReal)) :
     ChV φ e f⁻¹ ((-u : ℝ) : EReal) := by
-  obtain ⟨x, s, hs, hx, hfs, hu⟩ := (chval_fin_iff φ e f u).1 h
-  have hx0 : x ≠ 0 := fun h0 => hx (by rw [h0, map_zero])
-  have hxK : algebraMap A (FractionRing A) x ≠ 0 := fun h0 => hx0 (IsFractionRing.injective A _ (by rw [h0, map_zero]))
-  have hf0 : f ≠ 0 := by
-    intro h0
-    rw [h0, zero_mul] at hfs
-    exact hxK hfs.symm
-  refine (chval_fin_iff φ e _ _).2 ⟨s, x, hx, hs, ?_, ?_⟩
-  · rw [← hfs]
-    field_simp
-  · rw [hu]; ring
+  apply GlobalTheory.Reg.TrivBound.chval_fin_inv <;> assumption
 
 theorem chval_fin_alg (φ : A →+* V) (e : ℕ) (a : A) (ha : φ a ≠ 0) :
     ChV φ e (algebraMap A (FractionRing A) a) ((vr e (φ a) : ℝ) : EReal) := by
@@ -467,24 +379,7 @@ theorem w_fin {φ : A →+* V} {e : ℕ} {fw : FractionRing A} {W : EReal} (hW :
 theorem limit_lam (w t nu c' : ℝ) (eO : ℕ) (heO : 0 < eO) (ht : 0 ≤ t) (hc' : 0 ≤ c')
     (h : ∀ N : ℕ, 0 < N → (N : ℝ) * w ≤ (⌈(eO : ℝ) * N * nu⌉ : ℝ) * (1 / eO) + (⌈(N : ℝ) * c'⌉₊ : ℝ) * t) :
     w ≤ nu + c' * t := by
-  by_contra hlt
-  push Not at hlt
-  have hδ0 : 0 < w - nu - c' * t := by linarith
-  have heOr : (0 : ℝ) < eO := by exact_mod_cast heO
-  obtain ⟨N, hN⟩ := exists_nat_gt ((1 / eO + t) / (w - nu - c' * t))
-  have hNr : (0 : ℝ) < N := lt_of_le_of_lt (div_nonneg (by positivity) hδ0.le) hN
-  have hN0 : 0 < N := by exact_mod_cast hNr
-  have h1 := h N hN0
-  have hc1 : (⌈(eO : ℝ) * N * nu⌉ : ℝ) ≤ eO * N * nu + 1 := (Int.ceil_lt_add_one _).le
-  have hc2 : (⌈(N : ℝ) * c'⌉₊ : ℝ) ≤ N * c' + 1 := (Nat.ceil_lt_add_one (by positivity)).le
-  have h2 : (⌈(eO : ℝ) * N * nu⌉ : ℝ) * (1 / eO) ≤ N * nu + 1 / eO := by
-    calc (⌈(eO : ℝ) * N * nu⌉ : ℝ) * (1 / eO) ≤ (eO * N * nu + 1) * (1 / eO) :=
-          mul_le_mul_of_nonneg_right hc1 (by positivity)
-      _ = N * nu + 1 / eO := by field_simp
-  have h3 : (⌈(N : ℝ) * c'⌉₊ : ℝ) * t ≤ (N * c' + 1) * t := mul_le_mul_of_nonneg_right hc2 ht
-  have key : (N : ℝ) * (w - nu - c' * t) ≤ 1 / eO + t := by nlinarith
-  have := (div_lt_iff₀ hδ0).1 hN
-  linarith
+  apply GlobalTheory.Reg.TrivBound.limit_lam <;> assumption
 
 theorem limit_triv (w t c' : ℝ) (ht : 0 ≤ t) (hc' : 0 ≤ c')
     (h : ∀ N : ℕ, 0 < N → (N : ℝ) * w ≤ (⌈(N : ℝ) * c'⌉₊ : ℝ) * t) : w ≤ c' * t := by

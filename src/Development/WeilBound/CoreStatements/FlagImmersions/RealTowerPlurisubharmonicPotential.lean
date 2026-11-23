@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.MetricProofs.LogResolutionFubiniStudyPositive
 public import Development.AutomorphicSpectrum.Definitions.MetricPeriods.MetricsProjectionFormulaNef
 public import GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.CoordinateIdeals
 import Mathlib.Algebra.Order.Floor.Extended
@@ -127,21 +128,7 @@ theorem log_h_torus (L : HermLine ι) (c : K → ℂ) (z : (Σ k, ι k) → ℂ)
 
 theorem contDiffAt_log_h {L : HermLine ι} (hL : IsSmoothHerm L) (z : (Σ k, ι k) → ℂ)
     (hz : ∀ k, ∃ i, z ⟨k, i⟩ ≠ 0) : ContDiffAt ℝ 2 (fun z => Real.log (L.h z)) z := by
-  have hopen : IsOpen {z : (Σ k, ι k) → ℂ | ∀ k, ∃ i, z ⟨k, i⟩ ≠ 0} := by
-    have hset : {z : (Σ k, ι k) → ℂ | ∀ k, ∃ i, z ⟨k, i⟩ ≠ 0} =
-        ⋂ k, ⋃ i, {z : (Σ k, ι k) → ℂ | z ⟨k, i⟩ ≠ 0} := by
-      ext w
-      simp
-    rw [hset]
-    apply isOpen_iInter_of_finite
-    intro k
-    apply isOpen_iUnion
-    intro i
-    exact isOpen_ne_fun (continuous_apply _) continuous_const
-  have hh : ContDiffAt ℝ 2 L.h z := by
-    have h1 := hL.contDiffAt (hopen.mem_nhds hz)
-    exact h1.of_le (WithTop.coe_le_coe.mpr le_top)
-  exact hh.log (L.pos z hz).ne'
+  apply GlobalTheory.CompanionTheory.Ar.PB.PosFs.contDiffAt_log_h <;> assumption
 
 theorem log_line_lift {D : ℕ} {σ : Type} {S : PB.AnSys D σ} {P : Ideal (MRing ι)} (Re : PB.Realis S P) (a : σ) (t : ℝ)
     (ht : 0 < t) (ht' : t ≤ S.t₀) (x y : Re.R.X) (hy : y ∈ Re.R.U x) :

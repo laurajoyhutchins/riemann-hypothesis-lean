@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FlagMeasures.TraceFormPosOnOrthLiftedFlag
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.TermsFiniteAtPoint.CarrierRow
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -96,22 +97,7 @@ theorem qcs_bound {W : Type*} [AddCommGroup W] [Module ℚ W] [FiniteDimensional
 
 theorem trace_pos_of_re_pos {E : Type} [Field E] [NumberField E] (z : E)
     (h : ∀ τ : E →+* ℂ, 0 < (τ z).re) : 0 < Algebra.trace ℚ E z := by
-  haveI : Nonempty (E →ₐ[ℚ] ℂ) := ⟨IsAlgClosed.lift⟩
-  have h1 : algebraMap ℚ ℂ (Algebra.trace ℚ E z) = ∑ σ : E →ₐ[ℚ] ℂ, σ z :=
-    trace_eq_sum_embeddings ℂ
-  have h2 : (algebraMap ℚ ℂ (Algebra.trace ℚ E z)).re = ∑ σ : E →ₐ[ℚ] ℂ, (σ z).re := by
-    rw [h1, Complex.re_sum]
-  have h3 : (algebraMap ℚ ℂ (Algebra.trace ℚ E z)).re = ((Algebra.trace ℚ E z : ℚ) : ℝ) := by
-    simp
-  have hpos : 0 < ∑ σ : E →ₐ[ℚ] ℂ, (σ z).re := by
-    apply Finset.sum_pos
-    · intro σ _
-      exact h σ.toRingHom
-    · exact Finset.univ_nonempty
-  have h4 : (0 : ℝ) < ((Algebra.trace ℚ E z : ℚ) : ℝ) := by
-    rw [← h3, h2]
-    exact hpos
-  exact_mod_cast h4
+  apply GlobalTheory.LoopC.PerpPos.trace_pos <;> assumption
 
 theorem exists_common_den {E : Type} [Field E] [NumberField E] (t : Finset E) :
     ∃ d : ℤ, d ≠ 0 ∧ ∀ e ∈ t, IsIntegral ℤ ((d : E) * e) := by

@@ -142,10 +142,8 @@ theorem char_std (S : C.HidaSetting E Wp Wq) (hg : (0 : ℝ) < (S.g : ℝ)) (b s
   congr 3
   rw [betaU_eq]
   unfold GermRealisation.betaL
-  have hq' : (q : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hq0.ne'
   have hL1' : ((q ^ S6.nuBlock (S.G.r : ℤ) (b : ℤ) ((m + 1 : ℕ) : ℤ) : ℝ) : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hL1
   have hpi : (Real.pi : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
-  have hgc : ((S.g : ℝ) : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hg.ne'
   simp only [Complex.ofReal_mul, Complex.ofReal_inv]
   generalize ((q ^ S6.nuBlock (S.G.r : ℤ) (b : ℤ) ((m + 1 : ℕ) : ℤ) : ℝ) : ℂ) = L at hL1' ⊢
   congr 1

@@ -211,7 +211,6 @@ theorem real_step {N A : ℝ} {e m : ℕ} (hN : 1 ≤ N) (hA : 0 ≤ A) (he : 1 
       _ ≤ _ := mul_le_mul_of_nonneg_left h2 hm0
   have hpos : e * (m + 1) ≠ 0 := Nat.mul_ne_zero (by omega) (by omega)
   have hNE : N ≤ N ^ (e * (m + 1)) := le_self_pow₀ hN hpos
-  have h1E : 1 ≤ N ^ (e * (m + 1)) := one_le_pow₀ hN
   have eq : (2 + (m : ℝ) ^ (m + 1) * (1 + A) ^ (m + 1)) * N ^ (e * (m + 1)) =
       2 * N ^ (e * (m + 1)) + (m : ℝ) ^ (m + 1) * ((1 + A) ^ (m + 1) * N ^ (e * (m + 1))) := by ring
   rw [eq]

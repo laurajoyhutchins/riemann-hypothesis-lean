@@ -111,7 +111,6 @@ theorem towerLaK (la : HeightOneSpectrum (𝓞 K)) :
     IsScalarTower (𝓞 K) (Localization.AtPrime la.asIdeal) K := by
   first
     | exact IsLocalization.localization_isScalarTower_of_submonoid_le _ _ _ _ _
-    | exact IsLocalization.localization_isScalarTower_of_submonoid_le (Localization.AtPrime la.asIdeal) K _ _ la.asIdeal.primeCompl_le_nonZeroDivisors
     | (apply IsScalarTower.of_algebraMap_eq; intro x; exact (IsLocalization.map_eq _ x).symm)
 
 attribute [local instance] towerLaK
@@ -120,8 +119,6 @@ theorem fracLaK (la : HeightOneSpectrum (𝓞 K)) :
     IsFractionRing (Localization.AtPrime la.asIdeal) K := by
   first
     | exact IsFractionRing.isFractionRing_of_isLocalization la.asIdeal.primeCompl _ _ la.asIdeal.primeCompl_le_nonZeroDivisors
-    | exact IsLocalization.isFractionRing_of_isDomain_of_isLocalization la.asIdeal.primeCompl _ _
-    | exact IsFractionRing.isFractionRing_of_isDomain_of_isLocalization la.asIdeal.primeCompl _ _
 
 attribute [local instance] fracLaK
 
@@ -154,9 +151,7 @@ theorem mapLaT_coe (la : HeightOneSpectrum (𝓞 K)) (w : HeightOneSpectrum (�
     rw [← IsScalarTower.algebraMap_apply (𝓞 K) (Localization.AtPrime la.asIdeal) K]
     first
       | rfl
-      | simp
       | (norm_cast; simp)
-      | exact (trivial : True)
   exact RingHom.congr_fun key r
 
 theorem ramificationIdx_ne_zero' (la : HeightOneSpectrum (𝓞 K)) (w : HeightOneSpectrum (𝓞 K₁))
@@ -173,9 +168,6 @@ theorem ramificationIdx_ne_zero' (la : HeightOneSpectrum (𝓞 K)) (w : HeightOn
           | infer_instance
           | exact Ideal.map_le_iff_le_comap.mpr hw.ge
           | exact (Ideal.map_eq_bot_iff_of_injective (FaithfulSMul.algebraMap_injective (𝓞 K) (𝓞 K₁))).not.mpr la.ne_bot
-          | exact (Ideal.map_eq_bot_iff_of_injective (NoZeroSMulDivisors.algebraMap_injective (𝓞 K) (𝓞 K₁))).not.mpr la.ne_bot
-          | exact Ideal.map_ne_bot_of_ne_bot la.ne_bot
-          | exact (trivial : True)
 
 theorem exists_rel (la : HeightOneSpectrum (𝓞 K)) (w : HeightOneSpectrum (𝓞 K₁))
     (hw : LiesOver w la) :

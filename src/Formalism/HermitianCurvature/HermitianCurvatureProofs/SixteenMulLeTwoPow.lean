@@ -62,9 +62,6 @@ lemma sixteen_mul_le_two_pow (n : ℕ) (hn : 7 ≤ n) : n * 16 ≤ 2 ^ n := by
   induction n, hn using Nat.le_induction with
   | base => norm_num
   | succ k hk ih =>
-    have h16 : 16 ≤ 2 ^ k :=
-      calc 16 = 2 ^ 4 := by norm_num
-        _ ≤ 2 ^ k := Nat.pow_le_pow_right (by norm_num) (by omega)
     rw [pow_succ]
     linarith
 

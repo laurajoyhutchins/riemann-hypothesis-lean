@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.FramedPointBaseChangeLaws
 public import Formalism.LocalToGlobal.ProjectiveLattices.PtOfSInst
 public import Formalism.LocalToGlobal.ProjectiveLattices.CurveLoc
 public import Formalism.LocalToGlobal.ProjectiveLattices.CurveOpen
@@ -111,26 +112,7 @@ theorem pos_dualMap_comp {R S T : Type} [CommRing R] [CommRing S] [CommRing T] (
 theorem pos_frMap_trans {S T U : Type} [CommRing S] [Algebra c.F S] [CommRing T] [Algebra c.F T] [CommRing U]
     [Algebra c.F U] {φ : S →ₐ[c.F] T} {ψ : T →ₐ[c.F] U} {y : FrPt Xo c S} {z : FrPt Xo c T} {w : FrPt Xo c U}
     (h₁ : FrMap φ y z) (h₂ : FrMap ψ z w) : FrMap (ψ.comp φ) y w := by
-  obtain ⟨hx1, hu1, pm1, hs1, hf1, ha1⟩ := h₁
-  obtain ⟨hx2, hu2, pm2, hs2, hf2, ha2⟩ := h₂
-  have esp : spMap (ψ.comp φ).toRingHom = spMap ψ.toRingHom ≫ spMap φ.toRingHom := by
-    show Spec.map (CommRingCat.ofHom (ψ.toRingHom.comp φ.toRingHom)) = _
-    rw [CommRingCat.ofHom_comp, Spec.map_comp]
-  refine ⟨?_, ?_, pm2 ≫ pm1, ?_, ?_, ?_⟩
-  · rw [hx2, hx1, esp, CategoryTheory.Category.assoc]
-  · intro τ i
-    rw [hu2 τ i, hu1 τ i, ← CategoryTheory.Category.assoc]
-    congr 1
-    show _ = Spec.map (CommRingCat.ofHom (dualMap (ψ.toRingHom.comp φ.toRingHom)))
-    rw [pos_dualMap_comp, CommRingCat.ofHom_comp, Spec.map_comp]
-  · rw [CategoryTheory.Category.assoc, hs1, hs2]
-  · rw [CategoryTheory.Category.assoc, hf1, ← CategoryTheory.Category.assoc, hf2, esp, CategoryTheory.Category.assoc]
-  · intro i h
-    have h1' := pos_ppx_le pm1 hs1 i
-    have h2' := pos_ppx_le pm2 hs2 i
-    have e : (pm2 ≫ pm1).appLE _ _ h = pm1.appLE _ _ h1' ≫ pm2.appLE _ _ h2' :=
-      (AlgebraicGeometry.Scheme.Hom.appLE_comp_appLE pm2 pm1 _ _ _ h1' h2').symm
-    rw [e, CommRingCat.hom_comp, RingHom.comp_apply, ha1 i h1', ha2 i h2']
+  apply GlobalTheory.FramedBaseChange.trans <;> assumption
 
 theorem pos_evR (hWD : EvalWD (K := c.F) (fun S _ _ => FrPt Xo c S) (fun φ y z => FrMap φ y z)) (f : Rul Xo c)
     (hf : IsNatural (K := c.F) (fun S _ _ => FrPt Xo c S) (fun φ y z => FrMap φ y z) f)

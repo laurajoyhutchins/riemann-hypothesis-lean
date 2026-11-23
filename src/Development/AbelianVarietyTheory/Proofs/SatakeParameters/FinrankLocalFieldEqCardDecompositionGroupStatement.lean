@@ -3,7 +3,6 @@ module
 public import Mathlib.NumberTheory.NumberField.Basic
 public import Mathlib.NumberTheory.Padics.Complex
 public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
-public import Development.AbelianVarietyTheory.Proofs.SatakeParameters.FinrankLocalFieldEqCardDecompositionGroup
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
 import Mathlib.Algebra.Order.Interval.Basic
@@ -46,11 +45,12 @@ import Mathlib.Topology.Sheaves.Init
 import Formalism.FrobeniusOrbits.Statement
 import Formalism.SharpRestriction.LevelLetterCocycles.DataN
 import Formalism.SharpRestriction.LevelLetterCocycles.DataNLoc
+import Development.AutomorphicArithmetic.FrobeniusLocalisation.LocStab
 
 @[expose] public section
 
 open NumberField IsDedekindDomain Formalism.BasicNotions Formalism.FrobeniusOrbits Formalism.MainNotions.N
 open scoped Pointwise
 
-theorem _root_.GlobalTheory.T.finrank_local_field_eq_card_decomposition_group : ∀ (l : ℕ) [Fact l.Prime] (E : Type) [Field E] [NumberField E] (c : E →+* PadicAlgCl l) [IsGalois ℚ E] (v : HeightOneSpectrum (𝓞 E)), (∀ x : 𝓞 E, x ∈ v.asIdeal ↔ ‖c (x : E)‖ < 1) → Module.finrank ℚ_[l] (IntermediateField.adjoin ℚ_[l] (Set.range c)) = Nat.card (MulAction.stabilizer (E ≃ₐ[ℚ] E) v.asIdeal) := by
-  first | exact @GlobalTheory.LocStab.finrank_adjoin_range_eq_card_stabilizer | exact GlobalTheory.LocStab.finrank_adjoin_range_eq_card_stabilizer | (intros; apply GlobalTheory.LocStab.finrank_adjoin_range_eq_card_stabilizer <;> assumption)
+theorem _root_.GlobalTheory.T.finrank_local_field_eq_card_decomposition_group : ∀ (l : ℕ) [Fact l.Prime] (E : Type) [Field E] [NumberField E] (c : E →+* PadicAlgCl l) [IsGalois ℚ E] (v : HeightOneSpectrum (𝓞 E)), (∀ x : 𝓞 E, x ∈ v.asIdeal ↔ ‖c (x : E)‖ < 1) → Module.finrank ℚ_[l] (IntermediateField.adjoin ℚ_[l] (Set.range c)) = Nat.card (MulAction.stabilizer (E ≃ₐ[ℚ] E) v.asIdeal) :=
+  @_root_.UpperTheory.HF.LocStab.finrank_adjoin_range_eq_card_stabilizer

@@ -311,7 +311,6 @@ theorem odeB : CompanionTheory.RgExh.Dec.N.OdeB := by
     rw [hFt, mul_assoc, hcan, mul_one] at h5
     linarith
 
-  have hCn : 0 ≤ C := setIntegral_nonneg measurableSet_Ioi fun t _ => hVn t
   have hbound : ∀ T, 0 ≤ T → ∫ t in (0 : ℝ)..T, U t ≤ (K ^ 2 + (1 / a) * C) / a := by
     intro T hT
     have hI : ∫ t in (0 : ℝ)..T, D t = ‖f T‖ ^ 2 * E T - ‖f 0‖ ^ 2 * E 0 := by

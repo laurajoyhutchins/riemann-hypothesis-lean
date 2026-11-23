@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.RelativeEquivalence.DCRelEquivAllHolds
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.NormRepresentationLift.ActsByFrameAct
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -70,33 +71,7 @@ theorem X_le_orth (F : LFlag S r T) : Xsp F ≤ orth S (Xsp F) := by
 
 theorem NLam_mul (Λ : Submodule (𝓞 E) S.V) (F : LFlag S r T) {n₁ n₂ : S.V ≃ₗ[E] S.V}
     (h₁ : n₁ ∈ NLam Λ F) (h₂ : n₂ ∈ NLam Λ F) : n₁ * n₂ ∈ NLam Λ F := by
-  simp only [NLam, IsAutLam, Set.mem_setOf_eq] at h₁ h₂ ⊢
-  obtain ⟨⟨hi₁, hg₁⟩, hf₁, ho₁⟩ := h₁
-  obtain ⟨⟨hi₂, hg₂⟩, hf₂, ho₂⟩ := h₂
-  refine ⟨⟨Subgroup.mul_mem _ hi₁ hi₂, ?_⟩, ?_, ?_⟩
-  · rw [gmap_eq_iff] at hg₁ hg₂ ⊢
-    refine ⟨fun y hy => hg₁.1 _ (hg₂.1 y hy), fun y hy => ?_⟩
-    obtain ⟨w₁, hw₁, rfl⟩ := hg₁.2 y hy
-    obtain ⟨w₂, hw₂, rfl⟩ := hg₂.2 w₁ hw₁
-    exact ⟨w₂, hw₂, rfl⟩
-  · intro j x hx
-    have h2 := hf₂ j x hx
-    have hmem : n₂ x ∈ Xflag F (j + 1) := by
-      have h3 := Submodule.add_mem _ (Xflag_mono F j h2) hx
-      rwa [sub_add_cancel] at h3
-    have h1 := hf₁ j (n₂ x) hmem
-    have h4 := Submodule.add_mem _ h1 h2
-    rw [sub_add_sub_cancel] at h4
-    exact h4
-  · intro x hx
-    have h2 := ho₂ x hx
-    have hmem : n₂ x ∈ orth S (Xsp F) := by
-      have h3 := Submodule.add_mem _ (X_le_orth F h2) hx
-      rwa [sub_add_cancel] at h3
-    have h1 := ho₁ (n₂ x) hmem
-    have h4 := Submodule.add_mem _ h1 h2
-    rw [sub_add_sub_cancel] at h4
-    exact h4
+  apply PI.DCRelEquiv.UnitaryGroupMassFormula.nlam_mul <;> assumption
 
 theorem modG_of_mem (Λ : Submodule (𝓞 E) S.V) (g : ℕ) {x : S.V}
     (hx : x ∈ Ideal.span {(g : 𝓞 E)} • Λ) : ModG S Λ g x := by

@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.HeightProofs.IsValLineLogNormAtIffEmbedding
 public import Development.AbelianVarietyTheory.Definitions.KeyFormula.KeyRuleOneOfKeyFormula
 public import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.DualRestrictSurjectiveOfIsTorsionFreeQuotient
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.EigLatBasis
@@ -191,24 +192,7 @@ theorem valAt'_rig {X : Scheme.{0}} {G : Over X} [GrpObj G] [IsCommMonObj G] {G'
     valAt' y ((L.pull (eSec G)).U fun _ => j) (r.s fun _ => j).val =
       valAt' (show Sp ℂ ⟶ _ from eSec G') ((L.pull φ).U (fun _ => j) ⊓ L'.U i) (w.s (fun _ => j, i)).val *
         valAt' (𝟙 (Sp ℂ)) ((L'.pull (eSec G')).U fun _ => i) (r'.s fun _ => i).val := by
-  have hm : ⊤ ≤ (𝟙 (Sp ℂ) : Sp ℂ ⟶ _) ⁻¹ᵁ (((L.pull φ).pull (eSec G')).U (fun _ _ => j) ⊓
-      (L'.pull (eSec G')).U fun _ => i) := fun p hq => ⟨mem_pull.2 (hp hq).1, mem_pull.2 (hp hq).2⟩
-  have e := congrArg (fun q => valAt' (𝟙 (Sp ℂ)) _ q.val) (h (fun _ _ => j, fun _ => i))
-  have l : valAt' (𝟙 (Sp ℂ)) _ (res (inf_le_left : ((L.pull φ).pull (eSec G')).U (fun _ _ => j) ⊓
-      (L'.pull (eSec G')).U (fun _ => i) ≤ _) ((rigPullOf φ y he L r).s fun _ _ => j)).val =
-      valAt' y ((L.pull (eSec G)).U fun _ => j) (r.s fun _ => j).val := by
-    refine (CubeValues.val_res _ valAt'_rules _ hm _).trans ((CubeValues.val_res _ valAt'_rules _
-      (top_le_preimage_mono _ inf_le_left hm) _).trans ((CubeValues.val_pullU _ valAt'_rules _ _ _).trans ?_))
-    rw [Category.id_comp]
-    rfl
-  refine l.symm.trans (e.trans ((valAt'_mul _ _ _ _).trans (congrArg₂ (· * ·) ?_
-    (CubeValues.val_res _ valAt'_rules _ hm _))))
-  dsimp only [LB.linCombIso, id]
-  erw [Fintype.prod_unique, zpow_one]
-  refine (CubeValues.val_res _ valAt'_rules _ hm _).trans ((CubeValues.val_pullU (𝟙 (Sp ℂ)) valAt'_rules
-    (show Sp ℂ ⟶ _ from eSec G') (((L.pull φ).div L').U (fun _ => j, i)) (w.s (fun _ => j, i))).trans ?_)
-  rw [Category.id_comp]
-  rfl
+  apply GlobalTheory.ArchMetricCompare.val_rig <;> assumption
 
 theorem exists_push_iff {X : Scheme.{0}} (A : Out.PolAV X) (A' : Out.PolAV (Sp ℂ)) {y : Sp ℂ ⟶ X}
     {φ : A'.A.left ⟶ A.A.left} (h : IsGrpPullback A'.A A.A y φ) (hL : LBIso A'.L (A.L.pull φ)) :

@@ -91,14 +91,6 @@ theorem length_torsionBy_quotient_divisible_le (O : Type) [CommRing O] [IsDomain
     (Submodule.subtype_injective _) hφ (LinearMap.exact_subtype_ker_map φ)
 
   obtain ⟨ϖ, hϖ⟩ := IsDiscreteValuationRing.exists_irreducible O
-  have hdvd_unit : ∀ c : O, ¬ ϖ ∣ c → IsUnit c := by
-    intro c hc
-    by_contra hnu
-    apply hc
-    have hmem := (IsLocalRing.mem_maximalIdeal c).mpr hnu
-    rw [(IsDiscreteValuationRing.irreducible_iff_uniformizer ϖ).mp hϖ,
-      Ideal.mem_span_singleton] at hmem
-    exact hmem
   obtain ⟨x, hx0, hxK, b, hb0, hbx⟩ := htor
   obtain ⟨m, u, rfl⟩ := IsDiscreteValuationRing.eq_unit_mul_pow_irreducible hb0 hϖ
   have hxm : ϖ ^ m • x = 0 := by

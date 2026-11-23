@@ -167,7 +167,6 @@ private lemma sum_inv_le_mul_sum_squarefree_inv_totient (Q q : ℕ) (hq : 1 ≤ 
     · apply dvd_mul_of_dvd_left
       rw [← hn.2]
       exact Finset.dvd_prod_of_mem _ (Finset.mem_filter.2 ⟨hp.mem_primeFactors hpn (by omega), hpq⟩)
-  have hf0' : (f:ℝ) ≠ 0 := by exact_mod_cast hf0.ne'
   calc ∑ n ∈ (Finset.Icc 1 Q).filter (fun n => g n = f), (1:ℝ) / n
       = ∑ m ∈ ((Finset.Icc 1 Q).filter (fun n => g n = f)).image (· / f), (1:ℝ) / (f * m) := by
         rw [Finset.sum_image]
@@ -189,12 +188,8 @@ private lemma sum_inv_le_mul_sum_squarefree_inv_totient (Q q : ℕ) (hq : 1 ≤ 
         rw [hN, mul_pow, ArithmeticFunction.isMultiplicative_sigma.map_mul_of_coprime hcop]
         have hA := totient_mul_sigma_pow_le_pow_succ Q f hf0
         have hB := totient_mul_sigma_pow_le_pow_succ Q q hq0
-        have hφf : (0:ℝ) < f.totient := by exact_mod_cast Nat.totient_pos.2 hf0
-        have hφq : (0:ℝ) < q.totient := by exact_mod_cast Nat.totient_pos.2 hq0
         have hA' : (f.totient : ℝ) * ArithmeticFunction.sigma 1 (f ^ Q) ≤ (f:ℝ) ^ (Q + 1) := by exact_mod_cast hA
         have hB' : (q.totient : ℝ) * ArithmeticFunction.sigma 1 (q ^ Q) ≤ (q:ℝ) ^ (Q + 1) := by exact_mod_cast hB
-        have hfpos : (0:ℝ) < f := by exact_mod_cast hf0
-        have hqpos : (0:ℝ) < q := by exact_mod_cast hq0
         push_cast
         rw [one_div_mul_eq_div, div_div, div_le_iff₀ (by positivity)]
         have hprod := mul_le_mul hA' hB' (by positivity) (by positivity)
@@ -379,8 +374,6 @@ private lemma sum_norm_sq_exp_sum_eq_mul_sum_residues (d : ℕ) (hd : 0 < d) (S 
           · have : ¬ (d:ℤ) ∣ ((r:ℤ) - s) := by
               intro ⟨j, hj⟩
               apply hrs
-              have h1 : (r:ℤ) - s < d := by omega
-              have h2 : -(d:ℤ) < (r:ℤ) - s := by omega
               have : j = 0 := by
                 rcases lt_trichotomy j 0 with h | h | h
                 · nlinarith
@@ -430,7 +423,6 @@ private lemma norm_sum_sq_le_pred_mul_of_avoids_class (p : ℕ) (hp : p.Prime) (
           · have : (1:ℝ) ≤ p := by exact_mod_cast hp.one_le
             linarith
           · exact Finset.erase_subset _ _
-  have hp1 : (1:ℝ) < p := by exact_mod_cast hp.one_lt
   have hB' : ∑ r ∈ Finset.range p, B r ^ 2 = ∑ r ∈ Finset.range p, ‖∑ n ∈ S.filter (fun n => n % p = r), b n‖ ^ 2 := rfl
   rw [← hB'] at hpar
   nlinarith [hcs, hpar, sq_nonneg ‖∑ n ∈ S, b n‖]
@@ -495,8 +487,6 @@ theorem _root_.GlobalTheory.arithmetic_large_sieve_one_class : ∀ (M N Q q : �
   have hZ0 : 0 ≤ Z := Nat.cast_nonneg _
   have hRHS : 0 ≤ (Q : ℝ) ^ 2 + 2 * Real.pi * N := by positivity
 
-  have hφq : (0:ℝ) < q.totient := by exact_mod_cast Nat.totient_pos.2 hq
-  have hqpos : (0:ℝ) < q := by exact_mod_cast hq
   have hlog : Real.log Q ≤ ∑ n ∈ Finset.Icc 1 Q, (1:ℝ) / n := by
     have h1 := log_add_one_le_harmonic Q
     rw [harmonic_eq_sum_Icc] at h1
@@ -557,7 +547,6 @@ theorem _root_.GlobalTheory.arithmetic_large_sieve_one_class : ∀ (M N Q q : �
       obtain ⟨-, u2, u3, -⟩ := hmemP u hu
       obtain ⟨-, v2, v3, -⟩ := hmemP v hv
       exact _root_.GlobalTheory.MultSieve.farey_spaced Q u.1 v.1 u.2 v.2 u2 v2 u3 v3 hxy k
-    have hQpos : (0:ℝ) < Q := by exact_mod_cast hQ
     have h := _root_.GlobalTheory.additive_large_sieve M N (fun n => if n ∈ S then (1:ℂ) else 0) T (1 / (Q:ℝ) ^ 2)
       (by positivity) (by rw [div_le_one (by positivity)]; exact one_le_pow₀ (by exact_mod_cast hQ)) hspaced
     rw [one_div_one_div, ← hsumU] at h

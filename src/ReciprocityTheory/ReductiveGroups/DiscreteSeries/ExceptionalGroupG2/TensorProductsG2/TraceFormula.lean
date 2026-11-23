@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.TraceFormula
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.StdGap
 public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.SmoothDefs
@@ -287,21 +288,7 @@ theorem eeF_formB_symm (dual : Bool) {H : Type*} [NormedAddCommGroup H] [InnerPr
     {σ : Matrix (Fin n) (Fin n) ℂ → (H →L[ℂ] H)} {D : Submodule ℂ H} {E : Fin n → Fin n → Module.End ℂ D}
     (hσ : IsURepOn (UJset ε) σ) (hD : IsDerivedOn ε σ D E) (f g : Fin n → D) :
     formB ε (eeF dual E f) g = formB ε f (eeF dual E g) := by
-  have hU : IsInfUnitary ε E := isInfUnitary_of_isDerivedOn hσ hD
-  have hU' : ∀ a b (x y : D), inner ℂ ((E a b x : D) : H) (y : H) = adjSign ε a b * inner ℂ (x : H) ((E b a y : D) : H) := by
-    intro a b x y
-    have := hU a b x y
-    simpa only [Submodule.coe_inner] using this
-  cases dual
-  · simp only [formB, eeF, cond_false, eeV_coord, tfa_inner_sum, tfa_inner_sum', mul_sum, hU']
-    rw [sum_comm]
-    refine sum_congr rfl fun r _ => sum_congr rfl fun s _ => ?_
-    rw [← mul_assoc, tfa_sign]
-  · simp only [formB, eeF, cond_true, eeVd_coord, Submodule.coe_neg, inner_neg_left, inner_neg_right,
-      tfa_inner_sum, tfa_inner_sum', mul_neg, mul_sum, hU', sum_neg_distrib]
-    rw [sum_comm]
-    refine congrArg _ (sum_congr rfl fun r _ => sum_congr rfl fun s _ => ?_)
-    rw [← mul_assoc, tfa_sign']
+  apply ReciprocityTheory.ChartRestriction.DS.eeF_formB_symm <;> assumption
 
 theorem eigenProj_formB (dual : Bool) {lam : Fin n → ℝ} {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H] {ε : Fin n → Bool}
     {σ : Matrix (Fin n) (Fin n) ℂ → (H →L[ℂ] H)} {D : Submodule ℂ H} {E : Fin n → Fin n → Module.End ℂ D}

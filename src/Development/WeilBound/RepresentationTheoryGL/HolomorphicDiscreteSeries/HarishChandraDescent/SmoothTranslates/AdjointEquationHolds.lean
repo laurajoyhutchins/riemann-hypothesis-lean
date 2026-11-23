@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.LaplaceFoundations.InvMulSelfOfMemIndefiniteUnitary
 public import Development.WeilBound.RepresentationTheoryGL.HolomorphicDiscreteSeries.HarishChandraDescent.Commutant
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -73,30 +74,7 @@ theorem isUnit_of_mem {ε : Fin n → Bool} {g : Matrix (Fin n) (Fin n) ℂ} (hg
 
 theorem inG_conj {ε : Fin n → Bool} {g X : Matrix (Fin n) (Fin n) ℂ} (hg : g ∈ UJset ε) (hX : inG ε X) :
     inG ε (g * X * g⁻¹) := by
-  have hg' : gᴴ * Jm ε * g = Jm ε := hg
-  have hX' : Xᴴ * Jm ε + Jm ε * X = 0 := hX
-  have hdet : IsUnit g.det := (Matrix.isUnit_iff_isUnit_det g).mp (isUnit_of_mem hg)
-  have hJ : (Jm ε)ᴴ = Jm ε := by
-    delta Jm
-    rw [Matrix.diagonal_conjTranspose]
-    congr 1
-    funext a
-    simp only [Pi.star_apply]
-    split_ifs <;> simp
-  have h1 : gᴴ * Jm ε = Jm ε * g⁻¹ := by
-    have h : gᴴ * Jm ε * g * g⁻¹ = Jm ε * g⁻¹ := by rw [hg']
-    rw [Matrix.mul_assoc (gᴴ * Jm ε), Matrix.mul_nonsing_inv g hdet, Matrix.mul_one] at h
-    exact h
-  have h2 : ∀ M : Matrix (Fin n) (Fin n) ℂ, Jm ε * (g * M) = (g⁻¹)ᴴ * (Jm ε * M) := by
-    intro M
-    have h := congrArg Matrix.conjTranspose h1
-    rw [Matrix.conjTranspose_mul, Matrix.conjTranspose_mul, hJ, Matrix.conjTranspose_conjTranspose] at h
-    rw [← Matrix.mul_assoc, h, Matrix.mul_assoc]
-  show (g * X * g⁻¹)ᴴ * Jm ε + Jm ε * (g * X * g⁻¹) = 0
-  rw [Matrix.conjTranspose_mul, Matrix.conjTranspose_mul]
-  simp only [Matrix.mul_assoc]
-  rw [h1, h2, ← Matrix.mul_add, ← Matrix.mul_assoc Xᴴ, ← Matrix.mul_assoc (Jm ε) X, ← Matrix.add_mul, hX',
-    Matrix.zero_mul, Matrix.mul_zero]
+  apply ReciprocityTheory.ChartRestriction.DS.Lap.Base.inG_conj_unitary <;> assumption
 
 theorem smooth_translate {ε : Fin n → Bool} {H : Type} [NormedAddCommGroup H] [InnerProductSpace ℂ H]
     {σ : Matrix (Fin n) (Fin n) ℂ → (H →L[ℂ] H)} (hσ : IsURepOn (UJset ε) σ) {g : Matrix (Fin n) (Fin n) ℂ}

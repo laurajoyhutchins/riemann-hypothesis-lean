@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.ExAtMemPairChartIff
 public import Development.AbelianVarietyTheory.Definitions.ThetaValues.ExistsUniqueSecIsFnAt
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.ThetaUnifAV
 import Development.AbelianVarietyTheory.Proofs.CubicalLineBundles.AppellHumbertTrivialOfNowhereVanishing
@@ -71,22 +72,7 @@ theorem exAt_mem_twist_chart_iff {m : T ⊗ A ⟶ A} {z w : Fin g → ℂ}
     (hw : exAt u p z ≫ m.left = (u.ex w).left) (j : Fin 2 → L.ι) :
     ⊤ ≤ exAt u p z ⁻¹ᵁ LB.wchart L ![(snd T A).left, m.left] j ↔
       ⊤ ≤ (u.ex z).left ⁻¹ᵁ L.U (j 0) ∧ ⊤ ≤ (u.ex w).left ⁻¹ᵁ L.U (j 1) := by
-  have h0 : exAt u p z ≫ (snd T A).left = (u.ex z).left := by
-    unfold exAt
-    rw [← Over.comp_left, lift_snd]
-  rw [← h0, ← hw]
-  constructor
-  · intro h
-    refine ⟨fun a _ => ?_, fun a _ => ?_⟩
-    · have ha := Set.mem_iInter.1 (h (show a ∈ (⊤ : (Sp ℂ).Opens) from trivial)) 0
-      simpa using ha
-    · have ha := Set.mem_iInter.1 (h (show a ∈ (⊤ : (Sp ℂ).Opens) from trivial)) 1
-      simpa using ha
-  · rintro ⟨h0', h1'⟩ a _
-    refine Set.mem_iInter.2 (fun k => ?_)
-    fin_cases k
-    · simpa using h0' (show a ∈ (⊤ : (Sp ℂ).Opens) from trivial)
-    · simpa using h1' (show a ∈ (⊤ : (Sp ℂ).Opens) from trivial)
+  apply GlobalTheory.ThetaFn.exAt_mem_pairChart_iff <;> assumption
 
 private theorem exists_algChart_mem_source (hL : L.IsLB) (f : Sp ℂ ⟶ A.left) : ∃ i, ⊤ ≤ f ⁻¹ᵁ L.U i := by
   obtain ⟨cover, -, -⟩ := hL

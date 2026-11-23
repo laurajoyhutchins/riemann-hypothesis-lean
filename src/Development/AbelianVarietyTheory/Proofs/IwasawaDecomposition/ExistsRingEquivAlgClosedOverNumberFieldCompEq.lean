@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.JetHarmonics.MkLeContinuumOfDenseRange
 public import Mathlib.NumberTheory.NumberField.Basic
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -71,27 +72,7 @@ open Cardinal
 theorem exists_ringEquiv_commutes (R K L : Type) [Field R] [Field K] [Field L] [IsAlgClosed K]
     [IsAlgClosed L] [Algebra R K] [Algebra R L] (hR : #R ≤ ℵ₀) (hK : ℵ₀ < #K) (hKL : #K = #L) :
     ∃ e : K ≃+* L, ∀ x : R, e (algebraMap R K x) = algebraMap R L x := by
-  classical
-
-  obtain ⟨s, hs⟩ := exists_isTranscendenceBasis R K
-  obtain ⟨t, ht⟩ := exists_isTranscendenceBasis R L
-  have hL : ℵ₀ < #L := hKL ▸ hK
-  have hs' : #K = #s :=
-    IsAlgClosed.cardinal_eq_cardinal_transcendence_basis_of_aleph0_lt' _ hs hR hK
-  have ht' : #L = #t :=
-    IsAlgClosed.cardinal_eq_cardinal_transcendence_basis_of_aleph0_lt' _ ht hR hL
-  obtain ⟨f⟩ : Nonempty (s ≃ t) := Cardinal.eq.1 (hs'.symm.trans (hKL.trans ht'))
-
-  let := IsAlgClosed.isAlgClosure_of_transcendence_basis _ hs
-  let := IsAlgClosed.isAlgClosure_of_transcendence_basis _ ht
-
-  let e₀ : Algebra.adjoin R (Set.range ((↑) : s → K)) ≃ₐ[R]
-      Algebra.adjoin R (Set.range ((↑) : t → L)) :=
-    hs.1.aevalEquiv.symm.trans ((MvPolynomial.renameEquiv R f).trans ht.1.aevalEquiv)
-  refine ⟨IsAlgClosure.equivOfEquiv K L e₀.toRingEquiv, fun x => ?_⟩
-  rw [IsScalarTower.algebraMap_apply R (Algebra.adjoin R (Set.range ((↑) : s → K))) K,
-    IsAlgClosure.equivOfEquiv_algebraMap, AlgEquiv.coe_ringEquiv,
-    AlgEquiv.commutes, ← IsScalarTower.algebraMap_apply]
+  apply GlobalTheory.PadicComplexIso.exists_ringEquiv_over <;> assumption
 
 theorem exists_ringEquiv_comp_eq :
     ∀ (K Ω₁ Ω₂ : Type) [Field K] [NumberField K] [Field Ω₁] [Field Ω₂] [IsAlgClosed Ω₁]

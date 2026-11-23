@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.CuspSpanNormBounds.BruhatCellsKronecker.NormAdditiveCharacterTypePrimeEqOne
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.SigLamLeOfKTypes
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.EquivariantL2Space
 import Mathlib.Algebra.Order.Floor.Extended
@@ -64,54 +65,7 @@ variable {n : ℕ}
 
 theorem cdom_antisymm {ε : Fin n → Bool} {μ Λ : Fin n → ℝ} (h₁ : Formalism.MainNotions.S.CDom ε μ Λ)
     (h₂ : Formalism.MainNotions.S.CDom ε Λ μ) : μ = Λ := by
-  classical
-  let L : (Fin n → ℝ) →ₗ[ℝ] ℝ := ∑ i : Fin n, ((i : ℕ) : ℝ) • LinearMap.proj i
-  have hL1 : ∀ a : Fin n, L (Pi.single a 1) = ((a : ℕ) : ℝ) := by
-    intro a
-    simp [L, LinearMap.sum_apply, Pi.single_apply]
-  have hLr : ∀ a b : Fin n, L (Formalism.REAL.root a b) = ((a : ℕ) : ℝ) - ((b : ℕ) : ℝ) := by
-    intro a b
-    simp only [Formalism.REAL.root, map_sub, hL1]
-  have key : ∀ {x y : Fin n → ℝ}, Formalism.MainNotions.S.CDom ε x y →
-      L (y - x) ≤ 0 ∧ (L (y - x) = 0 → y - x = 0) := by
-    intro x y ⟨c, hc, he⟩
-    have hterm : ∀ a b, (c a b : ℝ) * (((a : ℕ) : ℝ) - ((b : ℕ) : ℝ)) ≤ 0 := by
-      intro a b
-      by_cases h0 : c a b = 0
-      · simp [h0]
-      · have hab : ((a : ℕ) : ℝ) < ((b : ℕ) : ℝ) := by
-          exact_mod_cast (hc a b h0).1
-        exact mul_nonpos_of_nonneg_of_nonpos (Nat.cast_nonneg _) (sub_nonpos.mpr hab.le)
-    have hLe : L (y - x) = ∑ a, ∑ b, (c a b : ℝ) * (((a : ℕ) : ℝ) - ((b : ℕ) : ℝ)) := by
-
-      rw [he, map_sum]
-      refine Finset.sum_congr rfl fun a _ => ?_
-
-      rw [map_sum]
-      refine Finset.sum_congr rfl fun b _ => ?_
-      rw [map_smul, hLr, smul_eq_mul]
-    refine ⟨?_, fun h0 => ?_⟩
-    · rw [hLe]
-      exact Finset.sum_nonpos fun a _ => Finset.sum_nonpos fun b _ => hterm a b
-    · rw [hLe] at h0
-      have h1 := (Finset.sum_eq_zero_iff_of_nonpos fun a _ => Finset.sum_nonpos fun b _ => hterm a b).1 h0
-      rw [he]
-      refine Finset.sum_eq_zero fun a _ => Finset.sum_eq_zero fun b _ => ?_
-      have h2 := (Finset.sum_eq_zero_iff_of_nonpos fun b _ => hterm a b).1 (h1 a (Finset.mem_univ _)) b
-        (Finset.mem_univ _)
-      by_cases h0 : c a b = 0
-      · simp [h0]
-      · have hab : ((a : ℕ) : ℝ) < ((b : ℕ) : ℝ) := by
-          exact_mod_cast (hc a b h0).1
-        have hc0 : (0 : ℝ) < (c a b : ℝ) := by exact_mod_cast Nat.pos_of_ne_zero h0
-        exact ((mul_neg_of_pos_of_neg hc0 (sub_neg.mpr hab)).ne h2).elim
-  obtain ⟨k1, k1'⟩ := key h₁
-  obtain ⟨k2, -⟩ := key h₂
-  have : L (Λ - μ) = 0 := by
-    have : L (μ - Λ) = -L (Λ - μ) := by rw [← map_neg, neg_sub]
-    linarith
-  have := k1' this
-  exact (sub_eq_zero.1 this).symm
+  apply Formalism.MainNotions.BridgeLemma.cdom_antisymm <;> assumption
 
 theorem stdGap_of {ε : Fin n → Bool} {lam : Fin n → ℝ} {h : ℝ} (hlam : S7.IsHCParam lam)
     (hgap : GapAtLeast ε lam h) (hN : hNeed ε < h) : StdGap ε lam := by

@@ -46,6 +46,7 @@ import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.Exists
 public import Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsRationalUnitaryDeterminantMapRationalUnitaryTo
 import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.HasExponentZeroIff
 import Development.AutomorphicArithmetic.IntegralCasts.IsOpenStabOfMemNhds
+import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.InfCharOfCharOfHasInfQ
 
 @[expose] public section
 
@@ -113,18 +114,7 @@ theorem val_inert (h : IsEtaT H χ) {w : PlE H} (hw : ¬ IsSplitPl H w) : χ.val
 
 theorem val_split (h : IsEtaT H χ) {w w' : PlE H} (hw : IsSplitPl H w) (hc : IsConjPl H w w') :
     χ.val w * χ.val w' = 1 := by
-  classical
-  have e := above_eq hc
-  have hne : w ≠ w' := by
-    rintro rfl
-    obtain ⟨P, h1, h2⟩ := (GlobalTheory.Mem.GoodPlace.isSplitPl_iff H w).1 hw
-    have : P ∈ aboveF (L := H.E) H.F (w.under (𝓞 H.F)) := by simpa [aboveF] using h2
-    rw [e] at this
-    simp at this
-    exact h1 this.symm
-  have := prod_val h (w.under (𝓞 H.F))
-  rw [e, Finset.prod_pair hne, Finset.card_pair hne] at this
-  simpa using this
+  apply _root_.GlobalTheory.HeightCounting.TrueSide.val_split <;> assumption
 
 end Eta
 

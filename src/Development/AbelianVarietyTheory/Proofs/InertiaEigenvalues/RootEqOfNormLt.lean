@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CyclotomicIntegersEqWittZetaSubOne
 public import Formalism.LocalRingCardinality.AdicCompletionLocal.InstIsAdicCompleteOCSpanSingletonSetCast
 public import Development.AbelianVarietyTheory.Definitions.Foundations.HTBasis
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsAlgClosedTiltFieldAndValuationRing
@@ -73,60 +74,7 @@ variable {l : ℕ} [Fact l.Prime]
 theorem norm_coeff_le (K : FinExt l) (N : ℕ) (π : Om l)
     (hπ : ‖π‖ = (l : ℝ) ^ (-(1 : ℝ) / (N : ℝ))) (p : (↥(K0 K))[X])
     (hd : p.natDegree < N) (h1 : ‖aeval π p‖ ≤ 1) (a : ℕ) : ‖((p.coeff a : ↥(K0 K)) : Om l)‖ ≤ 1 := by
-  have hl1 : (1 : ℝ) < l := by exact_mod_cast (Fact.out : l.Prime).one_lt
-  have hl0 : (0 : ℝ) < l := by linarith
-  have hN : (0 : ℝ) < N := by exact_mod_cast (Nat.zero_le _).trans_lt hd
-  have key : ∀ i ∈ p.support, ∃ n : ℤ, ‖((p.coeff i : ↥(K0 K)) : Om l)‖ = (l : ℝ) ^ n ∧
-      ‖p.coeff i • π ^ i‖ = (l : ℝ) ^ ((n : ℝ) - (i : ℝ) / N) := by
-    intro i hi
-    have h0 : ((p.coeff i : ↥(K0 K)) : Om l) ≠ 0 := by
-      have := mem_support_iff.1 hi
-      exact fun h => this (Subtype.ext h)
-    obtain ⟨n, hn⟩ := GlobalTheory.UnramValue.norm_of_mem_unramified_subfield l K _ (p.coeff i).2 h0
-    refine ⟨n, hn, ?_⟩
-    change ‖((p.coeff i : ↥(K0 K)) : Om l) * π ^ i‖ = _
-    rw [norm_mul, norm_pow, hn, hπ, ← Real.rpow_natCast, ← Real.rpow_mul hl0.le,
-      ← Real.rpow_intCast, ← Real.rpow_add hl0]
-    congr 1
-    ring
-  have hpw : Set.Pairwise (p.support : Set ℕ)
-      (fun i k => ‖p.coeff i • π ^ i‖₊ ≠ ‖p.coeff k • π ^ k‖₊) := by
-    intro i hi k hk hik h
-    obtain ⟨n, -, hn⟩ := key i hi
-    obtain ⟨m, -, hm⟩ := key k hk
-    have h' : ‖p.coeff i • π ^ i‖ = ‖p.coeff k • π ^ k‖ := congrArg NNReal.toReal h
-    rw [hn, hm] at h'
-    have h2 := (Real.rpow_right_inj hl0 hl1.ne').1 h'
-    have h3 : ((n - m) * N : ℝ) = i - k := by
-      field_simp at h2
-      linarith
-    have h4 : ((n - m) * N : ℤ) = i - k := by exact_mod_cast h3
-    have hi' : i < N := (le_natDegree_of_mem_supp i hi).trans_lt hd
-    have hk' : k < N := (le_natDegree_of_mem_supp k hk).trans_lt hd
-    have h5 : (i : ℤ) - k = 0 := by
-      apply Int.eq_zero_of_abs_lt_dvd (m := N) ⟨n - m, by rw [← h4]; ring⟩
-      rw [abs_lt]; constructor <;> omega
-    omega
-  have hs : ∑ i ∈ p.support, p.coeff i • π ^ i = aeval π p := by
-    rw [aeval_eq_sum_range' (Nat.lt_succ_self _)]
-    apply Finset.sum_subset supp_subset_range_natDegree_succ
-    intro i _ hi
-    rw [notMem_support_iff.1 hi, zero_smul]
-  have h6 := IsUltrametricDist.nnnorm_sum_eq_sup_of_pairwise_ne hpw
-  rw [hs] at h6
-  by_cases ha : a ∈ p.support
-  · obtain ⟨n, hn, hn'⟩ := key a ha
-    have h7 : ‖p.coeff a • π ^ a‖₊ ≤ ‖aeval π p‖₊ := by
-      rw [h6]
-      exact Finset.le_sup (f := fun i => ‖p.coeff i • π ^ i‖₊) ha
-    have h8 : ‖p.coeff a • π ^ a‖ ≤ 1 := le_trans (by exact_mod_cast h7) h1
-    rw [hn', ← Real.rpow_zero (l : ℝ), Real.rpow_le_rpow_left_iff hl1] at h8
-    have ha' : (a : ℝ) < N := by exact_mod_cast (le_natDegree_of_mem_supp a ha).trans_lt hd
-    have h9 : (a : ℝ) / N < 1 := (div_lt_one hN).2 ha'
-    have h10 : n < 1 := by exact_mod_cast (by linarith : (n : ℝ) < 1)
-    rw [hn]
-    exact zpow_le_one_of_nonpos₀ hl1.le (by omega)
-  · rw [notMem_support_iff.1 ha]; simp
+  apply GlobalTheory.PrismS.Poly.norm_coeff_le <;> assumption
 
 theorem mem_of_mem_Ks (K : FinExt l) (j : ℕ) (hj : 1 ≤ j) (ζ : Om l) (hζ : IsPrimitiveRoot ζ (l ^ j))
     (R : Subring (Om l)) (hζR : ζ ∈ R) (h0 : ∀ c ∈ K0 K, ‖c‖ ≤ 1 → c ∈ R)

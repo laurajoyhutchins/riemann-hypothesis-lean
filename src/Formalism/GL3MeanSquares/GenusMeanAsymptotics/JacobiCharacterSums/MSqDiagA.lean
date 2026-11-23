@@ -1,5 +1,6 @@
 module
 
+import Formalism.SharpRestriction.GlobalSchurBounds.GlobalRankLatticeProofs.GenericFramesLetters
 public import Formalism.GL3MeanSquares.SecondEstimateOfIntervalHypothesis
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -195,24 +196,7 @@ lemma dA_vM_major (g : ℕ → ℝ) (hg0 : ∀ n, 0 ≤ g n) (hg : ∀ n, 1 ≤ 
   linarith
 
 lemma dA_sum_inv_le (N : ℕ) (hN : 1 ≤ N) : ∑ n ∈ Icc 1 N, (1 : ℝ) / n ≤ 1 + Real.log N := by
-  induction N with
-  | zero => omega
-  | succ M ih =>
-    rcases Nat.eq_zero_or_pos M with h | h
-    · subst h
-      simp
-    · rw [Finset.sum_Icc_succ_top (show 1 ≤ M + 1 by omega)]
-      have ih' := ih (by omega)
-      have hM : (0:ℝ) < M := Nat.cast_pos.mpr h
-      have hM1 : (M:ℝ) + 1 ≠ 0 := by positivity
-      have hlog : Real.log ((M:ℝ) / ((M:ℝ) + 1)) ≤ (M:ℝ) / ((M:ℝ) + 1) - 1 :=
-        Real.log_le_sub_one_of_pos (by positivity)
-      rw [Real.log_div hM.ne' hM1] at hlog
-      have e : (M:ℝ) / ((M:ℝ) + 1) - 1 = -(1 / ((M:ℝ) + 1)) := by
-        rw [div_sub_one hM1]
-        ring
-      push_cast
-      linarith
+  apply Formalism.MainNotions.UnusedSlot33.PrimeReciprocalSums.sum_inv_le <;> assumption
 
 lemma dA_sum_split (u : ℕ → ℝ) (hu : ∀ n, 0 ≤ u n) (hu1 : ∀ n, u n ≤ 1) (T : ℕ) (B : ℝ)
     (hB : ∀ M, T ≤ M → ∑ n ∈ Ioc T M, u n ≤ B) (M : ℕ) : ∑ n ∈ Icc 1 M, u n ≤ T + B := by

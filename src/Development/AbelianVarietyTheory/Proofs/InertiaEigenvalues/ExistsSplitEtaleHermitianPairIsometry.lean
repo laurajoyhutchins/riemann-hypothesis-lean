@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.EtaleHermitianPairStructureFacts
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.IsTestRep
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -66,27 +67,7 @@ variable {F E : Type} [NontriviallyNormedField F] [NontriviallyNormedField E] [N
   [Unram F E]
 
 theorem algebraMap_norm_eq_mul_star (z : E) : algebraMap F E (Algebra.norm F z) = z * star z := by
-  have h2 : Module.finrank F E = 2 := Unram.finrank_eq
-  haveI : FiniteDimensional F E := Module.finite_of_finrank_pos (by omega)
-  let σ : E ≃ₐ[F] E := AlgEquiv.ofRingEquiv (f := starRingAut)
-    (fun x => by rw [starRingAut_apply]; exact Unram.star_fix (E := E) x)
-  have hσz : ∀ y, σ y = star y := fun y => rfl
-  have hσ : (1 : E ≃ₐ[F] E) ≠ σ := by
-    obtain ⟨y, hy⟩ := Unram.star_ne (F := F) (E := E)
-    intro h
-    apply hy
-    rw [← hσz, ← h]
-    rfl
-  classical
-  have hle := AlgEquiv.card_le (F := F) (K := E)
-  have hge : ({1, σ} : Finset (E ≃ₐ[F] E)).card ≤ Fintype.card (E ≃ₐ[F] E) := Finset.card_le_univ _
-  rw [Finset.card_pair hσ] at hge
-  have hcard : Fintype.card (E ≃ₐ[F] E) = 2 := by omega
-  haveI : IsGalois F E := IsGalois.of_card_aut_eq_finrank F E (by rw [Nat.card_eq_fintype_card, hcard, h2])
-  have huniv : ({1, σ} : Finset (E ≃ₐ[F] E)) = Finset.univ :=
-    Finset.eq_univ_of_card _ (by rw [Finset.card_pair hσ, hcard])
-  rw [Algebra.norm_eq_prod_automorphisms, ← huniv, Finset.prod_pair hσ, hσz]
-  rfl
+  apply GlobalTheory.JR.EtFacts.normE <;> assumption
 
 def piCoord {ι : Type} [Fintype ι] (b : Module.Basis ι F E) (r : ℕ) :
     (Fin r → E) ≃ₗ[Fin r → F] (ι → (Fin r → F)) where

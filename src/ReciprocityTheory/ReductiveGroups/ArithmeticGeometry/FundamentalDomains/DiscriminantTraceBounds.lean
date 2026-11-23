@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.SquareIntegrability.SplitOA
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.FundamentalDomains.FundamentalDomainPointBound
 import Mathlib.Algebra.AffineMonoid.Basic
 import Mathlib.Algebra.Order.Floor.Extended
@@ -64,56 +65,7 @@ variable {E : Type} [Field E] [NumberField E]
 theorem norm_mul_discr_ge {x : E} (hx : x ≠ 0)
     (htr : ∀ β : 𝓞 E, ∃ m : ℤ, Algebra.trace ℚ E (x * β) = m) :
     1 ≤ |Algebra.norm ℚ x| * |(NumberField.discr E : ℚ)| := by
-  classical
-  have h10 : (1 : FractionalIdeal (𝓞 E)⁰ E) ≠ 0 := by
-    rw [← FractionalIdeal.coeIdeal_top, Ne, FractionalIdeal.coeIdeal_eq_zero]
-    exact top_ne_bot
-  have hD0 : FractionalIdeal.dual ℤ ℚ (1 : FractionalIdeal (𝓞 E)⁰ E) ≠ 0 :=
-    FractionalIdeal.dual_ne_zero ℤ ℚ h10
-  have hmem : x ∈ FractionalIdeal.dual ℤ ℚ (1 : FractionalIdeal (𝓞 E)⁰ E) := by
-    rw [FractionalIdeal.mem_dual h10]
-    intro a ha
-    obtain ⟨β, rfl⟩ := (FractionalIdeal.mem_one_iff _).mp ha
-    obtain ⟨m, hm⟩ := htr β
-    refine ⟨m, ?_⟩
-    rw [Algebra.traceForm_apply]
-    simpa using hm.symm
-  have hsp : FractionalIdeal.spanSingleton (𝓞 E)⁰ x ≤ FractionalIdeal.dual ℤ ℚ 1 :=
-    FractionalIdeal.spanSingleton_le_iff_mem.mpr hmem
-  have hdiff := coeIdeal_differentIdeal ℤ ℚ E (𝓞 E)
-  have hJ : FractionalIdeal.spanSingleton (𝓞 E)⁰ x *
-      (differentIdeal ℤ (𝓞 E) : FractionalIdeal (𝓞 E)⁰ E) ≤ 1 := by
-    rw [hdiff]
-    calc _ ≤ FractionalIdeal.dual ℤ ℚ (1 : FractionalIdeal (𝓞 E)⁰ E) *
-          (FractionalIdeal.dual ℤ ℚ (1 : FractionalIdeal (𝓞 E)⁰ E))⁻¹ := by
-            first
-            | exact mul_le_mul' hsp le_rfl
-            | exact mul_right_mono hsp
-            | exact FractionalIdeal.mul_right_mono _ hsp
-      _ = 1 := mul_inv_cancel₀ hD0
-  obtain ⟨I, hI⟩ := FractionalIdeal.le_one_iff_exists_coeIdeal.mp hJ
-  have hJ0 : FractionalIdeal.spanSingleton (𝓞 E)⁰ x *
-      (differentIdeal ℤ (𝓞 E) : FractionalIdeal (𝓞 E)⁰ E) ≠ 0 := by
-    refine mul_ne_zero (FractionalIdeal.spanSingleton_ne_zero_iff.mpr hx) ?_
-    rw [hdiff]
-    exact inv_ne_zero hD0
-  have hI0 : I ≠ ⊥ := by
-    rintro rfl
-    apply hJ0
-    rw [← hI]
-    simp
-  have hnorm := congrArg FractionalIdeal.absNorm hI
-  rw [FractionalIdeal.coeIdeal_absNorm, map_mul, FractionalIdeal.absNorm_span_singleton,
-    FractionalIdeal.coeIdeal_absNorm, NumberField.absNorm_differentIdeal E (𝓞 E)] at hnorm
-  have h1 : (1 : ℚ) ≤ (Ideal.absNorm I : ℚ) := by
-    exact_mod_cast Nat.one_le_iff_ne_zero.mpr (fun h => hI0 (Ideal.absNorm_eq_zero_iff.mp h))
-  rw [hnorm] at h1
-  have h2 : (((NumberField.discr E).natAbs : ℕ) : ℚ) = |(NumberField.discr E : ℚ)| := by
-    rw [Nat.cast_natAbs]
-    push_cast
-    rfl
-  rw [h2] at h1
-  exact h1
+  apply ReciprocityTheory.ChartRestriction.G.I2.so_norm_ge <;> assumption
 
 theorem abs_norm_eq_pow {x : E} {a : ℝ} (h : ∀ σ : E →+* ℂ, ‖σ x‖ = a) :
     |((Algebra.norm ℚ x : ℚ) : ℝ)| = a ^ finrank ℚ E := by

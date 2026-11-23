@@ -320,7 +320,6 @@ theorem fibreProper (z z' : Fin (2 * r + k + 1) → ℂ) (hstd : C2.Std k r z z'
   obtain ⟨K, hKdef⟩ : ∃ K : ℝ, K = Kf + R ^ 2 * Kf := ⟨_, rfl⟩
   have hK0 : 0 ≤ K := hKdef ▸ add_nonneg hKf0 (mul_nonneg (sq_nonneg _) hKf0)
   obtain ⟨Bv, hBv⟩ : ∃ Bv : ℝ, Bv = ∑ j, nsq (bvec j : Fin (2 * r + k + 1) → ℂ) := ⟨_, rfl⟩
-  have hBv0 : 0 ≤ Bv := hBv ▸ Finset.sum_nonneg fun a _ => by rw [← eN_sq]; positivity
 
   have hcols : ∀ (C : ℝ) (t : B.Mat k r), (∀ v, nsq (t *ᵥ v) ≤ C * (1 + K) ^ 2 * nsq v) →
       B.gN t ≤ Real.sqrt (C * (1 + K) ^ 2 * Bv) := fun C t ht => by

@@ -66,9 +66,6 @@ theorem isOpen_integral :
   | exact @_root_.GlobalTheory.IntegralOpen.isOpen_integral
   | exact _root_.GlobalTheory.IntegralOpen.isOpen_integral
   | (apply _root_.GlobalTheory.IntegralOpen.isOpen_integral <;> assumption)
-  | (intros; apply _root_.GlobalTheory.IntegralOpen.isOpen_integral <;> assumption)
-  | (intros; apply @_root_.GlobalTheory.IntegralOpen.isOpen_integral <;> first | assumption | infer_instance)
-  | (intros; exact _root_.GlobalTheory.IntegralOpen.isOpen_integral ..)
 
 theorem exists_nsmul_adele (U : Set (FiniteAdeleRing (𝓞 F) F)) (hU : U ∈ 𝓝 (0 : FiniteAdeleRing (𝓞 F) F)) :
     ∃ N : ℕ, 0 < N ∧ ∀ a : FiniteAdeleRing (𝓞 F) F, (∀ v, a v ∈ v.adicCompletionIntegers F) → N • a ∈ U := by
@@ -76,9 +73,6 @@ theorem exists_nsmul_adele (U : Set (FiniteAdeleRing (𝓞 F) F)) (hU : U ∈ �
   | exact @_root_.GlobalTheory.LocalNormBound.main
   | exact _root_.GlobalTheory.LocalNormBound.main
   | (apply _root_.GlobalTheory.LocalNormBound.main <;> assumption)
-  | (intros; apply _root_.GlobalTheory.LocalNormBound.main <;> assumption)
-  | (intros; apply @_root_.GlobalTheory.LocalNormBound.main <;> first | assumption | infer_instance)
-  | (intros; exact _root_.GlobalTheory.LocalNormBound.main ..)
 
 theorem nsmul_integral_mem_nhds (M : ℕ) (hM : 0 < M) :
     {c : FiniteAdeleRing (𝓞 F) F | ∃ a : FiniteAdeleRing (𝓞 F) F,
@@ -87,9 +81,6 @@ theorem nsmul_integral_mem_nhds (M : ℕ) (hM : 0 < M) :
   | exact @_root_.GlobalTheory.IntegralNeighbourhoodZero.nsmul_integral_mem_nhds_zero
   | exact _root_.GlobalTheory.IntegralNeighbourhoodZero.nsmul_integral_mem_nhds_zero
   | (apply _root_.GlobalTheory.IntegralNeighbourhoodZero.nsmul_integral_mem_nhds_zero <;> assumption)
-  | (intros; apply _root_.GlobalTheory.IntegralNeighbourhoodZero.nsmul_integral_mem_nhds_zero <;> assumption)
-  | (intros; apply @_root_.GlobalTheory.IntegralNeighbourhoodZero.nsmul_integral_mem_nhds_zero <;> first | assumption | infer_instance)
-  | (intros; exact _root_.GlobalTheory.IntegralNeighbourhoodZero.nsmul_integral_mem_nhds_zero ..)
 
 variable {E : Type} [Field E] [NumberField E] [Algebra F E] {n : ℕ}
 
@@ -102,9 +93,6 @@ theorem exists_denom (L : Submodule (𝓞 E) (Fin n → E))
   | exact @_root_.GlobalTheory.NatMulMemUnitaryExistence.target
   | exact _root_.GlobalTheory.NatMulMemUnitaryExistence.target
   | (apply _root_.GlobalTheory.NatMulMemUnitaryExistence.target <;> assumption)
-  | (intros; apply _root_.GlobalTheory.NatMulMemUnitaryExistence.target <;> assumption)
-  | (intros; apply @_root_.GlobalTheory.NatMulMemUnitaryExistence.target <;> first | assumption | infer_instance)
-  | (intros; exact _root_.GlobalTheory.NatMulMemUnitaryExistence.target ..)
 
 theorem isOpen_nsmul_hat : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [NumberField E] [Algebra F E] (n : ℕ) (L : Submodule (𝓞 E) (Fin n → E)), Submodule.span E (L : Set (Fin n → E)) = ⊤ → letI : TopologicalSpace (FiniteAdeleRing (𝓞 F) F ⊗[F] E) := moduleTopology (FiniteAdeleRing (𝓞 F) F) (FiniteAdeleRing (𝓞 F) F ⊗[F] E); (∀ N : ℕ, 0 < N → IsOpen {z : Fin n → RA F E | ∃ y ∈ hat F (L : Set (Fin n → E)), z = N • y}) ∧ ∀ W ∈ 𝓝 (0 : RA F E), ∃ N : ℕ, 0 < N ∧ ∀ y ∈ hat1 F (Set.range (algebraMap (𝓞 E) E)), N • y ∈ W := by
   intro F E _ _ _ _ _ n L hL

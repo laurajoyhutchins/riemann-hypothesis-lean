@@ -1,5 +1,6 @@
 module
 
+import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SemidirectVolume.ProjHA
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.LevelSplitting.SemiAlg
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -66,28 +67,7 @@ theorem uj_of_uni {A : Type} [CommRing A] {n : Type} [Fintype n] [DecidableEq n]
     (JA : Matrix n n A) (Mx : Matrix n n A)
     (h : ∀ x y, Formalism.UG.hform σA JA (Matrix.mulVec Mx x) (Matrix.mulVec Mx y) = Formalism.UG.hform σA JA x y) :
     Formalism.UG.cT σA Mx * JA * Mx = JA := by
-  classical
-  ext a b
-  have hcol : ∀ c, Mx.mulVec (Pi.single c (1 : A)) = fun i => Mx i c := by
-    intro c
-    funext i
-    rw [Matrix.mulVec_single]
-    simp
-  have h1 := h (Pi.single a 1) (Pi.single b 1)
-  rw [hcol, hcol] at h1
-  simp only [Formalism.UG.hform] at h1
-  rw [show (Formalism.UG.cT σA Mx * JA * Mx) a b = ∑ i, ∑ j, σA (Mx i a) * JA i j * Mx j b by
-    simp only [Matrix.mul_apply, Formalism.UG.cT, Matrix.transpose_apply, Matrix.map_apply,
-      Finset.sum_mul]
-    rw [Finset.sum_comm], h1]
-  have hs : ∀ i, σA ((Pi.single a (1 : A) : n → A) i) = (Pi.single a (1 : A) : n → A) i := by
-    intro i
-    by_cases hi : i = a
-    · subst hi
-      simp
-    · simp [Pi.single_eq_of_ne hi]
-  simp only [hs]
-  simp [Pi.single_apply]
+  apply PI.VolSemiDirect.W.uj_of_uni <;> assumption
 
 theorem toMatrix'_lin (g : HA R σ J) :
     LinearMap.toMatrix' (lin R σ J g) =

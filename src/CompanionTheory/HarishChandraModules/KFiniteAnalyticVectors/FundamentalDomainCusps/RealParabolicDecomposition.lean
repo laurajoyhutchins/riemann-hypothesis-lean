@@ -255,7 +255,6 @@ end Am
 
 theorem norm_mulVec_le (M : Matrix (Fin n) (Fin n) ℂ) (v : Fin n → ℂ) :
     ‖M *ᵥ v‖ ≤ (1 + ∑ i, ∑ j, ‖M i j‖) * ‖v‖ := by
-  have h0 : 0 ≤ ∑ i, ∑ j, ‖M i j‖ := Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ => norm_nonneg _
   refine (pi_norm_le_iff_of_nonneg (by positivity)).2 fun i => ?_
   calc ‖(M *ᵥ v) i‖ ≤ ∑ j, ‖M i j‖ * ‖v‖ :=
         (norm_sum_le Finset.univ fun j => M i j * v j).trans (Finset.sum_le_sum fun j _ => by

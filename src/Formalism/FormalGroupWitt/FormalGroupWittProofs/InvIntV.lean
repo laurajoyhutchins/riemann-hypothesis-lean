@@ -1,5 +1,6 @@
 module
 
+import Formalism.FormalGroupWitt.FormalGroupWittProofs.EqSingleOfDegreeEqOne
 public import Formalism.FormalGroupWitt.SubstInjectiveV
 public import Formalism.FormalGroupLog.FormalGroupLogProofs.ChainRule
 import Mathlib.Algebra.Order.Floor.Extended
@@ -117,38 +118,7 @@ end Basic
 
 theorem eq_single_of_degree_eq_one {ι : Type*} [Fintype ι] (e : ι →₀ ℕ)
     (he : e.degree = 1) : ∃ i, e = Finsupp.single i 1 := by
-  classical
-  have hd : e.degree = ∑ j ∈ e.support, e j := by
-    first
-      | rfl
-      | simp [Finsupp.degree]
-  rw [hd] at he
-  have hcard : e.support.card ≤ 1 := by
-    have h1 : ∑ j ∈ e.support, (1 : ℕ) ≤ ∑ j ∈ e.support, e j :=
-      Finset.sum_le_sum fun j hj => Nat.one_le_iff_ne_zero.mpr (Finsupp.mem_support_iff.mp hj)
-    rw [he, Finset.sum_const, smul_eq_mul, mul_one] at h1
-    exact h1
-  have hpos : e.support.Nonempty := by
-    rw [Finset.nonempty_iff_ne_empty]
-    intro h0
-    rw [h0, Finset.sum_empty] at he
-    omega
-  have hc1 : e.support.card = 1 := by
-    have := Finset.card_pos.mpr hpos
-    omega
-  obtain ⟨i, hi⟩ := Finset.card_eq_one.mp hc1
-  refine ⟨i, ?_⟩
-  rw [hi, Finset.sum_singleton] at he
-  ext j
-  by_cases hj : j = i
-  · rw [hj, he, Finsupp.single_eq_same]
-  · have hz : e j = 0 := by
-      by_contra hne
-      have hmem : j ∈ e.support := Finsupp.mem_support_iff.mpr hne
-      rw [hi, Finset.mem_singleton] at hmem
-      exact hj hmem
-    rw [hz]
-    simp [Finsupp.single_apply, Ne.symm hj]
+  apply Formalism.FG.InjVAux.eq_single_of_degree_eq_one <;> assumption
 
 theorem decomp {σ : Type*} [Fintype σ] [LinearOrder σ] (m : ℕ) (x : MvPowerSeries σ K)
     (hx : Low (m + 1) x) :

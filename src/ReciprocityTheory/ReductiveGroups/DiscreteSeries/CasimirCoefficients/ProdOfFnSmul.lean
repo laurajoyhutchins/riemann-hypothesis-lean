@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.RepresentationTheoryGL.SiegelWeilProof.HolomorphicContinuation.MollifiedIntegrability.GBInvar
 public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.LaplaceOperators.CapelliIdentity.CapelliCentralStatement
 import Mathlib.Algebra.Order.Floor.Extended
@@ -100,21 +101,7 @@ lemma coef_det (P : Matrix (Fin n) (Fin n) ℂ) (c : Fin n → Fin n) :
 
 lemma sum_fun_perm {M : Type*} [AddCommMonoid M] (f : (Fin n → Fin n) → M)
     (hf : ∀ c, ¬ Function.Injective c → f c = 0) : ∑ c, f c = ∑ τ : Equiv.Perm (Fin n), f τ := by
-  classical
-  have himg : ∑ τ : Equiv.Perm (Fin n), f τ =
-      ∑ c ∈ Finset.univ.image (fun τ : Equiv.Perm (Fin n) => (τ : Fin n → Fin n)), f c := by
-    rw [Finset.sum_image]
-    intro a _ b _ h
-    exact Equiv.ext (congrFun h)
-  rw [himg]
-  symm
-  apply Finset.sum_subset (Finset.subset_univ _)
-  intro c _ hc
-  apply hf
-  intro hinj
-  apply hc
-  rw [Finset.mem_image]
-  exact ⟨Equiv.ofBijective c (Finite.injective_iff_bijective.1 hinj), Finset.mem_univ _, rfl⟩
+  apply PositivityTheory.Rg.Sw.WR.K.GB.Inv.sum_perm_of_noninj <;> assumption
 
 theorem capelliC_ad (E : Fin n → Fin n → 𝒰) (hE : GlRelR E) (P Q : Matrix (Fin n) (Fin n) ℂ)
     (hQP : Q * P = 1) (hPQ : P * Q = 1) (x : ℂ) :

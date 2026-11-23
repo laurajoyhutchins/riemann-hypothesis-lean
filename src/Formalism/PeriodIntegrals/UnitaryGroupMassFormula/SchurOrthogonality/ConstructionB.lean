@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.CovolumeBounds.IntegralConjInnerMulInnerOfIsEmptyEquiv
 public import Formalism.PeriodIntegrals.UnitaryGroupMassFormula.SchurOrthogonality.InstMeasurableSpaceMat
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -80,28 +81,7 @@ instance compactSpace_unitaryGroup (N : ℕ) : CompactSpace (Matrix.unitaryGroup
 theorem isMulRightInvariant_of_compact {G : Type*} [Group G] [TopologicalSpace G]
     [IsTopologicalGroup G] [CompactSpace G] [MeasurableSpace G] [BorelSpace G]
     (μ : Measure G) [IsHaarMeasure μ] : IsMulRightInvariant μ := by
-  constructor
-  intro g
-  haveI : (Measure.map (fun x => x * g) μ).IsHaarMeasure := Measure.isHaarMeasure_map_mul_right μ g
-  have huniv : Measure.map (fun x => x * g) μ Set.univ = μ Set.univ := by
-    rw [Measure.map_apply (measurable_mul_const g) MeasurableSet.univ, Set.preimage_univ]
-  have hfin : μ Set.univ ≠ ⊤ := measure_ne_top μ _
-  have hpos : μ Set.univ ≠ 0 := (isOpen_univ.measure_pos μ Set.univ_nonempty).ne'
-  have hc : (Measure.map (fun x => x * g) μ).haarScalarFactor μ = 1 := by
-    have h1 := Measure.measure_isHaarMeasure_eq_smul_of_isOpen (Measure.map (fun x => x * g) μ) μ
-      isOpen_univ
-    rw [huniv, ENNReal.smul_def] at h1
-    have h2 : ((((Measure.map (fun x => x * g) μ).haarScalarFactor μ : NNReal) : ENNReal)) = 1 := by
-      have h3 : (((Measure.map (fun x => x * g) μ).haarScalarFactor μ : NNReal) : ENNReal) * μ Set.univ =
-          1 * μ Set.univ := by
-        rw [one_mul]
-        exact h1.symm
-      exact (ENNReal.mul_left_inj hpos hfin).mp h3
-    exact_mod_cast h2
-  refine MeasureTheory.ext_of_generate_finite {s : Set G | IsOpen s}
-    BorelSpace.measurable_eq isPiSystem_isOpen ?_ huniv
-  intro s hs
-  rw [Measure.measure_isHaarMeasure_eq_smul_of_isOpen _ μ hs, hc, one_smul]
+  apply GlobalTheory.isMulRightInvariant_of_compactSpace <;> assumption
 
 theorem unitary_haar_measure : HaarU := by
   intro N

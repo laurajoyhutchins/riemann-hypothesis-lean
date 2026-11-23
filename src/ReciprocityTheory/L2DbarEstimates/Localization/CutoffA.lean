@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.L2DbarEstimates.Localization.LocalizeA
 public import ReciprocityTheory.L2DbarEstimates.Localization.UnweightBackStatement
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -131,46 +132,12 @@ theorem cut_cs (n : ℕ) (a b : Fin n → ℂ) :
 theorem cut_d_congr {M : Type*} [TopologicalSpace M] (n : ℕ) (z : M → V n)
     (hz : IsLocalHomeomorph z) (j : Fin n) (f g : M → ℂ) (x : M) (h : f =ᶠ[𝓝 x] g) :
     d n z j f x = d n z j g x := by
-  unfold d
-  split_ifs with hc
-  · have hs := Classical.choose_spec hc
-    generalize Classical.choose hc = e at hs ⊢
-    obtain ⟨hch, hxs⟩ := hs
-    have hzx : z x = e x := hch hxs
-    have ht : Tendsto e.symm (𝓝 (e x)) (𝓝 x) := by
-      first
-      | exact e.tendsto_symm hxs
-      | (have h0 := e.continuousAt_symm (e.map_source hxs)
-         unfold ContinuousAt at h0
-         rwa [e.left_inv hxs] at h0)
-    have hev : f ∘ e.symm =ᶠ[𝓝 (z x)] g ∘ e.symm := by
-      rw [hzx]
-      exact h.comp_tendsto ht
-    unfold wd
-    rw [hev.fderiv_eq]
-  · rfl
+  apply ReciprocityTheory.L2DbarEstimates.F.loc_d_congr <;> assumption
 
 theorem cut_db_congr {M : Type*} [TopologicalSpace M] (n : ℕ) (z : M → V n)
     (hz : IsLocalHomeomorph z) (j : Fin n) (f g : M → ℂ) (x : M) (h : f =ᶠ[𝓝 x] g) :
     db n z j f x = db n z j g x := by
-  unfold db
-  split_ifs with hc
-  · have hs := Classical.choose_spec hc
-    generalize Classical.choose hc = e at hs ⊢
-    obtain ⟨hch, hxs⟩ := hs
-    have hzx : z x = e x := hch hxs
-    have ht : Tendsto e.symm (𝓝 (e x)) (𝓝 x) := by
-      first
-      | exact e.tendsto_symm hxs
-      | (have h0 := e.continuousAt_symm (e.map_source hxs)
-         unfold ContinuousAt at h0
-         rwa [e.left_inv hxs] at h0)
-    have hev : f ∘ e.symm =ᶠ[𝓝 (z x)] g ∘ e.symm := by
-      rw [hzx]
-      exact h.comp_tendsto ht
-    unfold wdb
-    rw [hev.fderiv_eq]
-  · rfl
+  apply ReciprocityTheory.L2DbarEstimates.F.loc_db_congr <;> assumption
 
 theorem cut_d_eq_zero {M : Type*} [TopologicalSpace M] (n : ℕ) (z : M → V n)
     (hz : IsLocalHomeomorph z) (j : Fin n) (η : M → ℝ) (U : Set M) (hU : IsOpen U)

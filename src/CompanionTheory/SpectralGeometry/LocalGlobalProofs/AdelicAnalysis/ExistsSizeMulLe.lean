@@ -131,7 +131,6 @@ theorem exists_size_mul_le (b : Module.Basis (Fin d) F E) :
   obtain ⟨S₀, hS₀⟩ := (Set.finite_range (fun p : Fin d × Fin d × Fin d × InfinitePlace F =>
     ‖(algebraMap F (Ainf F) (b.repr (b p.1 * b p.2.1) p.2.2.1)) p.2.2.2‖)).bddAbove
   set S := |S₀| with hS
-  have hS0 : 0 ≤ S := abs_nonneg _
   have hs : ∀ i j k v, ‖(algebraMap F (Ainf F) (b.repr (b i * b j) k)) v‖ ≤ S := fun i j k v =>
     (hS₀ ⟨(i, j, k, v), rfl⟩).trans (le_abs_self _)
   refine ⟨(d : ℝ) * d * S, by positivity, fun x y => ?_⟩

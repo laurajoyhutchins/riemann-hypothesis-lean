@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.AlternatingDifferenceTermWindow
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DltEqZero
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.ExistsIsIntegralSmallElementPowSmulStatement
 public import Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.IsIntegralOrIsIntegralInvInFieldFactorStatement
@@ -113,33 +114,7 @@ theorem isIntegral_pow_smul (a : K.O) (n : ℕ) {x : B.A} (hx : IsIntegral K.O x
 
 theorem not_isIntegral_inv_smul (a : K.O) (ha : K.Small a) {f : B.A} (hf : IsIdempotentElem f)
     (hf0 : f ≠ 0) : ¬ IsIntegral K.O ((al K a ^ (-1 : ℤ)) • f) := by
-  intro h
-  let I : Ideal B.A := Ideal.span {1 - f}
-  have hI : I ≠ ⊤ := by
-    intro hT
-    have : (1 : B.A) ∈ I := hT ▸ Submodule.mem_top
-    obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.1 this
-    apply hf0
-    calc f = f * (c * (1 - f)) := by rw [hc, mul_one]
-      _ = c * (f - f * f) := by ring
-      _ = 0 := by rw [hf.eq, sub_self, mul_zero]
-  haveI : Nontrivial (B.A ⧸ I) := Ideal.Quotient.nontrivial_iff.2 hI
-  have hmk : Ideal.Quotient.mk I f = 1 := by
-    rw [← map_one (Ideal.Quotient.mk I), eq_comm, Ideal.Quotient.eq]
-    exact Ideal.subset_span rfl
-  have h2 : IsIntegral K.O (algebraMap K.E (B.A ⧸ I) (al K a ^ (-1 : ℤ))) := by
-    have := h.map (Ideal.Quotient.mkₐ K.O I)
-    rwa [Ideal.Quotient.mkₐ_eq_mk, Algebra.smul_def, map_mul, hmk, mul_one,
-      Ideal.Quotient.mk_algebraMap] at this
-  have h3 : IsIntegral K.O (al K a ^ (-1 : ℤ)) :=
-    (isIntegral_algHom_iff (IsScalarTower.toAlgHom K.O K.E (B.A ⧸ I))
-      (algebraMap K.E (B.A ⧸ I)).injective).1 h2
-  obtain ⟨t, ht⟩ := IsIntegrallyClosed.isIntegral_iff.1 h3
-  have hne := al_ne a ha
-  have h4 : algebraMap K.O K.E (a * t) = algebraMap K.O K.E 1 := by
-    rw [map_mul, ht, map_one, zpow_neg_one]; exact mul_inv_cancel₀ hne
-  have h5 : a * t = 1 := IsFractionRing.injective K.O K.E h4
-  exact (IsLocalRing.mem_maximalIdeal a).1 ha.2.1 (⟨⟨a, t, h5, by rw [mul_comm]; exact h5⟩, rfl⟩)
+  apply GlobalTheory.UnitLemma.Desc.Window.not_isIntegral_inv_smul_idem <;> assumption
 
 theorem smul_mem_of_adjoin (M : Submodule K.O B.A) (hM : ∀ y ∈ M, B.g * y ∈ M) {s : B.A}
     (hs : s ∈ Algebra.adjoin K.O {B.g}) : ∀ m ∈ M, s * m ∈ M := by

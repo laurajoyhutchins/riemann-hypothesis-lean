@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.DerivativeOfProductInducedIso
 public import Development.WeilBound.RepresentationTheoryGL.GenericUnitaryGL.LeibnizOrders.LeibnizOrd
 public import Development.AbelianVarietyTheory.Proofs.TwistedOperators.ParabolicProductTwoRepsEquivTwoBlockInduction
 import Development.AbelianVarietyTheory.Definitions.Divisors.T2SpaceGeneralLinearGroup
@@ -156,22 +157,7 @@ theorem det_levi (n : ℕ) (g : GL (Fin n) k) :
   exact GlobalTheory.CompanionTheory.MirPsiPair.det_glEmbMat n _
 
 theorem det_unip (n : ℕ) (v : Multiplicative (Fin n → k)) : GeneralLinearGroup.det (unip k n v) = 1 := by
-  ext
-  show (1 + colMat k n v.toAdd : Matrix (Fin (n + 1)) (Fin (n + 1)) k).det = 1
-  rw [Matrix.det_of_upperTriangular]
-  · refine Finset.prod_eq_one fun i _ => ?_
-    by_cases hi : i = Fin.last n
-    · subst hi
-      simp [colMat]
-    · simp [colMat, hi]
-  · intro a b hab
-    have hb : b ≠ Fin.last n := fun h => by
-      subst h
-      exact absurd (Fin.le_last a) (not_le.2 hab)
-    have hne : a ≠ b := fun h => by
-      subst h
-      exact lt_irrefl _ hab
-    simp [colMat, hb, Matrix.one_apply, hne]
+  apply GlobalTheory.CompanionTheory.BZPsiPG.Norm.det_unip' <;> assumption
 
 theorem dpowM_levi (n : ℕ) (s : ℝ) (g : GL (Fin n) k) :
     dpowM n s (levi k n g) = dpow n s g := by

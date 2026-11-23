@@ -78,7 +78,6 @@ private theorem final_ineqK (A B ε c₀ c₃ A₀ C₀ L u lm ℓm ℓ : ℝ) (
   have h16 : 0 ≤ (B + 1) ^ 2 / c₃ * L ^ 3 := by positivity
   have h17 : 0 ≤ A * L ^ 3 := by positivity
   have h18 : 0 ≤ (B + 1) * L ^ 3 := by positivity
-  have hu2' : (A / 4 + (B + 1) ^ 2 / c₃ + 5 * (B + 1)) * L ^ 3 = A * L ^ 3 / 4 + (B + 1) ^ 2 / c₃ * L ^ 3 + 5 * ((B + 1) * L ^ 3) := by ring
   have hP0 : L ^ 2 * ℓ / 8 ≤ u := by
     have : L ^ 2 * ℓ ≤ L ^ 2 * (ℓm + A * L) := mul_le_mul_of_nonneg_left hℓ (by positivity)
     have e : L ^ 2 * (ℓm + A * L) = L ^ 2 * ℓm + A * L ^ 3 := by ring
@@ -93,14 +92,12 @@ private theorem final_ineqK (A B ε c₀ c₃ A₀ C₀ L u lm ℓm ℓ : ℝ) (
   refine ⟨?_, ?_, ?_, ?_⟩
   ·
     have hA : lm + 2 ≤ (6 + A) * Real.exp ((ε / 5 + 1) * L) := by
-      have ee : (ε / 5 + 1) * L = ε / 5 * L + L := by ring
       have hεL : 0 ≤ ε / 5 * L := by positivity
       have e1 : Real.exp (ε / 5 * L) ≤ Real.exp ((ε / 5 + 1) * L) := Real.exp_le_exp.mpr (by linarith)
       have e2 : L ≤ Real.exp ((ε / 5 + 1) * L) := by
         have := Real.add_one_le_exp L
         have : Real.exp L ≤ Real.exp ((ε / 5 + 1) * L) := Real.exp_le_exp.mpr (by linarith)
         linarith
-      have e3 : 1 ≤ Real.exp ((ε / 5 + 1) * L) := Real.one_le_exp (by positivity)
       have e4 := mul_le_mul_of_nonneg_left e2 hA0.le
       linarith
     have hB : Real.log (lm + 2) ≤ Real.log (6 + A) + (ε / 5 + 1) * L := by
@@ -116,8 +113,6 @@ private theorem final_ineqK (A B ε c₀ c₃ A₀ C₀ L u lm ℓm ℓ : ℝ) (
         have : Real.log (6 + A) ≤ Real.log (6 + A) * L := by nlinarith
         linarith
       have h5 := mul_le_mul_of_nonneg_right hL5 hL0.le
-      have e5 : |C₀| * ((Real.log (6 + A) + ε / 5 + 1) * L) = (8 * |C₀| * (Real.log (6 + A) + ε / 5 + 1) * L) / 8 := by ring
-      have e6 : L ^ 2 / 8 = L * L / 8 := by ring
       linarith
     calc C₀ * lm * Real.log (lm + 2) ≤ |C₀| * lm * Real.log (lm + 2) := by
           apply mul_le_mul_of_nonneg_right _ hlog0
@@ -351,13 +346,9 @@ theorem twistK :
   have hρ0 : 0 < ρ := by positivity
   set k : ℝ := A₀ * ρ with hk
   have hkabs : |k| = |A₀| * ρ := by rw [hk, abs_mul, abs_of_pos hρ0]
-  have hk2 : 2 * |k| ≤ η / 8 := by rw [hkabs, ← mul_assoc]; exact f3
   have hk' : |k| ≤ 1 / 2 := by linarith
   set r : ℝ := 4 * Real.log X * Real.exp (-(c₀ / Real.log Z * Real.log X)) with hr
   have hr0 : 0 ≤ r := by positivity
-  have hr4 : 4 * r ≤ η / 8 := by
-    have : 4 * r = 16 * Real.log X * Real.exp (-(c₀ / Real.log Z * Real.log X)) := by rw [hr]; ring
-    rw [this]; exact f2
   have hr' : r ≤ 1 / 2 := by linarith
   have hli : 0 < liX X := lt_of_lt_of_le (by positivity) (liX_lower hX4)
   have hb : ∀ b ∈ clsB m₀ s a₀, |(piAP X (m₀ * s) b : ℝ) - mainAP (E (m₀ * s)) b X| ≤
@@ -389,7 +380,6 @@ theorem twistK :
     rw [e, e2]
     exact mul_le_mul_of_nonneg_left hcount (Real.exp_pos _).le
   have hP0 : 0 ≤ P := Nat.cast_nonneg _
-  have hd0 : 0 ≤ d := (Real.exp_pos _).le
   have ha4 : 4 * r + 2 * |k| ≤ η / 4 := by linarith
   have t1 : (4 * r + 2 * |k|) * (P + X ^ (1 / 2 : ℝ)) ≤ η / 4 * (P + d * P) :=
     mul_le_mul ha4 (by linarith) (add_nonneg hP0 (Real.rpow_nonneg hXp.le _)) (by linarith)
@@ -399,8 +389,6 @@ theorem twistK :
   rw [hxη]
   have : η / 4 * (P + d * P) = η / 4 * P + η / 4 * (d * P) := by ring
   have hηP : 0 ≤ η * P := mul_nonneg hη0 hP0
-  have e3 : η / 4 * (1 / 4 * P) = η * P / 16 := by ring
-  have e4 : η / 4 * P = η * P / 4 := by ring
   linarith
 
 end QH

@@ -1,5 +1,6 @@
 module
 
+import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.PdPBotPos
 public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.StCocycle
 public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartDividedPowersGradedConstantStatement
 public import Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ChartIsGoodStatement
@@ -53,25 +54,7 @@ namespace GlobalTheory.CompanionTheory.GrForm.FrameEx
 
 theorem dividedPowerFiltration_dividedPowersBot (O : Type) [CommRing O] {n : ℕ} (hn : n ≠ 0) :
     pdP (dividedPowersBot O) n = ⊥ := by
-  refine le_bot_iff.1 (Ideal.span_le.2 ?_)
-  rintro _ ⟨l, hl, hr, rfl⟩
-  have hpos : ∃ p ∈ l, p.1 ≠ 0 := by
-    by_contra hne
-    push_neg at hne
-    have : (l.map Prod.fst).sum = 0 := by
-      refine List.sum_eq_zero ?_
-      intro x hx
-      obtain ⟨p, hp, rfl⟩ := List.mem_map.1 hx
-      exact hne p hp
-    omega
-  obtain ⟨p, hp, hp0⟩ := hpos
-  have h0 : p.2 = 0 := by simpa using hl p hp
-  have : (dividedPowersBot O).dpow p.1 p.2 = 0 := by
-    rw [h0]; exact (dividedPowersBot O).dpow_eval_zero hp0
-  have hz : (l.map fun q => (dividedPowersBot O).dpow q.1 q.2).prod = 0 :=
-    List.prod_eq_zero (List.mem_map.2 ⟨p, hp, this⟩)
-  rw [hz]
-  exact Ideal.zero_mem _
+  apply GlobalTheory.CompanionTheory.BcLoc.dividedPowerFiltration_dividedPowersBot' <;> assumption
 
 variable {O : Type} [CommRing O] {X : Scheme.{0}} {q : X ⟶ Spec (CommRingCat.of O)}
 

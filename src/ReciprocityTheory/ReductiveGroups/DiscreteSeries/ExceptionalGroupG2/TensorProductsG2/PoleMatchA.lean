@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.PoleMatchA
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.StdGap
 public import Formalism.SharpRestriction.CuspSpanNormBounds.RelevantZeroGramTerms
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.DiscreteSeriesExistence.SmoothDefs
@@ -90,20 +91,7 @@ theorem pm_agree (A : Module.End ℂ W) (T : Submodule ℂ W) (B : Finset ℝ)
       ∀ (Q : Module.End ℂ W) (z : ℂ), (∀ f ∈ T, A f = z • f → Q f = f) →
         (∀ f ∈ T, ∀ z' : ℂ, z' ≠ z → A f = z' • f → Q f = 0) →
         ∀ f ∈ T, Q f = ∑ b ∈ B, if ((b : ℝ) : ℂ) = z then P b f else 0 := by
-  have hPb : ∀ fb : ℝ → W, (∀ b, fb b ∈ T ∧ A (fb b) = ((b : ℝ) : ℂ) • fb b) →
-      ∀ b ∈ B, P b (∑ b' ∈ B, fb b') = fb b := by
-    intro fb hfb b hb
-    rw [pm_proj_decomp A (P b) T B _ (hP1 b) (hP0 b) fb hfb]
-    simp [Complex.ofReal_inj, hb]
-  refine ⟨fun f hf k => ?_, fun Q z hQ1 hQ0 f hf => ?_⟩
-  · obtain ⟨fb, hfb, rfl⟩ := hdec f hf
-    rw [map_sum (A ^ k) fb B]
-    refine Finset.sum_congr rfl fun b hb => ?_
-    rw [hPb fb hfb b hb, pm_pow_eig A (hfb b).2]
-  · obtain ⟨fb, hfb, rfl⟩ := hdec f hf
-    rw [pm_proj_decomp A Q T B z hQ1 hQ0 fb hfb]
-    refine Finset.sum_congr rfl fun b hb => ?_
-    rw [hPb fb hfb b hb]
+  apply ReciprocityTheory.ChartRestriction.DS.pm_agree <;> assumption
 
 end Generic
 

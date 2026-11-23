@@ -1,8 +1,8 @@
 module
 
+import CompanionTheory.AutomorphicTheory.ThetaDilations.OrbitAdelic
 public import Development.WeilBound.CoreStatements.ThetaDilations.IsOpenCoset
 public import CompanionTheory.SpectralGeometry.LocalGlobalProofs.AdelicAnalysis.FiniteAdeleTopologyStatement
-public import Development.WeilBound.CoreStatements.ThetaDilations.SqPosOfNe
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
 import Mathlib.Algebra.Order.Interval.Basic
@@ -96,21 +96,6 @@ theorem orbit_adelic [MeasurableSpace (A F)] {ψ : AddChar (A F) ℂ} {h : A F} 
     ∃ (L' : AddSubgroup (ι → A F)) (s : Finset (ι → A F)) (C : ℝ), CO L' ∧ ∀ k : SL(2, A F), (∀ i j, k i j ∈ Oh F) →
       ∀ T, Impl ψ h B μ k T → (∀ u, ‖T φ u‖ ≤ C) ∧
         ∃ c : (ι → A F) → ℂ, (∀ a, ‖c a‖ ≤ C) ∧ T φ = ∑ a ∈ s, c a • ind a L' := by
-  have hD := H.2.2.2.2.2
-  obtain ⟨L, L', hL, hL', -, h0, hinv⟩ := sb_level hD hφ
-  obtain ⟨L₂, hL₂, hK⟩ := co_cpt hD ((co_LN (F := F) (ι := ι) one_pos).1.image (continuous_const_smul h))
-  obtain ⟨N, hN, hsub⟩ := LN_small (((hL'.2.inter (co_perp hD hL).2).inter (co_perp hD hL₂).2).mem_nhds
-    ⟨⟨L'.zero_mem, (perpG hD L).zero_mem⟩, (perpG hD L₂).zero_mem⟩)
-  refine orbit_bd H (Oh F) (co_LN hN) (fun a ha x hx i => ?_) hφ fun x hx y hy => funext fun u => ?_
-  · obtain ⟨y, hy, e⟩ := hx i
-    exact ⟨a * y, oh_mul ha hy, by rw [Pi.smul_apply, e, smul_eq_mul, mul_left_comm]⟩
-  · have h1 : chiB ψ B (h • x) y = 1 := (hsub hy).2 _ (hK ⟨x, fun i => by
-      obtain ⟨z, hz, e⟩ := hx i
-      exact ⟨N * z, oh_mul (oh_nat N) hz, by rw [e, Nat.cast_one, one_mul]⟩, rfl⟩)
-    rw [chiB, smul_dotProduct, smul_eq_mul] at h1
-    rw [Heisenberg₂, hinv u x (hsub hx).1.1, AddChar.map_add_eq_mul, h1, mul_one]
-    by_cases hu : u ∈ L
-    · rw [show ψ (u ⬝ᵥ (B *ᵥ y)) = 1 from (hsub hy).1.2 u hu, one_mul]
-    · rw [h0 u hu, mul_zero]
+  apply _root_.CompanionTheory.PlacePermOperatorBicommutantSpan.orbit_adelic <;> assumption
 
 end PositivityTheory.PlacePermOperatorBicommutantSpan

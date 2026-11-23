@@ -114,9 +114,6 @@ theorem exists_repr : ∀ (F E : Type) [Field F] [NumberField F] [Field E] [Numb
       by_contra hc
       push_neg at hc
       exact hdet (by rw [show T = 0 from Matrix.ext hc, Matrix.det_zero])
-    have hne : i ≠ j := by
-      rintro rfl
-      exact hij (hd i)
     refine ⟨2, Pi.single i (σ (T i j)⁻¹) + Pi.single j 1, two_ne_zero, ?_⟩
     have hji : T j i = σ (T i j) := (hH j i).symm
     have hs : σ (σ (T i j)⁻¹) = (T i j)⁻¹ := sig_sig hσ _

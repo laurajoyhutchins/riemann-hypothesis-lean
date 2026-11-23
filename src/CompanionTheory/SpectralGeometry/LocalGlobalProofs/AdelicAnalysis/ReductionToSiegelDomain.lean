@@ -112,8 +112,6 @@ theorem reduction : ∀ (F : Type) [Field F] [NumberField F], IsTotallyReal F �
   set n := Fintype.card (InfinitePlace F) with hn
   set A : ℝ := |C₁| + 1 with hAdef
   set B : ℝ := |C₂| + 1 with hBdef
-  have hA : 0 < A := by positivity
-  have hB : 0 < B := by positivity
   set P : ℝ := 1 / (A ^ n * B ^ 2) with hPdef
   have hP : 0 < P := by positivity
   refine ⟨s, κ, κ * min 1 P, hκ, mul_pos hκ (lt_min one_pos hP), ?_⟩

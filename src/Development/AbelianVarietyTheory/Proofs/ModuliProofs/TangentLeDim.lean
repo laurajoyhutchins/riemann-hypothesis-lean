@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DegenerationProofs.CmFieldHostElementAddConjEqOne
 public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.IsGaloisCover
 public import Development.AbelianVarietyTheory.Definitions.ModuliSpaces.ExistsArBaseAway
 public import ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.BirationalGeometry.ToroidalCompactification.SabPull
@@ -118,30 +119,7 @@ end Group
 variable {E : Type} [Field E] [NumberField E] [IsCMField E]
 
 theorem cmHostUnit_add_conj_eq_one (H : Host E) : H.w0 + H.bar H.w0 = 1 := by
-  have h1 : H.bar H.rt ^ 2 = H.rt ^ 2 := by
-    rw [← map_pow, H.rt_sq, map_neg, map_natCast]
-  have h2 : 2 * H.bar H.w0 = 1 + H.bar H.rt := by
-    have := congrArg H.bar H.two_weight_eq_one_add_root
-    simpa [map_ofNat] using this
-  have h3 : H.bar H.rt = -H.rt := by
-    rcases sq_eq_sq_iff_eq_or_eq_neg.1 h1 with e | e
-    · exfalso
-      have e' : IsCMField.complexConj E (H.rt : E) = H.rt := by rw [← H.bar_eq, e]
-      obtain ⟨φ⟩ : Nonempty (E →+* ℂ) := inferInstance
-      have c := IsCMField.complexEmbedding_complexConj E φ (H.rt : E)
-      rw [e'] at c
-      have r : φ (H.rt : E) ^ 2 = -(H.d : ℂ) := by
-        have := congrArg (fun z : 𝓞 E => φ (z : E)) H.rt_sq
-        simpa using this
-      obtain ⟨x, hx⟩ := Complex.conj_eq_iff_real.1 c.symm
-      rw [hx] at r
-      have r' : x ^ 2 = -(H.d : ℝ) := by exact_mod_cast r
-      have : (0 : ℝ) < H.d := by exact_mod_cast H.d_prime.pos
-      nlinarith [sq_nonneg x]
-    · exact e
-  have : (2 : 𝓞 E) * (H.w0 + H.bar H.w0) = 2 * 1 := by
-    rw [mul_add, h2, H.two_weight_eq_one_add_root, h3]; ring
-  exact mul_left_cancel₀ two_ne_zero this
+  apply GlobalTheory.Ex.Arch.AbVal.cmField_host_element_add_conj_eq_one <;> assumption
 
 theorem spMap_comp {R R' R'' : Type} [CommRing R] [CommRing R'] [CommRing R''] (f : R →+* R') (g : R' →+* R'')
     (h : R →+* R'') (e : g.comp f = h) : spMap g ≫ spMap f = spMap h := by

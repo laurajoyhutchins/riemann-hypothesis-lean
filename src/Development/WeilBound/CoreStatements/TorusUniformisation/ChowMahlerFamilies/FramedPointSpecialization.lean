@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.CoreStatements.PluriharmonicCharts.FderivValueZero
 public import Development.AutomorphicSpectrum.Definitions.GlobalGeometry.IsConstMul
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.EigenFrameFieldExtension
 public import Development.AutomorphicSpectrum.Proofs.GeometryProofs.EigenFrameIffEigenspaceBasis
@@ -59,40 +60,7 @@ namespace PositivityTheory.Xgn.FramedPointSpecialization
 
 theorem exists_embedding (K k : Type) [Field K] [Field k] [Countable K] [Countable k] (β : K →+* k) (s : K →+* ℂ) :
     ∃ j : k →+* ℂ, j.comp β = s := by
-  letI := β.toAlgebra
-  letI := s.toAlgebra
-  obtain ⟨ι, x, hx⟩ := exists_isTranscendenceBasis' K k
-  obtain ⟨κ, z, hz⟩ := exists_isTranscendenceBasis' K ℂ
-  have hι : Countable ι := hx.1.injective.countable
-  have hκ : Cardinal.mk ℂ = Cardinal.mk κ := by
-    have := IsAlgClosed.cardinal_eq_cardinal_transcendence_basis_of_aleph0_lt' z hz
-      (Cardinal.mk_le_aleph0_iff.2 inferInstance) (by rw [Cardinal.mk_complex]; exact Cardinal.aleph0_lt_continuum)
-    exact this
-  have hle : Cardinal.mk ι ≤ Cardinal.mk κ := by
-    rw [← hκ, Cardinal.mk_complex]
-    exact (Cardinal.mk_le_aleph0_iff.2 hι).trans Cardinal.aleph0_le_continuum
-  obtain ⟨e⟩ := hle
-  have hz' : AlgebraicIndependent K (z ∘ e) := hz.1.comp e e.injective
-  letI : Algebra (MvPolynomial ι K) k := (MvPolynomial.aeval x : MvPolynomial ι K →ₐ[K] k).toRingHom.toAlgebra
-  letI : Algebra (MvPolynomial ι K) ℂ := (MvPolynomial.aeval (z ∘ e) : MvPolynomial ι K →ₐ[K] ℂ).toRingHom.toAlgebra
-  haveI : FaithfulSMul (MvPolynomial ι K) k := (faithfulSMul_iff_algebraMap_injective _ _).2 hx.1
-  haveI : FaithfulSMul (MvPolynomial ι K) ℂ := (faithfulSMul_iff_algebraMap_injective _ _).2 hz'
-  haveI : Algebra.IsAlgebraic (MvPolynomial ι K) k := by
-    haveI := hx.isAlgebraic
-    exact Algebra.IsAlgebraic.of_ringHom_of_comp_eq (S := Algebra.adjoin K (Set.range x)) (B := k) hx.1.aevalEquiv
-      (RingHom.id k) hx.1.aevalEquiv.surjective Function.injective_id
-      (RingHom.ext fun p => hx.1.algebraMap_aevalEquiv p)
-  let j : k →ₐ[MvPolynomial ι K] ℂ := (by
-    refine @_root_.IsAlgClosed.lift _ _ _ _ _ _ _ _ _ _ _ ?_ ?_ ?_
-    solve_by_elim* (maxDepth := 2) only [*,
-      @_root_.DivisionSemiring.to_moduleIsTorsionFree,
-      @_root_.Algebra.IsIntegral.isAlgebraic, @_root_.inferInstance])
-  refine ⟨j.toRingHom, RingHom.ext fun a => ?_⟩
-  have h := j.commutes (MvPolynomial.C a)
-  have h1 : algebraMap (MvPolynomial ι K) k (MvPolynomial.C a) = β a := MvPolynomial.aeval_C x a
-  have h2 : algebraMap (MvPolynomial ι K) ℂ (MvPolynomial.C a) = s a := MvPolynomial.aeval_C (z ∘ e) a
-  rw [h1, h2] at h
-  exact h
+  apply PositivityTheory.Xgp.c_bm_exists_period.exists_embedding <;> assumption
 
 theorem exists_countable_field {X : Scheme.{0}} {K F : Type} [CommRing K] [Countable K] [Field F] (s : X ⟶ Sp K)
     [LocallyOfFiniteType s] (y : Sp F ⟶ X) :

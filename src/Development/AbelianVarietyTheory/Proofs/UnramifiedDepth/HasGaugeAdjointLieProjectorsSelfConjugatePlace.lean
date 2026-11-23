@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.LimitIdempotentRangeLeSumEigenspaces
 public import Formalism.LocalToGlobal.CharacterGerms.RowTieSelf
 public import Development.AbelianVarietyTheory.Definitions.TeichmullerDepth.HasTeich
 public import Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ExistsIntegralEndOfLadicActionLimitStatement
@@ -72,21 +73,7 @@ theorem eq_zero_of_ge {x : C} (h : ∀ N : ℕ, V.Ge N x) : x = 0 := by
   linarith
 
 theorem exists_lower {κ : Type} [Fintype κ] (v : κ → C) : ∃ m : ℕ, ∀ i, V.Ge (-(m : ℝ)) (v i) := by
-  have h1 : ∀ x : C, ∃ m : ℕ, V.Ge (-(m : ℝ)) x := by
-    intro x
-    unfold VF.Ge
-    induction V.v x using WithTop.recTopCoe with
-    | top => exact ⟨0, le_top⟩
-    | coe t =>
-      obtain ⟨N, hN⟩ := exists_nat_gt (-t)
-      refine ⟨N, ?_⟩
-      have : -(N : ℝ) ≤ t := by linarith
-      exact_mod_cast this
-  choose f hf using fun i => h1 (v i)
-  refine ⟨∑ i, f i, fun i => (hf i).mono ?_⟩
-  have : f i ≤ ∑ i, f i := Finset.single_le_sum (fun _ _ => Nat.zero_le _) (Finset.mem_univ i)
-  have : (f i : ℝ) ≤ ((∑ i, f i : ℕ) : ℝ) := by exact_mod_cast this
-  linarith
+  apply GlobalTheory.IdemRange.exists_lower_vec <;> assumption
 
 theorem ge_mulVec {κ : Type} [Fintype κ] {A : Matrix κ κ C} (hA : ∀ i j, V.Ge 0 (A i j)) {m : ℝ} {v : κ → C}
     (hv : ∀ i, V.Ge m (v i)) (i : κ) : V.Ge m (A.mulVec v i) :=

@@ -1,5 +1,6 @@
 module
 
+import Formalism.LocalToGlobal.GroupLattices.ComparisonMaps.CmpCMemFunMod
 public import Formalism.SharpRestriction.GrowthBounds.SelectionLemmas
 public import Formalism.GradedWeylDivisibility.DualWeylDominanceOf
 public import Formalism.GradedWeylDivisibility.FinalD
@@ -2760,22 +2761,7 @@ theorem jd_fmem (G : GAtP p) (Hv : G.P.Tup → Submodule G.O G.P.Xsp) (F : G.Fn)
       (∀ L, G.P.IsLatTup L → F i L ∈ Hv L) ∧ (∀ L, ¬ G.P.IsLatTup L → F i L = 0) ∧
       ∀ (γ : (G.lev i).Γ) (L : G.P.Tup),
         F i ((G.lev i).smul γ L) = ((G.lev i).χ γ : G.O) • (G.lev i).actX γ (F i L) := by
-  unfold GAtP.funMod
-  rw [Submodule.mem_pi]
-  constructor
-  · intro hF i
-    have h : F i ∈ (G.lev i).funMod Hv := hF i (Set.mem_univ i)
-    unfold Level.funMod at h
-    simp only [Submodule.mem_inf, Submodule.mem_iInf, Submodule.mem_comap, LinearMap.mem_ker,
-      LinearMap.proj_apply, LinearMap.sub_apply, LinearMap.comp_apply, LinearMap.smul_apply,
-      LinearMap.restrictScalars_apply, sub_eq_zero] at h
-    exact ⟨h.1.1, h.1.2, fun γ L => h.2 γ L⟩
-  · intro hF i _
-    unfold Level.funMod
-    simp only [Submodule.mem_inf, Submodule.mem_iInf, Submodule.mem_comap, LinearMap.mem_ker,
-      LinearMap.proj_apply, LinearMap.sub_apply, LinearMap.comp_apply, LinearMap.smul_apply,
-      LinearMap.restrictScalars_apply, sub_eq_zero]
-    exact ⟨⟨(hF i).1, (hF i).2.1⟩, fun γ L => (hF i).2.2 γ L⟩
+  apply Formalism.L2.G.Cmp.mem_funMod_iff <;> assumption
 
 theorem jd_mem (G : GAtP p) (h1 : G.TrivStab) (Hv : G.P.Tup → Submodule G.O G.P.Xsp) (hE : EquivSys G Hv)
     (i : G.comp) (L0 : G.P.Tup) (hL0 : G.P.IsLatTup L0) (ξ : G.P.Xsp) (hξ : ξ ∈ Hv L0) :
@@ -3250,23 +3236,7 @@ theorem js_mem (G : GAtP p) (Hv : G.P.Tup → Submodule G.O G.P.Xsp) (F : G.Fn) 
       (∀ L, ¬ G.P.IsLatTup L → F i L = 0) ∧
       ∀ (γ : (G.lev i).Γ) (L : G.P.Tup),
         F i ((G.lev i).smul γ L) = ((G.lev i).χ γ : G.O) • (G.lev i).actX γ (F i L) := by
-  have key : ∀ i : G.comp, F i ∈ (G.lev i).funMod Hv ↔ ((∀ L, G.P.IsLatTup L → F i L ∈ Hv L) ∧
-      (∀ L, ¬ G.P.IsLatTup L → F i L = 0) ∧
-      ∀ (γ : (G.lev i).Γ) (L : G.P.Tup),
-        F i ((G.lev i).smul γ L) = ((G.lev i).χ γ : G.O) • (G.lev i).actX γ (F i L)) := by
-    intro i
-    unfold Level.funMod
-    simp only [Submodule.mem_inf, Submodule.mem_iInf, Submodule.mem_comap, LinearMap.mem_ker,
-      LinearMap.proj_apply, LinearMap.sub_apply, LinearMap.comp_apply, LinearMap.smul_apply,
-      LinearMap.restrictScalars_apply, sub_eq_zero]
-    exact and_assoc
-  unfold GAtP.funMod
-  rw [Submodule.mem_pi]
-  constructor
-  · intro h i
-    exact (key i).1 (h i (Set.mem_univ i))
-  · intro h i _
-    exact (key i).2 (h i)
+  apply Formalism.L2.G.Cmp.mem_funMod_iff <;> assumption
 
 theorem js_div (G : GAtP p) (v0 : Fin G.P.nV) (T : G.P.Tup → Submodule G.O G.P.Xsp) (E : ℕ) (W : G.Fn)
     (hW : W ∈ G.funMod T)

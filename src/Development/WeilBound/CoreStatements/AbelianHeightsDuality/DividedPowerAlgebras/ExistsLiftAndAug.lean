@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLiftAndAugmentationMap
 public import Development.AbelianVarietyTheory.Definitions.Divisors.RatBasisLinearIndependentInt
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -81,45 +82,6 @@ theorem exists_lift_and_aug : ∀ (B : Type) [CommRing B] (Q : PDPoly B),
       (∀ m n, c m * c n = ((m + n).choose m : C) * c (m + n)) →
       ∃ F : Q.P →+* C, (∀ b, F (algebraMap B Q.P b) = f b) ∧ ∀ n, F (Q.e n) = c n) ∧
     ∃ ε : Q.P →ₐ[B] B, ∀ p, p ∈ Q.aug ↔ ε p = 0 := by
-  intro B _ Q
-  refine ⟨fun C _ f c h0 hm ↦ ?_, ?_⟩
-  · letI := f.toAlgebra
-    exact ⟨(liftAlg Q c h0 hm).toRingHom, fun b ↦ (liftAlg Q c h0 hm).commutes b,
-      fun n ↦ liftAlg_e Q c h0 hm n⟩
-  · let d : ℕ → B := fun n ↦ if n = 0 then 1 else 0
-    have h0 : d 0 = 1 := by simp [d]
-    have hm : ∀ m n, d m * d n = ((m + n).choose m : B) * d (m + n) := by
-      intro m n
-      by_cases hm : m = 0 <;> by_cases hn : n = 0 <;> simp [d, hm, hn]
-    let ε := liftAlg Q d h0 hm
-    have hε : ∀ n, ε (Q.e n) = d n := liftAlg_e Q d h0 hm
-    have hmem : ∀ p, p - algebraMap B Q.P (ε p) ∈ Q.aug := by
-      intro p
-      have hp : p ∈ Submodule.span B (Set.range Q.e) := by rw [Q.e.span_eq]; trivial
-      induction hp using Submodule.span_induction with
-      | mem x hx =>
-        obtain ⟨n, rfl⟩ := hx
-        rw [hε]
-        rcases n with _ | n
-        · simp [d, Q.e_zero]
-        · simpa [d] using e_succ_mem_aug Q n
-      | zero => simp
-      | add x y _ _ hx hy =>
-        have : x + y - algebraMap B Q.P (ε (x + y)) =
-            (x - algebraMap B Q.P (ε x)) + (y - algebraMap B Q.P (ε y)) := by
-          rw [map_add (f := _), map_add (f := _)]; abel
-        rw [this]; exact add_mem hx hy
-      | smul b x _ hx =>
-        have : b • x - algebraMap B Q.P (ε (b • x)) = algebraMap B Q.P b * (x - algebraMap B Q.P (ε x)) := by
-          rw [map_smul, smul_eq_mul, map_mul, Algebra.smul_def, mul_sub]
-        rw [this]; exact Q.aug.mul_mem_left _ hx
-    refine ⟨ε, fun p ↦ ⟨fun hp ↦ ?_, fun hp ↦ ?_⟩⟩
-    · have hle : Q.aug ≤ RingHom.ker ε := by
-        refine Ideal.span_le.2 ?_
-        rintro _ ⟨n, rfl⟩
-        simp [RingHom.mem_ker, hε, d]
-      exact RingHom.mem_ker.1 (hle hp)
-    · have := hmem p
-      rwa [hp, map_zero, sub_zero] at this
+  apply GlobalTheory.PDA.PDPoly.exists_lift_and_aug <;> assumption
 
 end FubiniStudyChowHeightFormula₂.Adr

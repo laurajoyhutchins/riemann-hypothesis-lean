@@ -1,5 +1,6 @@
 module
 
+import Development.EtaleCohomology.TateTwists.EtaleTensorUniversalPropertyOfDegreewise
 public import Development.AbelianVarietyTheory.Definitions.Divisors.SecClass
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleLocalPropertyCalculusRules
 public import Development.AbelianVarietyTheory.Proofs.DivisorProofs.EtaleSheafSectionsExtAndGlue
@@ -253,31 +254,7 @@ theorem sec_zero_of_isZero {F : Shv R} (hF : IsZero F) {U : Scheme.{0}} (a : Sec
 
 theorem part2 {I J K : Cx R} (τ : Pair I J K) (hτ : τ.IsTensor) (hI : I.IsStrictlyGE 0) (hJ : J.IsStrictlyGE 0) :
     K.IsStrictlyGE 0 := by
-  rw [CochainComplex.isStrictlyGE_iff] at hI hJ ⊢
-  intro w hw
-  have hz : ∀ (V : Scheme.{0}) (x : Tens I J V w), x = 0 := by
-    intro V x
-    induction x using tens_ind with
-    | h0 => rfl
-    | hadd x y hx hy => rw [hx, hy, add_zero]
-    | ht p a b =>
-      rcases lt_or_ge p.1.1 0 with h1 | h1
-      · rw [sec_zero_of_isZero (hI _ h1) a]
-        simp [tof]
-      · have h2 : p.1.2 < 0 := by have := p.2; omega
-        rw [sec_zero_of_isZero (hJ _ h2) b]
-        simp [tof]
-  have hsec : ∀ U (y : Sec (K.X w) U), y = 0 := by
-    intro U y
-    refine (sec_ext_glue R _ U).1 _ _ (loc_mono U _ _ (hτ.1 U w y) ?_)
-    rintro V g ⟨x, hx⟩
-    rw [← hx, hz V x, map_zero]
-    simp
-  rw [IsZero.iff_id_eq_zero]
-  apply shv_ext
-  intro U a
-  rw [hsec U a]
-  simp
+  apply LateralTheory.EtaleFoundations.TensUnivPf.part2 <;> assumption
 
 end GlobalTheory.EtC.TensUniv
 

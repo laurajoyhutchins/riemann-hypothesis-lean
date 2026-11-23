@@ -99,7 +99,6 @@ theorem ofF_ne_zero_iff {F E : Type} [Field F] [Field E] [Algebra F E] {M d : �
 
 theorem real_bound {C₀ c R : ℝ} (hc : 1 ≤ c) (hR : 0 < R) (a b : ℕ) :
     C₀ * ((c * R) ^ a + (c * R) ^ b) ≤ (|C₀| * (c ^ a + c ^ b)) * (R ^ a + R ^ b) := by
-  have hc0 : 0 < c := by linarith
   have ha : 0 < c ^ a := by positivity
   have hb : 0 < c ^ b := by positivity
   have hRa : 0 < R ^ a := by positivity

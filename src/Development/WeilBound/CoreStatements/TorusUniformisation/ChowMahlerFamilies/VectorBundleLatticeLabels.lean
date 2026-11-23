@@ -49,6 +49,7 @@ import Mathlib.Tactic.NormNum.RealSqrt
 import Development.AutomorphicSpectrum.Definitions.DivisibilityTowers.CompactGapsGE
 import Development.AutomorphicSpectrum.Proofs.GeometryProofs.IsLatFamilyCongr
 public import GroundTheory.HeightsAndTheta.Heights.DiscreteValuationNumbers.InstFintypeSumElim
+import Development.AutomorphicSpectrum.Proofs.GeometryProofs.GenericPointNormalCoords
 
 @[expose] public section
 
@@ -84,47 +85,12 @@ theorem genMap_germ {X : Scheme.{0}} {Ω : Type} [Field Ω] {ξ : Spec (CommRing
 theorem exists_eq_div_genMap {X : Scheme.{0}} {Ω : Type} [Field Ω] {ξ : Spec (CommRingCat.of Ω) ⟶ X}
     (hξ : IsCptGen ξ) (p : Cpt ξ) (a : Ω) :
     ∃ u v : X.presheaf.stalk p.1, genMap ξ p v ≠ 0 ∧ a = genMap ξ p u / genMap ξ p v := by
-  obtain ⟨U, hU, hpU, -⟩ := exists_isAffineOpen_mem_and_subset (x := p.1) (U := ⊤) trivial
-  have heU : genPt ξ ∈ U := p.2.mem_open U.isOpen hpU
-  obtain ⟨g, hg⟩ : ∃ g : X.presheaf.stalk (genPt ξ), (Scheme.stalkClosedPointTo ξ).hom g = a := hξ.bij.2 a
-  letI alg : Algebra Γ(X, U) (X.presheaf.stalk (genPt ξ)) :=
-    TopCat.Presheaf.algebra_section_stalk X.presheaf (⟨genPt ξ, heU⟩ : U)
-  have hloc : IsLocalization.AtPrime (X.presheaf.stalk (genPt ξ)) (hU.primeIdealOf ⟨genPt ξ, heU⟩).asIdeal :=
-    hU.isLocalization_stalk ⟨genPt ξ, heU⟩
-  obtain ⟨⟨f, h⟩, hfh⟩ := IsLocalization.surj (hU.primeIdealOf ⟨genPt ξ, heU⟩).asIdeal.primeCompl g
-  have hunit := IsLocalization.map_units (X.presheaf.stalk (genPt ξ)) h
-  let ψ : X.presheaf.stalk (genPt ξ) →+* Ω := (Scheme.stalkClosedPointTo ξ).hom
-  have germ_val : ∀ s : Γ(X, U), genMap ξ p ((X.presheaf.germ U p.1 hpU).hom s) =
-      (Scheme.stalkClosedPointTo ξ).hom (algebraMap Γ(X, U) (X.presheaf.stalk (genPt ξ)) s) :=
-    fun s => genMap_germ p hpU heU s
-  have hv : (Scheme.stalkClosedPointTo ξ).hom
-      (algebraMap Γ(X, U) (X.presheaf.stalk (genPt ξ)) (h : Γ(X, U))) ≠ 0 :=
-    (hunit.map (Scheme.stalkClosedPointTo ξ).hom).ne_zero
-  refine ⟨(X.presheaf.germ U p.1 hpU).hom f, (X.presheaf.germ U p.1 hpU).hom h, ?_, ?_⟩
-  · rw [germ_val]
-    exact hv
-  · rw [germ_val, germ_val, eq_div_iff hv, ← hg]
-    exact (map_mul ψ _ _).symm.trans (congrArg ψ hfh)
+  apply _root_.GlobalTheory.CompanionTheory.Ar.XR.exists_eq_div_genMap <;> assumption
 
 theorem normalCpt_of_isCptGen {X : Scheme.{0}} {Ω : Type} [Field Ω] {ξ : Spec (CommRingCat.of Ω) ⟶ X}
     (hξ : IsCptGen ξ)
     (hX : ∀ x : X, IsDomain (X.presheaf.stalk x) ∧ IsIntegrallyClosed (X.presheaf.stalk x)) : Flat.NormalCpt ξ := by
-  intro p a ha
-  obtain ⟨hd, hc⟩ := hX p.1
-  letI : Algebra (X.presheaf.stalk p.1) Ω := (genMap ξ p).toAlgebra
-  have hinj : Function.Injective (algebraMap (X.presheaf.stalk p.1) Ω) := hξ.inj p
-  haveI : FaithfulSMul (X.presheaf.stalk p.1) Ω := (faithfulSMul_iff_algebraMap_injective _ _).2 hinj
-  haveI : IsFractionRing (X.presheaf.stalk p.1) Ω := IsFractionRing.of_field _ _ fun z => by
-    obtain ⟨u, v, -, e⟩ := exists_eq_div_genMap hξ p z
-    exact ⟨u, v, e⟩
-  letI : Algebra (X.presheaf.stalk p.1) (regAt ξ p) := (genMap ξ p).rangeRestrict.toAlgebra
-  haveI : IsScalarTower (X.presheaf.stalk p.1) (regAt ξ p) Ω := IsScalarTower.of_algebraMap_eq fun _ => rfl
-  haveI : Algebra.IsIntegral (X.presheaf.stalk p.1) (regAt ξ p) :=
-    Algebra.IsIntegral.of_surjective (R := X.presheaf.stalk p.1) (A := X.presheaf.stalk p.1)
-      (Algebra.ofId _ _) (genMap ξ p).rangeRestrict_surjective
-  obtain ⟨b, hb⟩ := (IsIntegrallyClosed.isIntegral_iff (R := X.presheaf.stalk p.1) (K := Ω)).1
-    (isIntegral_trans (R := X.presheaf.stalk p.1) (A := regAt ξ p) a ha)
-  exact ⟨b, hb⟩
+  apply _root_.GlobalTheory.CompanionTheory.Ar.XR.normalCpt_of_isCptGen <;> assumption
 
 end PositivityTheory.Xgn.VectorBundleLabels
 

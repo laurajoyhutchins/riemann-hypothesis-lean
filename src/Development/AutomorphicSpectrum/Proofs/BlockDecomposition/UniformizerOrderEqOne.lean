@@ -1,5 +1,6 @@
 module
 
+import Development.AbelianVarietyTheory.Proofs.FoundationProofs.ValuationOfMemNotMemSq
 public import GroundTheory.GlobalFields.LocalFieldAtPlace
 public import GroundTheory.LocalFields.UnitsBasic
 public import Development.AbelianVarietyTheory.Proofs.DecoratedLatticeProofs.AdicCompletionValuationMapUniformiser
@@ -59,22 +60,7 @@ namespace GlobalTheory.CompanionTheory.Completion
 theorem valuation_eq_exp_neg_one_of_mem_of_notMem (F : Type) [Field F] [NumberField F]
     (v : HeightOneSpectrum (𝓞 F)) (ϖ : 𝓞 F) (h1 : ϖ ∈ v.asIdeal) (h2 : ϖ ∉ v.asIdeal ^ 2) :
     v.valuation F (ϖ : F) = WithZero.exp (-1 : ℤ) := by
-  have hval : v.valuation F (ϖ : F) = v.intValuation ϖ := v.valuation_of_algebraMap ϖ
-  rw [hval]
-  have hle : v.intValuation ϖ ≤ WithZero.exp (-((1 : ℕ) : ℤ)) :=
-    (v.intValuation_le_pow_iff_mem ϖ 1).2 (by simpa using h1)
-  have hnle : ¬ v.intValuation ϖ ≤ WithZero.exp (-((2 : ℕ) : ℤ)) :=
-    fun h => h2 ((v.intValuation_le_pow_iff_mem ϖ 2).1 h)
-  have hne : v.intValuation ϖ ≠ 0 := by
-    intro h
-    apply hnle
-    rw [h]
-    exact zero_le
-  rw [← WithZero.exp_log hne] at hle hnle ⊢
-  rw [WithZero.exp_le_exp] at hle hnle
-  congr 1
-  push_cast at hle hnle
-  omega
+  apply GlobalTheory.LFun.EulerTie.valuation_of_mem_notMem_sq <;> assumption
 
 theorem ord_algebraMap_eq_one : ∀ (F : Type) [Field F] [NumberField F] (v : HeightOneSpectrum (𝓞 F)) (ϖ : 𝓞 F), ϖ ∈ v.asIdeal → ϖ ∉ v.asIdeal ^ 2 → ord (algebraMap F (v.adicCompletion F) (ϖ : F)) = 1 := by
   intro F _ _ v ϖ h1 h2

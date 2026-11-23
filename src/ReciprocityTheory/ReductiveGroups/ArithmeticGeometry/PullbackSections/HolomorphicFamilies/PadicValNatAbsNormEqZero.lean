@@ -208,10 +208,6 @@ theorem padicValNat_absNorm_eq_sum (ℓ : ℕ) [Fact ℓ.Prime] {X : Ideal (𝓞
       = ∑ Q ∈ A ∪ B, (normalizedFactors X).count Q * padicValNat ℓ (Ideal.absNorm Q) := by
         apply Finset.sum_subset Finset.subset_union_left
         intro Q hQ hQA
-        have hQB : Q ∈ B := by
-          rcases Finset.mem_union.mp hQ with h | h
-          · exact absurd h hQA
-          · exact h
         have hc : (normalizedFactors X).count Q = 0 :=
           Multiset.count_eq_zero.mpr (fun h => hQA (Multiset.mem_toFinset.mpr h))
         rw [hc, zero_mul]

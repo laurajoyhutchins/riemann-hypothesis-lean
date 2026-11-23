@@ -1,5 +1,6 @@
 module
 
+import Development.EtaleCohomology.EtaleSheaves.KummerSequence.TwLocGenPfSec
 public import Development.EtaleCohomology.TateTwists.TwLocPfR
 import Mathlib.Algebra.Category.ModuleCat.FilteredColimits
 import Mathlib.Algebra.Order.Floor.Extended
@@ -106,35 +107,13 @@ theorem twF_single_pow (q : ℕ) [NeZero q] (i : ℤ) (A : CommRingCat.{0}) (ζ 
     (h : ξ.1 = ζ.1 ^ (a : ZMod q).val) (b : ULift.{1} (ZMod q)) :
     (Submodule.Quotient.mk (Finsupp.single ξ b) : (twF q i).obj A) =
       (b.down * ((a ^ i : (ZMod q)ˣ) : ZMod q)).val • (Submodule.Quotient.mk (Finsupp.single ζ 1) : (twF q i).obj A) := by
-  have hrel : (Submodule.Quotient.mk (Finsupp.single ξ 1) : (twF q i).obj A) =
-      Submodule.Quotient.mk (Finsupp.single ζ (ULift.up ((a ^ i : (ZMod q)ˣ) : ZMod q))) :=
-    (Submodule.Quotient.eq _).2 (Submodule.subset_span ⟨ζ, ξ, a, h, rfl⟩)
-  have e1 : Finsupp.single ξ b = b • Finsupp.single ξ (1 : ULift.{1} (ZMod q)) := by
-    rw [Finsupp.smul_single, smul_eq_mul, mul_one]
-  have e2 : Finsupp.single ζ (ULift.up ((a ^ i : (ZMod q)ˣ) : ZMod q)) =
-      (ULift.up ((a ^ i : (ZMod q)ˣ) : ZMod q)) • Finsupp.single ζ (1 : ULift.{1} (ZMod q)) := by
-    rw [Finsupp.smul_single, smul_eq_mul, mul_one]
-  rw [e1, Submodule.Quotient.mk_smul, hrel, e2, Submodule.Quotient.mk_smul, smul_smul]
-  exact ulift_smul_eq_nsmul _ _
+  apply LateralTheory.E.H2CurveOrder.TwLocGenPfSec.twF_single_pow <;> assumption
 
 theorem twF_loc (hZ : ZarPow) (q : ℕ) [NeZero q] (i : ℤ) (V : Scheme.{0}) (ζ : Prim q Γ(V, ⊤))
     (x : (twF q i).obj Γ(V, ⊤)) :
     Loc V fun W h => ∃ c : ℕ, ((twF q i).map h.appTop).hom x =
       c • (Submodule.Quotient.mk (Finsupp.single (ζ.map h.appTop.hom) 1) : (twF q i).obj Γ(W, ⊤)) := by
-  obtain ⟨f, rfl⟩ := Submodule.Quotient.mk_surjective _ x
-  induction f using Finsupp.induction with
-  | zero =>
-    refine loc_mono (loc_true V) fun W h _ => ⟨0, ?_⟩
-    rw [zero_smul, Submodule.Quotient.mk_zero]
-    exact map_zero ((twF q i).map h.appTop).hom
-  | single_add ξ b g _ _ ih =>
-    refine loc_mono (loc_and (hZ q V ζ ξ) ih) fun W h ⟨⟨a, ha⟩, ⟨c, hc⟩⟩ =>
-      ⟨(b.down * ((a ^ i : (ZMod q)ˣ) : ZMod q)).val + c, ?_⟩
-    rw [Submodule.Quotient.mk_add]
-    refine (map_add ((twF q i).map h.appTop).hom _ _).trans ?_
-    rw [hc, twF_map_mk, Finsupp.mapDomain_single,
-      twF_single_pow q i _ _ _ a ha b, add_smul]
-    rfl
+  apply LateralTheory.E.H2CurveOrder.TwLocGenPfSec.twF_loc <;> assumption
 
 theorem TwSecLoc_of (hZ : ZarPow) : LateralTheory.EtaleFoundations.TwLocPf.TwSecLoc := by
   intro q _ i U ζ y

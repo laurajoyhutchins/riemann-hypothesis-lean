@@ -1,5 +1,6 @@
 module
 
+import ReciprocityTheory.ReductiveGroups.DiscreteSeries.TensorRepresentations.DecompC
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.TensorProductsG2.DecompB
 public import ReciprocityTheory.ReductiveGroups.DiscreteSeries.ExceptionalGroupG2.StdGap
 public import Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.DcAevalIntertwineAlt
@@ -84,20 +85,7 @@ theorem dc_tensSub_mono {M : Type*} [AddCommGroup M] [Module ℂ M] {S T : Submo
 theorem dc_tens_kStable {M : Type*} [AddCommGroup M] [Module ℂ M] {E : Fin n → Fin n → Module.End ℂ M}
     (dual : Bool) {S : Submodule ℂ M} (hS : IsKStableSub ε E S) (a b : Fin n) (hab : ε a = ε b) :
     ∀ f ∈ tensSub S, tensF dual E a b f ∈ tensSub S := by
-  intro f hf
-  rw [dc_mem_tensSub] at hf ⊢
-  intro c
-  cases dual
-  · simp only [tensF, cond_false, tensV_coord]
-    refine S.add_mem (hS a b hab _ (hf c)) ?_
-    split_ifs
-    · exact hf b
-    · exact S.zero_mem
-  · simp only [tensF, cond_true, tensVd_coord]
-    refine S.sub_mem (hS a b hab _ (hf c)) ?_
-    split_ifs
-    · exact hf a
-    · exact S.zero_mem
+  apply ReciprocityTheory.ChartRestriction.DS.dc_tens_kStable <;> assumption
 
 theorem dc_genSub_stable' {M : Type*} [AddCommGroup M] [Module ℂ M] {E : Fin n → Fin n → Module.End ℂ M}
     {V : Submodule ℂ M} (a b : Fin n) {v : M} (hv : v ∈ genSub E V) : E a b v ∈ genSub E V := by
@@ -107,14 +95,7 @@ theorem dc_genSub_stable' {M : Type*} [AddCommGroup M] [Module ℂ M] {E : Fin n
 
 theorem dc_eeF_mem {M : Type*} [AddCommGroup M] [Module ℂ M] {E : Fin n → Fin n → Module.End ℂ M}
     {V : Submodule ℂ M} (dual : Bool) : ∀ f ∈ tensSub (genSub E V), eeF dual E f ∈ tensSub (genSub E V) := by
-  intro f hf
-  rw [dc_mem_tensSub] at hf ⊢
-  intro c
-  cases dual
-  · simp only [eeF, cond_false, eeV_coord]
-    exact Submodule.sum_mem _ fun r _ => dc_genSub_stable' _ _ (hf r)
-  · simp only [eeF, cond_true, eeVd_coord]
-    exact Submodule.neg_mem _ (Submodule.sum_mem _ fun r _ => dc_genSub_stable' _ _ (hf r))
+  apply ReciprocityTheory.ChartRestriction.DS.dc_eeF_mem <;> assumption
 
 theorem dc_eeF_comm {M : Type*} [AddCommGroup M] [Module ℂ M] {E : Fin n → Fin n → Module.End ℂ M}
     (hE : IsGlRep E) (dual : Bool) (a b : Fin n) (y : Fin n → M) :
@@ -152,36 +133,7 @@ theorem dc_core {Xs Ys : Type*} [NormedAddCommGroup Xs] [InnerProductSpace ℂ X
     (hgood : ∀ y ∈ S0, ∀ z ∈ LX, ψ0 y - z ∈ LXᗮ → ψ0 y - z ≠ 0 → ∀ μ : Fin n → ℝ,
       (∀ c, (p c).eval (μ c : ℂ) = 0) → IsKHWVec ε A μ (ψ0 y - z) → False) :
     ∀ y ∈ S0, ψ0 y ∈ LX := by
-  classical
-  haveI : CompleteSpace LX := FiniteDimensional.complete ℂ LX
-  have hcomm := fun a b (hab : ε a = ε b) x => starProjection_comm (S := LX) hU hLk hab x
-  let ψ : Ys →ₗ[ℂ] Xs := ψ0 - (LX.starProjection : Xs →ₗ[ℂ] Xs) ∘ₗ ψ0
-  have hψ : ∀ y, ψ y = ψ0 y - LX.starProjection (ψ0 y) := fun y => rfl
-  have hψi : ∀ a b, ε a = ε b → ∀ y, ψ (B a b y) = A a b (ψ y) := by
-    intro a b hab y
-    rw [hψ, hψ, hψ0 a b hab, hcomm a b hab, map_sub]
-  have hRfd : FiniteDimensional ℂ (S0.map ψ) := inferInstance
-  have hRk : IsKStableSub ε A (S0.map ψ) := by
-    intro a b hab x hx
-    obtain ⟨y, hy, rfl⟩ := hx
-    exact ⟨_, hS0k a b hab y hy, hψi a b hab y⟩
-  have hR : S0.map ψ = ⊥ := by
-    by_contra hne
-    obtain ⟨w, hwR, hw0, μ, hμ⟩ := exists_khw hA hU hRfd hRk hne
-    obtain ⟨y, hy, rfl⟩ := hwR
-    refine hgood y hy _ (Submodule.starProjection_apply_mem _ _)
-      (Submodule.sub_starProjection_mem_orthogonal _) hw0 μ (fun c => ?_) hμ
-    have h1 := dc_aeval_intertwine ψ (B c c) (A c c) (hψi c c rfl) (p c) y
-    rw [hp c y hy, map_zero, dc_aeval_eigen (hμ.1 c)] at h1
-    exact (smul_eq_zero.mp h1.symm).resolve_right hw0
-  intro y hy
-  have h0 : ψ y = 0 := by
-    have : ψ y ∈ S0.map ψ := ⟨y, hy, rfl⟩
-    rw [hR] at this
-    exact this
-  rw [hψ, sub_eq_zero] at h0
-  rw [h0]
-  exact Submodule.starProjection_apply_mem _ _
+  apply ReciprocityTheory.ChartRestriction.DS.dc_core <;> assumption
 
 theorem dc_layer_map {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] {D : Submodule ℂ H}
     {E : Fin n → Fin n → Module.End ℂ D} {V : Submodule ℂ D} (dual : Bool) (hE : IsGlRep E) (hKU : IsKUnitary ε E)
@@ -193,59 +145,7 @@ theorem dc_layer_map {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H
     (T : Module.End ℂ (Fin n → D)) (hT : ∀ a b, ε a = ε b → ∀ y, T (tensF dual E a b y) = tensF dual E a b (T y))
     (hTM : ∀ y ∈ tensSub V, T y ∈ tensSub (genSub E V)) :
     ∀ y ∈ tensSub V, T y ∈ tensSub L := by
-  classical
-  have h4 : IsKStableSub ε (dc_tensX dual E) ((tensSub (n := n) L).map ((dc_eqv (n := n) (D := ↥D)).symm : (Fin n → D) →ₗ[ℂ] dc_TX n D)) := by
-    intro a b hab x hx
-    obtain ⟨f, hf, rfl⟩ := hx
-    exact ⟨tensF dual E a b f, dc_tens_kStable dual hLk a b hab f hf, by simp [dc_tensX_apply]⟩
-  have h5 : ∀ a b, ε a = ε b → ∀ y, (((dc_eqv (n := n) (D := ↥D)).symm : (Fin n → D) →ₗ[ℂ] dc_TX n D) ∘ₗ T) (tensF dual E a b y) = dc_tensX dual E a b ((((dc_eqv (n := n) (D := ↥D)).symm : (Fin n → D) →ₗ[ℂ] dc_TX n D) ∘ₗ T) y) := by
-      intro a b hab y
-      simp only [LinearMap.comp_apply, LinearEquiv.coe_coe]
-      rw [dc_tensX_apply, LinearEquiv.apply_symm_apply, hT a b hab]
-  have h3 : FiniteDimensional ℂ ((tensSub (n := n) L).map ((dc_eqv (n := n) (D := ↥D)).symm : (Fin n → D) →ₗ[ℂ] dc_TX n D)) := by
-    haveI := dc_tensSub_fd (n := n) hLfd; infer_instance
-  have key := dc_core (Xs := dc_TX n ↥D) (Ys := Fin n → ↥D) (A := dc_tensX dual E) (B := tensF dual E)
-    (dc_tensX_isGlRep hE) (dc_tensX_isKUnitary hKU) h3 h4 (dc_tensSub_fd hVfd) (dc_tens_kStable dual hVk) _ h5 p hp
-  intro y hy
-  obtain ⟨z, hz, hze⟩ := key (by
-    intro y hy x hx horth hx0 μ hμ hhw
-    obtain ⟨zf, hzf, rfl⟩ := hx
-    set f : Fin n → D := dc_eqv (((dc_eqv (n := n) (D := ↥D)).symm (T y)) - (dc_eqv (n := n) (D := ↥D)).symm zf) with hfdef
-    have hfe : f = T y - zf := by
-      rw [hfdef, map_sub, LinearEquiv.apply_symm_apply, LinearEquiv.apply_symm_apply]
-    have hfM : f ∈ tensSub (genSub E V) := by
-      rw [hfe]
-      exact Submodule.sub_mem _ (hTM y hy) (dc_tensSub_mono hLM hzf)
-    have hf0 : f ≠ 0 := by
-      intro h
-      apply hx0
-      simp only [LinearMap.comp_apply, LinearEquiv.coe_coe]
-      rw [← (dc_eqv (n := n) (D := ↥D)).map_eq_zero_iff]
-      exact h
-    have hfhw : IsKHWVec ε (tensF dual E) μ f := by
-      simp only [LinearMap.comp_apply, LinearEquiv.coe_coe] at hhw
-      refine ⟨fun a => ?_, fun a b hab he => ?_⟩
-      · rw [hfdef, ← dc_eqv_tensX, hhw.1 a, map_smul]
-      · rw [hfdef, ← dc_eqv_tensX, hhw.2 a b hab he, map_zero]
-    obtain ⟨c, hc0, hchw⟩ := dc_top_coord hfhw hf0
-    have hcL : f c ∈ L := hL μ hμ c _ (dc_mem_tensSub.mp hfM c) hchw
-    have hsing : ((dc_eqv (n := n) (D := ↥D)).symm (Pi.single c (f c)) : dc_TX n D) ∈
-        (tensSub (n := n) L).map ((dc_eqv (n := n) (D := ↥D)).symm : (Fin n → D) →ₗ[ℂ] dc_TX n D) := by
-      refine ⟨Pi.single c (f c), dc_mem_tensSub.mpr fun i => ?_, rfl⟩
-      rw [Pi.single_apply]
-      split_ifs with h
-      · subst h; exact hcL
-      · exact L.zero_mem
-    have h0 := Submodule.inner_right_of_mem_orthogonal hsing horth
-    simp only [LinearMap.comp_apply, LinearEquiv.coe_coe] at h0
-    have h0' : inner ℂ (f c) (f c) = 0 := by
-      rw [PiLp.inner_apply, Finset.sum_eq_single c (fun i _ hi => by simp [dc_eqv_symm_apply, hi]) (by simp)] at h0
-      simpa [hfdef, dc_eqv_symm_apply, dc_eqv_apply] using h0
-    exact hc0 (inner_self_eq_zero.mp h0')) y hy
-  simp only [LinearMap.comp_apply, LinearEquiv.coe_coe] at hze
-  have : z = T y := (dc_eqv (n := n) (D := ↥D)).symm.injective hze
-  rw [← this]
-  exact hz
+  apply ReciprocityTheory.ChartRestriction.DS.dc_layer_map <;> assumption
 
 end ReciprocityTheory.ChartRestriction.DS.G2
 
@@ -353,17 +253,7 @@ theorem dc_tens_genSub_stable {M : Type*} [AddCommGroup M] [Module ℂ M] {E : F
 theorem dc_casimir_tensF_apply {M : Type*} [AddCommGroup M] [Module ℂ M] {E : Fin n → Fin n → Module.End ℂ M}
     (hE : IsGlRep E) (dual : Bool) {c0 : ℂ} {S : Submodule ℂ M} (hc : ∀ v ∈ S, casimir E v = c0 • v) :
     ∀ f ∈ tensSub S, casimir (tensF dual E) f = (c0 + n) • f + (2 : ℂ) • eeF dual E f := by
-  intro f hf
-  have hd : diagOp (n := n) (casimir E) f = c0 • f := by
-    funext c
-    rw [diagOp_coord, hc _ (dc_mem_tensSub.mp hf c), Pi.smul_apply]
-  cases dual
-  · have h := LinearMap.congr_fun (casimir_tensV (n := n) hE) f
-    simp only [tensF, eeF, cond_false, LinearMap.add_apply, LinearMap.smul_apply, Module.End.one_apply] at h ⊢
-    rw [h, hd, add_smul]
-  · have h := LinearMap.congr_fun (casimir_tensVd (n := n) hE) f
-    simp only [tensF, eeF, cond_true, LinearMap.add_apply, LinearMap.smul_apply, Module.End.one_apply] at h ⊢
-    rw [h, hd, add_smul]
+  apply ReciprocityTheory.ChartRestriction.DS.dc_casimir_tensF_apply <;> assumption
 
 theorem dc_eeF_Qsymm {M : Type*} [AddCommGroup M] [Module ℂ M] {E : Fin n → Fin n → Module.End ℂ M}
     {V : Submodule ℂ M} (hE : IsGlRep E) (dual : Bool) {c0 : ℝ}
@@ -372,22 +262,7 @@ theorem dc_eeF_Qsymm {M : Type*} [AddCommGroup M] [Module ℂ M] {E : Fin n → 
       Q (tensF dual E a b f) g = adjSign ε a b * Q f (tensF dual E b a g)) :
     ∀ f ∈ tensSub (genSub E V), ∀ g ∈ tensSub (genSub E V),
       Q (eeF dual E f) g = Q f (eeF dual E g) := by
-  intro f hf g hg
-  have hΩ : Q (casimir (tensF dual E) f) g = Q f (casimir (tensF dual E) g) := by
-
-    simp only [casimir, LinearMap.sum_apply, Module.End.mul_apply, map_sum]
-    refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
-    rw [hadj a b _ (dc_tens_genSub_stable dual b a f hf) g hg,
-      hadj b a f hf _ (dc_tens_genSub_stable dual b a g hg), ← mul_assoc, dc_adjSign_mul_swap, one_mul]
-  have e : ∀ x ∈ tensSub (genSub E V), eeF dual E x =
-      (1 / 2 : ℂ) • (casimir (tensF dual E) x - (((c0 : ℝ) : ℂ) + n) • x) := by
-    intro x hx
-    rw [dc_casimir_tensF_apply hE dual hc x hx, add_sub_cancel_left, smul_smul]
-    norm_num
-  rw [e f hf, e g hg]
-  simp only [LinearMap.map_smulₛₗ, LinearMap.smul_apply, map_sub, LinearMap.sub_apply, map_smul, hΩ,
-    smul_eq_mul]
-  simp [Complex.conj_ofReal, map_ofNat]
+  apply ReciprocityTheory.ChartRestriction.DS.dc_eeF_Qsymm <;> assumption
 
 end ReciprocityTheory.ChartRestriction.DS.G2
 

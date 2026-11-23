@@ -1,5 +1,6 @@
 module
 
+import Formalism.HermitianCurvature.HermitianCurvatureProofs.EulerZetaGammaInvIdentity
 public import Formalism.HermitianCurvature.StatementM
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -176,33 +177,7 @@ theorem ord (k : ℕ) (u u' ρ : ℕ → ℝ) (hI : I.Interlaces k u u' ρ) (l :
     (∀ i ∈ Icc 1 k, i ≤ l → u l ≤ u i ∧ u' l ≤ u' i) ∧ (∀ i ∈ Icc 1 k, l < i → u i ≤ u (l + 1) ∧ u' i ≤ u' (l + 1)) ∧
     (∀ j ∈ Icc 1 (k - 1), j < l → u l + 1 / 2 ≤ ρ j ∧ u' l + 1 / 2 ≤ ρ j) ∧
     (∀ j ∈ Icc 1 (k - 1), l < j → ρ j + 1 / 2 ≤ u (l + 1) ∧ ρ j + 1 / 2 ≤ u' (l + 1)) := by
-  have hm := mono k u u' ρ hI
-  have hl' := Finset.mem_Icc.1 hl
-  refine ⟨?_, ?_, ?_, ?_⟩
-  · intro i hi h
-    have hi' := Finset.mem_Icc.1 hi
-    have c := hm (l - i) i hi'.1 (by omega)
-    have e : i + (l - i) = l := by omega
-    rwa [e] at c
-  · intro i hi h
-    have hi' := Finset.mem_Icc.1 hi
-    have c := hm (i - (l + 1)) (l + 1) (by omega) (by omega)
-    have e : l + 1 + (i - (l + 1)) = i := by omega
-    rwa [e] at c
-  · intro j hj h
-    have hj' := Finset.mem_Icc.1 hj
-    have b := hI j hj
-    have c := hm (l - (j + 1)) (j + 1) (by omega) (by omega)
-    have e : j + 1 + (l - (j + 1)) = l := by omega
-    rw [e] at c
-    constructor <;> linarith [b.2.2.1, b.2.2.2, c.1, c.2]
-  · intro j hj h
-    have hj' := Finset.mem_Icc.1 hj
-    have b := hI j hj
-    have c := hm (j - (l + 1)) (l + 1) (by omega) (by omega)
-    have e : l + 1 + (j - (l + 1)) = j := by omega
-    rw [e] at c
-    constructor <;> linarith [b.1, b.2.1, c.1, c.2]
+  apply Formalism.FourierDecayAlt.P.Mx4.ord <;> assumption
 
 theorem nrm_pos (P : Par) (hP : P.OK) (l : ℕ) (hl : l ∈ Icc 1 (P.k - 1)) (π π' : Ty P) (hU : Up P l π π') :
     0 < Nrm P l π := by

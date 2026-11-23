@@ -155,9 +155,7 @@ theorem wb_definite {z w : Fin (2 * r + k + 1) → ℂ} (hz : inWb k r z) (hT : 
   have hP : 0 ≤ P := Finset.sum_nonneg (fun i _ => by positivity)
   have hQ : 0 ≤ Q := Finset.sum_nonneg (fun i _ => by positivity)
   have ha : 0 ≤ ‖w K‖ := norm_nonneg _
-  have hc : 0 ≤ ‖z K‖ := norm_nonneg _
   have h1 : P ≤ ‖w K‖ ^ 2 := by linarith
-  have h2 : Q < ‖z K‖ ^ 2 := by linarith
   have h3 : (‖z K‖ * ‖w K‖) ^ 2 ≤ m ^ 2 := by
     have : 0 ≤ ‖z K‖ * ‖w K‖ := by positivity
     exact pow_le_pow_left₀ this hn 2
@@ -165,7 +163,6 @@ theorem wb_definite {z w : Fin (2 * r + k + 1) → ℂ} (hz : inWb k r z) (hT : 
     calc (‖z K‖ * ‖w K‖) ^ 2 ≤ m ^ 2 := h3
       _ ≤ Q * P := hcs
       _ ≤ Q * ‖w K‖ ^ 2 := mul_le_mul_of_nonneg_left h1 hQ
-  have h5 : ‖w K‖ ^ 2 * (‖z K‖ ^ 2 - Q) ≤ 0 := by nlinarith
   have h6 : ‖w K‖ ^ 2 ≤ 0 := by
     by_contra hcon
     push Not at hcon

@@ -1,5 +1,6 @@
 module
 
+import Formalism.PieriBlockIdeals.PieriColumnMinors.HeckeLFunctionIdealEulerProduct
 public import Formalism.SharpRestriction.LevelLetterCocycles.AdmissibleParameterJ
 import Mathlib.Algebra.Order.Floor.Extended
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -768,22 +769,7 @@ lemma jd_card_lt {m j : ℕ} (hj : j ≤ m) :
 
 lemma jd_card_ge {m j : ℕ} (hj : j ≤ m) :
     (Finset.univ.filter (fun a : Fin m => j ≤ a.1)).card = m - j := by
-  have hinj : Function.Injective (fun b : Fin (m - j) => (⟨j + b.1, by omega⟩ : Fin m)) := by
-    intro b b' e
-    have := congrArg Fin.val e
-    simp only at this
-    exact Fin.ext (by omega)
-  have : Finset.univ.filter (fun a : Fin m => j ≤ a.1) =
-      Finset.univ.image (fun b : Fin (m - j) => (⟨j + b.1, by omega⟩ : Fin m)) := by
-    ext a
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_image]
-    constructor
-    · intro ha
-      exact ⟨⟨a.1 - j, by omega⟩, Fin.ext (by simp only; omega)⟩
-    · rintro ⟨b, rfl⟩
-      simp only
-      omega
-  rw [this, Finset.card_image_of_injective _ hinj, Finset.card_univ, Fintype.card_fin]
+  apply Formalism.CohomologicalDescent.FrobeniusPeriodChange.card_filter_le_val_eq_sub <;> assumption
 
 lemma jd_ncard {n : ℕ} (f : Fin n → ℚ) (hf : Function.Injective f) (p : Fin n → Prop)
     [DecidablePred p] (S : Set ℚ) (hS : ∀ q, q ∈ S ↔ ∃ a, p a ∧ q = f a) :

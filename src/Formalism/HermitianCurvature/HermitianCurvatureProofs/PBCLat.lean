@@ -98,8 +98,6 @@ theorem sizesSup : PBC.SizesSup := by
   set ν : ℤ := S6.nuBlock S.G.r b n with hν
   set x : ℝ := S6.rd E ^ ν with hx
   have hxpos : 0 < x := zpow_pos hrd _
-  have hexp : ((2 * S.G.r + 4 : ℤ) - 2 * b - n) = ν + 1 := by
-    simp only [hν, S6.nuBlock]; ring
   rw [zpow_add₀ hrd.ne', zpow_one] at hN
   set m : ℝ := Finset.univ.inf' Finset.univ_nonempty (thr S b n) with hm
   have hmpos : 0 < m := by
@@ -375,7 +373,6 @@ theorem dual_sep (f : ℕ) (R : ℝ) (hR : 0 < R) (σ σ' : crystallineCompariso
     by_contra h; push Not at h; exact hne (funext h)
   obtain ⟨a, b, hab⟩ := (mem_dual_iff f R hR σ).1 hσ v
   obtain ⟨a', b', hab'⟩ := (mem_dual_iff f R hR σ').1 hσ' v
-  have hR' : (2 * (R : ℂ)) ≠ 0 := by simp [hR.ne']
   have hd : σ v - σ' v = (((a - a' : ℤ) : ℂ) + ((b - b' : ℤ) : ℂ) * Complex.I) / (2 * (R : ℂ)) := by
     rw [hab, hab']; push_cast; field_simp; ring
   have hnz : (((a - a' : ℤ) : ℂ) + ((b - b' : ℤ) : ℂ) * Complex.I) ≠ 0 := by
@@ -409,8 +406,6 @@ theorem lstdSum : PBC.LstdSum := by
   have hint := hmaj.1
   have hnn : ∀ y : crystallineComparison.V f, 0 ≤ crystallineComparison.mL K L' y := fun y =>
     Finset.prod_nonneg (fun v _ => Formalism.FourierDecayAlt.P.LatticeSummability.mfac_nonneg K (hL'pos v).le _ (norm_nonneg _))
-  have hnn0 : ∀ y : crystallineComparison.V f, 0 ≤ crystallineComparison.mL K large₂ y := fun y =>
-    Finset.prod_nonneg (fun v _ => Formalism.FourierDecayAlt.P.LatticeSummability.mfac_nonneg K (hLg0 v) _ (norm_nonneg _))
   set vb := (volume : Measure (crystallineComparison.V f)).real (Metric.ball 0 δ) with hvb
   have hvb0 : 0 < vb := by rw [hvb, vol_ball_V f δ hδ]; positivity
   have hvbσ : ∀ σ : crystallineComparison.V f, (volume : Measure (crystallineComparison.V f)).real (Metric.ball σ δ) = vb := by
@@ -475,7 +470,6 @@ theorem lstdSum : PBC.LstdSum := by
     show L v / g + δ = _
     rw [hxdef, hδdef]; field_simp
   rw [hx]
-  have ht : 0 < Real.pi * δ ^ 2 := by positivity
   have e : Real.pi * (4 * δ * x + δ) ^ 2 * 5 / (5 - 2) / (Real.pi * δ ^ 2) = (4 * x + 1) ^ 2 * 5 / 3 := by
     field_simp; ring
   rw [e]

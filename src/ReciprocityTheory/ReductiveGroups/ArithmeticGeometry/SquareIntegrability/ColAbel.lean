@@ -148,9 +148,6 @@ theorem cab_core (hP : Ext.PackingCount) (hGT : Ext.GaussianTailBound) (hA : Pro
       exact norm_eq_zero.mp h0
     have ht := hI.thick x hx'.1 hx'.2 hxI
     have hth : |P.R0| ≤ Real.sqrt (P.q * Real.pi) * P.th := by
-      have hq : (0 : ℝ) < P.q := by
-        have := P.hq
-        exact_mod_cast (by omega : 0 < P.q)
       have hf1 : (1 : ℝ) ≤ PT.f E := by
         have h2 : 1 ≤ PT.f E := le_trans (Nat.one_le_pow _ _ (by have := P.hm1; omega)) P.hmf
         exact_mod_cast h2

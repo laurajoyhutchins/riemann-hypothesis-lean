@@ -1,5 +1,6 @@
 module
 
+import Development.WeilBound.ThetaLifts.LocalTheory.ConeShifts.ExistsPowIdem
 public import Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.LinearDescent
 import Mathlib.Algebra.GroupWithZero.Submonoid.CancelMulZero
 import Mathlib.Algebra.Module.StablyFree.Basic
@@ -82,25 +83,7 @@ theorem precomplete_of_finite (O : Type) [CommRing O] (I : Ideal O) [IsPrecomple
 
 theorem exists_pow_idem (M : Type) [Monoid M] [Finite M] (x : M) :
     ∃ n : ℕ, 0 < n ∧ x ^ n * x ^ n = x ^ n := by
-  have key : ∀ i j : ℕ, i < j → x ^ i = x ^ j → ∃ n : ℕ, 0 < n ∧ x ^ n * x ^ n = x ^ n := by
-    intro i j hij h
-    obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_lt hij
-    have h1 : ∀ k : ℕ, x ^ (i + k * (d + 1)) = x ^ i := by
-      intro k
-      induction k with
-      | zero => simp
-      | succ k ih =>
-        have : i + (k + 1) * (d + 1) = (i + d + 1) + k * (d + 1) := by ring
-        rw [this, pow_add, ← h, ← pow_add, ih]
-    refine ⟨(i + 1) * (d + 1), by positivity, ?_⟩
-    have e1 : (i + 1) * (d + 1) = i + (i * d + d + 1) := by ring
-    have e2 : (i + 1) * (d + 1) + (i + 1) * (d + 1)
-        = (i + (i + 1) * (d + 1)) + (i * d + d + 1) := by ring
-    rw [← pow_add, e2, pow_add, h1, ← pow_add, ← e1]
-  obtain ⟨i, j, hne, h⟩ := Finite.exists_ne_map_eq_of_infinite (fun n : ℕ => x ^ n)
-  rcases lt_or_gt_of_ne hne with hlt | hlt
-  · exact key i j hlt h
-  · exact key j i hlt h.symm
+  apply PositivityTheory.ThKG.Loc.Cone.Vf.exists_pow_idem <;> assumption
 
 theorem isLocalRing_of_finite (O : Type) [CommRing O] [IsLocalRing O] [IsNoetherianRing O]
     [IsAdicComplete (IsLocalRing.maximalIdeal O) O] [Finite (IsLocalRing.ResidueField O)]

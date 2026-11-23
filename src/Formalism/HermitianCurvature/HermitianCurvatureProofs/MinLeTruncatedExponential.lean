@@ -327,7 +327,6 @@ theorem lemmaSOfSteps : LemmaSOfSteps := by
   obtain ⟨Cu, hCu, hup⟩ := hU
   refine ⟨max (3 / π) Cu, lt_max_of_lt_right hCu, ?_⟩
   intro Wp Wq _ _ _ _ _ _ P p nn F Y Λ K N hK hΛ hPos hI2 hI3 hI4 hI5
-  have hC2 : 0 ≤ max (3 / π) Cu := le_max_of_le_right hCu.le
   have hCL : 0 ≤ max (3 / π) Cu * Λ ^ 2 := by positivity
   intro b s hb hs
   induction s, hs using Nat.le_induction with
