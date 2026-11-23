@@ -86,3 +86,113 @@ theorem weighted_mean_of_inputs2_integrated
 #print axioms Formalism.LFunctionChainParameters.LChain2.weighted_mean_of_inputs2_integrated
 
 end Formalism.LFunctionChainParameters.LChain2
+
+
+/-!
+## Pointwise sharp error, for the actual downstream arithmetic contract
+
+The original \`CoreTopEach\`/\`TopOfInputs2\` statements use a bound at
+*each* unit, which cannot be deduced from the mean bound alone.
+We instead specialize the already-checked \`Ga_bound5_integrated\`
+pointwise and reuse the original local loss and Lo5-cap arguments.
+-/
+
+namespace Formalism.LFunctionChainParameters.WeightedSlopeBounds
+
+open Formalism.RankGapBounds.WeightedMeanData
+
+variable {U0 : Type} [Fintype U0] {W : U0 → Type}
+  [∀ u0, Fintype (W u0)] [∀ u0, Nonempty (W u0)]
+  {Top : Type} [Fintype Top] {m f : ℕ}
+variable (D : Data U0 W Top m f) (C : Consts) (Xpp : ℝ)
+
+/-- The exact original \`ErrX5at\` baseline, with only the uniform
+logarithmic slope-loss term replaced by its harmonic refinement. -/
+def ErrX5atIntegrated (u0 : U0) : ℝ :=
+  K0v5 D C + Real.log (Fintype.card (W u0) : ℝ) + D.LoP C
+    + MLo5 D C Xpp
+    + (1 - D.delBar)⁻¹ *
+      (4 * (UBar5 D C Xpp * (D.x ^ C.cHH * D.b) /
+        (UBar5 D C Xpp + D.x ^ C.cHH * D.b)) +
+        (D.etaBar + 4 * Real.sqrt D.eBar) * (D.x ^ C.cHH * D.b))
+
+/-- The harmonic per-unit error is bounded by the old error,
+using the already-proved comparison of the corresponding mean terms. -/
+theorem ErrX5atIntegrated_le_ErrX5at
+    (hS : D.HidaSetting C) (hU : 0 ≤ UBar5 D C Xpp)
+    (u0 : U0) :
+    ErrX5atIntegrated D C Xpp u0 ≤ ErrX5at D C Xpp u0 := by
+  have h := errorTermWithIntegrated_le_errorTermWith D C Xpp hS hU
+  unfold errorTermWithIntegrated errorTermWith at h
+  unfold ErrX5atIntegrated ErrX5at K0v5 Data.EDiv
+  linarith
+
+/-- Genuine per-unit harmonic upper bound, from the same old
+Hida, exponent, count, slope and local loss hypotheses. -/
+theorem each_unit_bound_integrated
+    (hS : D.HidaSetting C) (hDIV : D.DIV C) (hE : EComp5 D C)
+    (hH : D.HComp C) (hCount : Count5 D C)
+    (hSl : D.Slopes C) (hSN : QuotientSlopeBoundsWith D C Xpp)
+    (hLoss : LossBounds D C) (hSI : D.SlopeIneqIntegrated)
+    (hHH : D.HHBound C) (hFP : D.FParams) (u0 : U0) :
+    D.ASK u0 ≤ D.Main u0 + ErrX5atIntegrated D C Xpp u0 := by
+  have h1 := Ga_bound5_integrated D C Xpp
+    hS hDIV hE hH hCount hSl hSN hLoss hSI hHH hFP u0
+  have hML : wmean (D.d u0) (Lo5 D C Xpp u0) ≤
+      MLo5 D C Xpp := by
+    have h2 := weighted_mean_lower_bound_le D C Xpp hS hCount u0
+    have hcSl1 : 0 ≤ C.cSl1 := by
+      obtain ⟨_, _, _, _, _, _, _, _, _, _, _, _, hc, _, _, _, _⟩ := hS
+      exact hc
+    have hIO := mul_le_mul_of_nonneg_left (hLoss u0).2 hcSl1
+    dsimp only [MLo5, K7v5] at h2 ⊢
+    linarith
+  have h4 := (hLoss u0).1
+  unfold ErrX5atIntegrated
+  linarith
+
+#print axioms Formalism.LFunctionChainParameters.WeightedSlopeBounds.each_unit_bound_integrated
+
+end Formalism.LFunctionChainParameters.WeightedSlopeBounds
+
+namespace Formalism.LFunctionChainParameters.LChain2
+
+open Formalism Formalism.D5 Formalism.RankGapBounds.WeightedMeanData
+open Formalism.LFunctionChainParameters.WeightedSlopeBounds
+open Formalism.LFunctionChainParameters.characterSumData
+
+variable {H : Type} [AddCommGroup H] [Fintype H] [DecidableEq H]
+  {W : H → Type} [∀ u0, Fintype (W u0)] {m : ℕ}
+  [∀ u0, Nonempty (W u0)]
+
+/-- Production \`Inputs2\` yields an improved bound for every character
+sum separately, not merely for their arithmetic average. -/
+theorem pointwise_of_inputs2_integrated
+    (D : ArithData H) (ell : AddChar (E0 × H) ℂ → ℂ)
+    (G : Glob) (C : Consts) (cT : ℝ) (N : ℕ)
+    (TT T2 : Finset H) (a : H → ℝ)
+    (w : H → Fin m → E0 × H → ℝ) (Fm : ∀ u0, Fam (W u0) m)
+    (η θ eK K CL : ℝ)
+    (h : Inputs2 D ell G C cT N TT T2 a w Fm η θ eK K CL) :
+    ∀ u0, (∑ t ∈ TT, ∑ j : Fin m, ASK D N (a t) t (w u0 j)) ≤
+      (mkData G C.cHH D ell N TT T2 a w Fm).Main u0 +
+        ErrX5atIntegrated (mkData G C.cHH D ell N TT T2 a w Fm)
+          C (XppH H G) u0 := by
+  obtain ⟨hB, hLoss⟩ := h
+  have hSI := integrated_slope_of_inputsB D ell G C cT N TT T2 a w Fm
+    η θ eK K CL hB
+  obtain ⟨hSet, hSN, _, hHHB, hFPar⟩ :=
+    sizeConditions_of_split D ell G C cT N TT T2 a w Fm η θ eK K CL hB
+  obtain ⟨_, _, _, _, _, _, hDIV, hE, hHC, hCnt, hSl, _, _, _, _, _, _⟩ := hB
+  intro u0
+  change (mkData G C.cHH D ell N TT T2 a w Fm).ASK u0 ≤
+    (mkData G C.cHH D ell N TT T2 a w Fm).Main u0 +
+      ErrX5atIntegrated (mkData G C.cHH D ell N TT T2 a w Fm)
+        C (XppH H G) u0
+  exact each_unit_bound_integrated
+    (mkData G C.cHH D ell N TT T2 a w Fm) C (XppH H G)
+    hSet hDIV hE hHC hCnt hSl hSN hLoss hSI hHHB hFPar u0
+
+#print axioms Formalism.LFunctionChainParameters.LChain2.pointwise_of_inputs2_integrated
+
+end Formalism.LFunctionChainParameters.LChain2
